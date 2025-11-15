@@ -169,64 +169,6 @@ const GeneralTab = ({ field, onUpdate }) => {
         </div>
       )}
 
-      {/* Number Slider Fields */}
-      {field.type === 'number-slider' && (
-        <>
-          <div className="formtura-form-group">
-            <label>
-              Value Range <Info size={14} className="formtura-help-icon" />
-            </label>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-              <div>
-                <input
-                  type="number"
-                  value={field.minValue !== undefined ? field.minValue : 0}
-                  onChange={(e) => handleChange('minValue', parseInt(e.target.value) || 0)}
-                  placeholder="0"
-                />
-                <span className="formtura-field-help">Minimum</span>
-              </div>
-              <div>
-                <input
-                  type="number"
-                  value={field.maxValue !== undefined ? field.maxValue : 10}
-                  onChange={(e) => handleChange('maxValue', parseInt(e.target.value) || 10)}
-                  placeholder="10"
-                />
-                <span className="formtura-field-help">Maximum</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="formtura-form-group">
-            <label htmlFor="field-default-value">
-              Default Value <Info size={14} className="formtura-help-icon" />
-            </label>
-            <input
-              id="field-default-value"
-              type="number"
-              value={field.defaultValue !== undefined ? field.defaultValue : 0}
-              onChange={(e) => handleChange('defaultValue', parseInt(e.target.value) || 0)}
-              placeholder="0"
-            />
-          </div>
-
-          <div className="formtura-form-group">
-            <label htmlFor="field-increment">
-              Increment <Info size={14} className="formtura-help-icon" />
-            </label>
-            <input
-              id="field-increment"
-              type="number"
-              value={field.increment !== undefined ? field.increment : 1}
-              onChange={(e) => handleChange('increment', parseInt(e.target.value) || 1)}
-              placeholder="1"
-              min="1"
-            />
-          </div>
-        </>
-      )}
-
       {hasChoices && (
         <div className="formtura-form-group">
           <div className="formtura-choices-header">
@@ -353,21 +295,82 @@ const GeneralTab = ({ field, onUpdate }) => {
         />
       </div>
 
-      <div className="formtura-form-group">
-        <div className="formtura-toggle-group">
-          <label className="formtura-toggle">
+      {/* Number Slider Fields - After Description */}
+      {field.type === 'number-slider' && (
+        <>
+          <div className="formtura-form-group">
+            <label>
+              Value Range <Info size={14} className="formtura-help-icon" />
+            </label>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+              <div>
+                <input
+                  type="number"
+                  value={field.minValue !== undefined ? field.minValue : 0}
+                  onChange={(e) => handleChange('minValue', parseInt(e.target.value) || 0)}
+                  placeholder="0"
+                />
+                <span className="formtura-field-help">Minimum</span>
+              </div>
+              <div>
+                <input
+                  type="number"
+                  value={field.maxValue !== undefined ? field.maxValue : 10}
+                  onChange={(e) => handleChange('maxValue', parseInt(e.target.value) || 10)}
+                  placeholder="10"
+                />
+                <span className="formtura-field-help">Maximum</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="formtura-form-group">
+            <label htmlFor="field-default-value">
+              Default Value <Info size={14} className="formtura-help-icon" />
+            </label>
             <input
-              type="checkbox"
-              checked={field.required || false}
-              onChange={(e) => handleChange('required', e.target.checked)}
+              id="field-default-value"
+              type="number"
+              value={field.defaultValue !== undefined ? field.defaultValue : 0}
+              onChange={(e) => handleChange('defaultValue', parseInt(e.target.value) || 0)}
+              placeholder="0"
             />
-            <span className="formtura-toggle-slider"></span>
-          </label>
-          <span className="formtura-toggle-label">
-            Required <Info size={14} className="formtura-help-icon" />
-          </span>
+          </div>
+
+          <div className="formtura-form-group">
+            <label htmlFor="field-increment">
+              Increment <Info size={14} className="formtura-help-icon" />
+            </label>
+            <input
+              id="field-increment"
+              type="number"
+              value={field.increment !== undefined ? field.increment : 1}
+              onChange={(e) => handleChange('increment', parseInt(e.target.value) || 1)}
+              placeholder="1"
+              min="1"
+            />
+          </div>
+        </>
+      )}
+
+      {/* Required toggle - not shown for number-slider */}
+      {field.type !== 'number-slider' && (
+        <div className="formtura-form-group">
+          <div className="formtura-toggle-group">
+            <label className="formtura-toggle">
+              <input
+                type="checkbox"
+                checked={field.required || false}
+                onChange={(e) => handleChange('required', e.target.checked)}
+              />
+              <span className="formtura-toggle-slider"></span>
+            </label>
+            <span className="formtura-toggle-label">
+              Required <Info size={14} className="formtura-help-icon" />
+            </span>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

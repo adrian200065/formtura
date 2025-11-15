@@ -1,8 +1,8 @@
-import { Check, Info, List, Settings, Tag, Zap } from 'lucide-react';
+import { Check, GripVertical, Info, List, Minus, Plus, Settings, Tag, Wand2, Zap } from 'lucide-react';
 import { useState } from 'react';
 
 const FieldSettings = ({ field, onFieldUpdate }) => {
-  const [panelMode, setPanelMode] = useState('fields'); // 'fields' or 'options'
+  const [, setPanelMode] = useState('fields'); // 'fields' or 'options'
   const [activeTab, setActiveTab] = useState('general'); // 'general', 'advanced', 'smart-logic'
 
   // Switch to Field Options when a field is selected
@@ -150,6 +150,82 @@ const GeneralTab = ({ field, onUpdate }) => {
           onChange={(e) => handleChange('label', e.target.value)}
         />
       </div>
+
+      {/* Name Field Format */}
+      {field.type === 'name' && (
+        <div className="formtura-form-group">
+          <label htmlFor="field-format">
+            Format <Info size={14} className="formtura-help-icon" />
+          </label>
+          <select
+            id="field-format"
+            value={field.format || 'first-last'}
+            onChange={(e) => handleChange('format', e.target.value)}
+          >
+            <option value="first-last">First Last</option>
+            <option value="first-middle-last">First Middle Last</option>
+            <option value="simple">Simple</option>
+          </select>
+        </div>
+      )}
+
+      {/* Number Slider Fields */}
+      {field.type === 'number-slider' && (
+        <>
+          <div className="formtura-form-group">
+            <label>
+              Value Range <Info size={14} className="formtura-help-icon" />
+            </label>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+              <div>
+                <input
+                  type="number"
+                  value={field.minValue !== undefined ? field.minValue : 0}
+                  onChange={(e) => handleChange('minValue', parseInt(e.target.value) || 0)}
+                  placeholder="0"
+                />
+                <span className="formtura-field-help">Minimum</span>
+              </div>
+              <div>
+                <input
+                  type="number"
+                  value={field.maxValue !== undefined ? field.maxValue : 10}
+                  onChange={(e) => handleChange('maxValue', parseInt(e.target.value) || 10)}
+                  placeholder="10"
+                />
+                <span className="formtura-field-help">Maximum</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="formtura-form-group">
+            <label htmlFor="field-default-value">
+              Default Value <Info size={14} className="formtura-help-icon" />
+            </label>
+            <input
+              id="field-default-value"
+              type="number"
+              value={field.defaultValue !== undefined ? field.defaultValue : 0}
+              onChange={(e) => handleChange('defaultValue', parseInt(e.target.value) || 0)}
+              placeholder="0"
+            />
+          </div>
+
+          <div className="formtura-form-group">
+            <label htmlFor="field-increment">
+              Increment <Info size={14} className="formtura-help-icon" />
+            </label>
+            <input
+              id="field-increment"
+              type="number"
+              value={field.increment !== undefined ? field.increment : 1}
+              onChange={(e) => handleChange('increment', parseInt(e.target.value) || 1)}
+              placeholder="1"
+              min="1"
+            />
+          </div>
+        </>
+      )}
 
       {hasChoices && (
         <div className="formtura-form-group">
@@ -302,6 +378,93 @@ const AdvancedTab = ({ field, onUpdate }) => {
     onUpdate(field.id, { [key]: value });
   };
 
+  // Number Slider has different Advanced options
+  if (field.type === 'number-slider') {
+    return (
+      <div className="formtura-field-options">
+        <div className="formtura-field-options-title">
+          <strong>{field.label}</strong> <span className="formtura-field-id">(ID #{field.id.slice(-4)})</span>
+        </div>
+
+        <div className="formtura-form-group">
+          <label htmlFor="field-size">
+            Field Size <Info size={14} className="formtura-help-icon" />
+          </label>
+          <select
+            id="field-size"
+            value={field.fieldSize || 'medium'}
+            onChange={(e) => handleChange('fieldSize', e.target.value)}
+          >
+            <option value="small">Small</option>
+            <option value="medium">Medium</option>
+            <option value="large">Large</option>
+          </select>
+        </div>
+
+        <div className="formtura-form-group">
+          <label htmlFor="field-value-display">
+            Value Display <Info size={14} className="formtura-help-icon" />
+          </label>
+          <input
+            id="field-value-display"
+            type="text"
+            value={field.valueDisplay || 'Selected Value: {value}'}
+            onChange={(e) => handleChange('valueDisplay', e.target.value)}
+            placeholder="Selected Value: {value}"
+          />
+        </div>
+
+        <div className="formtura-form-group">
+          <label htmlFor="field-css-classes">
+            CSS Classes <Info size={14} className="formtura-help-icon" />
+          </label>
+          <input
+            id="field-css-classes"
+            type="text"
+            value={field.cssClasses || ''}
+            onChange={(e) => handleChange('cssClasses', e.target.value)}
+          />
+          <button className="formtura-btn-link" type="button">
+            <Tag size={14} /> Show Layouts
+          </button>
+        </div>
+
+        <div className="formtura-form-group">
+          <div className="formtura-toggle-group">
+            <label className="formtura-toggle">
+              <input
+                type="checkbox"
+                checked={field.hideLabel || false}
+                onChange={(e) => handleChange('hideLabel', e.target.checked)}
+              />
+              <span className="formtura-toggle-slider"></span>
+            </label>
+            <span className="formtura-toggle-label">
+              Hide Label <Info size={14} className="formtura-help-icon" />
+            </span>
+          </div>
+        </div>
+
+        <div className="formtura-form-group">
+          <div className="formtura-toggle-group">
+            <label className="formtura-toggle">
+              <input
+                type="checkbox"
+                checked={field.readOnly || false}
+                onChange={(e) => handleChange('readOnly', e.target.checked)}
+              />
+              <span className="formtura-toggle-slider"></span>
+            </label>
+            <span className="formtura-toggle-label">
+              Read-Only <Info size={14} className="formtura-help-icon" />
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Default Advanced Tab for other field types
   return (
     <div className="formtura-field-options">
       <div className="formtura-field-options-title">

@@ -110,12 +110,28 @@ const FieldPreview = ({ field }) => {
         );
 
       case 'name':
-        return (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
-            <input type="text" placeholder="First Name" readOnly />
-            <input type="text" placeholder="Last Name" readOnly />
-          </div>
-        );
+        const nameFormat = field.format || 'first-last';
+        if (nameFormat === 'simple') {
+          return (
+            <input type="text" placeholder="Name" readOnly />
+          );
+        } else if (nameFormat === 'first-middle-last') {
+          return (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.5rem' }}>
+              <input type="text" placeholder="First Name" readOnly />
+              <input type="text" placeholder="Middle Name" readOnly />
+              <input type="text" placeholder="Last Name" readOnly />
+            </div>
+          );
+        } else {
+          // first-last (default)
+          return (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+              <input type="text" placeholder="First Name" readOnly />
+              <input type="text" placeholder="Last Name" readOnly />
+            </div>
+          );
+        }
 
       case 'phone':
         return (
@@ -134,6 +150,28 @@ const FieldPreview = ({ field }) => {
             required={field.required}
             readOnly
           />
+        );
+
+      case 'number-slider':
+        const minValue = field.minValue !== undefined ? field.minValue : 0;
+        const maxValue = field.maxValue !== undefined ? field.maxValue : 10;
+        const defaultValue = field.defaultValue !== undefined ? field.defaultValue : minValue;
+        const valueDisplay = field.valueDisplay || 'Selected Value: {value}';
+        const displayText = valueDisplay.replace('{value}', defaultValue);
+
+        return (
+          <div className="formtura-slider-container">
+            <input
+              type="range"
+              min={minValue}
+              max={maxValue}
+              value={defaultValue}
+              step={field.increment || 1}
+              readOnly
+              style={{ width: '100%' }}
+            />
+            <div className="formtura-slider-value">{displayText}</div>
+          </div>
         );
 
       default:

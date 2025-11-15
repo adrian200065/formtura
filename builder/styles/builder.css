@@ -1656,3 +1656,57 @@
     background-color: var(--fta-builder-sidebar);
     border: 1px solid var(--fta-builder-border);
 }
+
+/* Number Slider Styles */
+.formtura-slider-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--fta-builder-space-sm);
+}
+
+.formtura-slider-value {
+    color: var(--fta-builder-text);
+    font-size: .875rem;
+    text-align: center;
+    padding: var(--fta-builder-space-xs);
+}
+
+input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    inline-size: 100%;
+    block-size: .375rem;
+    background: var(--fta-builder-border);
+    border-radius: var(--fta-builder-radius);
+    outline: none;
+    cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    inline-size: 1.25rem;
+    block-size: 1.25rem;
+    background: var(--fta-builder-primary);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background-color .2s ease;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+    background: hsl(221, 83%, 48%);
+}
+
+input[type="range"]::-moz-range-thumb {
+    inline-size: 1.25rem;
+    block-size: 1.25rem;
+    background: var(--fta-builder-primary);
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    transition: background-color .2s ease;
+}
+
+input[type="range"]::-moz-range-thumb:hover {
+    background: hsl(221, 83%, 48%);
+}

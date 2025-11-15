@@ -1,12 +1,11 @@
 import { Check, Info, List, Settings, Tag, Zap } from 'lucide-react';
 import { useState } from 'react';
 
-const FieldSettings = ({ field, formSettings, onFieldUpdate, onFormSettingsUpdate }) => {
+const FieldSettings = ({ field, onFieldUpdate }) => {
   const [panelMode, setPanelMode] = useState('fields'); // 'fields' or 'options'
   const [activeTab, setActiveTab] = useState('general'); // 'general', 'advanced', 'smart-logic'
 
   // Switch to Field Options when a field is selected
-  const effectivePanelMode = field ? 'options' : panelMode;
 
   if (!field) {
     return (
@@ -107,6 +106,33 @@ const GeneralTab = ({ field, onUpdate }) => {
     onUpdate(field.id, { [key]: value });
   };
 
+  const hasChoices = ['select', 'radio', 'checkbox'].includes(field.type);
+
+  // Choices management functions
+  const handleChoiceChange = (index, value) => {
+    const newOptions = [...(field.options || [])];
+    newOptions[index] = value;
+    handleChange('options', newOptions);
+  };
+
+  const handleAddChoice = () => {
+    const newOptions = [...(field.options || []), `Option ${(field.options?.length || 0) + 1}`];
+    handleChange('options', newOptions);
+  };
+
+  const handleRemoveChoice = (index) => {
+    const newOptions = field.options.filter((_, i) => i !== index);
+    handleChange('options', newOptions);
+  };
+
+  const handleBulkAdd = () => {
+    const bulkText = prompt('Enter choices (one per line):');
+    if (bulkText) {
+      const newChoices = bulkText.split('\n').filter(line => line.trim());
+      handleChange('options', [...(field.options || []), ...newChoices]);
+    }
+  };
+
   return (
     <div className="formtura-field-options">
       <div className="formtura-field-options-title">
@@ -124,6 +150,120 @@ const GeneralTab = ({ field, onUpdate }) => {
           onChange={(e) => handleChange('label', e.target.value)}
         />
       </div>
+
+      {hasChoices && (
+        <div className="formtura-form-group">
+          <div className="formtura-choices-header">
+            <label>
+              Choices <Info size={14} className="formtura-help-icon" />
+            </label>
+            <button
+              className="formtura-btn-link formtura-bulk-add"
+              type="button"
+              onClick={handleBulkAdd}
+            >
+              <Plus size={14} /> Bulk Add
+            </button>
+          </div>
+
+          <div className="formtura-choices-list">
+            {(field.options || []).map((option, index) => (
+              <div key={index} className="formtura-choice-item">
+                <div className="formtura-choice-radio">
+                  <input
+                    type="radio"
+                    name={`choice-${field.id}`}
+                    disabled
+                    checked={false}
+                  />
+                </div>
+                <div className="formtura-choice-drag">
+                  <GripVertical size={16} className="formtura-drag-handle" />
+                </div>
+                <input
+                  type="text"
+                  className="formtura-choice-input"
+                  value={option}
+                  onChange={(e) => handleChoiceChange(index, e.target.value)}
+                  placeholder="Enter choice"
+                />
+                <button
+                  className="formtura-choice-btn formtura-choice-btn-add"
+                  type="button"
+                  onClick={handleAddChoice}
+                  title="Add choice"
+                >
+                  <Plus size={16} />
+                </button>
+                <button
+                  className="formtura-choice-btn formtura-choice-btn-remove"
+                  type="button"
+                  onClick={() => handleRemoveChoice(index)}
+                  disabled={field.options.length <= 1}
+                  title="Remove choice"
+                >
+                  <Minus size={16} />
+                </button>
+              </div>
+            ))}
+          </div>
+
+          <button
+            className="formtura-btn-secondary formtura-generate-choices"
+            type="button"
+          >
+            <Wand2 size={14} /> Generate Choices
+          </button>
+
+          <div className="formtura-form-group">
+            <div className="formtura-toggle-group">
+              <label className="formtura-toggle">
+                <input
+                  type="checkbox"
+                  checked={field.addOtherChoice || false}
+                  onChange={(e) => handleChange('addOtherChoice', e.target.checked)}
+                />
+                <span className="formtura-toggle-slider"></span>
+              </label>
+              <span className="formtura-toggle-label">
+                Add Other Choice <Info size={14} className="formtura-help-icon" />
+              </span>
+            </div>
+          </div>
+
+          <div className="formtura-form-group">
+            <div className="formtura-toggle-group">
+              <label className="formtura-toggle">
+                <input
+                  type="checkbox"
+                  checked={field.useImageChoices || false}
+                  onChange={(e) => handleChange('useImageChoices', e.target.checked)}
+                />
+                <span className="formtura-toggle-slider"></span>
+              </label>
+              <span className="formtura-toggle-label">
+                Use Image Choices <Info size={14} className="formtura-help-icon" />
+              </span>
+            </div>
+          </div>
+
+          <div className="formtura-form-group">
+            <div className="formtura-toggle-group">
+              <label className="formtura-toggle">
+                <input
+                  type="checkbox"
+                  checked={field.useIconChoices || false}
+                  onChange={(e) => handleChange('useIconChoices', e.target.checked)}
+                />
+                <span className="formtura-toggle-slider"></span>
+              </label>
+              <span className="formtura-toggle-label">
+                Use Icon Choices <Info size={14} className="formtura-help-icon" />
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="formtura-form-group">
         <label htmlFor="field-description">

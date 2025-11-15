@@ -1270,13 +1270,23 @@
 
 .formtura-choice-item input[type="radio"],
 .formtura-item-row input[type="radio"] {
-    flex-shrink: 0;
-    margin: 0;
+    flex-shrink: 0 !important;
+    flex-grow: 0 !important;
+    margin: 0 !important;
+    inline-size: 1.125rem !important;
+    block-size: 1.125rem !important;
+    min-inline-size: 1.125rem !important;
+    max-inline-size: 1.125rem !important;
 }
 
 .formtura-choice-item input[type="checkbox"] {
-    flex-shrink: 0;
-    margin: 0;
+    flex-shrink: 0 !important;
+    flex-grow: 0 !important;
+    inline-size: 1.125rem !important;
+    block-size: 1.125rem !important;
+    min-inline-size: 1.125rem !important;
+    max-inline-size: 1.125rem !important;
+    margin: 0 !important;
 }
 
 .formtura-icon-btn {
@@ -1284,14 +1294,14 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    inline-size: 32px;
-    block-size: 32px;
+    flex-shrink: 0;
+    inline-size: 1.25rem;
+    block-size: 1.25rem;
     padding: 0;
     border: none;
     border-radius: 50%;
+    transition: color .2s ease, background-color .2s ease, opacity .2s ease;
     cursor: pointer;
-    transition: all .2s ease;
-    flex-shrink: 0;
 }
 
 .formtura-icon-btn:hover {
@@ -1304,25 +1314,25 @@
 }
 
 .formtura-btn-add {
-    color: white;
-    background-color: var(--fta-builder-primary);
+    color: hsl(0, 0%, 100%);
+    background-color: var(--fta-builder-field-dark-blue);
 }
 
 .formtura-btn-add:hover:not(:disabled) {
-    background-color: hsl(221, 83%, 48%);
+    background-color: var(--fta-builder-field-light-blue);
 }
 
 .formtura-btn-remove {
-    color: white;
-    background-color: #dc2626;
+    color: hsl(0, 0%, 100%);
+    background-color: var(--fta-builder-primary);
 }
 
 .formtura-btn-remove:hover:not(:disabled) {
-    background-color: #b91c1c;
+    background-color: var(--fta-builder-primary-hover-hover);
 }
 
 .formtura-btn-primary {
-    color: white;
+    color: hsl(0, 0%, 100%);
     background-color: var(--fta-builder-primary);
     font-size: .875rem;
     font-weight: 500;
@@ -1360,17 +1370,17 @@
     font-weight: 500;
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    padding: 4px 8px;
+    gap: var(--fta-builder-space-sm);
+    padding: var(--fta-builder-space-sm) var(--fta-builder-space-md);
     border: 1px solid var(--fta-builder-primary);
     border-radius: var(--fta-builder-radius-sm);
+    transition: color .2s ease, background-color .2s ease;
     cursor: pointer;
-    transition: all .2s ease;
 }
 
 .formtura-bulk-add-btn:hover {
+    color: hsl(0, 0%, 100%);
     background-color: var(--fta-builder-primary);
-    color: white;
 }
 
 .formtura-bulk-add-container {
@@ -1400,13 +1410,13 @@
 }
 
 .formtura-checkbox-choice-item label {
+    font-size: .875rem;
+    font-weight: 400;
     display: flex;
     align-items: center;
     gap: var(--fta-builder-space-xs);
-    cursor: pointer;
     margin: 0;
-    font-size: .875rem;
-    font-weight: 400;
+    cursor: pointer;
 }
 
 .formtura-checkbox-choice-item input[type="radio"] {
@@ -1432,13 +1442,13 @@
 }
 
 .formtura-radio-item label {
+    font-size: .875rem;
+    font-weight: 400;
     display: flex;
     align-items: center;
     gap: var(--fta-builder-space-xs);
-    cursor: pointer;
     margin: 0;
-    font-size: .875rem;
-    font-weight: 400;
+    cursor: pointer;
 }
 
 .formtura-radio-item input[type="radio"] {
@@ -1464,13 +1474,13 @@
 }
 
 .formtura-checkbox-item label {
+    font-size: .875rem;
+    font-weight: 400;
     display: flex;
     align-items: center;
     gap: var(--fta-builder-space-xs);
-    cursor: pointer;
     margin: 0;
-    font-size: .875rem;
-    font-weight: 400;
+    cursor: pointer;
 }
 
 .formtura-checkbox-item input[type="checkbox"] {
@@ -1481,4 +1491,168 @@
 
 .formtura-checkbox-item span {
     color: var(--fta-builder-text);
+}
+
+/* Choices Section Styles */
+.formtura-choices-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-block-end: var(--fta-builder-space-sm);
+}
+
+.formtura-choices-header label {
+    display: flex;
+    align-items: center;
+    gap: var(--fta-builder-space-xs);
+    margin: 0;
+}
+
+.formtura-bulk-add {
+    color: var(--fta-builder-primary);
+    font-size: .75rem;
+    font-weight: 500;
+    margin: 0;
+}
+
+.formtura-choices-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--fta-builder-space-sm);
+    margin-block-end: var(--fta-builder-space-md);
+}
+
+.formtura-choice-item {
+    display: flex;
+    align-items: center;
+    gap: .625rem;
+    padding: 0;
+}
+
+.formtura-choice-radio {
+    display: flex !important;
+    align-items: center;
+    flex-shrink: 0;
+    inline-size: 1.25rem;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.formtura-choice-radio input[type="radio"] {
+    inline-size: 1.125rem !important;
+    block-size: 1.125rem !important;
+    min-inline-size: 1.125rem !important;
+    max-inline-size: 1.125rem !important;
+    min-block-size: 1.125rem !important;
+    max-block-size: 1.125rem !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    display: block !important;
+    flex-shrink: 0 !important;
+    flex-grow: 0 !important;
+    appearance: auto !important;
+    -webkit-appearance: radio !important;
+    -moz-appearance: radio !important;
+    cursor: default;
+}
+
+.formtura-choice-drag {
+    display: flex !important;
+    align-items: center;
+    flex-shrink: 0;
+    inline-size: 1.25rem;
+    visibility: visible !important;
+    opacity: 1 !important;
+    cursor: grab;
+}
+
+.formtura-drag-handle {
+    color: hsl(0, 0%, 60%) !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.formtura-choice-input {
+    color: var(--fta-builder-text);
+    background-color: var(--fta-builder-sidebar);
+    font-size: .875rem;
+    flex: 1;
+    padding: .5rem .75rem;
+    border: 1px solid var(--fta-builder-border);
+    border-radius: .25rem;
+    outline: none;
+    transition: border-color .2s ease;
+}
+
+.formtura-choice-input:focus {
+    border-color: hsl(211, 100%, 50%);
+    box-shadow: 0 0 0 1px hsl(211, 100%, 50%);
+}
+
+.formtura-choice-btn {
+    color: hsl(0, 0%, 100%) !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    inline-size: 2rem !important;
+    block-size: 2rem !important;
+    padding: 0 !important;
+    border: none !important;
+    border-radius: 50% !important;
+    transition: background-color .2s ease;
+    visibility: visible !important;
+    opacity: 1 !important;
+    cursor: pointer;
+}
+
+.formtura-choice-btn-add {
+    background-color: hsl(211, 100%, 50%) !important;
+}
+
+.formtura-choice-btn-add:hover {
+    background-color: hsl(211, 100%, 45%) !important;
+}
+
+.formtura-choice-btn-remove {
+    background-color: hsl(0, 84%, 60%) !important;
+}
+
+.formtura-choice-btn-remove:hover {
+    background-color: hsl(0, 84%, 55%) !important;
+}
+
+.formtura-choice-btn-remove:disabled {
+    background-color: hsl(0, 0%, 75%) !important;
+    opacity: .6 !important;
+    cursor: not-allowed;
+}
+
+.formtura-generate-choices {
+    color: hsl(270, 50%, 50%);
+    background-color: transparent;
+    font-size: .875rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--fta-builder-space-xs);
+    padding: var(--fta-builder-space-xs) var(--fta-builder-space-sm);
+    margin-block-end: var(--fta-builder-space-md);
+    border: 1px solid hsl(270, 50%, 50%);
+    border-radius: var(--fta-builder-radius-sm);
+    cursor: pointer;
+    transition: color .2s ease, background-color .2s ease;
+}
+
+.formtura-generate-choices:hover {
+    color: hsl(0, 0%, 100%);
+    background-color: hsl(270, 50%, 50%);
+}
+
+.formtura-btn-secondary {
+    color: var(--fta-builder-text);
+    background-color: var(--fta-builder-sidebar);
+    border: 1px solid var(--fta-builder-border);
 }

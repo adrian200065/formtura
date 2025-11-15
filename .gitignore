@@ -1,0 +1,27 @@
+# Dependencies
+/node_modules
+/vendor
+/HTML
+
+# Build files
+/assets/js/builder.js
+/assets/js/builder.js.map
+/assets/css/builder.css
+
+# IDE
+.vscode
+.idea
+*.sublime-project
+*.sublime-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Environment
+.env
+.env.local

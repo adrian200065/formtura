@@ -1,0 +1,362 @@
+/**
+ * Formtura Frontend Styles
+ *
+ * Styles for forms displayed on the website frontend.
+ * Uses modern CSS standards with accessibility in mind.
+ *
+ * @package Formtura
+ * @since 1.0.0
+ */
+
+:root {
+	/* Frontend form colors - can be customized by themes */
+	--fta-form-bg: hsl(0, 0%, 100%);
+	--fta-form-text: hsl(210, 11%, 15%);
+	--fta-form-border: hsl(210, 14%, 83%);
+	--fta-form-focus: hsl(220, 90%, 56%);
+	--fta-form-error: hsl(0, 84%, 60%);
+	--fta-form-success: hsl(142, 71%, 45%);
+
+	/* Form spacing */
+	--fta-form-space-sm: .5rem;
+	--fta-form-space-md: 1rem;
+	--fta-form-space-lg: 1.5rem;
+	--fta-form-space-xl: 2rem;
+
+	/* Form typography */
+	--fta-form-text-sm: .875rem;
+	--fta-form-text-base: 1rem;
+	--fta-form-text-lg: 1.125rem;
+
+	/* Form border radius */
+	--fta-form-radius: .375rem;
+}
+
+/* Form Container */
+.fta-form {
+	background-color: var(--fta-form-bg);
+	max-inline-size: 40rem;
+	margin-inline: auto;
+	padding: var(--fta-form-space-xl);
+	border-radius: var(--fta-form-radius);
+}
+
+.fta-form-header {
+	margin-block-end: var(--fta-form-space-xl);
+}
+
+.fta-form-title {
+	color: var(--fta-form-text);
+	font-size: var(--fta-form-text-lg);
+	font-weight: 600;
+	margin-block-end: var(--fta-form-space-sm);
+}
+
+.fta-form-description {
+	color: hsl(210, 9%, 46%);
+	font-size: var(--fta-form-text-base);
+	line-height: 1.6;
+}
+
+/* Form Fields */
+.fta-field {
+	margin-block-end: var(--fta-form-space-lg);
+}
+
+/* Grid Layout Classes */
+.fta-form-row {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--fta-form-space-md);
+	margin-block-end: var(--fta-form-space-lg);
+}
+
+.fta-form-row .fta-field {
+	margin-block-end: 0;
+}
+
+/* Column Widths */
+.fta-one-half {
+	flex: 0 0 calc(50% - (var(--fta-form-space-md) / 2));
+	max-inline-size: calc(50% - (var(--fta-form-space-md) / 2));
+}
+
+.fta-one-third {
+	flex: 0 0 calc(33.333% - (var(--fta-form-space-md) * 2 / 3));
+	max-inline-size: calc(33.333% - (var(--fta-form-space-md) * 2 / 3));
+}
+
+.fta-two-thirds {
+	flex: 0 0 calc(66.666% - (var(--fta-form-space-md) / 3));
+	max-inline-size: calc(66.666% - (var(--fta-form-space-md) / 3));
+}
+
+.fta-one-fourth {
+	flex: 0 0 calc(25% - (var(--fta-form-space-md) * 3 / 4));
+	max-inline-size: calc(25% - (var(--fta-form-space-md) * 3 / 4));
+}
+
+.fta-two-fourths {
+	flex: 0 0 calc(50% - (var(--fta-form-space-md) / 2));
+	max-inline-size: calc(50% - (var(--fta-form-space-md) / 2));
+}
+
+.fta-three-fourths {
+	flex: 0 0 calc(75% - (var(--fta-form-space-md) / 4));
+	max-inline-size: calc(75% - (var(--fta-form-space-md) / 4));
+}
+
+/* First Column Marker */
+.fta-first {
+	clear: both;
+}
+
+/* Responsive - Stack on Mobile */
+@media (max-width: 48em) {
+	.fta-one-half,
+	.fta-one-third,
+	.fta-two-thirds,
+	.fta-one-fourth,
+	.fta-two-fourths,
+	.fta-three-fourths {
+		flex: 0 0 100%;
+		max-inline-size: 100%;
+	}
+}
+
+.fta-field-label {
+    color: var(--fta-form-text);
+	font-size: var(--fta-form-text-base);
+	font-weight: 500;
+	display: block;
+	margin-block-end: var(--fta-form-space-sm);
+}
+
+.fta-field-label.required::after {
+	color: var(--fta-form-error);
+	content: ' *';
+}
+
+.fta-field-description {
+	color: hsl(210, 9%, 46%);
+	font-size: var(--fta-form-text-sm);
+	line-height: 1.5;
+	display: block;
+	margin-block-start: var(--fta-form-space-sm);
+}
+
+/* Input Fields */
+.fta-field-input,
+.fta-field-select,
+.fta-field-textarea {
+	color: var(--fta-form-text);
+	background-color: var(--fta-form-bg);
+	font-family: inherit;
+	font-size: var(--fta-form-text-base);
+	inline-size: 100%;
+	padding-block: var(--fta-form-space-sm);
+	padding-inline: var(--fta-form-space-md);
+	border: 1px solid var(--fta-form-border);
+	border-radius: var(--fta-form-radius);
+	transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.fta-field-input:focus,
+.fta-field-select:focus,
+.fta-field-textarea:focus {
+	outline: none;
+	border-color: var(--fta-form-focus);
+	box-shadow: 0 0 0 3px hsl(220, 90%, 56%, .1);
+}
+
+.fta-field-textarea {
+	min-block-size: 8rem;
+	resize: vertical;
+}
+
+/* Checkboxes and Radio Buttons */
+.fta-field-choices {
+	display: flex;
+	flex-direction: column;
+	gap: var(--fta-form-space-sm);
+}
+
+.fta-choice-item {
+	display: flex;
+	align-items: center;
+	gap: var(--fta-form-space-sm);
+}
+
+.fta-choice-input {
+	accent-color: var(--fta-form-focus);
+	inline-size: 1.125rem;
+	block-size: 1.125rem;
+	cursor: pointer;
+}
+
+.fta-choice-label {
+	color: var(--fta-form-text);
+	font-size: var(--fta-form-text-base);
+	cursor: pointer;
+}
+
+/* Error States */
+.fta-field.has-error .fta-field-input,
+.fta-field.has-error .fta-field-select,
+.fta-field.has-error .fta-field-textarea {
+	border-color: var(--fta-form-error);
+}
+
+.fta-field.has-error .fta-field-input:focus,
+.fta-field.has-error .fta-field-select:focus,
+.fta-field.has-error .fta-field-textarea:focus {
+	box-shadow: 0 0 0 3px hsl(0, 84%, 60%, .1);
+}
+
+.fta-field-error {
+    color: var(--fta-form-error);
+	font-size: var(--fta-form-text-sm);
+	display: block;
+	margin-block-start: var(--fta-form-space-sm);
+}
+
+/* Submit Button */
+.fta-form-footer {
+	margin-block-start: var(--fta-form-space-xl);
+}
+
+.fta-submit-button {
+	color: hsl(0, 0%, 100%);
+	background-color: var(--fta-form-focus);
+	font-size: var(--fta-form-text-base);
+	font-weight: 500;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--fta-form-space-sm);
+	padding-block: var(--fta-form-space-md);
+	padding-inline: var(--fta-form-space-xl);
+	border: none;
+	border-radius: var(--fta-form-radius);
+	transition: background-color 150ms ease, transform 150ms ease;
+	cursor: pointer;
+}
+
+.fta-submit-button:hover {
+	background-color: hsl(220, 90%, 48%);
+}
+
+.fta-submit-button:active {
+	transform: scale(.98);
+}
+
+.fta-submit-button:disabled {
+	opacity: .6;
+	cursor: not-allowed;
+}
+
+.fta-submit-button.loading {
+	color: transparent;
+	position: relative;
+}
+
+.fta-submit-button.loading::after {
+	content: '';
+	position: absolute;
+	inline-size: 1.25rem;
+	block-size: 1.25rem;
+	border: 2px solid white;
+	border-block-start-color: transparent;
+	border-radius: 50%;
+	animation: fta-spin .6s linear infinite;
+}
+
+@keyframes fta-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+/* Success Message */
+.fta-success-message {
+    color: hsl(142, 71%, 20%);
+	background-color: hsl(142, 71%, 96%);
+	padding: var(--fta-form-space-lg);
+	margin-block-end: var(--fta-form-space-lg);
+	border-inline-start: 4px solid var(--fta-form-success);
+	border-radius: var(--fta-form-radius);
+}
+
+.fta-success-title {
+	font-weight: 600;
+	margin-block-end: var(--fta-form-space-sm);
+}
+
+/* Error Message */
+.fta-error-message {
+    color: hsl(0, 84%, 20%);
+	background-color: hsl(0, 84%, 96%);
+	padding: var(--fta-form-space-lg);
+	margin-block-end: var(--fta-form-space-lg);
+	border-inline-start: 4px solid var(--fta-form-error);
+	border-radius: var(--fta-form-radius);
+}
+
+/* File Upload */
+.fta-file-upload {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: var(--fta-form-space-xl);
+	border: 2px dashed var(--fta-form-border);
+	border-radius: var(--fta-form-radius);
+	transition: border-color 150ms ease, background-color 150ms ease;
+	cursor: pointer;
+}
+
+.fta-file-upload:hover {
+	background-color: hsl(220, 90%, 56%, 0.02);
+	border-color: var(--fta-form-focus);
+}
+
+.fta-file-upload-input {
+	display: none;
+}
+
+.fta-file-upload-text {
+    color: hsl(210, 9%, 46%);
+	font-size: var(--fta-form-text-sm);
+	text-align: center;
+}
+
+/* Responsive Design - Mobile First */
+@media (max-width: 48em) {
+	.fta-form {
+		padding: var(--fta-form-space-lg);
+	}
+
+	.fta-submit-button {
+		inline-size: 100%;
+	}
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+	.fta-field-input,
+	.fta-field-select,
+	.fta-field-textarea {
+		border-width: 2px;
+	}
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: .01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: .01ms !important;
+	}
+}

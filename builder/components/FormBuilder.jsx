@@ -1,0 +1,287 @@
+import { closestCenter, DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { arrayMove } from '@dnd-kit/sortable';
+import { useEffect, useState } from 'react';
+import { generateFieldId } from '../utils/helpers';
+import FieldLibrary from './FieldLibrary';
+import FormCanvas from './FormCanvas';
+import FormPreview from './FormPreview';
+
+const FormBuilder = ({ formId }) => {
+  const [fields, setFields] = useState([]);
+  const [selectedField, setSelectedField] = useState(null);
+  const [activeId, setActiveId] = useState(null);
+  const [formSettings, setFormSettings] = useState({
+    title: '',
+    description: '',
+    submitButtonText: 'Submit',
+    successMessage: 'Thank you for your submission!',
+  });
+  const [isSaving, setIsSaving] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    })
+  );
+
+  // Load form data if editing existing form
+  useEffect(() => {
+    if (formId) {
+      loadForm(formId);
+    }
+  }, [formId]);
+
+  const loadForm = async (id) => {
+    try {
+      const response = await fetch(`${window.formturaBuilder.ajaxUrl}?action=fta_get_form&form_id=${id}&nonce=${window.formturaBuilder.nonce}`);
+      const data = await response.json();
+
+      if (data.success && data.data) {
+        const formData = JSON.parse(data.data.form_data || '{}');
+        setFields(formData.fields || []);
+        setFormSettings(formData.settings || formSettings);
+      }
+    } catch (error) {
+      console.error('Error loading form:', error);
+    }
+  };
+
+  const createField = (type) => {
+    const baseField = {
+      id: generateFieldId(),
+      type,
+      label: getDefaultLabel(type),
+      placeholder: '',
+      required: false,
+      description: '',
+    };
+
+    // Add type-specific properties
+    switch (type) {
+      case 'text':
+      case 'email':
+      case 'number':
+        return { ...baseField };
+      case 'textarea':
+        return { ...baseField, rows: 4 };
+      case 'select':
+      case 'radio':
+      case 'checkbox':
+        return { ...baseField, options: ['Option 1', 'Option 2', 'Option 3'] };
+      default:
+        return baseField;
+    }
+  };
+
+  const getDefaultLabel = (type) => {
+    const labels = {
+      text: 'Text Field',
+      email: 'Email Address',
+      textarea: 'Message',
+      number: 'Number',
+      select: 'Dropdown',
+      radio: 'Radio Buttons',
+      checkbox: 'Checkboxes',
+      name: 'Full Name',
+      phone: 'Phone Number',
+      date: 'Date',
+    };
+    return labels[type] || 'Field';
+  };
+
+  const handleDragStart = (event) => {
+    setActiveId(event.active.id);
+  };
+
+  const handleDragEnd = (event) => {
+    const { active, over } = event;
+    setActiveId(null);
+
+    if (!over) return;
+
+    // Dragging from library to canvas
+    if (active.id.startsWith('library-')) {
+      const fieldType = active.id.replace('library-', '');
+      const newField = createField(fieldType);
+
+      // If dropping on the canvas droppable area or on an existing field
+      if (over.id === 'canvas-droppable') {
+        // Add to end of fields array
+        setFields([...fields, newField]);
+        setSelectedField(newField.id);
+        return;
+      } else {
+        // Dropping on an existing field - insert after that field
+        const overIndex = fields.findIndex(f => f.id === over.id);
+        if (overIndex !== -1) {
+          const newFields = [...fields];
+          newFields.splice(overIndex + 1, 0, newField);
+          setFields(newFields);
+          setSelectedField(newField.id);
+          return;
+        } else {
+          // Fallback: add to end
+          setFields([...fields, newField]);
+          setSelectedField(newField.id);
+          return;
+        }
+      }
+    }
+
+    // Reordering within canvas
+    if (!active.id.startsWith('library-') && !over.id.startsWith('library-')) {
+      const oldIndex = fields.findIndex(f => f.id === active.id);
+      const newIndex = fields.findIndex(f => f.id === over.id);
+
+      if (oldIndex !== -1 && newIndex !== -1) {
+        setFields(arrayMove(fields, oldIndex, newIndex));
+      }
+    }
+  };
+
+  const handleFieldUpdate = (fieldId, updates) => {
+    setFields(fields.map(field =>
+      field.id === fieldId ? { ...field, ...updates } : field
+    ));
+  };
+
+  const handleFieldDelete = (fieldId) => {
+    setFields(fields.filter(field => field.id !== fieldId));
+    if (selectedField === fieldId) {
+      setSelectedField(null);
+    }
+  };
+
+  const handleFieldDuplicate = (fieldId) => {
+    const fieldToDuplicate = fields.find(f => f.id === fieldId);
+    if (fieldToDuplicate) {
+      const newField = {
+        ...fieldToDuplicate,
+        id: generateFieldId(),
+        label: `${fieldToDuplicate.label} (Copy)`,
+      };
+      const index = fields.findIndex(f => f.id === fieldId);
+      const newFields = [...fields];
+      newFields.splice(index + 1, 0, newField);
+      setFields(newFields);
+    }
+  };
+
+  const handleSaveForm = async () => {
+    setIsSaving(true);
+    try {
+      const formData = {
+        fields,
+        settings: formSettings,
+      };
+
+      const response = await fetch(window.formturaBuilder.ajaxUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          action: 'fta_save_form',
+          form_id: formId || '',
+          form_data: JSON.stringify(formData),
+          nonce: window.formturaBuilder.nonce,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert('Form saved successfully!');
+
+        // If this was a new form (no formId), redirect to edit page with the new ID
+        if (!formId && data.data?.form_id) {
+          const newFormId = data.data.form_id;
+          window.location.href = `${window.formturaBuilder.editUrl}&form_id=${newFormId}`;
+        }
+      } else {
+        alert('Error saving form: ' + (data.data?.message || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Error saving form:', error);
+      alert('Error saving form. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  return (
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+    >
+      <div className={`formtura-builder ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+        <header className="formtura-canvas-header">
+          <h1 className="formtura-canvas-title">Form Builder</h1>
+          <div className="formtura-canvas-actions">
+            <button
+              className="formtura-btn formtura-btn-secondary"
+              type="button"
+              onClick={() => setShowPreview(true)}
+            >
+              Preview
+            </button>
+            <button className="formtura-btn formtura-btn-secondary" type="button">
+              Embed
+            </button>
+            <button
+              className="formtura-btn formtura-btn-primary"
+              type="button"
+              onClick={handleSaveForm}
+              disabled={isSaving}
+            >
+              {isSaving ? 'Saving...' : '✔ Save'}
+            </button>
+          </div>
+        </header>
+
+        <FieldLibrary
+          selectedField={selectedField}
+          fields={fields}
+          onFieldUpdate={handleFieldUpdate}
+          isCollapsed={isSidebarCollapsed}
+          onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+        />
+
+        <FormCanvas
+          fields={fields}
+          selectedField={selectedField}
+          onFieldSelect={setSelectedField}
+          onFieldDelete={handleFieldDelete}
+          onFieldDuplicate={handleFieldDuplicate}
+        />
+
+        <DragOverlay>
+          {activeId ? (
+            <div className="formtura-drag-overlay">
+              {activeId.startsWith('library-')
+                ? getDefaultLabel(activeId.replace('library-', ''))
+                : fields.find(f => f.id === activeId)?.label
+              }
+            </div>
+          ) : null}
+        </DragOverlay>
+
+        {showPreview && (
+          <FormPreview
+            fields={fields}
+            formSettings={formSettings}
+            onClose={() => setShowPreview(false)}
+          />
+        )}
+      </div>
+    </DndContext>
+  );
+};
+
+export default FormBuilder;

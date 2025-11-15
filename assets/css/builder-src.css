@@ -1,0 +1,359 @@
+/**
+ * Formtura Form Builder Styles
+ *
+ * Styles specific to the drag-and-drop form builder UI.
+ * This file will be processed by Vite and output as builder.css.
+ *
+ * @package Formtura
+ * @since 1.0.0
+ */
+
+:root {
+	/* Builder-specific colors */
+	--fta-builder-bg: hsl(210, 20%, 98%);
+	--fta-canvas-bg: hsl(0, 0%, 100%);
+	--fta-sidebar-bg: hsl(210, 12%, 16%);
+	--fta-sidebar-text: hsl(210, 20%, 98%);
+	--fta-sidebar-hover: hsl(210, 12%, 22%);
+	--fta-sidebar-active: var(--fta-primary);
+
+	/* Field colors */
+	--fta-field-border: var(--fta-gray-300);
+	--fta-field-hover: var(--fta-primary-light);
+	--fta-field-selected: var(--fta-primary);
+
+	/* Drag and drop */
+	--fta-drag-overlay: hsl(220, 90%, 56%, .1);
+	--fta-drop-zone: hsl(220, 90%, 56%, .2);
+}
+
+/* Builder Layout */
+.fta-builder {
+	background-color: var(--fta-builder-bg);
+	display: flex;
+	block-size: 100vh;
+	overflow: hidden;
+}
+
+/* Left Navigation Sidebar */
+.fta-builder-nav {
+	background-color: var(--fta-sidebar-bg);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: var(--fta-space-sm);
+	inline-size: 4.5rem;
+	padding-block: var(--fta-space-lg);
+	box-shadow: var(--fta-shadow-md);
+	z-index: 10;
+}
+
+.fta-nav-item {
+    color: var(--fta-sidebar-text);
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	inline-size: 3rem;
+	block-size: 3rem;
+	border-radius: var(--fta-radius-md);
+	transition: color var(--fta-transition), background-color var(--fta-transition);
+	cursor: pointer;
+}
+
+.fta-nav-item:hover {
+	background-color: var(--fta-sidebar-hover);
+}
+
+.fta-nav-item.active {
+	color: hsl(0, 0%, 100%);
+	background-color: var(--fta-sidebar-active);
+}
+
+.fta-nav-item svg {
+	inline-size: 1.5rem;
+	block-size: 1.5rem;
+}
+
+/* Tooltip for nav items */
+.fta-nav-item::after {
+	color: hsl(0, 0%, 100%);
+	background-color: var(--fta-gray-900);
+	font-size: var(--fta-text-xs);
+	content: attr(data-tooltip);
+	position: absolute;
+	inset-inline-start: 100%;
+	padding-block: var(--fta-space-xs);
+	padding-inline: var(--fta-space-sm);
+	margin-inline-start: var(--fta-space-sm);
+	border-radius: var(--fta-radius-sm);
+	white-space: nowrap;
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity var(--fta-transition);
+}
+
+.fta-nav-item:hover::after {
+	opacity: 1;
+}
+
+/* Center Panel (Fields/Options) */
+.fta-builder-panel {
+    background-color: hsl(0, 0%, 100%);
+	display: flex;
+	flex-direction: column;
+	inline-size: 20rem;
+	border-inline-end: 1px solid var(--fta-gray-200);
+	overflow: hidden;
+}
+
+.fta-panel-header {
+	padding: var(--fta-space-lg);
+	border-block-end: 1px solid var(--fta-gray-200);
+}
+
+.fta-panel-title {
+	color: var(--fta-gray-900);
+	font-size: var(--fta-text-lg);
+	font-weight: 600;
+	margin: 0;
+}
+
+.fta-panel-content {
+	flex: 1;
+	padding: var(--fta-space-lg);
+	overflow-y: auto;
+}
+
+/* Field Library */
+.fta-field-library {
+	display: grid;
+	gap: var(--fta-space-sm);
+}
+
+.fta-field-item {
+	display: flex;
+	align-items: center;
+	gap: var(--fta-space-md);
+	padding: var(--fta-space-md);
+	border: 1px solid var(--fta-gray-200);
+	border-radius: var(--fta-radius-md);
+	transition: background-color var(--fta-transition), border-color var(--fta-transition);
+	cursor: grab;
+}
+
+.fta-field-item:hover {
+	background-color: var(--fta-field-hover);
+	border-color: var(--fta-primary);
+}
+
+.fta-field-item:active {
+	cursor: grabbing;
+}
+
+.fta-field-icon {
+    color: var(--fta-gray-600);
+	background-color: var(--fta-gray-100);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	inline-size: 2rem;
+	block-size: 2rem;
+	border-radius: var(--fta-radius-sm);
+}
+
+.fta-field-info {
+	flex: 1;
+}
+
+.fta-field-name {
+	color: var(--fta-gray-900);
+	font-size: var(--fta-text-sm);
+	font-weight: 500;
+}
+
+.fta-field-description {
+	color: var(--fta-gray-600);
+	font-size: var(--fta-text-xs);
+	margin-block-start: var(--fta-space-xs);
+}
+
+/* Form Canvas (Right Side) */
+.fta-builder-canvas {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
+
+.fta-canvas-header {
+	background-color: hsl(0, 0%, 100%);
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: var(--fta-space-lg);
+	border-block-end: 1px solid var(--fta-gray-200);
+	box-shadow: var(--fta-shadow-sm);
+}
+
+.fta-form-title {
+	color: var(--fta-gray-700);
+	font-size: var(--fta-text-lg);
+	font-weight: 500;
+}
+
+.fta-canvas-actions {
+	display: flex;
+	gap: var(--fta-space-sm);
+}
+
+.fta-canvas-content {
+	flex: 1;
+	padding: var(--fta-space-2xl);
+	overflow-y: auto;
+}
+
+/* Empty State */
+.fta-empty-state {
+	text-align: center;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	block-size: 100%;
+	padding: var(--fta-space-2xl);
+}
+
+.fta-empty-illustration {
+	max-inline-size: 20rem;
+	margin-block-end: var(--fta-space-xl);
+	opacity: .8;
+}
+
+.fta-empty-title {
+	color: var(--fta-gray-900);
+	font-size: var(--fta-text-2xl);
+	font-weight: 600;
+	margin-block-end: var(--fta-space-sm);
+}
+
+.fta-empty-description {
+	color: var(--fta-gray-600);
+	font-size: var(--fta-text-base);
+	max-inline-size: 30rem;
+}
+
+/* Form Preview */
+.fta-form-preview {
+	background-color: var(--fta-canvas-bg);
+	max-inline-size: 48rem;
+	padding: var(--fta-space-2xl);
+	margin-inline: auto;
+	border-radius: var(--fta-radius-lg);
+	box-shadow: var(--fta-shadow-lg);
+}
+
+/* Field in Canvas */
+.fta-canvas-field {
+	background-color: hsl(0, 0%, 100%);
+	position: relative;
+	padding: var(--fta-space-lg);
+	margin-block-end: var(--fta-space-md);
+	border: 2px solid var(--fta-field-border);
+	border-radius: var(--fta-radius-md);
+	transition: border-color var(--fta-transition), box-shadow var(--fta-transition);
+	cursor: pointer;
+}
+
+.fta-canvas-field:hover {
+	border-color: var(--fta-primary);
+	box-shadow: var(--fta-shadow-md);
+}
+
+.fta-canvas-field.selected {
+	border-color: var(--fta-field-selected);
+	box-shadow: 0 0 0 3px var(--fta-primary-light);
+}
+
+.fta-canvas-field.dragging {
+	opacity: .5;
+}
+
+/* Field Actions */
+.fta-field-actions {
+	position: absolute;
+	inset-block-start: var(--fta-space-sm);
+	inset-inline-end: var(--fta-space-sm);
+	display: flex;
+	gap: var(--fta-space-xs);
+	opacity: 0;
+	transition: opacity var(--fta-transition);
+}
+
+.fta-canvas-field:hover .fta-field-actions {
+	opacity: 1;
+}
+
+.fta-field-action-btn {
+	background-color: hsl(0, 0%, 100%);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	inline-size: 2rem;
+	block-size: 2rem;
+	border: 1px solid var(--fta-gray-300);
+	border-radius: var(--fta-radius-sm);
+	transition: background-color var(--fta-transition), border-color var(--fta-transition);
+	cursor: pointer;
+}
+
+.fta-field-action-btn:hover {
+	background-color: var(--fta-gray-100);
+	border-color: var(--fta-gray-400);
+}
+
+/* Drop Zone Indicator */
+.fta-drop-zone {
+	color: var(--fta-primary);
+	background-color: var(--fta-drop-zone);
+	font-size: var(--fta-text-sm);
+	font-weight: 500;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	block-size: 4rem;
+	border: 2px dashed var(--fta-primary);
+	border-radius: var(--fta-radius-md);
+	margin-block-end: var(--fta-space-md);
+}
+
+/* Responsive Design */
+@media (max-width: 64em) {
+	.fta-builder-panel {
+		inline-size: 16rem;
+	}
+
+	.fta-canvas-content {
+		padding: var(--fta-space-lg);
+	}
+}
+
+@media (max-width: 48em) {
+	.fta-builder-nav {
+		inline-size: 3.5rem;
+	}
+
+	.fta-builder-panel {
+		position: absolute;
+		inset-inline-start: 3.5rem;
+		block-size: 100%;
+		box-shadow: var(--fta-shadow-lg);
+		transform: translateX(-100%);
+		transition: transform var(--fta-transition);
+		z-index: 5;
+	}
+
+	.fta-builder-panel.open {
+		transform: translateX(0);
+	}
+}

@@ -1,0 +1,238 @@
+/**
+ * Formtura Admin Styles
+ *
+ * General admin area styling for settings pages and admin UI.
+ * Uses modern CSS standards: rem/em units, logical properties, HSL colors, and CSS custom properties.
+ *
+ * @package Formtura
+ * @since 1.0.0
+ */
+
+:root {
+	/* Brand Colors (HSL format) */
+	--fta-primary: hsl(220, 90%, 56%);
+	--fta-primary-hover: hsl(220, 90%, 48%);
+	--fta-primary-light: hsl(220, 90%, 96%);
+
+	--fta-success: hsl(142, 71%, 45%);
+	--fta-warning: hsl(38, 92%, 50%);
+	--fta-danger: hsl(0, 84%, 60%);
+	--fta-info: hsl(199, 89%, 48%);
+
+	/* Neutral Colors */
+	--fta-gray-50: hsl(210, 20%, 98%);
+	--fta-gray-100: hsl(210, 20%, 95%);
+	--fta-gray-200: hsl(210, 16%, 93%);
+	--fta-gray-300: hsl(210, 14%, 89%);
+	--fta-gray-400: hsl(210, 14%, 83%);
+	--fta-gray-500: hsl(210, 11%, 71%);
+	--fta-gray-600: hsl(210, 9%, 46%);
+	--fta-gray-700: hsl(210, 10%, 23%);
+	--fta-gray-800: hsl(210, 11%, 15%);
+	--fta-gray-900: hsl(210, 12%, 8%);
+
+	/* Spacing Scale */
+	--fta-space-xs: 0.25rem;
+	--fta-space-sm: 0.5rem;
+	--fta-space-md: 1rem;
+	--fta-space-lg: 1.5rem;
+	--fta-space-xl: 2rem;
+	--fta-space-2xl: 3rem;
+
+	/* Font Sizes */
+	--fta-text-xs: .75rem;
+	--fta-text-sm: .875rem;
+	--fta-text-base: 1rem;
+	--fta-text-lg: 1.125rem;
+	--fta-text-xl: 1.25rem;
+	--fta-text-2xl: 1.5rem;
+	--fta-text-3xl: 1.875rem;
+
+	/* Border Radius */
+	--fta-radius-sm: 0.25rem;
+	--fta-radius-md: 0.375rem;
+	--fta-radius-lg: 0.5rem;
+	--fta-radius-xl: 0.75rem;
+
+	/* Shadows */
+	--fta-shadow-sm: 0 1px 2px 0 hsl(0, 0%, 0%, .05);
+	--fta-shadow-md: 0 4px 6px -1px hsl(0, 0%, 0%, .1);
+	--fta-shadow-lg: 0 10px 15px -3px hsl(0, 0%, 0%, .1);
+
+	/* Transitions */
+	--fta-transition: 150ms cubic-bezier(.4, 0, .2, 1);
+}
+
+/* Admin Page Container */
+.fta-admin-page {
+	margin-block-start: var(--fta-space-lg);
+	margin-inline: var(--fta-space-lg);
+}
+
+.fta-admin-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding-block-end: var(--fta-space-lg);
+	margin-block-end: var(--fta-space-xl);
+	border-block-end: 1px solid var(--fta-gray-200);
+}
+
+.fta-admin-header h1 {
+	color: var(--fta-gray-900);
+	font-size: var(--fta-text-3xl);
+	font-weight: 600;
+	margin: 0;
+}
+
+/* Buttons */
+.fta-button {
+	font-size: var(--fta-text-sm);
+	font-weight: 500;
+	text-decoration: none;
+	display: inline-flex;
+	align-items: center;
+	gap: var(--fta-space-sm);
+	padding-block: var(--fta-space-sm);
+	padding-inline: var(--fta-space-lg);
+	border-radius: var(--fta-radius-md);
+	border: 1px solid transparent;
+	transition: color var(--fta-transition),
+                background-color var(--fta-transition),
+                border-color var(--fta-transition);
+	cursor: pointer;
+}
+
+.fta-button-primary {
+	color: hsl(0, 0%, 100%);
+	background-color: var(--fta-primary);
+}
+
+.fta-button-primary:hover {
+	color: hsl(0, 0%, 100%);
+	background-color: var(--fta-primary-hover);
+}
+
+.fta-button-secondary {
+	color: var(--fta-gray-700);
+	background-color: hsl(0, 0%, 100%);
+	border-color: var(--fta-gray-300);
+}
+
+.fta-button-secondary:hover {
+	background-color: var(--fta-gray-50);
+	border-color: var(--fta-gray-400);
+}
+
+/* Cards */
+.fta-card {
+	background-color: hsl(0, 0%, 100%);
+	padding: var(--fta-space-xl);
+	margin-block-end: var(--fta-space-lg);
+	border: 1px solid var(--fta-gray-200);
+	border-radius: var(--fta-radius-lg);
+	box-shadow: var(--fta-shadow-sm);
+}
+
+.fta-card-header {
+	margin-block-end: var(--fta-space-lg);
+}
+
+.fta-card-title {
+	color: var(--fta-gray-900);
+	font-size: var(--fta-text-xl);
+	font-weight: 600;
+	margin: 0;
+}
+
+.fta-card-description {
+	color: var(--fta-gray-600);
+	font-size: var(--fta-text-sm);
+	margin-block-start: var(--fta-space-xs);
+}
+
+/* Form Elements */
+.fta-form-group {
+	margin-block-end: var(--fta-space-lg);
+}
+
+.fta-label {
+    color: var(--fta-gray-700);
+	font-size: var(--fta-text-sm);
+	font-weight: 500;
+	display: block;
+	margin-block-end: var(--fta-space-sm);
+}
+
+.fta-input,
+.fta-select,
+.fta-textarea {
+	font-size: var(--fta-text-sm);
+	inline-size: 100%;
+	padding-block: var(--fta-space-sm);
+	padding-inline: var(--fta-space-md);
+	border: 1px solid var(--fta-gray-300);
+	border-radius: var(--fta-radius-md);
+	transition: border-color var(--fta-transition);
+}
+
+.fta-input:focus,
+.fta-select:focus,
+.fta-textarea:focus {
+	outline: none;
+	border-color: var(--fta-primary);
+	box-shadow: 0 0 0 3px var(--fta-primary-light);
+}
+
+.fta-help-text {
+    color: var(--fta-gray-600);
+	font-size: var(--fta-text-xs);
+	display: block;
+	margin-block-start: var(--fta-space-xs);
+}
+
+/* Notices */
+.fta-notice {
+	padding: var(--fta-space-md);
+	margin-block-end: var(--fta-space-lg);
+	border-inline-start: 4px solid;
+	border-radius: var(--fta-radius-md);
+}
+
+.fta-notice-success {
+	color: hsl(142, 71%, 20%);
+	background-color: hsl(142, 71%, 96%);
+	border-color: var(--fta-success);
+}
+
+.fta-notice-warning {
+	color: hsl(38, 92%, 20%);
+	background-color: hsl(38, 92%, 96%);
+	border-color: var(--fta-warning);
+}
+
+.fta-notice-error {
+	color: hsl(0, 84%, 20%);
+	background-color: hsl(0, 84%, 96%);
+	border-color: var(--fta-danger);
+}
+
+.fta-notice-info {
+	color: hsl(199, 89%, 20%);
+	background-color: hsl(199, 89%, 96%);
+	border-color: var(--fta-info);
+}
+
+/* Responsive Design - Mobile First */
+@media (min-width: 48em) {
+	.fta-admin-page {
+		margin-inline: var(--fta-space-2xl);
+	}
+}
+
+@media (min-width: 64em) {
+	.fta-admin-page {
+		max-inline-size: 75rem;
+		margin-inline: auto;
+	}
+}

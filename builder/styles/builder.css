@@ -1,0 +1,1225 @@
+/* Formtura Builder Styles */
+:root {
+    /* Colors from HTML style.css */
+    --fta-builder-primary: hsl(356, 91%, 56%);
+    --fta-builder-primary-hover: hsl(356, 91%, 46%);
+    --fta-builder-field-dark-blue: hsl(216, 46%, 45%);
+    --fta-builder-field-light-blue: hsl(211, 43%, 62%);
+    --fta-builder-bg: hsl(216, 20%, 95%);
+    --fta-builder-sidebar: hsl(0, 0%, 100%);
+    --fta-builder-border: hsl(0, 0%, 88%);
+    --fta-builder-text: hsl(0, 0%, 20%);
+    --fta-builder-text-light: hsl(0, 0%, 100%);
+    --fta-builder-text-muted: hsl(208, 7%, 46%);
+    --fta-builder-canvas: hsl(0, 0%, 100%);
+    --fta-builder-field-bg: hsl(0, 0%, 100%);
+    --fta-builder-field-hover: hsl(26, 91%, 98%);
+    --fta-builder-field-active: hsl(26, 91%, 95%);
+    --fta-builder-shadow: 0 1px 3px hsla(0, 0%, 0%, .1);
+    --fta-builder-shadow-lg: 0 4px 12px hsla(0, 0%, 0%, .15);
+
+    /* Sizing & Spacing - using relative units */
+    --fta-builder-radius: .375rem;
+    --fta-builder-radius-sm: .375rem;
+    --fta-builder-space-xs: .375rem;
+    --fta-builder-space-sm: .5rem;
+    --fta-builder-space-md: 1rem;
+    --fta-builder-space-lg: 1.5rem;
+    --fta-builder-space-xl: 2rem;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+/* WordPress admin wrapper overrides */
+.formtura-builder-wrap {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.formtura-builder-wrap #formtura-builder-root {
+    position: fixed;
+    inset: 2rem 0 0 10rem;
+    z-index: 9999;
+}
+
+@media screen and (max-width: 48em) {
+    .formtura-builder-wrap #formtura-builder-root {
+        inset: 2.875rem 0 0 0;
+    }
+}
+
+@media screen and (max-width: 60em) {
+    .formtura-builder-wrap #formtura-builder-root {
+        inset-inline-start: 2.25rem;
+    }
+}
+
+.formtura-builder {
+    color: var(--fta-builder-text);
+    background-color: var(--fta-builder-bg);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    line-height: 1.5;
+    position: relative;
+    display: grid;
+    grid-template-columns: 25rem 1fr;
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+        "header header"
+        "sidebar main";
+    block-size: 100vh;
+    inline-size: 100%;
+    overflow: hidden;
+}
+
+/* Header */
+.formtura-canvas-header {
+    background-color: var(--fta-builder-sidebar);
+    grid-area: header;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-block: var(--fta-builder-space-sm);
+    padding-inline: var(--fta-builder-space-lg);
+    border-block-end: 1px solid var(--fta-builder-border);
+}
+
+.formtura-canvas-title {
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin: 0;
+}
+
+.formtura-canvas-actions {
+    display: flex;
+    gap: var(--fta-builder-space-sm);
+}
+
+/* Sidebar - Field Library */
+.formtura-sidebar {
+    background-color: var(--fta-builder-sidebar);
+    position: relative;
+    grid-area: sidebar;
+    display: flex;
+    flex-direction: column;
+    gap: var(--fta-builder-space-md);
+    padding: var(--fta-builder-space-lg);
+    overflow-y: auto;
+    overflow-x: hidden;
+    transition: transform .3s ease, inline-size .3s ease;
+}
+
+.formtura-sidebar.collapsed {
+    inline-size: 0;
+    padding: 0;
+    transform: translateX(-100%);
+}
+
+/* Sidebar Collapse Button */
+.formtura-sidebar-collapse-btn {
+    color: var(--fta-builder-text-muted);
+    background-color: var(--fta-builder-sidebar);
+    position: absolute;
+    inset-inline-end: -2.5rem;
+    inset-block-start: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: 2.5rem;
+    block-size: 3rem;
+    transform: translateY(-50%);
+    border: 1px solid var(--fta-builder-border);
+    border-inline-start: none;
+    border-start-end-radius: var(--fta-builder-radius);
+    border-end-end-radius: var(--fta-builder-radius);
+    transition: background-color .2s ease, color .2s ease;
+    z-index: 100;
+    cursor: pointer;
+}
+
+.formtura-sidebar-collapse-btn:hover {
+    color: var(--fta-builder-text-light);
+    background-color: var(--fta-builder-primary);
+}
+
+.formtura-sidebar.collapsed .formtura-sidebar-collapse-btn {
+    inset-inline-end: auto;
+    inset-inline-start: 0;
+    border: 1px solid var(--fta-builder-border);
+    border-inline-end: none;
+    border-start-start-radius: var(--fta-builder-radius);
+    border-end-start-radius: var(--fta-builder-radius);
+    border-start-end-radius: 0;
+    border-end-end-radius: 0;
+}
+
+/* Expand canvas when sidebar is collapsed */
+.formtura-builder.sidebar-collapsed {
+    grid-template-columns: 0 1fr;
+}
+
+.formtura-sidebar-header {
+    /* display: flex; */
+    border: 1px solid var(--fta-builder-border);
+    border-radius: var(--fta-builder-radius);
+}
+
+.formtura-sidebar-tabs {
+    display: flex;
+    inline-size: 100%;
+}
+
+.formtura-sidebar-tab {
+    color: var(--fta-builder-text);
+    background-color: var(--fta-builder-bg);
+    font-weight: 500;
+    font-size: .875rem;
+    flex-grow: 1;
+    padding-block: var(--fta-builder-space-sm);
+    border: none;
+    transition: background-color .2s ease;
+    cursor: pointer;
+}
+
+.formtura-sidebar-tab:first-child {
+    border-start-start-radius: var(--fta-builder-radius);
+    border-end-start-radius: var(--fta-builder-radius);
+}
+
+.formtura-sidebar-tab:last-child {
+    border-start-end-radius: var(--fta-builder-radius);
+    border-end-end-radius: var(--fta-builder-radius);
+}
+
+.formtura-sidebar-tab.active {
+    background-color: var(--fta-builder-sidebar);
+}
+
+.formtura-search-input {
+    font-size: .875rem;
+    font-family: inherit;
+    inline-size: 100%;
+    padding: .6rem;
+    border: 1px solid var(--fta-builder-border);
+    border-radius: var(--fta-builder-radius);
+}
+
+.formtura-search-input:focus {
+    outline: none;
+    border-color: var(--fta-builder-primary);
+}
+
+.formtura-field-group {
+    margin-block-end: var(--fta-builder-space-lg);
+}
+
+.formtura-field-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--fta-builder-space-sm);
+}
+
+.formtura-field-group-title {
+    font-weight: 600;
+    margin-block: var(--fta-builder-space-md) var(--fta-builder-space-sm);
+    cursor: pointer;
+}
+
+.formtura-field-item {
+    color: var(--fta-builder-text-light);
+    background-color: var(--fta-builder-field-dark-blue);
+    font-size: 1rem;
+    font-weight: 500;
+    text-align: start;
+    display: flex;
+    align-items: center;
+    gap: var(--fta-builder-space-xs);
+    padding: .75em;
+    border: none;
+    border-radius: var(--fta-builder-radius);
+    white-space: nowrap;
+    transition: background-color .2s ease, transform .2s ease;
+    cursor: grab;
+}
+
+.formtura-field-item:hover {
+    background-color: hsl(216, 46%, 40%);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px hsla(216, 46%, 45%, .3);
+}
+
+.formtura-field-item:active {
+    transform: translateY(0);
+    cursor: grabbing;
+}
+
+.formtura-field-item.dragging {
+    opacity: .5;
+    cursor: grabbing;
+}
+
+/* Field button color variants */
+.formtura-field-item.field-dark-blue {
+    background-color: var(--fta-builder-field-dark-blue);
+}
+
+.formtura-field-item.field-dark-blue:hover {
+    background-color: hsl(216, 46%, 40%);
+}
+
+.formtura-field-item.field-light-blue {
+    background-color: var(--fta-builder-field-light-blue);
+}
+
+.formtura-field-item.field-light-blue:hover {
+    background-color: hsl(211, 43%, 57%);
+}
+
+.formtura-field-icon {
+    color: hsl(0, 0%, 100%);
+    flex-shrink: 0;
+    inline-size: 1rem;
+    block-size: 1rem;
+}
+
+.formtura-field-label {
+    color: hsl(0, 0%, 100%);
+    font-size: .875rem;
+    font-weight: 500;
+    text-overflow: ellipsis;
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+/* Canvas - Form Preview */
+.formtura-canvas {
+    position: relative;
+    grid-area: main;
+    display: flex;
+    flex-direction: column;
+    padding: var(--fta-builder-space-lg);
+    overflow: hidden;
+}
+
+.formtura-btn {
+    background-color: transparent;
+    font-size: .875rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--fta-builder-space-xs);
+    padding: .5rem 1rem;
+    border: 1px solid var(--fta-builder-border);
+    border-radius: var(--fta-builder-radius);
+    transition: color .2s ease,
+                background-color .2s ease,
+                border-color .2s ease;
+    cursor: pointer;
+}
+
+.formtura-btn-secondary {
+    color: var(--fta-builder-text);
+    background-color: var(--fta-builder-sidebar);
+}
+
+.formtura-btn-secondary:hover {
+    color: var(--fta-builder-primary);
+    border-color: var(--fta-builder-primary);
+}
+
+.formtura-btn-primary {
+    color: var(--fta-builder-text-light);
+    background-color: var(--fta-builder-primary);
+    border-color: var(--fta-builder-primary);
+}
+
+.formtura-btn-primary:hover {
+    background-color: var(--fta-builder-primary-hover);
+    border-color: var(--fta-builder-primary-hover);
+}
+
+.formtura-canvas-body,
+.formtura-canvas-empty {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.formtura-canvas-body {
+    block-size: 70%;
+}
+
+.formtura-canvas-empty {
+    block-size: 100%;
+    padding: var(--fta-builder-space-xl);
+}
+
+.formtura-canvas-empty-icon,
+.formtura-empty-state-image {
+    max-inline-size: 18rem;
+    margin-block-end: var(--fta-builder-space-lg);
+}
+
+.formtura-canvas-empty-title {
+    color: var(--fta-builder-text);
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-block-end: var(--fta-builder-space-xs);
+}
+
+.formtura-canvas-empty-text {
+    color: var(--fta-builder-text-muted);
+    font-size: 1rem;
+    line-height: 1.1;
+    /* max-inline-size: 25rem; */
+}
+
+/* Dropped Fields */
+.formtura-dropped-field {
+    background-color: var(--fta-builder-field-bg);
+    position: relative;
+    padding: var(--fta-builder-space-md);
+    margin-block-end: var(--fta-builder-space-md);
+    border: 2px solid var(--fta-builder-border);
+    border-radius: var(--fta-builder-radius-sm);
+    transition: border-color .2s ease, box-shadow .2s ease;
+    cursor: pointer;
+}
+
+.formtura-dropped-field:hover {
+    border-color: var(--fta-builder-primary);
+    box-shadow: var(--fta-builder-shadow);
+}
+
+.formtura-dropped-field.selected {
+    background-color: var(--fta-builder-field-hover);
+    border-color: var(--fta-builder-primary);
+}
+
+.formtura-dropped-field.dragging {
+    opacity: .5;
+}
+
+.formtura-field-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-block-end: var(--fta-builder-space-sm);
+}
+
+.formtura-field-type {
+    color: var(--fta-builder-text-muted);
+    font-size: .75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: var(--fta-builder-space-xs);
+}
+
+.formtura-field-actions {
+    display: flex;
+    gap: var(--fta-builder-space-xs);
+}
+
+.formtura-field-action-btn {
+    color: var(--fta-builder-text-muted);
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: 1.5rem;
+    block-size: 1.5rem;
+    padding: 0;
+    border: none;
+    border-radius: var(--fta-builder-radius);
+    transition: color .2s ease, background-color .2s ease;
+    cursor: pointer;
+}
+
+.formtura-field-action-btn:hover {
+    color: var(--fta-builder-primary);
+    background-color: var(--fta-builder-field-hover);
+}
+
+.formtura-field-preview label {
+    font-size: .875rem;
+    font-weight: 500;
+    display: block;
+    margin-block-end: var(--fta-builder-space-xs);
+}
+
+.formtura-field-preview input,
+.formtura-field-preview textarea,
+.formtura-field-preview select {
+    font-family: inherit;
+    font-size: .875rem;
+    inline-size: 100%;
+    padding: var(--fta-builder-space-sm);
+    border: 1px solid var(--fta-builder-border);
+    border-radius: var(--fta-builder-radius-sm);
+    pointer-events: none;
+}
+
+.formtura-field-preview textarea {
+    min-block-size: 5rem;
+    resize: vertical;
+}
+
+/* Field Size Classes */
+.formtura-field-size-small {
+    inline-size: 25%;
+}
+
+.formtura-field-size-medium {
+    inline-size: 50%;
+}
+
+.formtura-field-size-large {
+    inline-size: 100%;
+}
+
+/* Field Description Text */
+.formtura-field-description-text {
+    color: var(--fta-builder-text);
+    font-size: .875rem;
+    margin-block-start: var(--fta-builder-space-xs);
+    margin-block-end: 0;
+}
+
+/* Drag Overlay */
+.formtura-drag-overlay {
+    color: var(--fta-builder-text);
+    background-color: var(--fta-builder-field-bg);
+    padding: var(--fta-builder-space-md);
+    border: 1px solid var(--fta-builder-border);
+    border-radius: var(--fta-builder-radius);
+    pointer-events: none;
+}
+
+/* Layout Selector */
+.formtura-layout-selector {
+    background-color: var(--fta-builder-bg);
+    padding: var(--fta-builder-space-md);
+    margin-block-start: var(--fta-builder-space-sm);
+    border: 1px solid var(--fta-builder-border);
+    border-radius: var(--fta-builder-radius);
+}
+
+.formtura-layout-title {
+    font-size: .875rem;
+    font-weight: 600;
+    margin-block-end: var(--fta-builder-space-md);
+    margin-block-start: 0;
+}
+
+.formtura-layout-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--fta-builder-space-sm);
+}
+
+.formtura-layout-option {
+    background-color: var(--fta-builder-sidebar);
+    padding: var(--fta-builder-space-sm);
+    border: 1px solid var(--fta-builder-border);
+    border-radius: var(--fta-builder-radius);
+    transition: all .2s ease;
+}
+
+.formtura-layout-option:hover {
+    border-color: var(--fta-builder-primary);
+    box-shadow: var(--fta-builder-shadow);
+}
+
+.formtura-layout-preview {
+    display: flex;
+    gap: .25rem;
+    block-size: 2rem;
+}
+
+.formtura-layout-col {
+    background-color: hsl(210, 14%, 83%);
+    flex: 1;
+    border-radius: .125rem;
+    min-block-size: 2rem;
+}
+
+.formtura-layout-col-clickable {
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: background-color .2s ease, transform .1s ease;
+}
+
+.formtura-layout-col-clickable:hover {
+    background-color: var(--fta-builder-primary);
+    transform: scale(1.05);
+}
+
+.formtura-layout-col-clickable:active {
+    transform: scale(.98);
+}
+
+/* Settings Panel - Not used, Field Options are in left sidebar */
+.formtura-settings {
+    display: none;
+}
+
+.formtura-settings-header {
+    padding: var(--fta-builder-space-lg);
+    border-block-end: 1px solid var(--fta-builder-border);
+}
+
+.formtura-settings-header h2 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.formtura-settings-content {
+    flex: 1;
+    padding: var(--fta-builder-space-lg);
+}
+
+.formtura-settings-group {
+    margin-block-end: var(--fta-builder-space-lg);
+}
+
+.formtura-field-group-title {
+    color: var(--fta-builder-text);
+    background: transparent;
+    font-size: .875rem;
+    font-weight: 600;
+    inline-size: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--fta-builder-space-sm) 0;
+    margin-block-end: var(--fta-builder-space-sm);
+    border: none;
+    transition: color .2s ease;
+    cursor: pointer;
+}
+
+.formtura-field-group-title:hover {
+    color: var(--fta-builder-primary);
+}
+
+.formtura-group-chevron {
+    transition: transform .2s ease;
+}
+
+.formtura-group-chevron.collapsed {
+    transform: rotate(-90deg);
+}
+
+.formtura-form-group {
+    margin-block-end: var(--fta-builder-space-md);
+}
+
+.formtura-form-group label {
+    font-size: .875rem;
+    font-weight: 500;
+    display: block;
+    margin-block-end: var(--fta-builder-space-xs);
+}
+
+.formtura-form-group input,
+.formtura-form-group textarea,
+.formtura-form-group select {
+    font-family: inherit;
+    font-size: .875rem;
+    inline-size: 100%;
+    padding: var(--fta-builder-space-sm);
+    border: 1px solid var(--fta-builder-border);
+    border-radius: var(--fta-builder-radius-sm);
+}
+
+.formtura-form-group textarea {
+    min-block-size: 5rem;
+    resize: vertical;
+}
+
+.formtura-checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: var(--fta-builder-space-sm);
+}
+
+.formtura-checkbox-group input[type="checkbox"] {
+    inline-size: auto;
+}
+
+/* Panel Toggle (Add Fields / Field Options) */
+.formtura-panel-toggle {
+    background-color: var(--fta-builder-bg);
+    display: flex;
+    gap: 0;
+    /* padding: var(--fta-builder-space-sm); */
+    border: 1px solid var(--fta-builder-border);
+    border-radius: var(--fta-builder-radius);
+}
+
+.formtura-panel-toggle-btn {
+    color: var(--fta-builder-text-muted);
+    background-color: transparent;
+    font-size: .875rem;
+    font-weight: 500;
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    gap: var(--fta-builder-space-xs);
+    padding: var(--fta-builder-space-md) var(--fta-builder-space-md);
+    border: none;
+    transition: background-color .2s ease, color .2s ease;
+    cursor: pointer;
+}
+
+.formtura-panel-toggle-btn:first-child {
+    border-start-start-radius: var(--fta-builder-radius);
+    border-end-start-radius: var(--fta-builder-radius);
+}
+
+.formtura-panel-toggle-btn:last-child {
+    border-start-end-radius: var(--fta-builder-radius);
+    border-end-end-radius: var(--fta-builder-radius);
+}
+
+.formtura-panel-toggle-btn.active {
+    color: var(--fta-builder-text);
+    background-color: var(--fta-builder-sidebar);
+}
+
+.formtura-panel-toggle-btn:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+}
+
+/* Settings Tabs */
+.formtura-settings-tabs {
+    background-color: var(--fta-builder-sidebar);
+    display: flex;
+    border-block-end: 1px solid var(--fta-builder-border);
+}
+
+.formtura-settings-tab {
+    color: var(--fta-builder-text-muted);
+    background-color: transparent;
+    font-size: .875rem;
+    font-weight: 500;
+    flex: 1;
+    padding: var(--fta-builder-space-md);
+    border: none;
+    border-block-end: 2px solid transparent;
+    transition: color .2s ease, border-color .2s ease;
+    cursor: pointer;
+}
+
+.formtura-settings-tab:hover {
+    color: var(--fta-builder-text);
+}
+
+.formtura-settings-tab.active {
+    color: var(--fta-builder-primary);
+    border-block-end-color: var(--fta-builder-primary);
+}
+
+/* Field Options */
+.formtura-field-options {
+    padding: var(--fta-builder-space-lg);
+}
+
+.formtura-field-options-title {
+    font-size: 1rem;
+    padding-block-end: var(--fta-builder-space-md);
+    margin-block-end: var(--fta-builder-space-lg);
+    border-block-end: 1px solid var(--fta-builder-border);
+}
+
+.formtura-field-id {
+    color: var(--fta-builder-text-muted);
+    font-size: .875rem;
+    font-weight: 400;
+}
+
+.formtura-help-icon {
+    color: var(--fta-builder-text-muted);
+    vertical-align: middle;
+    margin-inline-start: .25rem;
+}
+
+.formtura-field-help {
+    display: block;
+    color: var(--fta-builder-primary);
+    font-size: .75rem;
+    margin-block-start: var(--fta-builder-space-xs);
+    cursor: pointer;
+}
+
+.formtura-field-help:hover {
+    text-decoration: underline;
+}
+
+/* Toggle Switch */
+.formtura-toggle-group {
+    display: flex;
+    align-items: center;
+    gap: var(--fta-builder-space-sm);
+}
+
+.formtura-toggle {
+    position: relative;
+    display: inline-block;
+    inline-size: 2.5rem;
+    block-size: 1.25rem;
+}
+
+.formtura-toggle input {
+    inline-size: 0;
+    block-size: 0;
+    opacity: 0;
+}
+
+.formtura-toggle-slider {
+    background-color: var(--fta-builder-border);
+    position: absolute;
+    inset: 0;
+    border-radius: 1.25rem;
+    transition: background-color .2s ease;
+    cursor: pointer;
+}
+
+.formtura-toggle-slider::before {
+    background-color: var(--fta-builder-sidebar);
+    position: absolute;
+    content: '';
+    inset-inline-start: .125rem;
+    inset-block-end: .125rem;
+    block-size: 1rem;
+    inline-size: 1rem;
+    border-radius: 50%;
+    transition: transform .2s ease;
+}
+
+.formtura-toggle input:checked + .formtura-toggle-slider {
+    background-color: var(--fta-builder-primary);
+}
+
+.formtura-toggle input:checked + .formtura-toggle-slider::before {
+    transform: translateX(1.25rem);
+}
+
+.formtura-toggle-label {
+    color: var(--fta-builder-text);
+    font-size: .875rem;
+    display: flex;
+    align-items: center;
+    gap: var(--fta-builder-space-xs);
+}
+
+/* Badge */
+.formtura-badge {
+    color: var(--fta-builder-text-muted);
+    background-color: var(--fta-builder-bg);
+    font-size: .625rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    display: inline-block;
+    padding: .125rem .375rem;
+    margin-inline-start: .25rem;
+    border-radius: .25rem;
+}
+
+/* Button Link */
+.formtura-btn-link {
+    color: var(--fta-builder-primary);
+    background: transparent;
+    font-size: .875rem;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--fta-builder-space-xs);
+    padding: 0;
+    margin-block-start: var(--fta-builder-space-xs);
+    border: none;
+    cursor: pointer;
+}
+
+.formtura-btn-link:hover {
+    text-decoration: underline;
+}
+
+/* Field Description */
+.formtura-field-description {
+    color: var(--fta-builder-text-muted);
+    font-size: .75rem;
+    line-height: 1.4;
+    margin-block-start: var(--fta-builder-space-xs);
+}
+
+/* Logic Rules */
+.formtura-logic-rules {
+    background-color: var(--fta-builder-bg);
+    padding: var(--fta-builder-space-md);
+    margin-block-start: var(--fta-builder-space-md);
+    border-radius: var(--fta-builder-radius);
+}
+
+/* Settings Empty State */
+.formtura-settings-empty {
+    color: var(--fta-builder-text-muted);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--fta-builder-space-xl);
+}
+
+.formtura-settings-empty svg {
+    margin-block-end: var(--fta-builder-space-md);
+    opacity: .5;
+}
+
+/* Drag Overlay */
+.formtura-drag-overlay {
+    color: hsl(0, 0%, 100%);
+    background-color: var(--fta-builder-primary);
+    font-size: .875rem;
+    font-weight: 500;
+    padding: var(--fta-builder-space-sm) var(--fta-builder-space-md);
+    border-radius: var(--fta-builder-radius);
+    box-shadow: var(--fta-builder-shadow-lg);
+    cursor: grabbing;
+}
+
+/* Responsive */
+@media (max-width: 62em) {
+    .formtura-builder {
+        grid-template-columns: 20rem 1fr;
+    }
+}
+
+@media (max-width: 48em) {
+    .formtura-builder {
+        grid-template-columns: 1fr !important;
+        grid-template-areas:
+            "header"
+            "main";
+    }
+
+    .formtura-sidebar {
+        display: none;
+    }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+    }
+}
+
+/* Form Preview Modal */
+.formtura-preview-overlay {
+    background-color: rgb(0 0 0 / .7);
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--fta-builder-space-lg);
+    z-index: 10000;
+}
+
+.formtura-preview-modal {
+    background-color: var(--fta-builder-sidebar);
+    display: flex;
+    flex-direction: column;
+    inline-size: 100%;
+    max-inline-size: 50rem;
+    max-block-size: 90vh;
+    border-radius: var(--fta-builder-radius);
+    box-shadow: 0 .625rem 2.5rem rgb(0 0 0 / .3);
+    overflow: hidden;
+}
+
+.formtura-preview-header {
+    background-color: var(--fta-builder-bg);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--fta-builder-space-lg);
+    border-block-end: 1px solid var(--fta-builder-border);
+}
+
+.formtura-preview-header h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.formtura-preview-close {
+    color: var(--fta-builder-text);
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--fta-builder-space-xs);
+    border: none;
+    border-radius: var(--fta-builder-radius);
+    transition: background-color .2s ease;
+    cursor: pointer;
+}
+
+.formtura-preview-close:hover {
+    background-color: var(--fta-builder-field-hover);
+}
+
+.formtura-preview-body {
+    padding: var(--fta-builder-space-xl);
+    overflow-y: auto;
+}
+
+.formtura-preview-form {
+    max-inline-size: 40rem;
+    margin-inline: auto;
+}
+
+.formtura-preview-form-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-block-end: var(--fta-builder-space-sm);
+}
+
+.formtura-preview-form-description {
+    color: var(--fta-builder-text-muted);
+    margin-block-end: var(--fta-builder-space-lg);
+}
+
+.formtura-preview-fields {
+    display: flex;
+    flex-direction: column;
+    gap: var(--fta-builder-space-lg);
+}
+
+/* Grid Layout for Preview */
+.formtura-preview-fields .fta-form-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--fta-builder-space-md);
+    margin-block-end: 0;
+}
+
+.formtura-preview-fields .fta-form-row .formtura-preview-field {
+    margin-block-end: 0;
+}
+
+/* Column Widths for Preview */
+.formtura-preview-field.fta-one-half {
+    flex: 0 0 calc(50% - (var(--fta-builder-space-md) / 2));
+    max-inline-size: calc(50% - (var(--fta-builder-space-md) / 2));
+}
+
+.formtura-preview-field.fta-one-third {
+    flex: 0 0 calc(33.333% - (var(--fta-builder-space-md) * 2 / 3));
+    max-inline-size: calc(33.333% - (var(--fta-builder-space-md) * 2 / 3));
+}
+
+.formtura-preview-field.fta-two-thirds {
+    flex: 0 0 calc(66.666% - (var(--fta-builder-space-md) / 3));
+    max-inline-size: calc(66.666% - (var(--fta-builder-space-md) / 3));
+}
+
+.formtura-preview-field.fta-one-fourth {
+    flex: 0 0 calc(25% - (var(--fta-builder-space-md) * 3 / 4));
+    max-inline-size: calc(25% - (var(--fta-builder-space-md) * 3 / 4));
+}
+
+.formtura-preview-field.fta-two-fourths {
+    flex: 0 0 calc(50% - (var(--fta-builder-space-md) / 2));
+    max-inline-size: calc(50% - (var(--fta-builder-space-md) / 2));
+}
+
+.formtura-preview-field.fta-three-fourths {
+    flex: 0 0 calc(75% - (var(--fta-builder-space-md) / 4));
+    max-inline-size: calc(75% - (var(--fta-builder-space-md) / 4));
+}
+
+.formtura-preview-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--fta-builder-space-xs);
+}
+
+.formtura-preview-label {
+    font-weight: 500;
+    display: block;
+}
+
+.formtura-preview-required {
+    color: var(--fta-builder-primary);
+}
+
+.formtura-preview-field input[type="text"],
+.formtura-preview-field input[type="email"],
+.formtura-preview-field input[type="number"],
+.formtura-preview-field input[type="tel"],
+.formtura-preview-field input[type="date"],
+.formtura-preview-field textarea,
+.formtura-preview-field select {
+    font-family: inherit;
+    font-size: 1rem;
+    inline-size: 100%;
+    padding: var(--fta-builder-space-sm);
+    border: 1px solid var(--fta-builder-border);
+    border-radius: var(--fta-builder-radius);
+}
+
+.formtura-preview-field input.field-size-small,
+.formtura-preview-field textarea.field-size-small,
+.formtura-preview-field select.field-size-small {
+    inline-size: 25%;
+    min-inline-size: 10rem;
+}
+
+.formtura-preview-field input.field-size-medium,
+.formtura-preview-field textarea.field-size-medium,
+.formtura-preview-field select.field-size-medium {
+    inline-size: 50%;
+    min-inline-size: 15rem;
+}
+
+.formtura-preview-field input.field-size-large,
+.formtura-preview-field textarea.field-size-large,
+.formtura-preview-field select.field-size-large {
+    inline-size: 100%;
+}
+
+.formtura-preview-field textarea {
+    min-block-size: 6rem;
+    resize: vertical;
+}
+
+.formtura-preview-description {
+    color: var(--fta-builder-text);
+    font-size: .875rem;
+    margin: 0;
+}
+
+.formtura-preview-radio-group,
+.formtura-preview-checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--fta-builder-space-sm);
+}
+
+.formtura-preview-radio,
+.formtura-preview-checkbox {
+    display: flex;
+    align-items: center;
+    gap: var(--fta-builder-space-sm);
+    cursor: pointer;
+}
+
+.formtura-preview-name-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--fta-builder-space-sm);
+}
+
+.formtura-preview-name-input {
+    inline-size: 100%;
+    padding: var(--fta-builder-space-sm);
+    border: 1px solid var(--fta-builder-border);
+    border-radius: var(--fta-builder-radius);
+}
+
+.formtura-preview-submit {
+    color: var(--fta-builder-text-light);
+    background-color: var(--fta-builder-primary);
+    font-size: 1rem;
+    font-weight: 500;
+    padding: var(--fta-builder-space-sm) var(--fta-builder-space-xl);
+    margin-block-start: var(--fta-builder-space-xl);
+    border: none;
+    border-radius: var(--fta-builder-radius);
+    transition: background-color .2s ease;
+    cursor: pointer;
+}
+
+.formtura-preview-submit:hover {
+    background-color: var(--fta-builder-primary-hover);
+}
+
+.formtura-preview-empty {
+    color: var(--fta-builder-text-muted);
+    text-align: center;
+    padding: var(--fta-builder-space-xl);
+}
+
+/* CSS Layout Classes */
+.fta-one-half {
+    inline-size: 50%;
+}
+
+.fta-one-third {
+    inline-size: 33.333%;
+}
+
+.fta-two-thirds {
+    inline-size: 66.666%;
+}
+
+.fta-one-fourth {
+    inline-size: 25%;
+}
+
+.fta-three-fourths {
+    inline-size: 75%;
+}
+
+.fta-first {
+    clear: both;
+}
+
+/* Responsive */
+@media (max-width: 48em) {
+    .formtura-builder {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "header"
+            "main";
+    }
+
+    .formtura-sidebar {
+        display: none;
+    }
+
+    .formtura-canvas-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--fta-builder-space-md);
+    }
+
+    .formtura-canvas-actions {
+        inline-size: 100%;
+        justify-content: flex-start;
+    }
+
+    .formtura-preview-modal {
+        max-inline-size: 100%;
+    }
+
+    .formtura-preview-field input.field-size-small,
+    .formtura-preview-field input.field-size-medium {
+        inline-size: 100%;
+    }
+}

@@ -35,9 +35,9 @@ const FormPreview = ({ fields, formSettings, onClose }) => {
           return (
             <select required={field.required} className={fieldSizeClass}>
               <option value="">Select an option</option>
-              {field.options?.map((option, index) => (
-                <option key={index} value={option}>
-                  {option}
+              {(field.choices || field.options)?.map((choice, index) => (
+                <option key={index} value={choice.value || choice}>
+                  {choice.label || choice}
                 </option>
               ))}
             </select>
@@ -46,15 +46,16 @@ const FormPreview = ({ fields, formSettings, onClose }) => {
         case 'radio':
           return (
             <div className="formtura-preview-radio-group">
-              {field.options?.map((option, index) => (
+              {(field.choices || field.options)?.map((choice, index) => (
                 <label key={index} className="formtura-preview-radio">
                   <input
                     type="radio"
                     name={field.id}
-                    value={option}
+                    value={choice.value || choice}
+                    defaultChecked={choice.isDefault || false}
                     required={field.required}
                   />
-                  <span>{option}</span>
+                  <span>{choice.label || choice}</span>
                 </label>
               ))}
             </div>
@@ -63,10 +64,31 @@ const FormPreview = ({ fields, formSettings, onClose }) => {
         case 'checkbox':
           return (
             <div className="formtura-preview-checkbox-group">
-              {field.options?.map((option, index) => (
+              {(field.choices || field.options)?.map((choice, index) => (
                 <label key={index} className="formtura-preview-checkbox">
-                  <input type="checkbox" value={option} />
-                  <span>{option}</span>
+                  <input
+                    type="radio"
+                    name={field.id}
+                    value={choice.value || choice}
+                    defaultChecked={choice.isDefault || false}
+                  />
+                  <span>{choice.label || choice}</span>
+                </label>
+              ))}
+            </div>
+          );
+
+        case 'checkboxes':
+          return (
+            <div className="formtura-preview-checkboxes-group">
+              {(field.choices || field.options)?.map((choice, index) => (
+                <label key={index} className="formtura-preview-checkbox">
+                  <input
+                    type="checkbox"
+                    value={choice.value || choice}
+                    defaultChecked={choice.isDefault || false}
+                  />
+                  <span>{choice.label || choice}</span>
                 </label>
               ))}
             </div>

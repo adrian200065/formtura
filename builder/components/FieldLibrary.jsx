@@ -10,9 +10,11 @@ import {
     Code,
     CreditCard,
     DollarSign,
+    Download,
     Eye,
     FileText,
     Globe,
+    GripVertical,
     Hash,
     Info,
     Layout,
@@ -24,6 +26,7 @@ import {
     Minus,
     PenTool,
     Phone,
+    Plus,
     Settings,
     ShoppingCart,
     Star,
@@ -32,6 +35,7 @@ import {
     Type,
     Upload,
     User,
+    Wand2,
     Zap
 } from 'lucide-react';
 import React from 'react';
@@ -282,8 +286,551 @@ const FieldLibrary = ({ selectedField, fields, onFieldUpdate, isCollapsed, onTog
 
 // General Tab Component
 const GeneralTab = ({ field, onUpdate }) => {
+  const [showBulkAdd, setShowBulkAdd] = React.useState(false);
+  const [bulkText, setBulkText] = React.useState('');
+
   const handleChange = (key, value) => {
     onUpdate(field.id, { [key]: value });
+  };
+
+  // Initialize choices if not present
+  React.useEffect(() => {
+    if ((field.type === 'select' || field.type === 'checkbox' || field.type === 'checkboxes') && !field.choices) {
+      handleChange('choices', [
+        { label: 'First Choice', value: 'first-choice', isDefault: false },
+        { label: 'Second Choice', value: 'second-choice', isDefault: false },
+        { label: 'Third Choice', value: 'third-choice', isDefault: false }
+      ]);
+    }
+    if (field.type === 'payment-dropdown' && !field.items) {
+      handleChange('items', [
+        { label: 'First Item', value: 'first-item', price: '10.00', isDefault: false },
+        { label: 'Second Item', value: 'second-item', price: '25.00', isDefault: false },
+        { label: 'Third Item', value: 'third-item', price: '50.00', isDefault: false }
+      ]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [field.type]);
+
+  const handleChoiceChange = (index, key, value) => {
+    const newChoices = [...(field.choices || [])];
+    newChoices[index] = { ...newChoices[index], [key]: value };
+    handleChange('choices', newChoices);
+  };
+
+  const handleItemChange = (index, key, value) => {
+    const newItems = [...(field.items || [])];
+    newItems[index] = { ...newItems[index], [key]: value };
+    handleChange('items', newItems);
+  };
+
+  const addChoice = () => {
+    const newChoices = [...(field.choices || [])];
+    newChoices.push({
+      label: `Choice ${newChoices.length + 1}`,
+      value: `choice-${newChoices.length + 1}`,
+      isDefault: false
+    });
+    handleChange('choices', newChoices);
+  };
+
+  const removeChoice = (index) => {
+    const newChoices = field.choices.filter((_, i) => i !== index);
+    handleChange('choices', newChoices);
+  };
+
+  const addItem = () => {
+    const newItems = [...(field.items || [])];
+    newItems.push({
+      label: `Item ${newItems.length + 1}`,
+      value: `item-${newItems.length + 1}`,
+      price: '0.00',
+      isDefault: false
+    });
+    handleChange('items', newItems);
+  };
+
+  const removeItem = (index) => {
+    const newItems = field.items.filter((_, i) => i !== index);
+    handleChange('items', newItems);
+  };
+
+  const handleBulkAdd = () => {
+    if (!bulkText.trim()) return;
+
+    const lines = bulkText.split('\n').filter(line => line.trim());
+    const newChoices = lines.map((line) => {
+      const trimmed = line.trim();
+      return {
+        label: trimmed,
+        value: trimmed.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
+        isDefault: false
+      };
+    });
+
+    handleChange('choices', newChoices);
+    setBulkText('');
+    setShowBulkAdd(false);
+  };
+
+  const generateChoices = () => {
+    // Simple example - generate some sample choices
+    const samples = ['Option A', 'Option B', 'Option C', 'Option D', 'Option E'];
+    const newChoices = samples.map((label, index) => ({
+      label,
+      value: label.toLowerCase().replace(/\s+/g, '-'),
+      isDefault: index === 0
+    }));
+    handleChange('choices', newChoices);
+  };
+
+  // Render field-specific options based on type
+  const renderFieldSpecificOptions = () => {
+    // Dropdown field (select)
+    if (field.type === 'select') {
+      return (
+        <>
+          <div className="formtura-form-group">
+            <label>
+              Choices <Info size={14} className="formtura-help-icon" />
+              <button
+                type="button"
+                className="formtura-bulk-add-btn"
+                onClick={() => setShowBulkAdd(!showBulkAdd)}
+                style={{ float: 'right', fontSize: '12px', padding: '4px 8px' }}
+              >
+                <Download size={12} /> Bulk Add
+              </button>
+            </label>
+
+            {showBulkAdd && (
+              <div className="formtura-bulk-add-container" style={{ marginBottom: '12px' }}>
+                <textarea
+                  placeholder="Paste your list here (one item per line)&#10;Example:&#10;Alabama&#10;Alaska&#10;Arizona"
+                  value={bulkText}
+                  onChange={(e) => setBulkText(e.target.value)}
+                  rows={6}
+                  style={{ width: '100%', marginBottom: '8px', padding: '8px' }}
+                />
+                <button
+                  type="button"
+                  onClick={handleBulkAdd}
+                  className="formtura-btn-primary"
+                  style={{ marginRight: '8px' }}
+                >
+                  Add Choices
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setBulkText(''); setShowBulkAdd(false); }}
+                  className="formtura-btn-secondary"
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
+
+            <div className="formtura-choices-list">
+              {(field.choices || []).map((choice, index) => (
+                <div key={index} className="formtura-choice-item" style={{ display: 'flex', gap: '8px', marginBottom: '8px', alignItems: 'center' }}>
+                  <input
+                    type="radio"
+                    checked={choice.isDefault || false}
+                    onChange={() => {
+                      const newChoices = field.choices.map((c, i) => ({
+                        ...c,
+                        isDefault: i === index
+                      }));
+                      handleChange('choices', newChoices);
+                    }}
+                    style={{ flexShrink: 0 }}
+                  />
+                  <GripVertical size={16} style={{ color: '#999', cursor: 'move', flexShrink: 0 }} />
+                  <input
+                    type="text"
+                    value={choice.label}
+                    onChange={(e) => handleChoiceChange(index, 'label', e.target.value)}
+                    placeholder="Choice label"
+                    style={{ flex: 1 }}
+                  />
+                  <button
+                    type="button"
+                    onClick={addChoice}
+                    className="formtura-icon-btn formtura-btn-add"
+                    title="Add choice"
+                  >
+                    <Plus size={16} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => removeChoice(index)}
+                    className="formtura-icon-btn formtura-btn-remove"
+                    title="Remove choice"
+                    disabled={field.choices.length <= 1}
+                  >
+                    <Minus size={16} />
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              onClick={generateChoices}
+              className="formtura-btn-secondary"
+              style={{ marginTop: '8px', fontSize: '13px' }}
+            >
+              <Wand2 size={14} /> Generate Choices
+            </button>
+          </div>
+        </>
+      );
+    }
+
+    // Multiple Choice field (checkbox - radio buttons)
+    if (field.type === 'checkbox') {
+      return (
+        <>
+          <div className="formtura-form-group">
+            <label>
+              Choices <Info size={14} className="formtura-help-icon" />
+              <button
+                type="button"
+                className="formtura-bulk-add-btn"
+                onClick={() => setShowBulkAdd(!showBulkAdd)}
+                style={{ float: 'right', fontSize: '12px', padding: '4px 8px' }}
+              >
+                <Download size={12} /> Bulk Add
+              </button>
+            </label>
+
+            {showBulkAdd && (
+              <div className="formtura-bulk-add-container" style={{ marginBottom: '12px' }}>
+                <textarea
+                  placeholder="Paste your list here (one item per line)"
+                  value={bulkText}
+                  onChange={(e) => setBulkText(e.target.value)}
+                  rows={6}
+                  style={{ width: '100%', marginBottom: '8px', padding: '8px' }}
+                />
+                <button
+                  type="button"
+                  onClick={handleBulkAdd}
+                  className="formtura-btn-primary"
+                  style={{ marginRight: '8px' }}
+                >
+                  Add Choices
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setBulkText(''); setShowBulkAdd(false); }}
+                  className="formtura-btn-secondary"
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
+
+            <div className="formtura-choices-list">
+              {(field.choices || []).map((choice, index) => (
+                <div key={index} className="formtura-choice-item" style={{ display: 'flex', gap: '8px', marginBottom: '8px', alignItems: 'center' }}>
+                  <input
+                    type="radio"
+                    checked={choice.isDefault || false}
+                    onChange={() => {
+                      const newChoices = field.choices.map((c, i) => ({
+                        ...c,
+                        isDefault: i === index
+                      }));
+                      handleChange('choices', newChoices);
+                    }}
+                    style={{ flexShrink: 0 }}
+                  />
+                  <GripVertical size={16} style={{ color: '#999', cursor: 'move', flexShrink: 0 }} />
+                  <input
+                    type="text"
+                    value={choice.label}
+                    onChange={(e) => handleChoiceChange(index, 'label', e.target.value)}
+                    placeholder="Choice label"
+                    style={{ flex: 1 }}
+                  />
+                  <button
+                    type="button"
+                    onClick={addChoice}
+                    className="formtura-icon-btn formtura-btn-add"
+                    title="Add choice"
+                  >
+                    <Plus size={16} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => removeChoice(index)}
+                    className="formtura-icon-btn formtura-btn-remove"
+                    title="Remove choice"
+                    disabled={field.choices.length <= 1}
+                  >
+                    <Minus size={16} />
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              onClick={generateChoices}
+              className="formtura-btn-secondary"
+              style={{ marginTop: '8px', fontSize: '13px' }}
+            >
+              <Wand2 size={14} /> Generate Choices
+            </button>
+          </div>
+
+          <div className="formtura-form-group">
+            <div className="formtura-toggle-group">
+              <label className="formtura-toggle">
+                <input
+                  type="checkbox"
+                  checked={field.addOtherChoice || false}
+                  onChange={(e) => handleChange('addOtherChoice', e.target.checked)}
+                />
+                <span className="formtura-toggle-slider"></span>
+              </label>
+              <span className="formtura-toggle-label">
+                Add Other Choice <Info size={14} className="formtura-help-icon" />
+              </span>
+            </div>
+          </div>
+
+          <div className="formtura-form-group">
+            <div className="formtura-toggle-group">
+              <label className="formtura-toggle">
+                <input
+                  type="checkbox"
+                  checked={field.useImageChoices || false}
+                  onChange={(e) => handleChange('useImageChoices', e.target.checked)}
+                />
+                <span className="formtura-toggle-slider"></span>
+              </label>
+              <span className="formtura-toggle-label">
+                Use Image Choices <Info size={14} className="formtura-help-icon" />
+              </span>
+            </div>
+          </div>
+
+          <div className="formtura-form-group">
+            <div className="formtura-toggle-group">
+              <label className="formtura-toggle">
+                <input
+                  type="checkbox"
+                  checked={field.useIconChoices || false}
+                  onChange={(e) => handleChange('useIconChoices', e.target.checked)}
+                />
+                <span className="formtura-toggle-slider"></span>
+              </label>
+              <span className="formtura-toggle-label">
+                Use Icon Choices <Info size={14} className="formtura-help-icon" />
+              </span>
+            </div>
+          </div>
+        </>
+      );
+    }
+
+    // Checkboxes field
+    if (field.type === 'checkboxes') {
+      return (
+        <>
+          <div className="formtura-form-group">
+            <label>
+              Choices <Info size={14} className="formtura-help-icon" />
+              <button
+                type="button"
+                className="formtura-bulk-add-btn"
+                onClick={() => setShowBulkAdd(!showBulkAdd)}
+                style={{ float: 'right', fontSize: '12px', padding: '4px 8px' }}
+              >
+                <Download size={12} /> Bulk Add
+              </button>
+            </label>
+
+            {showBulkAdd && (
+              <div className="formtura-bulk-add-container" style={{ marginBottom: '12px' }}>
+                <textarea
+                  placeholder="Paste your list here (one item per line)"
+                  value={bulkText}
+                  onChange={(e) => setBulkText(e.target.value)}
+                  rows={6}
+                  style={{ width: '100%', marginBottom: '8px', padding: '8px' }}
+                />
+                <button
+                  type="button"
+                  onClick={handleBulkAdd}
+                  className="formtura-btn-primary"
+                  style={{ marginRight: '8px' }}
+                >
+                  Add Choices
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setBulkText(''); setShowBulkAdd(false); }}
+                  className="formtura-btn-secondary"
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
+
+            <div className="formtura-choices-list">
+              {(field.choices || []).map((choice, index) => (
+                <div key={index} className="formtura-choice-item" style={{ display: 'flex', gap: '8px', marginBottom: '8px', alignItems: 'center' }}>
+                  <input
+                    type="checkbox"
+                    checked={choice.isDefault || false}
+                    onChange={(e) => handleChoiceChange(index, 'isDefault', e.target.checked)}
+                    style={{ flexShrink: 0 }}
+                  />
+                  <GripVertical size={16} style={{ color: '#999', cursor: 'move', flexShrink: 0 }} />
+                  <input
+                    type="text"
+                    value={choice.label}
+                    onChange={(e) => handleChoiceChange(index, 'label', e.target.value)}
+                    placeholder="Choice label"
+                    style={{ flex: 1 }}
+                  />
+                  <button
+                    type="button"
+                    onClick={addChoice}
+                    className="formtura-icon-btn formtura-btn-add"
+                    title="Add choice"
+                  >
+                    <Plus size={16} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => removeChoice(index)}
+                    className="formtura-icon-btn formtura-btn-remove"
+                    title="Remove choice"
+                    disabled={field.choices.length <= 1}
+                  >
+                    <Minus size={16} />
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              onClick={generateChoices}
+              className="formtura-btn-secondary"
+              style={{ marginTop: '8px', fontSize: '13px' }}
+            >
+              <Wand2 size={14} /> Generate Choices
+            </button>
+          </div>
+        </>
+      );
+    }
+
+    // Dropdown Items (payment-dropdown)
+    if (field.type === 'payment-dropdown') {
+      return (
+        <>
+          <div className="formtura-form-group">
+            <label>
+              Items <Info size={14} className="formtura-help-icon" />
+            </label>
+
+            <div className="formtura-items-list">
+              {(field.items || []).map((item, index) => (
+                <div key={index} className="formtura-item-row" style={{ display: 'flex', gap: '8px', marginBottom: '8px', alignItems: 'center' }}>
+                  <input
+                    type="radio"
+                    checked={item.isDefault || false}
+                    onChange={() => {
+                      const newItems = field.items.map((it, i) => ({
+                        ...it,
+                        isDefault: i === index
+                      }));
+                      handleChange('items', newItems);
+                    }}
+                    style={{ flexShrink: 0 }}
+                  />
+                  <GripVertical size={16} style={{ color: '#999', cursor: 'move', flexShrink: 0 }} />
+                  <input
+                    type="text"
+                    value={item.label}
+                    onChange={(e) => handleItemChange(index, 'label', e.target.value)}
+                    placeholder="Item name"
+                    style={{ flex: 1 }}
+                  />
+                  <input
+                    type="number"
+                    value={item.price}
+                    onChange={(e) => handleItemChange(index, 'price', e.target.value)}
+                    placeholder="0.00"
+                    step="0.01"
+                    min="0"
+                    style={{ width: '80px' }}
+                  />
+                  <button
+                    type="button"
+                    onClick={addItem}
+                    className="formtura-icon-btn formtura-btn-add"
+                    title="Add item"
+                  >
+                    <Plus size={16} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => removeItem(index)}
+                    className="formtura-icon-btn formtura-btn-remove"
+                    title="Remove item"
+                    disabled={field.items.length <= 1}
+                  >
+                    <Minus size={16} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="formtura-form-group">
+            <div className="formtura-toggle-group">
+              <label className="formtura-toggle">
+                <input
+                  type="checkbox"
+                  checked={field.showPriceAfterLabel || false}
+                  onChange={(e) => handleChange('showPriceAfterLabel', e.target.checked)}
+                />
+                <span className="formtura-toggle-slider"></span>
+              </label>
+              <span className="formtura-toggle-label">
+                Show Price After Item Labels <Info size={14} className="formtura-help-icon" />
+              </span>
+            </div>
+          </div>
+
+          <div className="formtura-form-group">
+            <div className="formtura-toggle-group">
+              <label className="formtura-toggle">
+                <input
+                  type="checkbox"
+                  checked={field.enableQuantity || false}
+                  onChange={(e) => handleChange('enableQuantity', e.target.checked)}
+                />
+                <span className="formtura-toggle-slider"></span>
+              </label>
+              <span className="formtura-toggle-label">
+                Enable Quantity <Info size={14} className="formtura-help-icon" />
+              </span>
+            </div>
+          </div>
+        </>
+      );
+    }
+
+    // Default: no field-specific options
+    return null;
   };
 
   return (
@@ -303,6 +850,9 @@ const GeneralTab = ({ field, onUpdate }) => {
           onChange={(e) => handleChange('label', e.target.value)}
         />
       </div>
+
+      {/* Render field-specific options */}
+      {renderFieldSpecificOptions()}
 
       <div className="formtura-form-group">
         <label htmlFor="field-description">

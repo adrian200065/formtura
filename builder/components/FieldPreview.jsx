@@ -40,9 +40,9 @@ const FieldPreview = ({ field }) => {
         return (
           <select required={field.required} disabled>
             <option value="">Select an option</option>
-            {field.options?.map((option, index) => (
-              <option key={index} value={option}>
-                {option}
+            {(field.choices || field.options)?.map((choice, index) => (
+              <option key={index} value={choice.value || choice}>
+                {choice.label || choice}
               </option>
             ))}
           </select>
@@ -50,18 +50,19 @@ const FieldPreview = ({ field }) => {
 
       case 'radio':
         return (
-          <div>
-            {field.options?.map((option, index) => (
-              <div key={index} style={{ marginBottom: '0.5rem' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <div className="formtura-radio-group">
+            {(field.choices || field.options)?.map((choice, index) => (
+              <div key={index} className="formtura-radio-item">
+                <label>
                   <input
                     type="radio"
                     name={field.id}
-                    value={option}
+                    value={choice.value || choice}
+                    checked={choice.isDefault || false}
                     required={field.required}
                     disabled
                   />
-                  {option}
+                  <span>{choice.label || choice}</span>
                 </label>
               </div>
             ))}
@@ -70,16 +71,38 @@ const FieldPreview = ({ field }) => {
 
       case 'checkbox':
         return (
-          <div>
-            {field.options?.map((option, index) => (
-              <div key={index} style={{ marginBottom: '0.5rem' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <div className="formtura-checkbox-choices-group">
+            {(field.choices || field.options)?.map((choice, index) => (
+              <div key={index} className="formtura-checkbox-choice-item">
+                <label>
                   <input
-                    type="checkbox"
-                    value={option}
+                    type="radio"
+                    name={field.id}
+                    value={choice.value || choice}
+                    checked={choice.isDefault || false}
+                    required={field.required}
                     disabled
                   />
-                  {option}
+                  <span>{choice.label || choice}</span>
+                </label>
+              </div>
+            ))}
+          </div>
+        );
+
+      case 'checkboxes':
+        return (
+          <div className="formtura-checkboxes-group">
+            {(field.choices || field.options)?.map((choice, index) => (
+              <div key={index} className="formtura-checkbox-item">
+                <label>
+                  <input
+                    type="checkbox"
+                    value={choice.value || choice}
+                    checked={choice.isDefault || false}
+                    disabled
+                  />
+                  <span>{choice.label || choice}</span>
                 </label>
               </div>
             ))}

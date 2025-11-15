@@ -40,13 +40,13 @@ After creating the repository, GitHub will show you commands. Use these:
 
 ```bash
 # Add GitHub as remote origin
-git remote add origin https://github.com/yourusername/formtura.git
+git remote add origin https://github.com/adrian200065/formtura.git
 
 # Push to GitHub
 git push -u origin main
 ```
 
-Replace `yourusername` with your actual GitHub username.
+Replace `adrian200065` with your actual GitHub username.
 
 ### 3. Verify Upload
 
@@ -81,7 +81,7 @@ If prompted for credentials, you have two options:
 
 3. Change remote to SSH:
    ```bash
-   git remote set-url origin git@github.com:yourusername/formtura.git
+   git remote set-url origin git@github.com:adrian200065/formtura.git
    ```
 
 ## 📝 Repository Settings (Optional)
@@ -291,7 +291,7 @@ git branch -a
 **Solution**:
 ```bash
 git remote remove origin
-git remote add origin https://github.com/yourusername/formtura.git
+git remote add origin https://github.com/adrian200065/formtura.git
 ```
 
 ### Issue: "Failed to push some refs"

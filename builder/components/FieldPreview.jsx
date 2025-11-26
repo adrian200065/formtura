@@ -1,4 +1,7 @@
 const FieldPreview = ({ field }) => {
+  const fieldId = `field-preview-${field.id}`;
+  const descriptionId = field.description ? `${fieldId}-description` : null;
+
   // Determine field size class
   const getFieldSizeClass = () => {
     switch(field.fieldSize) {
@@ -19,26 +22,38 @@ const FieldPreview = ({ field }) => {
       case 'number':
         return (
           <input
+            id={`${fieldId}-input`}
             type={field.type}
             placeholder={field.placeholder}
             required={field.required}
             readOnly
+            aria-label={field.hideLabel ? field.label : undefined}
+            aria-required={field.required}
           />
         );
 
       case 'textarea':
         return (
           <textarea
+            id={`${fieldId}-input`}
             placeholder={field.placeholder}
             rows={field.rows || 4}
             required={field.required}
             readOnly
+            aria-label={field.hideLabel ? field.label : undefined}
+            aria-required={field.required}
           />
         );
 
       case 'select':
         return (
-          <select required={field.required} disabled>
+          <select
+            id={`${fieldId}-input`}
+            required={field.required}
+            disabled
+            aria-label={field.hideLabel ? field.label : undefined}
+            aria-required={field.required}
+          >
             <option value="">Select an option</option>
             {(field.choices || field.options)?.map((choice, index) => (
               <option key={index} value={choice.value || choice}>
@@ -111,24 +126,46 @@ const FieldPreview = ({ field }) => {
 
       case 'name':
         const nameFormat = field.format || 'first-last';
+        const firstPlaceholder = field.firstNamePlaceholder || 'First Name';
+        const middlePlaceholder = field.middleNamePlaceholder || 'Middle Name';
+        const lastPlaceholder = field.lastNamePlaceholder || 'Last Name';
+        const firstDefault = field.firstNameDefault || '';
+        const middleDefault = field.middleNameDefault || '';
+        const lastDefault = field.lastNameDefault || '';
+
         if (nameFormat === 'simple') {
           return (
-            <input type="text" placeholder="Name" readOnly />
+            <input type="text" placeholder={field.placeholder || 'Name'} defaultValue={firstDefault} readOnly />
           );
         } else if (nameFormat === 'first-middle-last') {
           return (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.5rem' }}>
-              <input type="text" placeholder="First Name" readOnly />
-              <input type="text" placeholder="Middle Name" readOnly />
-              <input type="text" placeholder="Last Name" readOnly />
+            <div className="formtura-name-field-group">
+              <div className="formtura-name-field-item">
+                <input type="text" placeholder={firstPlaceholder} defaultValue={firstDefault} readOnly />
+                {!field.hideSublabels && <span className="formtura-sublabel">First Name</span>}
+              </div>
+              <div className="formtura-name-field-item">
+                <input type="text" placeholder={middlePlaceholder} defaultValue={middleDefault} readOnly />
+                {!field.hideSublabels && <span className="formtura-sublabel">Middle Name</span>}
+              </div>
+              <div className="formtura-name-field-item">
+                <input type="text" placeholder={lastPlaceholder} defaultValue={lastDefault} readOnly />
+                {!field.hideSublabels && <span className="formtura-sublabel">Last Name</span>}
+              </div>
             </div>
           );
         } else {
           // first-last (default)
           return (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
-              <input type="text" placeholder="First Name" readOnly />
-              <input type="text" placeholder="Last Name" readOnly />
+            <div className="formtura-name-field-group">
+              <div className="formtura-name-field-item">
+                <input type="text" placeholder={firstPlaceholder} defaultValue={firstDefault} readOnly />
+                {!field.hideSublabels && <span className="formtura-sublabel">First Name</span>}
+              </div>
+              <div className="formtura-name-field-item">
+                <input type="text" placeholder={lastPlaceholder} defaultValue={lastDefault} readOnly />
+                {!field.hideSublabels && <span className="formtura-sublabel">Last Name</span>}
+              </div>
             </div>
           );
         }
@@ -186,18 +223,18 @@ const FieldPreview = ({ field }) => {
   };
 
   return (
-    <div className="formtura-field-preview">
+    <div className="formtura-field-preview" role="group" aria-labelledby={!field.hideLabel ? fieldId : undefined}>
       {!field.hideLabel && (
-        <label>
+        <label id={fieldId} htmlFor={`${fieldId}-input`}>
           {field.label}
-          {field.required && <span style={{ color: 'red' }}> *</span>}
+          {field.required && <span style={{ color: 'red' }} aria-label="required"> *</span>}
         </label>
       )}
-      <div className={getFieldSizeClass()}>
+      <div className={getFieldSizeClass()} aria-describedby={descriptionId}>
         {renderField()}
       </div>
       {field.description && (
-        <p className="formtura-field-description-text">
+        <p id={descriptionId} className="formtura-field-description-text">
           {field.description}
         </p>
       )}

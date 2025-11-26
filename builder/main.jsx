@@ -1,32 +1,43 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import FormBuilder from './components/FormBuilder';
+import Toast from './components/Toast';
+import LiveRegion from './components/LiveRegion';
+import { log, handleError, LogLevel } from './utils/errorHandler';
 import './styles/builder.css';
+import './styles/toast.css';
+import './styles/accessibility.css';
 
 // Initialize the form builder when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('Formtura: DOMContentLoaded event fired');
+  log('DOMContentLoaded event fired', LogLevel.DEBUG);
   const container = document.getElementById('formtura-builder-root');
 
-  console.log('Formtura: Container element:', container);
+  log('Container element found', LogLevel.DEBUG, { container: !!container });
 
   if (container) {
     try {
-      console.log('Formtura: Creating React root');
+      log('Creating React root', LogLevel.DEBUG);
       const root = createRoot(container);
       const formId = container.dataset.formId || null;
 
-      console.log('Formtura: Rendering FormBuilder with formId:', formId);
+      log('Rendering FormBuilder', LogLevel.DEBUG, { formId });
       root.render(
         <React.StrictMode>
+          <LiveRegion />
+          <Toast />
           <FormBuilder formId={formId} />
         </React.StrictMode>
       );
-      console.log('Formtura: FormBuilder rendered successfully');
+      log('FormBuilder rendered successfully', LogLevel.DEBUG);
     } catch (error) {
-      console.error('Formtura: Error rendering FormBuilder:', error);
+      handleError(error, {
+        userMessage: 'Failed to initialize form builder. Please refresh the page.',
+      });
     }
   } else {
-    console.error('Formtura: Container element #formtura-builder-root not found');
+    handleError('Container element #formtura-builder-root not found', {
+      userMessage: 'Form builder container not found. Please contact support.',
+    });
   }
 });

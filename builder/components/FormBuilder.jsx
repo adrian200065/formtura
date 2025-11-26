@@ -1,10 +1,12 @@
 import { closestCenter, DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
 import { useEffect, useState } from 'react';
+import { handleError, handleSuccess } from '../utils/errorHandler';
 import { generateFieldId } from '../utils/helpers';
 import FieldLibrary from './FieldLibrary';
 import FormCanvas from './FormCanvas';
 import FormPreview from './FormPreview';
+import { announce } from './LiveRegion';
 
 const FormBuilder = ({ formId }) => {
   const [fields, setFields] = useState([]);
@@ -44,9 +46,15 @@ const FormBuilder = ({ formId }) => {
         const formData = JSON.parse(data.data.form_data || '{}');
         setFields(formData.fields || []);
         setFormSettings(formData.settings || formSettings);
+      } else {
+        handleError('Failed to load form data', {
+          userMessage: 'Could not load form. Please try again.',
+        });
       }
     } catch (error) {
-      console.error('Error loading form:', error);
+      handleError(error, {
+        userMessage: 'Failed to load form. Please refresh the page.',
+      });
     }
   };
 
@@ -72,6 +80,28 @@ const FormBuilder = ({ formId }) => {
       case 'radio':
       case 'checkbox':
         return { ...baseField, options: ['Option 1', 'Option 2', 'Option 3'] };
+      case 'name':
+        return {
+          ...baseField,
+          label: 'Name',
+          format: 'first-last',
+          firstNamePlaceholder: '',
+          lastNamePlaceholder: '',
+          middleNamePlaceholder: '',
+          firstNameDefault: '',
+          lastNameDefault: '',
+          middleNameDefault: '',
+          hideSublabels: false,
+        };
+      case 'number-slider':
+        return {
+          ...baseField,
+          minValue: 0,
+          maxValue: 10,
+          defaultValue: 0,
+          increment: 1,
+          valueDisplay: 'Selected Value: {value}',
+        };
       default:
         return baseField;
     }
@@ -86,9 +116,10 @@ const FormBuilder = ({ formId }) => {
       select: 'Dropdown',
       radio: 'Radio Buttons',
       checkbox: 'Checkboxes',
-      name: 'Full Name',
+      name: 'Name',
       phone: 'Phone Number',
       date: 'Date',
+      'number-slider': 'Number Slider',
     };
     return labels[type] || 'Field';
   };
@@ -150,10 +181,12 @@ const FormBuilder = ({ formId }) => {
   };
 
   const handleFieldDelete = (fieldId) => {
+    const field = fields.find(f => f.id === fieldId);
     setFields(fields.filter(field => field.id !== fieldId));
     if (selectedField === fieldId) {
       setSelectedField(null);
     }
+    announce(`Field "${field?.label || 'Untitled'}" deleted`);
   };
 
   const handleFieldDuplicate = (fieldId) => {
@@ -168,6 +201,7 @@ const FormBuilder = ({ formId }) => {
       const newFields = [...fields];
       newFields.splice(index + 1, 0, newField);
       setFields(newFields);
+      announce(`Field "${fieldToDuplicate.label}" duplicated`);
     }
   };
 
@@ -195,7 +229,7 @@ const FormBuilder = ({ formId }) => {
       const data = await response.json();
 
       if (data.success) {
-        alert('Form saved successfully!');
+        handleSuccess('Form saved successfully!');
 
         // If this was a new form (no formId), redirect to edit page with the new ID
         if (!formId && data.data?.form_id) {
@@ -203,11 +237,14 @@ const FormBuilder = ({ formId }) => {
           window.location.href = `${window.formturaBuilder.editUrl}&form_id=${newFormId}`;
         }
       } else {
-        alert('Error saving form: ' + (data.data?.message || 'Unknown error'));
+        handleError(data.data?.message || 'Unknown error', {
+          userMessage: `Error saving form: ${data.data?.message || 'Please try again'}`,
+        });
       }
     } catch (error) {
-      console.error('Error saving form:', error);
-      alert('Error saving form. Please try again.');
+      handleError(error, {
+        userMessage: 'Error saving form. Please try again.',
+      });
     } finally {
       setIsSaving(false);
     }

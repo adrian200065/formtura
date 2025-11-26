@@ -1,0 +1,120 @@
+/* Toast Notifications */
+.formtura-toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 400px;
+}
+
+.formtura-toast {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-left: 4px solid #3b82f6;
+  animation: slideIn 0.3s ease-out;
+  min-width: 300px;
+  max-width: 100%;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.formtura-toast-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.formtura-toast-message {
+  flex: 1;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #1f2937;
+}
+
+.formtura-toast-close {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.formtura-toast-close:hover {
+  background-color: #f3f4f6;
+  color: #1f2937;
+}
+
+.formtura-toast-close:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Toast Types */
+.formtura-toast-success {
+  border-left-color: #10b981;
+}
+
+.formtura-toast-success .formtura-toast-icon {
+  color: #10b981;
+}
+
+.formtura-toast-error {
+  border-left-color: #ef4444;
+}
+
+.formtura-toast-error .formtura-toast-icon {
+  color: #ef4444;
+}
+
+.formtura-toast-warning {
+  border-left-color: #f59e0b;
+}
+
+.formtura-toast-warning .formtura-toast-icon {
+  color: #f59e0b;
+}
+
+.formtura-toast-info {
+  border-left-color: #3b82f6;
+}
+
+.formtura-toast-info .formtura-toast-icon {
+  color: #3b82f6;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .formtura-toast-container {
+    left: 20px;
+    right: 20px;
+    max-width: none;
+  }
+
+  .formtura-toast {
+    min-width: auto;
+  }
+}

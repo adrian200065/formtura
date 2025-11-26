@@ -40,6 +40,144 @@ import {
 } from 'lucide-react';
 import React from 'react';
 
+// Smart Tags data
+const smartTagsData = [
+  { category: 'OTHER', tags: [
+    { label: 'Site Administrator Email', value: '{admin_email}' },
+    { label: 'Form ID', value: '{form_id}' },
+    { label: 'Form Name', value: '{form_name}' },
+    { label: 'Embedded Post/Page Title', value: '{page_title}' },
+    { label: 'Embedded Post/Page URL', value: '{page_url}' },
+    { label: 'Embedded Post/Page ID', value: '{page_id}' },
+    { label: 'Date', value: '{date}' },
+    { label: 'Query String Variable', value: '{query_var key=""}' },
+    { label: 'User IP Address', value: '{user_ip}' },
+    { label: 'User ID', value: '{user_id}' },
+    { label: 'User Display Name', value: '{user_display_name}' },
+    { label: 'User Full Name', value: '{user_full_name}' },
+    { label: 'User First Name', value: '{user_first_name}' },
+    { label: 'User Last Name', value: '{user_last_name}' },
+    { label: "Logged-in User's Email", value: '{user_email}' },
+    { label: 'User Meta', value: '{user_meta key=""}' },
+    { label: 'Author ID', value: '{author_id}' },
+    { label: 'Author Name', value: '{author_name}' },
+    { label: 'Author Email', value: '{author_email}' },
+    { label: 'Referrer URL', value: '{referrer_url}' },
+    { label: 'Login URL', value: '{login_url}' },
+    { label: 'Logout URL', value: '{logout_url}' },
+    { label: 'Register URL', value: '{register_url}' },
+    { label: 'Lost Password URL', value: '{lost_password_url}' },
+    { label: 'Unique Value', value: '{unique_value}' },
+    { label: 'Site Name', value: '{site_name}' },
+    { label: 'Order Summary', value: '{order_summary}' },
+  ]},
+];
+
+// SmartTagsPopup Component
+const SmartTagsPopup = ({ isOpen, onClose, onSelect, position }) => {
+  const [searchTerm, setSearchTerm] = React.useState('');
+  const popupRef = React.useRef(null);
+
+  // Close popup when clicking outside
+  React.useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (popupRef.current && !popupRef.current.contains(event.target)) {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen, onClose]);
+
+  if (!isOpen) return null;
+
+  const filteredTags = smartTagsData.map(category => ({
+    ...category,
+    tags: category.tags.filter(tag =>
+      tag.label.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  })).filter(category => category.tags.length > 0);
+
+  return (
+    <div
+      ref={popupRef}
+      className="formtura-smart-tags-popup"
+      style={{
+        position: 'absolute',
+        top: position?.top || '100%',
+        right: position?.right || 0,
+        zIndex: 1000,
+      }}
+    >
+      <div className="formtura-smart-tags-header">
+        <strong>Smart Tags</strong>
+      </div>
+      <div className="formtura-smart-tags-search">
+        <input
+          type="text"
+          placeholder="Search"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="formtura-smart-tags-search-input"
+          autoFocus
+        />
+      </div>
+      <div className="formtura-smart-tags-list">
+        {filteredTags.map((category, catIndex) => (
+          <div key={catIndex} className="formtura-smart-tags-category">
+            <div className="formtura-smart-tags-category-title">{category.category}</div>
+            {category.tags.map((tag, tagIndex) => (
+              <button
+                key={tagIndex}
+                type="button"
+                className="formtura-smart-tags-item"
+                onClick={() => {
+                  onSelect(tag.value);
+                  onClose();
+                }}
+              >
+                {tag.label}
+              </button>
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// SmartTagButton Component - Reusable button with popup
+const SmartTagButton = ({ onSelect }) => {
+  const [isOpen, setIsOpen] = React.useState(false);
+  const buttonRef = React.useRef(null);
+
+  return (
+    <div style={{ position: 'relative' }}>
+      <button
+        ref={buttonRef}
+        type="button"
+        className="formtura-smart-tag-btn"
+        title="Smart Tags"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <Tag size={16} />
+      </button>
+      <SmartTagsPopup
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        onSelect={onSelect}
+        position={{ top: '100%', right: 0 }}
+      />
+    </div>
+  );
+};
+
 const fieldTypes = [
   {
     category: 'Standard Fields',
@@ -851,6 +989,24 @@ const GeneralTab = ({ field, onUpdate }) => {
         />
       </div>
 
+      {/* Name Field Format Selector */}
+      {field.type === 'name' && (
+        <div className="formtura-form-group">
+          <label htmlFor="field-format">
+            Format <Info size={14} className="formtura-help-icon" />
+          </label>
+          <select
+            id="field-format"
+            value={field.format || 'first-last'}
+            onChange={(e) => handleChange('format', e.target.value)}
+          >
+            <option value="simple">Simple</option>
+            <option value="first-last">First + Last Names</option>
+            <option value="first-middle-last">First + Middle + Last Name</option>
+          </select>
+        </div>
+      )}
+
       {/* Render field-specific options */}
       {renderFieldSpecificOptions()}
 
@@ -866,21 +1022,82 @@ const GeneralTab = ({ field, onUpdate }) => {
         />
       </div>
 
-      <div className="formtura-form-group">
-        <div className="formtura-toggle-group">
-          <label className="formtura-toggle">
+      {/* Number Slider Fields - After Description */}
+      {field.type === 'number-slider' && (
+        <>
+          <div className="formtura-form-group">
+            <label>
+              Value Range <Info size={14} className="formtura-help-icon" />
+            </label>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+              <div>
+                <input
+                  type="number"
+                  value={field.minValue !== undefined ? field.minValue : 0}
+                  onChange={(e) => handleChange('minValue', parseInt(e.target.value) || 0)}
+                  placeholder="0"
+                />
+                <span className="formtura-field-help">Minimum</span>
+              </div>
+              <div>
+                <input
+                  type="number"
+                  value={field.maxValue !== undefined ? field.maxValue : 10}
+                  onChange={(e) => handleChange('maxValue', parseInt(e.target.value) || 10)}
+                  placeholder="10"
+                />
+                <span className="formtura-field-help">Maximum</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="formtura-form-group">
+            <label htmlFor="field-default-value">
+              Default Value <Info size={14} className="formtura-help-icon" />
+            </label>
             <input
-              type="checkbox"
-              checked={field.required || false}
-              onChange={(e) => handleChange('required', e.target.checked)}
+              id="field-default-value"
+              type="number"
+              value={field.defaultValue !== undefined ? field.defaultValue : 0}
+              onChange={(e) => handleChange('defaultValue', parseInt(e.target.value) || 0)}
+              placeholder="0"
             />
-            <span className="formtura-toggle-slider"></span>
-          </label>
-          <span className="formtura-toggle-label">
-            Required <Info size={14} className="formtura-help-icon" />
-          </span>
+          </div>
+
+          <div className="formtura-form-group">
+            <label htmlFor="field-increment">
+              Increment <Info size={14} className="formtura-help-icon" />
+            </label>
+            <input
+              id="field-increment"
+              type="number"
+              value={field.increment !== undefined ? field.increment : 1}
+              onChange={(e) => handleChange('increment', parseInt(e.target.value) || 1)}
+              placeholder="1"
+              min="1"
+            />
+          </div>
+        </>
+      )}
+
+      {/* Required toggle - not shown for number-slider */}
+      {field.type !== 'number-slider' && (
+        <div className="formtura-form-group">
+          <div className="formtura-toggle-group">
+            <label className="formtura-toggle">
+              <input
+                type="checkbox"
+                checked={field.required || false}
+                onChange={(e) => handleChange('required', e.target.checked)}
+              />
+              <span className="formtura-toggle-slider"></span>
+            </label>
+            <span className="formtura-toggle-label">
+              Required <Info size={14} className="formtura-help-icon" />
+            </span>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
@@ -951,6 +1168,294 @@ const AdvancedTab = ({ field, onUpdate }) => {
     setShowLayouts(false);
   };
 
+  // Name field has different Advanced options
+  if (field.type === 'name') {
+    const nameFormat = field.format || 'first-last';
+    const showMultipleFields = nameFormat !== 'simple';
+
+    const appendSmartTag = (fieldKey, tagValue) => {
+      const currentValue = field[fieldKey] || '';
+      handleChange(fieldKey, currentValue + tagValue);
+    };
+
+    return (
+      <div className="formtura-field-options">
+        <div className="formtura-field-options-title">
+          <strong>{field.label}</strong> <span className="formtura-field-id">(ID #{field.id.slice(-4)})</span>
+        </div>
+
+        <div className="formtura-form-group">
+          <label htmlFor="field-size">
+            Field Size <Info size={14} className="formtura-help-icon" />
+          </label>
+          <select
+            id="field-size"
+            value={field.fieldSize || 'medium'}
+            onChange={(e) => handleChange('fieldSize', e.target.value)}
+          >
+            <option value="small">Small</option>
+            <option value="medium">Medium</option>
+            <option value="large">Large</option>
+          </select>
+        </div>
+
+        {/* First Name Placeholder & Default */}
+        {showMultipleFields && (
+          <div className="formtura-form-group">
+            <label>
+              First Name <Info size={14} className="formtura-help-icon" />
+            </label>
+            <div className="formtura-name-field-row">
+              <div className="formtura-name-field-col">
+                <input
+                  type="text"
+                  value={field.firstNamePlaceholder || ''}
+                  onChange={(e) => handleChange('firstNamePlaceholder', e.target.value)}
+                  placeholder=""
+                />
+                <span className="formtura-field-help">Placeholder</span>
+              </div>
+              <div className="formtura-name-field-col">
+                <div className="formtura-input-with-inline-tag">
+                  <input
+                    type="text"
+                    value={field.firstNameDefault || ''}
+                    onChange={(e) => handleChange('firstNameDefault', e.target.value)}
+                    placeholder=""
+                  />
+                  <SmartTagButton onSelect={(tag) => appendSmartTag('firstNameDefault', tag)} />
+                </div>
+                <span className="formtura-field-help">Default Value</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Middle Name Placeholder & Default - Always show for multi-field formats */}
+        {showMultipleFields && (
+          <div className="formtura-form-group">
+            <label>
+              Middle Name <Info size={14} className="formtura-help-icon" />
+            </label>
+            <div className="formtura-name-field-row">
+              <div className="formtura-name-field-col">
+                <input
+                  type="text"
+                  value={field.middleNamePlaceholder || ''}
+                  onChange={(e) => handleChange('middleNamePlaceholder', e.target.value)}
+                  placeholder=""
+                />
+                <span className="formtura-field-help">Placeholder</span>
+              </div>
+              <div className="formtura-name-field-col">
+                <div className="formtura-input-with-inline-tag">
+                  <input
+                    type="text"
+                    value={field.middleNameDefault || ''}
+                    onChange={(e) => handleChange('middleNameDefault', e.target.value)}
+                    placeholder=""
+                  />
+                  <SmartTagButton onSelect={(tag) => appendSmartTag('middleNameDefault', tag)} />
+                </div>
+                <span className="formtura-field-help">Default Value</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Last Name Placeholder & Default */}
+        {showMultipleFields && (
+          <div className="formtura-form-group">
+            <label>
+              Last Name <Info size={14} className="formtura-help-icon" />
+            </label>
+            <div className="formtura-name-field-row">
+              <div className="formtura-name-field-col">
+                <input
+                  type="text"
+                  value={field.lastNamePlaceholder || ''}
+                  onChange={(e) => handleChange('lastNamePlaceholder', e.target.value)}
+                  placeholder=""
+                />
+                <span className="formtura-field-help">Placeholder</span>
+              </div>
+              <div className="formtura-name-field-col">
+                <div className="formtura-input-with-inline-tag">
+                  <input
+                    type="text"
+                    value={field.lastNameDefault || ''}
+                    onChange={(e) => handleChange('lastNameDefault', e.target.value)}
+                    placeholder=""
+                  />
+                  <SmartTagButton onSelect={(tag) => appendSmartTag('lastNameDefault', tag)} />
+                </div>
+                <span className="formtura-field-help">Default Value</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="formtura-form-group">
+          <label htmlFor="field-css-classes">
+            CSS Classes <Info size={14} className="formtura-help-icon" />
+          </label>
+          <input
+            id="field-css-classes"
+            type="text"
+            value={field.cssClasses || ''}
+            onChange={(e) => handleChange('cssClasses', e.target.value)}
+          />
+          <button
+            className="formtura-btn-link"
+            type="button"
+            onClick={() => setShowLayouts(!showLayouts)}
+          >
+            <Tag size={14} /> {showLayouts ? 'Hide Layouts' : 'Show Layouts'}
+          </button>
+        </div>
+
+        <div className="formtura-form-group">
+          <div className="formtura-toggle-group">
+            <label className="formtura-toggle">
+              <input
+                type="checkbox"
+                checked={field.hideLabel || false}
+                onChange={(e) => handleChange('hideLabel', e.target.checked)}
+              />
+              <span className="formtura-toggle-slider"></span>
+            </label>
+            <span className="formtura-toggle-label">
+              Hide Label <Info size={14} className="formtura-help-icon" />
+            </span>
+          </div>
+        </div>
+
+        <div className="formtura-form-group">
+          <div className="formtura-toggle-group">
+            <label className="formtura-toggle">
+              <input
+                type="checkbox"
+                checked={field.hideSublabels || false}
+                onChange={(e) => handleChange('hideSublabels', e.target.checked)}
+              />
+              <span className="formtura-toggle-slider"></span>
+            </label>
+            <span className="formtura-toggle-label">
+              Hide Sublabels <Info size={14} className="formtura-help-icon" />
+            </span>
+          </div>
+        </div>
+
+        <div className="formtura-form-group">
+          <div className="formtura-toggle-group">
+            <label className="formtura-toggle">
+              <input
+                type="checkbox"
+                checked={field.readOnly || false}
+                onChange={(e) => handleChange('readOnly', e.target.checked)}
+              />
+              <span className="formtura-toggle-slider"></span>
+            </label>
+            <span className="formtura-toggle-label">
+              Read-Only <Info size={14} className="formtura-help-icon" />
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Number Slider has different Advanced options
+  if (field.type === 'number-slider') {
+    return (
+      <div className="formtura-field-options">
+        <div className="formtura-field-options-title">
+          <strong>{field.label}</strong> <span className="formtura-field-id">(ID #{field.id.slice(-4)})</span>
+        </div>
+
+        <div className="formtura-form-group">
+          <label htmlFor="field-size">
+            Field Size <Info size={14} className="formtura-help-icon" />
+          </label>
+          <select
+            id="field-size"
+            value={field.fieldSize || 'medium'}
+            onChange={(e) => handleChange('fieldSize', e.target.value)}
+          >
+            <option value="small">Small</option>
+            <option value="medium">Medium</option>
+            <option value="large">Large</option>
+          </select>
+        </div>
+
+        <div className="formtura-form-group">
+          <label htmlFor="field-value-display">
+            Value Display <Info size={14} className="formtura-help-icon" />
+          </label>
+          <input
+            id="field-value-display"
+            type="text"
+            value={field.valueDisplay || 'Selected Value: {value}'}
+            onChange={(e) => handleChange('valueDisplay', e.target.value)}
+            placeholder="Selected Value: {value}"
+          />
+        </div>
+
+        <div className="formtura-form-group">
+          <label htmlFor="field-css-classes">
+            CSS Classes <Info size={14} className="formtura-help-icon" />
+          </label>
+          <input
+            id="field-css-classes"
+            type="text"
+            value={field.cssClasses || ''}
+            onChange={(e) => handleChange('cssClasses', e.target.value)}
+          />
+          <button
+            className="formtura-btn-link"
+            type="button"
+            onClick={() => setShowLayouts(!showLayouts)}
+          >
+            <Tag size={14} /> {showLayouts ? 'Hide Layouts' : 'Show Layouts'}
+          </button>
+        </div>
+
+        <div className="formtura-form-group">
+          <div className="formtura-toggle-group">
+            <label className="formtura-toggle">
+              <input
+                type="checkbox"
+                checked={field.hideLabel || false}
+                onChange={(e) => handleChange('hideLabel', e.target.checked)}
+              />
+              <span className="formtura-toggle-slider"></span>
+            </label>
+            <span className="formtura-toggle-label">
+              Hide Label <Info size={14} className="formtura-help-icon" />
+            </span>
+          </div>
+        </div>
+
+        <div className="formtura-form-group">
+          <div className="formtura-toggle-group">
+            <label className="formtura-toggle">
+              <input
+                type="checkbox"
+                checked={field.readOnly || false}
+                onChange={(e) => handleChange('readOnly', e.target.checked)}
+              />
+              <span className="formtura-toggle-slider"></span>
+            </label>
+            <span className="formtura-toggle-label">
+              Read-Only <Info size={14} className="formtura-help-icon" />
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Default Advanced Tab for other field types
   return (
     <div className="formtura-field-options">
       <div className="formtura-field-options-title">

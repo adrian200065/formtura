@@ -95,12 +95,55 @@ const FormPreview = ({ fields, formSettings, onClose }) => {
           );
 
         case 'name':
-          return (
-            <div className="formtura-preview-name-group">
-              <input type="text" placeholder="First Name" className="formtura-preview-name-input" />
-              <input type="text" placeholder="Last Name" className="formtura-preview-name-input" />
-            </div>
-          );
+          const nameFormat = field.format || 'first-last';
+          const firstPlaceholder = field.firstNamePlaceholder || 'First Name';
+          const middlePlaceholder = field.middleNamePlaceholder || 'Middle Name';
+          const lastPlaceholder = field.lastNamePlaceholder || 'Last Name';
+          const firstDefault = field.firstNameDefault || '';
+          const middleDefault = field.middleNameDefault || '';
+          const lastDefault = field.lastNameDefault || '';
+
+          if (nameFormat === 'simple') {
+            return (
+              <input
+                type="text"
+                placeholder={field.placeholder || 'Name'}
+                defaultValue={firstDefault}
+                className={fieldSizeClass}
+              />
+            );
+          } else if (nameFormat === 'first-middle-last') {
+            return (
+              <div className="formtura-preview-name-group formtura-preview-name-group-3">
+                <div className="formtura-preview-name-item">
+                  <input type="text" placeholder={firstPlaceholder} defaultValue={firstDefault} className="formtura-preview-name-input" />
+                  {!field.hideSublabels && <span className="formtura-preview-sublabel">First Name</span>}
+                </div>
+                <div className="formtura-preview-name-item">
+                  <input type="text" placeholder={middlePlaceholder} defaultValue={middleDefault} className="formtura-preview-name-input" />
+                  {!field.hideSublabels && <span className="formtura-preview-sublabel">Middle Name</span>}
+                </div>
+                <div className="formtura-preview-name-item">
+                  <input type="text" placeholder={lastPlaceholder} defaultValue={lastDefault} className="formtura-preview-name-input" />
+                  {!field.hideSublabels && <span className="formtura-preview-sublabel">Last Name</span>}
+                </div>
+              </div>
+            );
+          } else {
+            // first-last (default)
+            return (
+              <div className="formtura-preview-name-group">
+                <div className="formtura-preview-name-item">
+                  <input type="text" placeholder={firstPlaceholder} defaultValue={firstDefault} className="formtura-preview-name-input" />
+                  {!field.hideSublabels && <span className="formtura-preview-sublabel">First Name</span>}
+                </div>
+                <div className="formtura-preview-name-item">
+                  <input type="text" placeholder={lastPlaceholder} defaultValue={lastDefault} className="formtura-preview-name-input" />
+                  {!field.hideSublabels && <span className="formtura-preview-sublabel">Last Name</span>}
+                </div>
+              </div>
+            );
+          }
 
         case 'phone':
           return (
@@ -119,6 +162,29 @@ const FormPreview = ({ fields, formSettings, onClose }) => {
               required={field.required}
               className={fieldSizeClass}
             />
+          );
+
+        case 'number-slider':
+          const minValue = field.minValue !== undefined ? field.minValue : 0;
+          const maxValue = field.maxValue !== undefined ? field.maxValue : 10;
+          const defaultValue = field.defaultValue !== undefined ? field.defaultValue : minValue;
+          const valueDisplay = field.valueDisplay || 'Selected Value: {value}';
+          const displayText = valueDisplay.replace('{value}', defaultValue);
+
+          return (
+            <div className="formtura-slider-container">
+              <input
+                type="range"
+                min={minValue}
+                max={maxValue}
+                defaultValue={defaultValue}
+                step={field.increment || 1}
+                className={fieldSizeClass}
+                style={{ width: '100%' }}
+                disabled={field.readOnly}
+              />
+              <div className="formtura-slider-value">{displayText}</div>
+            </div>
           );
 
         default:

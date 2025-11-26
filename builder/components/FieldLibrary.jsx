@@ -1654,6 +1654,309 @@ const AdvancedTab = ({ field, onUpdate }) => {
     );
   }
 
+  // Number field has different Advanced options
+  if (field.type === 'number') {
+    const appendSmartTag = (fieldKey, tagValue) => {
+      const currentValue = field[fieldKey] || '';
+      handleChange(fieldKey, currentValue + tagValue);
+    };
+
+    return (
+      <div className="formtura-field-options">
+        <div className="formtura-field-options-title">
+          <strong>{field.label}</strong> <span className="formtura-field-id">(ID #{field.id.slice(-4)})</span>
+        </div>
+
+        <div className="formtura-form-group">
+          <label htmlFor="field-size">
+            Field Size <Tooltip text="Select the default size for the field." />
+          </label>
+          <select
+            id="field-size"
+            value={field.fieldSize || 'medium'}
+            onChange={(e) => handleChange('fieldSize', e.target.value)}
+          >
+            <option value="small">Small</option>
+            <option value="medium">Medium</option>
+            <option value="large">Large</option>
+          </select>
+        </div>
+
+        <div className="formtura-form-group">
+          <label htmlFor="field-placeholder">
+            Placeholder Text <Tooltip text="Enter placeholder text that appears inside the input field before the user types." />
+          </label>
+          <input
+            id="field-placeholder"
+            type="text"
+            value={field.placeholder || ''}
+            onChange={(e) => handleChange('placeholder', e.target.value)}
+          />
+        </div>
+
+        <div className="formtura-form-group">
+          <label>
+            Range <Tooltip text="Define the minimum and the maximum values for the field." />
+          </label>
+          <div className="formtura-range-row">
+            <div className="formtura-range-col">
+              <input
+                type="number"
+                value={field.minValue !== undefined ? field.minValue : ''}
+                onChange={(e) => handleChange('minValue', e.target.value === '' ? undefined : parseFloat(e.target.value))}
+                placeholder=""
+              />
+              <span className="formtura-field-help">Minimum</span>
+            </div>
+            <div className="formtura-range-col">
+              <input
+                type="number"
+                value={field.maxValue !== undefined ? field.maxValue : ''}
+                onChange={(e) => handleChange('maxValue', e.target.value === '' ? undefined : parseFloat(e.target.value))}
+                placeholder=""
+              />
+              <span className="formtura-field-help">Maximum</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="formtura-form-group">
+          <label htmlFor="field-default-value">
+            Default Value <Tooltip text="Enter text for the default form field value." />
+          </label>
+          <div className="formtura-input-with-inline-tag">
+            <input
+              id="field-default-value"
+              type="text"
+              value={field.defaultValue !== undefined ? field.defaultValue : ''}
+              onChange={(e) => handleChange('defaultValue', e.target.value)}
+              placeholder=""
+            />
+            <SmartTagButton onSelect={(tag) => appendSmartTag('defaultValue', tag)} />
+          </div>
+        </div>
+
+        <div className="formtura-form-group">
+          <label htmlFor="field-css-classes">
+            CSS Classes <Tooltip text="Enter CSS class names for the form field container. Separate multiple class names with spaces." />
+          </label>
+          <input
+            id="field-css-classes"
+            type="text"
+            value={field.cssClasses || ''}
+            onChange={(e) => handleChange('cssClasses', e.target.value)}
+          />
+          <button
+            className="formtura-btn-link"
+            type="button"
+            onClick={() => setShowLayouts(!showLayouts)}
+          >
+            <Tag size={14} /> {showLayouts ? 'Hide Layouts' : 'Show Layouts'}
+          </button>
+        </div>
+
+        <div className="formtura-form-group">
+          <div className="formtura-toggle-group">
+            <label className="formtura-toggle">
+              <input
+                type="checkbox"
+                checked={field.hideLabel || false}
+                onChange={(e) => handleChange('hideLabel', e.target.checked)}
+              />
+              <span className="formtura-toggle-slider"></span>
+            </label>
+            <span className="formtura-toggle-label">
+              Hide Label <Tooltip text="Check this option to hide the form field label." />
+            </span>
+          </div>
+        </div>
+
+        <div className="formtura-form-group">
+          <div className="formtura-toggle-group">
+            <label className="formtura-toggle">
+              <input
+                type="checkbox"
+                checked={field.readOnly || false}
+                onChange={(e) => handleChange('readOnly', e.target.checked)}
+              />
+              <span className="formtura-toggle-slider"></span>
+            </label>
+            <span className="formtura-toggle-label">
+              Read-Only <Tooltip text="Check this option to display the field's value without allowing changes. The value will still be submitted." />
+            </span>
+          </div>
+        </div>
+
+        <div className="formtura-form-group">
+          <div className="formtura-toggle-group">
+            <label className="formtura-toggle">
+              <input
+                type="checkbox"
+                checked={field.enableCalculation || false}
+                onChange={(e) => handleChange('enableCalculation', e.target.checked)}
+              />
+              <span className="formtura-toggle-slider"></span>
+            </label>
+            <span className="formtura-toggle-label">
+              Enable Calculation <Tooltip text="Enable mathematical calculations using values from other form fields." />
+              <span className="formtura-pro-badge">PRO</span>
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Multiple Choice (checkbox/radio) and Checkboxes fields have different Advanced options
+  if (field.type === 'checkbox' || field.type === 'checkboxes' || field.type === 'radio') {
+    return (
+      <div className="formtura-field-options">
+        <div className="formtura-field-options-title">
+          <strong>{field.label}</strong> <span className="formtura-field-id">(ID #{field.id.slice(-4)})</span>
+        </div>
+
+        <div className="formtura-form-group">
+          <div className="formtura-toggle-group">
+            <label className="formtura-toggle">
+              <input
+                type="checkbox"
+                checked={field.randomizeChoices || false}
+                onChange={(e) => handleChange('randomizeChoices', e.target.checked)}
+              />
+              <span className="formtura-toggle-slider"></span>
+            </label>
+            <span className="formtura-toggle-label">
+              Randomize Choices <Tooltip text="Check this option to randomize the order of the choices." />
+            </span>
+          </div>
+        </div>
+
+        <div className="formtura-form-group">
+          <label htmlFor="field-choice-layout">
+            Choice Layout <Tooltip text="Select the layout for displaying field choices." />
+          </label>
+          <select
+            id="field-choice-layout"
+            value={field.choiceLayout || 'one-column'}
+            onChange={(e) => handleChange('choiceLayout', e.target.value)}
+          >
+            <option value="one-column">One Column</option>
+            <option value="two-columns">Two Columns</option>
+            <option value="three-columns">Three Columns</option>
+            <option value="inline">Inline</option>
+          </select>
+        </div>
+
+        <div className="formtura-form-group">
+          <label htmlFor="field-dynamic-choices">
+            Dynamic Choices <Tooltip text="Select auto-populate method to use." />
+          </label>
+          <select
+            id="field-dynamic-choices"
+            value={field.dynamicChoices || 'off'}
+            onChange={(e) => handleChange('dynamicChoices', e.target.value)}
+          >
+            <option value="off">Off</option>
+            <option value="post_type">Post Type</option>
+            <option value="taxonomy">Taxonomy</option>
+          </select>
+        </div>
+
+        {field.dynamicChoices === 'post_type' && (
+          <div className="formtura-form-group">
+            <label htmlFor="field-dynamic-post-type">
+              Dynamic Post Type Source <Tooltip text="Select Post Type to use for auto-populating the field choices." />
+            </label>
+            <select
+              id="field-dynamic-post-type"
+              value={field.dynamicPostType || 'post'}
+              onChange={(e) => handleChange('dynamicPostType', e.target.value)}
+            >
+              <option value="post">Posts</option>
+              <option value="page">Pages</option>
+              <option value="attachment">Media</option>
+              {/* Custom post types loaded dynamically from WordPress */}
+              {window.formturaBuilderData?.postTypes?.map(pt => (
+                <option key={pt.value} value={pt.value}>{pt.label}</option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {field.dynamicChoices === 'taxonomy' && (
+          <div className="formtura-form-group">
+            <label htmlFor="field-dynamic-taxonomy">
+              Dynamic Taxonomy Source <Tooltip text="Select Taxonomy to use for auto-populating the field choices." />
+            </label>
+            <select
+              id="field-dynamic-taxonomy"
+              value={field.dynamicTaxonomy || 'category'}
+              onChange={(e) => handleChange('dynamicTaxonomy', e.target.value)}
+            >
+              <option value="category">Categories</option>
+              <option value="post_tag">Tags</option>
+              {/* Custom taxonomies loaded dynamically from WordPress */}
+              {window.formturaBuilderData?.taxonomies?.map(tax => (
+                <option key={tax.value} value={tax.value}>{tax.label}</option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        <div className="formtura-form-group">
+          <label htmlFor="field-css-classes">
+            CSS Classes <Tooltip text="Enter CSS class names for the form field container. Separate multiple class names with spaces." />
+          </label>
+          <input
+            id="field-css-classes"
+            type="text"
+            value={field.cssClasses || ''}
+            onChange={(e) => handleChange('cssClasses', e.target.value)}
+          />
+          <button
+            className="formtura-btn-link"
+            type="button"
+            onClick={() => setShowLayouts(!showLayouts)}
+          >
+            <Tag size={14} /> {showLayouts ? 'Hide Layouts' : 'Show Layouts'}
+          </button>
+        </div>
+
+        <div className="formtura-form-group">
+          <div className="formtura-toggle-group">
+            <label className="formtura-toggle">
+              <input
+                type="checkbox"
+                checked={field.hideLabel || false}
+                onChange={(e) => handleChange('hideLabel', e.target.checked)}
+              />
+              <span className="formtura-toggle-slider"></span>
+            </label>
+            <span className="formtura-toggle-label">
+              Hide Label <Tooltip text="Check this option to hide the form field label." />
+            </span>
+          </div>
+        </div>
+
+        <div className="formtura-form-group">
+          <div className="formtura-toggle-group">
+            <label className="formtura-toggle">
+              <input
+                type="checkbox"
+                checked={field.readOnly || false}
+                onChange={(e) => handleChange('readOnly', e.target.checked)}
+              />
+              <span className="formtura-toggle-slider"></span>
+            </label>
+            <span className="formtura-toggle-label">
+              Read-Only <Tooltip text="Check this option to display the field's value without allowing changes. The value will still be submitted." />
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // Default Advanced Tab for other field types
   return (
     <div className="formtura-field-options">
@@ -1939,6 +2242,7 @@ const AdvancedTab = ({ field, onUpdate }) => {
           </label>
           <span className="formtura-toggle-label">
             Enable Calculation <Tooltip text="Enable mathematical calculations using values from other form fields." />
+            <span className="formtura-pro-badge">PRO</span>
           </span>
         </div>
       </div>

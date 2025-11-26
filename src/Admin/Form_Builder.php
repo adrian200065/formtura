@@ -346,6 +346,114 @@ class Form_Builder {
 			$sanitized['options'] = array_map( 'sanitize_text_field', $field['options'] );
 		}
 
+		// Sanitize choices (for select, radio, checkbox, checkboxes).
+		if ( isset( $field['choices'] ) && is_array( $field['choices'] ) ) {
+			$sanitized['choices'] = array_map( function( $choice ) {
+				if ( is_array( $choice ) ) {
+					return [
+						'label'     => isset( $choice['label'] ) ? sanitize_text_field( $choice['label'] ) : '',
+						'value'     => isset( $choice['value'] ) ? sanitize_text_field( $choice['value'] ) : '',
+						'isDefault' => isset( $choice['isDefault'] ) ? (bool) $choice['isDefault'] : false,
+					];
+				}
+				return sanitize_text_field( $choice );
+			}, $field['choices'] );
+		}
+
+		// Sanitize choice layout (for radio, checkbox, checkboxes).
+		if ( isset( $field['choiceLayout'] ) ) {
+			$sanitized['choiceLayout'] = sanitize_text_field( $field['choiceLayout'] );
+		}
+
+		// Sanitize randomize choices.
+		if ( isset( $field['randomizeChoices'] ) ) {
+			$sanitized['randomizeChoices'] = (bool) $field['randomizeChoices'];
+		}
+
+		// Sanitize dynamic choices.
+		if ( isset( $field['dynamicChoices'] ) ) {
+			$sanitized['dynamicChoices'] = sanitize_text_field( $field['dynamicChoices'] );
+		}
+
+		// Sanitize dynamic post type.
+		if ( isset( $field['dynamicPostType'] ) ) {
+			$sanitized['dynamicPostType'] = sanitize_text_field( $field['dynamicPostType'] );
+		}
+
+		// Sanitize dynamic taxonomy.
+		if ( isset( $field['dynamicTaxonomy'] ) ) {
+			$sanitized['dynamicTaxonomy'] = sanitize_text_field( $field['dynamicTaxonomy'] );
+		}
+
+		// Sanitize multiple selection (for dropdown).
+		if ( isset( $field['multipleSelection'] ) ) {
+			$sanitized['multipleSelection'] = (bool) $field['multipleSelection'];
+		}
+
+		// Sanitize style (for dropdown).
+		if ( isset( $field['style'] ) ) {
+			$sanitized['style'] = sanitize_text_field( $field['style'] );
+		}
+
+		// Sanitize format (for name field).
+		if ( isset( $field['format'] ) ) {
+			$sanitized['format'] = sanitize_text_field( $field['format'] );
+		}
+
+		// Sanitize name field placeholders.
+		if ( isset( $field['firstNamePlaceholder'] ) ) {
+			$sanitized['firstNamePlaceholder'] = sanitize_text_field( $field['firstNamePlaceholder'] );
+		}
+		if ( isset( $field['middleNamePlaceholder'] ) ) {
+			$sanitized['middleNamePlaceholder'] = sanitize_text_field( $field['middleNamePlaceholder'] );
+		}
+		if ( isset( $field['lastNamePlaceholder'] ) ) {
+			$sanitized['lastNamePlaceholder'] = sanitize_text_field( $field['lastNamePlaceholder'] );
+		}
+
+		// Sanitize name field defaults.
+		if ( isset( $field['firstNameDefault'] ) ) {
+			$sanitized['firstNameDefault'] = sanitize_text_field( $field['firstNameDefault'] );
+		}
+		if ( isset( $field['middleNameDefault'] ) ) {
+			$sanitized['middleNameDefault'] = sanitize_text_field( $field['middleNameDefault'] );
+		}
+		if ( isset( $field['lastNameDefault'] ) ) {
+			$sanitized['lastNameDefault'] = sanitize_text_field( $field['lastNameDefault'] );
+		}
+
+		// Sanitize hide sublabels (for name field).
+		if ( isset( $field['hideSublabels'] ) ) {
+			$sanitized['hideSublabels'] = (bool) $field['hideSublabels'];
+		}
+
+		// Sanitize number slider fields.
+		if ( isset( $field['minValue'] ) ) {
+			$sanitized['minValue'] = floatval( $field['minValue'] );
+		}
+		if ( isset( $field['maxValue'] ) ) {
+			$sanitized['maxValue'] = floatval( $field['maxValue'] );
+		}
+		if ( isset( $field['defaultValue'] ) ) {
+			$sanitized['defaultValue'] = floatval( $field['defaultValue'] );
+		}
+		if ( isset( $field['increment'] ) ) {
+			$sanitized['increment'] = floatval( $field['increment'] );
+		}
+		if ( isset( $field['valueDisplay'] ) ) {
+			$sanitized['valueDisplay'] = sanitize_text_field( $field['valueDisplay'] );
+		}
+
+		// Sanitize enable calculation.
+		if ( isset( $field['enableCalculation'] ) ) {
+			$sanitized['enableCalculation'] = (bool) $field['enableCalculation'];
+		}
+
+		// Sanitize conditional logic (new format).
+		if ( isset( $field['conditionalLogic'] ) && is_array( $field['conditionalLogic'] ) ) {
+			$sanitized['conditionalLogic'] = $field['conditionalLogic'];
+		}
+
 		// Sanitize validation rules.
 		if ( isset( $field['validation'] ) && is_array( $field['validation'] ) ) {
 			$sanitized['validation'] = $field['validation'];

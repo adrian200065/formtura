@@ -511,6 +511,49 @@ select.formtura-field-size-large {
     inline-size: 100%;
 }
 
+/* Choice Layout Classes for Radio/Checkbox/Multiple Choice fields */
+.formtura-choices-one-column {
+    display: flex;
+    flex-direction: column;
+    gap: var(--fta-builder-space-sm);
+}
+
+.formtura-choices-two-columns {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--fta-builder-space-sm);
+}
+
+.formtura-choices-three-columns {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--fta-builder-space-sm);
+}
+
+.formtura-choices-inline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--fta-builder-space-md);
+}
+
+/* Responsive adjustments for choice layouts */
+@media screen and (max-width: 48em) {
+    .formtura-choices-three-columns {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media screen and (max-width: 30em) {
+    .formtura-choices-two-columns,
+    .formtura-choices-three-columns {
+        grid-template-columns: 1fr;
+    }
+
+    .formtura-choices-inline {
+        flex-direction: column;
+    }
+}
+
 /* Field Description Text */
 .formtura-field-description-text {
     color: var(--fta-builder-text);
@@ -1191,8 +1234,6 @@ select.formtura-field-size-large {
 .formtura-preview-radio-group,
 .formtura-preview-checkbox-group,
 .formtura-preview-checkboxes-group {
-    display: flex;
-    flex-direction: column;
     gap: var(--fta-builder-space-sm);
 }
 
@@ -1473,8 +1514,6 @@ select.formtura-field-size-large {
 
 /* Field Preview - Multiple Choice (Radio Buttons) */
 .formtura-checkbox-choices-group {
-    display: flex;
-    flex-direction: column;
     gap: var(--fta-builder-space-xs);
 }
 
@@ -1505,8 +1544,6 @@ select.formtura-field-size-large {
 
 /* Field Preview - Radio Group */
 .formtura-radio-group {
-    display: flex;
-    flex-direction: column;
     gap: var(--fta-builder-space-xs);
 }
 
@@ -1537,8 +1574,6 @@ select.formtura-field-size-large {
 
 /* Field Preview - Checkboxes Group */
 .formtura-checkboxes-group {
-    display: flex;
-    flex-direction: column;
     gap: var(--fta-builder-space-xs);
 }
 
@@ -1802,6 +1837,23 @@ select.formtura-field-size-large {
 }
 
 .formtura-name-field-col input {
+    width: 100%;
+}
+
+/* Range Field Row Styles (for Number field) */
+.formtura-range-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+}
+
+.formtura-range-col {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.formtura-range-col input {
     width: 100%;
 }
 

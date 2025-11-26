@@ -19,12 +19,27 @@ const FieldPreview = ({ field }) => {
     switch (field.type) {
       case 'text':
       case 'email':
-      case 'number':
         return (
           <input
             id={`${fieldId}-input`}
             type={field.type}
             placeholder={field.placeholder}
+            required={field.required}
+            readOnly
+            aria-label={field.hideLabel ? field.label : undefined}
+            aria-required={field.required}
+          />
+        );
+
+      case 'number':
+        return (
+          <input
+            id={`${fieldId}-input`}
+            type="number"
+            placeholder={field.placeholder}
+            defaultValue={field.defaultValue !== undefined ? field.defaultValue : ''}
+            min={field.minValue !== undefined ? field.minValue : undefined}
+            max={field.maxValue !== undefined ? field.maxValue : undefined}
             required={field.required}
             readOnly
             aria-label={field.hideLabel ? field.label : undefined}
@@ -147,10 +162,86 @@ const FieldPreview = ({ field }) => {
         );
 
       case 'radio':
+      case 'checkbox': {
+        // Get choices based on dynamic choices setting
+        const getRadioChoices = () => {
+          if (field.dynamicChoices === 'post_type') {
+            const builtInPostTypes = [
+              { value: 'post', label: 'Posts' },
+              { value: 'page', label: 'Pages' },
+              { value: 'attachment', label: 'Media' }
+            ];
+            const customPostTypes = window.formturaBuilderData?.postTypes || [];
+            const allPostTypes = [...builtInPostTypes, ...customPostTypes];
+
+            if (field.dynamicPostType) {
+              const selectedType = allPostTypes.find(pt => pt.value === field.dynamicPostType);
+              if (selectedType) {
+                return [
+                  { value: '1', label: `${selectedType.label} Item 1` },
+                  { value: '2', label: `${selectedType.label} Item 2` },
+                  { value: '3', label: `${selectedType.label} Item 3` }
+                ];
+              }
+            }
+            return allPostTypes;
+          } else if (field.dynamicChoices === 'taxonomy') {
+            const builtInTaxonomies = [
+              { value: 'category', label: 'Categories' },
+              { value: 'post_tag', label: 'Tags' }
+            ];
+            const customTaxonomies = window.formturaBuilderData?.taxonomies || [];
+            const allTaxonomies = [...builtInTaxonomies, ...customTaxonomies];
+
+            if (field.dynamicTaxonomy) {
+              const selectedTax = allTaxonomies.find(tax => tax.value === field.dynamicTaxonomy);
+              if (selectedTax) {
+                return [
+                  { value: '1', label: `${selectedTax.label} Term 1` },
+                  { value: '2', label: `${selectedTax.label} Term 2` },
+                  { value: '3', label: `${selectedTax.label} Term 3` }
+                ];
+              }
+            }
+            return allTaxonomies;
+          }
+          return field.choices || field.options || [
+            { value: '1', label: 'First Choice' },
+            { value: '2', label: 'Second Choice' },
+            { value: '3', label: 'Third Choice' }
+          ];
+        };
+
+        let radioChoices = getRadioChoices();
+
+        // Randomize choices if enabled
+        if (field.randomizeChoices) {
+          radioChoices = [...radioChoices].sort(() => Math.random() - 0.5);
+        }
+
+        // Get layout class
+        const getChoiceLayoutClass = () => {
+          switch(field.choiceLayout) {
+            case 'two-columns':
+              return 'formtura-choices-two-columns';
+            case 'three-columns':
+              return 'formtura-choices-three-columns';
+            case 'inline':
+              return 'formtura-choices-inline';
+            case 'one-column':
+            default:
+              return 'formtura-choices-one-column';
+          }
+        };
+
+        const layoutClass = getChoiceLayoutClass();
+        const groupClass = field.type === 'checkbox' ? 'formtura-checkbox-choices-group' : 'formtura-radio-group';
+        const itemClass = field.type === 'checkbox' ? 'formtura-checkbox-choice-item' : 'formtura-radio-item';
+
         return (
-          <div className="formtura-radio-group">
-            {(field.choices || field.options)?.map((choice, index) => (
-              <div key={index} className="formtura-radio-item">
+          <div className={`${groupClass} ${layoutClass}`}>
+            {radioChoices.map((choice, index) => (
+              <div key={index} className={itemClass}>
                 <label>
                   <input
                     type="radio"
@@ -166,32 +257,83 @@ const FieldPreview = ({ field }) => {
             ))}
           </div>
         );
+      }
 
-      case 'checkbox':
-        return (
-          <div className="formtura-checkbox-choices-group">
-            {(field.choices || field.options)?.map((choice, index) => (
-              <div key={index} className="formtura-checkbox-choice-item">
-                <label>
-                  <input
-                    type="radio"
-                    name={field.id}
-                    value={choice.value || choice}
-                    checked={choice.isDefault || false}
-                    required={field.required}
-                    disabled
-                  />
-                  <span>{choice.label || choice}</span>
-                </label>
-              </div>
-            ))}
-          </div>
-        );
+      case 'checkboxes': {
+        // Get choices based on dynamic choices setting
+        const getCheckboxChoices = () => {
+          if (field.dynamicChoices === 'post_type') {
+            const builtInPostTypes = [
+              { value: 'post', label: 'Posts' },
+              { value: 'page', label: 'Pages' },
+              { value: 'attachment', label: 'Media' }
+            ];
+            const customPostTypes = window.formturaBuilderData?.postTypes || [];
+            const allPostTypes = [...builtInPostTypes, ...customPostTypes];
 
-      case 'checkboxes':
+            if (field.dynamicPostType) {
+              const selectedType = allPostTypes.find(pt => pt.value === field.dynamicPostType);
+              if (selectedType) {
+                return [
+                  { value: '1', label: `${selectedType.label} Item 1` },
+                  { value: '2', label: `${selectedType.label} Item 2` },
+                  { value: '3', label: `${selectedType.label} Item 3` }
+                ];
+              }
+            }
+            return allPostTypes;
+          } else if (field.dynamicChoices === 'taxonomy') {
+            const builtInTaxonomies = [
+              { value: 'category', label: 'Categories' },
+              { value: 'post_tag', label: 'Tags' }
+            ];
+            const customTaxonomies = window.formturaBuilderData?.taxonomies || [];
+            const allTaxonomies = [...builtInTaxonomies, ...customTaxonomies];
+
+            if (field.dynamicTaxonomy) {
+              const selectedTax = allTaxonomies.find(tax => tax.value === field.dynamicTaxonomy);
+              if (selectedTax) {
+                return [
+                  { value: '1', label: `${selectedTax.label} Term 1` },
+                  { value: '2', label: `${selectedTax.label} Term 2` },
+                  { value: '3', label: `${selectedTax.label} Term 3` }
+                ];
+              }
+            }
+            return allTaxonomies;
+          }
+          return field.choices || field.options || [
+            { value: '1', label: 'First Choice' },
+            { value: '2', label: 'Second Choice' },
+            { value: '3', label: 'Third Choice' }
+          ];
+        };
+
+        let checkboxChoices = getCheckboxChoices();
+
+        // Randomize choices if enabled
+        if (field.randomizeChoices) {
+          checkboxChoices = [...checkboxChoices].sort(() => Math.random() - 0.5);
+        }
+
+        // Get layout class
+        const getCheckboxLayoutClass = () => {
+          switch(field.choiceLayout) {
+            case 'two-columns':
+              return 'formtura-choices-two-columns';
+            case 'three-columns':
+              return 'formtura-choices-three-columns';
+            case 'inline':
+              return 'formtura-choices-inline';
+            case 'one-column':
+            default:
+              return 'formtura-choices-one-column';
+          }
+        };
+
         return (
-          <div className="formtura-checkboxes-group">
-            {(field.choices || field.options)?.map((choice, index) => (
+          <div className={`formtura-checkboxes-group ${getCheckboxLayoutClass()}`}>
+            {checkboxChoices.map((choice, index) => (
               <div key={index} className="formtura-checkbox-item">
                 <label>
                   <input
@@ -206,6 +348,7 @@ const FieldPreview = ({ field }) => {
             ))}
           </div>
         );
+      }
 
       case 'name':
         const nameFormat = field.format || 'first-last';

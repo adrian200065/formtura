@@ -9,11 +9,24 @@ const FormPreview = ({ fields, formSettings, onClose }) => {
       switch (field.type) {
         case 'text':
         case 'email':
-        case 'number':
           return (
             <input
               type={field.type}
               placeholder={field.placeholder}
+              required={field.required}
+              readOnly={field.readOnly}
+              className={fieldSizeClass}
+            />
+          );
+
+        case 'number':
+          return (
+            <input
+              type="number"
+              placeholder={field.placeholder}
+              defaultValue={field.defaultValue !== undefined ? field.defaultValue : ''}
+              min={field.minValue !== undefined ? field.minValue : undefined}
+              max={field.maxValue !== undefined ? field.maxValue : undefined}
               required={field.required}
               readOnly={field.readOnly}
               className={fieldSizeClass}
@@ -32,10 +45,44 @@ const FormPreview = ({ fields, formSettings, onClose }) => {
           );
 
         case 'select':
+          // Get choices based on dynamic choices setting
+          const getSelectChoices = () => {
+            if (field.dynamicChoices === 'post_type' || field.dynamicChoices === 'taxonomy') {
+              // For preview, show placeholder dynamic choices
+              return [
+                { value: '1', label: 'Dynamic Choice 1' },
+                { value: '2', label: 'Dynamic Choice 2' },
+                { value: '3', label: 'Dynamic Choice 3' }
+              ];
+            }
+            return field.choices || field.options || [];
+          };
+
+          const selectChoices = getSelectChoices();
+          const isMultiple = field.multipleSelection || false;
+
+          if (isMultiple) {
+            return (
+              <select
+                multiple
+                size={Math.min(selectChoices.length, 5)}
+                required={field.required}
+                className={fieldSizeClass}
+                style={{ minHeight: '80px' }}
+              >
+                {selectChoices.map((choice, index) => (
+                  <option key={index} value={choice.value || choice}>
+                    {choice.label || choice}
+                  </option>
+                ))}
+              </select>
+            );
+          }
+
           return (
             <select required={field.required} className={fieldSizeClass}>
-              <option value="">Select an option</option>
-              {(field.choices || field.options)?.map((choice, index) => (
+              <option value="">{field.placeholder || 'Select an option'}</option>
+              {selectChoices.map((choice, index) => (
                 <option key={index} value={choice.value || choice}>
                   {choice.label || choice}
                 </option>
@@ -44,10 +91,48 @@ const FormPreview = ({ fields, formSettings, onClose }) => {
           );
 
         case 'radio':
+        case 'checkbox': {
+          // Get choice layout class
+          const getRadioLayoutClass = () => {
+            switch(field.choiceLayout) {
+              case 'two-columns':
+                return 'formtura-choices-two-columns';
+              case 'three-columns':
+                return 'formtura-choices-three-columns';
+              case 'inline':
+                return 'formtura-choices-inline';
+              case 'one-column':
+              default:
+                return 'formtura-choices-one-column';
+            }
+          };
+
+          // Get choices based on dynamic choices setting
+          const getRadioChoices = () => {
+            if (field.dynamicChoices === 'post_type' || field.dynamicChoices === 'taxonomy') {
+              return [
+                { value: '1', label: 'Dynamic Choice 1' },
+                { value: '2', label: 'Dynamic Choice 2' },
+                { value: '3', label: 'Dynamic Choice 3' }
+              ];
+            }
+            return field.choices || field.options || [];
+          };
+
+          let radioChoices = getRadioChoices();
+
+          // Randomize choices if enabled
+          if (field.randomizeChoices) {
+            radioChoices = [...radioChoices].sort(() => Math.random() - 0.5);
+          }
+
+          const radioLayoutClass = getRadioLayoutClass();
+          const radioGroupClass = field.type === 'checkbox' ? 'formtura-preview-checkbox-group' : 'formtura-preview-radio-group';
+
           return (
-            <div className="formtura-preview-radio-group">
-              {(field.choices || field.options)?.map((choice, index) => (
-                <label key={index} className="formtura-preview-radio">
+            <div className={`${radioGroupClass} ${radioLayoutClass}`}>
+              {radioChoices.map((choice, index) => (
+                <label key={index} className={field.type === 'checkbox' ? 'formtura-preview-checkbox' : 'formtura-preview-radio'}>
                   <input
                     type="radio"
                     name={field.id}
@@ -60,28 +145,46 @@ const FormPreview = ({ fields, formSettings, onClose }) => {
               ))}
             </div>
           );
+        }
 
-        case 'checkbox':
-          return (
-            <div className="formtura-preview-checkbox-group">
-              {(field.choices || field.options)?.map((choice, index) => (
-                <label key={index} className="formtura-preview-checkbox">
-                  <input
-                    type="radio"
-                    name={field.id}
-                    value={choice.value || choice}
-                    defaultChecked={choice.isDefault || false}
-                  />
-                  <span>{choice.label || choice}</span>
-                </label>
-              ))}
-            </div>
-          );
+        case 'checkboxes': {
+          // Get choice layout class
+          const getCheckboxesLayoutClass = () => {
+            switch(field.choiceLayout) {
+              case 'two-columns':
+                return 'formtura-choices-two-columns';
+              case 'three-columns':
+                return 'formtura-choices-three-columns';
+              case 'inline':
+                return 'formtura-choices-inline';
+              case 'one-column':
+              default:
+                return 'formtura-choices-one-column';
+            }
+          };
 
-        case 'checkboxes':
+          // Get choices based on dynamic choices setting
+          const getCheckboxesChoices = () => {
+            if (field.dynamicChoices === 'post_type' || field.dynamicChoices === 'taxonomy') {
+              return [
+                { value: '1', label: 'Dynamic Choice 1' },
+                { value: '2', label: 'Dynamic Choice 2' },
+                { value: '3', label: 'Dynamic Choice 3' }
+              ];
+            }
+            return field.choices || field.options || [];
+          };
+
+          let checkboxesChoices = getCheckboxesChoices();
+
+          // Randomize choices if enabled
+          if (field.randomizeChoices) {
+            checkboxesChoices = [...checkboxesChoices].sort(() => Math.random() - 0.5);
+          }
+
           return (
-            <div className="formtura-preview-checkboxes-group">
-              {(field.choices || field.options)?.map((choice, index) => (
+            <div className={`formtura-preview-checkboxes-group ${getCheckboxesLayoutClass()}`}>
+              {checkboxesChoices.map((choice, index) => (
                 <label key={index} className="formtura-preview-checkbox">
                   <input
                     type="checkbox"
@@ -93,6 +196,7 @@ const FormPreview = ({ fields, formSettings, onClose }) => {
               ))}
             </div>
           );
+        }
 
         case 'name':
           const nameFormat = field.format || 'first-last';

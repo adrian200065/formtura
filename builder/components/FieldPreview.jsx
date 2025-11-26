@@ -46,6 +46,89 @@ const FieldPreview = ({ field }) => {
         );
 
       case 'select':
+        // Get choices based on dynamic choices setting
+        const getDropdownChoices = () => {
+          if (field.dynamicChoices === 'post_type') {
+            // Get post types from WordPress localized data
+            const builtInPostTypes = [
+              { value: 'post', label: 'Posts' },
+              { value: 'page', label: 'Pages' },
+              { value: 'attachment', label: 'Media' }
+            ];
+            const customPostTypes = window.formturaBuilderData?.postTypes || [];
+            const allPostTypes = [...builtInPostTypes, ...customPostTypes];
+
+            // Filter by selected post type source if set
+            if (field.dynamicPostType) {
+              // For preview, show sample items from the selected post type
+              const selectedType = allPostTypes.find(pt => pt.value === field.dynamicPostType);
+              if (selectedType) {
+                // Return placeholder items representing posts of that type
+                return [
+                  { value: '1', label: `${selectedType.label} Item 1` },
+                  { value: '2', label: `${selectedType.label} Item 2` },
+                  { value: '3', label: `${selectedType.label} Item 3` }
+                ];
+              }
+            }
+            return allPostTypes;
+          } else if (field.dynamicChoices === 'taxonomy') {
+            // Get taxonomies from WordPress localized data
+            const builtInTaxonomies = [
+              { value: 'category', label: 'Categories' },
+              { value: 'post_tag', label: 'Tags' }
+            ];
+            const customTaxonomies = window.formturaBuilderData?.taxonomies || [];
+            const allTaxonomies = [...builtInTaxonomies, ...customTaxonomies];
+
+            // Filter by selected taxonomy source if set
+            if (field.dynamicTaxonomy) {
+              const selectedTax = allTaxonomies.find(tax => tax.value === field.dynamicTaxonomy);
+              if (selectedTax) {
+                // Return placeholder items representing terms of that taxonomy
+                return [
+                  { value: '1', label: `${selectedTax.label} Term 1` },
+                  { value: '2', label: `${selectedTax.label} Term 2` },
+                  { value: '3', label: `${selectedTax.label} Term 3` }
+                ];
+              }
+            }
+            return allTaxonomies;
+          }
+          // Default: use manual choices
+          return field.choices || field.options || [
+            { value: '1', label: 'First Choice' },
+            { value: '2', label: 'Second Choice' },
+            { value: '3', label: 'Third Choice' }
+          ];
+        };
+
+        const dropdownChoices = getDropdownChoices();
+        const isMultiple = field.multipleSelection || false;
+
+        if (isMultiple) {
+          // Multi-select mode - render as a list box
+          return (
+            <select
+              id={`${fieldId}-input`}
+              multiple
+              size={Math.min(dropdownChoices.length, 5)}
+              required={field.required}
+              disabled
+              aria-label={field.hideLabel ? field.label : undefined}
+              aria-required={field.required}
+              style={{ minHeight: '80px' }}
+            >
+              {dropdownChoices.map((choice, index) => (
+                <option key={index} value={choice.value || choice}>
+                  {choice.label || choice}
+                </option>
+              ))}
+            </select>
+          );
+        }
+
+        // Single select mode - render as dropdown
         return (
           <select
             id={`${fieldId}-input`}
@@ -54,8 +137,8 @@ const FieldPreview = ({ field }) => {
             aria-label={field.hideLabel ? field.label : undefined}
             aria-required={field.required}
           >
-            <option value="">Select an option</option>
-            {(field.choices || field.options)?.map((choice, index) => (
+            <option value="">{field.placeholder || 'Select an option'}</option>
+            {dropdownChoices.map((choice, index) => (
               <option key={index} value={choice.value || choice}>
                 {choice.label || choice}
               </option>

@@ -183,19 +183,19 @@ class Admin {
 		);
 
 		// Enqueue builder assets on builder page.
-		$is_builder_page = ( 
-			$hook === 'formtura_page_formtura-builder' || 
+		$is_builder_page = (
+			$hook === 'formtura_page_formtura-builder' ||
 			( isset( $_GET['page'] ) && $_GET['page'] === 'formtura-builder' ) ||
 			( isset( $_GET['action'] ) && $_GET['action'] === 'edit' )
 		);
-		
+
 		if ( $is_builder_page ) {
 			// Use file modification time for cache busting in development
 			$css_file = FORMTURA_PLUGIN_DIR . 'assets/css/builder.css';
 			$js_file  = FORMTURA_PLUGIN_DIR . 'assets/js/builder.js';
 			$css_version = file_exists( $css_file ) ? filemtime( $css_file ) : FORMTURA_VERSION;
 			$js_version  = file_exists( $js_file ) ? filemtime( $js_file ) : FORMTURA_VERSION;
-			
+
 			// Enqueue React builder CSS
 			wp_enqueue_style(
 				'formtura-builder',
@@ -211,6 +211,46 @@ class Admin {
 				[],
 				$js_version,
 				true
+			);
+
+			// Get all public post types for dynamic choices
+			$post_types = get_post_types( [ 'public' => true ], 'objects' );
+			$post_type_options = [];
+			foreach ( $post_types as $post_type ) {
+				// Skip built-in types that are already listed
+				if ( in_array( $post_type->name, [ 'post', 'page', 'attachment' ], true ) ) {
+					continue;
+				}
+				$post_type_options[] = [
+					'value' => $post_type->name,
+					'label' => $post_type->labels->name,
+				];
+			}
+
+			// Get all public taxonomies for dynamic choices
+			$taxonomies = get_taxonomies( [ 'public' => true ], 'objects' );
+			$taxonomy_options = [];
+			foreach ( $taxonomies as $taxonomy ) {
+				// Skip built-in types that are already listed
+				if ( in_array( $taxonomy->name, [ 'category', 'post_tag' ], true ) ) {
+					continue;
+				}
+				$taxonomy_options[] = [
+					'value' => $taxonomy->name,
+					'label' => $taxonomy->labels->name,
+				];
+			}
+
+			// Localize builder script with dynamic data
+			wp_localize_script(
+				'formtura-builder',
+				'formturaBuilderData',
+				[
+					'postTypes'  => $post_type_options,
+					'taxonomies' => $taxonomy_options,
+					'ajaxUrl'    => admin_url( 'admin-ajax.php' ),
+					'nonce'      => wp_create_nonce( 'formtura_admin' ),
+				]
 			);
 		}
 	}

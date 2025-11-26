@@ -300,7 +300,9 @@
     display: flex;
     flex-direction: column;
     padding: var(--fta-builder-space-lg);
-    overflow: hidden;
+    padding-block-end: 6rem; /* Extra space at bottom for scrolling */
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .formtura-btn {
@@ -480,6 +482,32 @@
 }
 
 .formtura-field-size-large {
+    inline-size: 100%;
+}
+
+/* Field size classes applied directly to select elements */
+select.formtura-field-size-small {
+    inline-size: 25%;
+}
+
+select.formtura-field-size-medium {
+    inline-size: 50%;
+}
+
+select.formtura-field-size-large {
+    inline-size: 100%;
+}
+
+/* Ensure inputs/selects inside size wrappers take full width */
+.formtura-field-size-small input,
+.formtura-field-size-small select,
+.formtura-field-size-small textarea,
+.formtura-field-size-medium input,
+.formtura-field-size-medium select,
+.formtura-field-size-medium textarea,
+.formtura-field-size-large input,
+.formtura-field-size-large select,
+.formtura-field-size-large textarea {
     inline-size: 100%;
 }
 
@@ -752,6 +780,52 @@
     color: var(--fta-builder-text-muted);
     vertical-align: middle;
     margin-inline-start: .25rem;
+    cursor: help;
+}
+
+/* Tooltip Component */
+.formtura-tooltip-wrapper {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle;
+    margin-inline-start: .25rem;
+}
+
+.formtura-tooltip {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1f2937;
+    color: #ffffff;
+    font-size: 0.75rem;
+    font-weight: 400;
+    line-height: 1.4;
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--fta-builder-radius);
+    white-space: normal;
+    width: max-content;
+    max-width: 250px;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    pointer-events: none;
+}
+
+.formtura-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: #1f2937;
+}
+
+/* Tooltip positioning adjustments for edge cases */
+.formtura-tooltip-wrapper:hover .formtura-tooltip,
+.formtura-tooltip-wrapper:focus-within .formtura-tooltip {
+    display: block;
 }
 
 .formtura-field-help {

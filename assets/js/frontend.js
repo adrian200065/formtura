@@ -1,6 +1,6 @@
 /**
  * Formtura Frontend Scripts
- * 
+ *
  * Scripts for front-end forms (validation, conditional logic, submission).
  *
  * @package Formtura
@@ -14,13 +14,14 @@
 	 * Formtura Frontend object.
 	 */
 	const FormturaFrontend = {
-		
+
 		/**
 		 * Initialize frontend functionality.
 		 */
 		init() {
 			this.bindEvents();
 			this.initConditionalLogic();
+			this.initCalculations();
 		},
 
 		/**
@@ -29,13 +30,13 @@
 		bindEvents() {
 			// Form submission
 			$(document).on('submit', '.fta-form', this.handleSubmit);
-			
+
 			// Real-time validation
 			$(document).on('blur', '.fta-field-input, .fta-field-textarea, .fta-field-select', this.validateField);
-			
+
 			// File upload
 			$(document).on('change', '.fta-file-upload-input', this.handleFileUpload);
-			
+
 			// Character counter
 			$(document).on('input', '[data-char-limit]', this.updateCharCounter);
 		},
@@ -87,10 +88,10 @@
 					if (response.success) {
 						FormturaFrontend.showSuccess($form, response.data.message);
 						$form[0].reset();
-						
+
 						// Trigger custom event
 						$(document).trigger('formtura:submit:success', [formId, response.data]);
-						
+
 						// Redirect if configured
 						if (response.data.redirect_url) {
 							setTimeout(() => {
@@ -99,7 +100,7 @@
 						}
 					} else {
 						FormturaFrontend.showError($form, response.data.message);
-						
+
 						// Show field-specific errors
 						if (response.data.errors) {
 							FormturaFrontend.showFieldErrors($form, response.data.errors);
@@ -282,12 +283,12 @@
 		 */
 		evaluateConditionalLogic($field, logic) {
 			let show = logic.action === 'show';
-			
+
 			// Evaluate conditions
 			const conditionsMet = logic.conditions.every(condition => {
 				const $triggerField = $(`[name="${condition.field}"]`);
 				const triggerValue = $triggerField.val();
-				
+
 				switch (condition.operator) {
 					case 'is':
 						return triggerValue === condition.value;
@@ -309,6 +310,91 @@
 				$field.slideDown();
 			} else {
 				$field.slideUp();
+			}
+		},
+
+		/**
+		 * Initialize calculation fields.
+		 */
+		initCalculations() {
+			const self = this;
+
+			$('[data-calculation]').each(function() {
+				const $field = $(this);
+				const formula = $field.data('calculation');
+				const $form = $field.closest('.fta-form');
+
+				if (!formula) return;
+
+				// Extract field references from formula (e.g., {field_abc123})
+				const fieldRefs = formula.match(/\{([^}]+)\}/g) || [];
+				const fieldIds = fieldRefs.map(ref => ref.replace(/[{}]/g, ''));
+
+				// Bind change events to all referenced fields
+				fieldIds.forEach(fieldId => {
+					// Find the input by looking for fields with matching name or data-field-id
+					$form.find(`[name="${fieldId}"], [data-field-id="${fieldId}"]`).on('input change', function() {
+						self.evaluateCalculation($field, formula, $form);
+					});
+				});
+
+				// Initial calculation
+				self.evaluateCalculation($field, formula, $form);
+			});
+		},
+
+		/**
+		 * Evaluate a calculation formula and update the field.
+		 */
+		evaluateCalculation($field, formula, $form) {
+			let expression = formula;
+
+			// Replace field references with their values
+			const fieldRefs = formula.match(/\{([^}]+)\}/g) || [];
+
+			fieldRefs.forEach(ref => {
+				const fieldId = ref.replace(/[{}]/g, '');
+				// Try to find the field by name or data-field-id attribute
+				let $sourceField = $form.find(`[name="${fieldId}"]`);
+				if (!$sourceField.length) {
+					$sourceField = $form.find(`[data-field-id="${fieldId}"]`);
+				}
+
+				let value = 0;
+				if ($sourceField.length) {
+					const rawValue = $sourceField.val();
+					value = parseFloat(rawValue) || 0;
+				}
+
+				// Replace the field reference with the numeric value
+				expression = expression.replace(ref, value.toString());
+			});
+
+			// Safely evaluate the mathematical expression
+			try {
+				// Only allow numbers, operators, parentheses, and whitespace
+				const sanitized = expression.replace(/[^0-9+\-*/().\s]/g, '');
+
+				if (sanitized.trim() === '') {
+					$field.val(0);
+					return;
+				}
+
+				// Use Function constructor to evaluate (safer than eval)
+				const result = new Function('return ' + sanitized)();
+
+				// Round to 2 decimal places for cleaner display
+				const roundedResult = Math.round(result * 100) / 100;
+
+				// Update the field value
+				$field.val(isNaN(roundedResult) ? 0 : roundedResult);
+
+				// Trigger change event so other calculations can chain
+				$field.trigger('calculation:updated');
+			} catch (e) {
+				// If evaluation fails, set to 0
+				console.warn('Formtura: Calculation error', e);
+				$field.val(0);
 			}
 		}
 	};

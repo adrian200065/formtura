@@ -2034,3 +2034,105 @@ input[type="range"]::-moz-range-thumb {
 input[type="range"]::-moz-range-thumb:hover {
     background: hsl(221, 83%, 48%);
 }
+
+/* WYSIWYG Editor Styles */
+.formtura-wysiwyg-editor {
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.formtura-wysiwyg-toolbar {
+    display: flex;
+    gap: 4px;
+    padding: 8px;
+    background: #f9fafb;
+    border: 1px solid #d1d5db;
+    border-bottom: none;
+    border-radius: 6px 6px 0 0;
+    flex-wrap: wrap;
+}
+
+.formtura-wysiwyg-toolbar button {
+    padding: 4px 8px;
+    border: 1px solid #d1d5db;
+    background: #fff;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    min-width: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+}
+
+.formtura-wysiwyg-toolbar button:hover {
+    background: #f3f4f6;
+    border-color: #9ca3af;
+}
+
+.formtura-wysiwyg-toolbar button:active {
+    background: #e5e7eb;
+}
+
+.formtura-wysiwyg-toolbar select {
+    padding: 4px 8px;
+    border: 1px solid #d1d5db;
+    background: #fff;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    min-width: 80px;
+}
+
+.formtura-wysiwyg-content {
+    min-height: 150px;
+    padding: 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 0 0 6px 6px;
+    outline: none;
+    background: #fff;
+    line-height: 1.6;
+}
+
+.formtura-wysiwyg-content:focus {
+    border-color: var(--fta-builder-primary);
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
+}
+
+.formtura-wysiwyg-content h1,
+.formtura-wysiwyg-content h2,
+.formtura-wysiwyg-content h3,
+.formtura-wysiwyg-content h4 {
+    margin: 0.5em 0;
+    font-weight: 600;
+}
+
+.formtura-wysiwyg-content h1 { font-size: 1.5em; }
+.formtura-wysiwyg-content h2 { font-size: 1.3em; }
+.formtura-wysiwyg-content h3 { font-size: 1.1em; }
+.formtura-wysiwyg-content h4 { font-size: 1em; }
+
+.formtura-wysiwyg-content p {
+    margin: 0.5em 0;
+}
+
+.formtura-wysiwyg-content ul,
+.formtura-wysiwyg-content ol {
+    margin: 0.5em 0;
+    padding-left: 1.5em;
+}
+
+.formtura-wysiwyg-content blockquote {
+    margin: 0.5em 0;
+    padding-left: 1em;
+    border-left: 3px solid #d1d5db;
+    color: #6b7280;
+    font-style: italic;
+}
+
+.formtura-wysiwyg-content a {
+    color: var(--fta-builder-primary);
+    text-decoration: underline;
+}

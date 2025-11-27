@@ -616,10 +616,29 @@ const AdvancedTab = ({ field, onUpdate }) => {
             <span className="formtura-toggle-slider"></span>
           </label>
           <span className="formtura-toggle-label">
-            Enable Calculation <span className="formtura-badge">PRO</span>
+            Enable Calculation <Info size={14} className="formtura-help-icon" title="Enable mathematical calculations using values from other form fields." />
           </span>
         </div>
       </div>
+
+      {field.enableCalculation && (
+        <div className="formtura-form-group">
+          <label htmlFor="field-calculation-formula">
+            Calculation Formula
+          </label>
+          <textarea
+            id="field-calculation-formula"
+            value={field.calculationFormula || ''}
+            onChange={(e) => handleChange('calculationFormula', e.target.value)}
+            placeholder="e.g., {field_1} + {field_2} * 0.1"
+            rows={3}
+            className="formtura-textarea"
+          />
+          <p className="formtura-field-description">
+            Use {'{field_ID}'} to reference other number fields. Supported operators: +, -, *, /, ()
+          </p>
+        </div>
+      )}
     </div>
   );
 };

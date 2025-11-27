@@ -39,6 +39,7 @@ import {
     Zap
 } from 'lucide-react';
 import React from 'react';
+import InfoDialog from './InfoDialog';
 
 // Tooltip Component
 const Tooltip = ({ text, children }) => {
@@ -280,11 +281,36 @@ const DraggableField = ({ type, label, icon: Icon }) => {
   );
 };
 
+// Non-draggable field that triggers a click action (for CAPTCHA, etc.)
+const ClickableField = ({ type, label, icon: Icon, onClick }) => {
+  return (
+    <div
+      className="formtura-field-item formtura-field-item-clickable"
+      onClick={onClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onClick();
+        }
+      }}
+    >
+      <Icon className="formtura-field-icon" size={20} />
+      <span className="formtura-field-label">{label}</span>
+    </div>
+  );
+};
+
 const FieldLibrary = ({ selectedField, fields, onFieldUpdate, isCollapsed, onToggleCollapse }) => {
   const [searchTerm, setSearchTerm] = React.useState('');
   const [activeTab, setActiveTab] = React.useState('add'); // 'add' or 'options'
   const [optionsTab, setOptionsTab] = React.useState('general'); // 'general', 'advanced', 'smart-logic'
   const [collapsedGroups, setCollapsedGroups] = React.useState({}); // Track which groups are collapsed
+  const [showCaptchaDialog, setShowCaptchaDialog] = React.useState(false); // CAPTCHA info dialog
+  const [showStripeDialog, setShowStripeDialog] = React.useState(false); // Stripe info dialog
+  const [showPayPalDialog, setShowPayPalDialog] = React.useState(false); // PayPal info dialog
+  const [showSquareDialog, setShowSquareDialog] = React.useState(false); // Square info dialog
 
   // Get the selected field data
   const field = fields?.find(f => f.id === selectedField);
@@ -374,14 +400,64 @@ const FieldLibrary = ({ selectedField, fields, onFieldUpdate, isCollapsed, onTog
                     </button>
                     {!collapsedGroups[group.category] && (
                       <div className="formtura-field-grid">
-                        {group.fields.map((field) => (
-                          <DraggableField
-                            key={field.type}
-                            type={field.type}
-                            label={field.label}
-                            icon={field.icon}
-                          />
-                        ))}
+                        {group.fields.map((fieldItem) => {
+                          // CAPTCHA fields show a popup instead of being draggable
+                          if (fieldItem.type === 'captcha' || fieldItem.type === 'custom-captcha') {
+                            return (
+                              <ClickableField
+                                key={fieldItem.type}
+                                type={fieldItem.type}
+                                label={fieldItem.label}
+                                icon={fieldItem.icon}
+                                onClick={() => setShowCaptchaDialog(true)}
+                              />
+                            );
+                          }
+                          // Stripe field shows a popup for connection setup
+                          if (fieldItem.type === 'stripe') {
+                            return (
+                              <ClickableField
+                                key={fieldItem.type}
+                                type={fieldItem.type}
+                                label={fieldItem.label}
+                                icon={fieldItem.icon}
+                                onClick={() => setShowStripeDialog(true)}
+                              />
+                            );
+                          }
+                          // PayPal field shows a popup for connection setup
+                          if (fieldItem.type === 'paypal') {
+                            return (
+                              <ClickableField
+                                key={fieldItem.type}
+                                type={fieldItem.type}
+                                label={fieldItem.label}
+                                icon={fieldItem.icon}
+                                onClick={() => setShowPayPalDialog(true)}
+                              />
+                            );
+                          }
+                          // Square field shows a popup for connection setup
+                          if (fieldItem.type === 'square') {
+                            return (
+                              <ClickableField
+                                key={fieldItem.type}
+                                type={fieldItem.type}
+                                label={fieldItem.label}
+                                icon={fieldItem.icon}
+                                onClick={() => setShowSquareDialog(true)}
+                              />
+                            );
+                          }
+                          return (
+                            <DraggableField
+                              key={fieldItem.type}
+                              type={fieldItem.type}
+                              label={fieldItem.label}
+                              icon={fieldItem.icon}
+                            />
+                          );
+                        })}
                       </div>
                     )}
                   </div>
@@ -441,6 +517,373 @@ const FieldLibrary = ({ selectedField, fields, onFieldUpdate, isCollapsed, onTog
             </>
           )}
         </>
+      )}
+
+      {/* CAPTCHA Info Dialog */}
+      <InfoDialog
+        isOpen={showCaptchaDialog}
+        title="Heads up!"
+        message={
+          <>
+            Please complete the CAPTCHA setup in your{' '}
+            <a
+              href={`${window.formturaBuilder?.adminUrl || '/wp-admin/'}admin.php?page=formtura-settings&tab=captcha`}
+              style={{ color: 'var(--fta-builder-primary)', textDecoration: 'underline' }}
+            >
+              Formtura Settings
+            </a>
+            {' '}to enable CAPTCHA protection on your forms.
+          </>
+        }
+        buttonText="OK"
+        onClose={() => setShowCaptchaDialog(false)}
+      />
+
+      {/* Stripe Info Dialog */}
+      <InfoDialog
+        isOpen={showStripeDialog}
+        title="Heads up!"
+        message={
+          <>
+            <p style={{ marginBottom: '12px' }}>
+              Stripe account connection is required when using the Stripe Credit Card field.
+            </p>
+            <p>
+              To proceed, please go to{' '}
+              <a
+                href={`${window.formturaBuilder?.adminUrl || '/wp-admin/'}admin.php?page=formtura-settings&tab=payments`}
+                style={{ color: 'var(--fta-builder-primary)', textDecoration: 'none', fontWeight: '600' }}
+              >
+                Formtura Settings » Payments » Stripe
+              </a>
+              {' '}and press{' '}
+              <strong>Connect with Stripe</strong> button.
+            </p>
+          </>
+        }
+        buttonText="OK"
+        onClose={() => setShowStripeDialog(false)}
+      />
+
+      {/* PayPal Info Dialog */}
+      <InfoDialog
+        isOpen={showPayPalDialog}
+        title="Heads up!"
+        message={
+          <>
+            <p style={{ marginBottom: '12px' }}>
+              PayPal account connection is required when using the PayPal Commerce field.
+            </p>
+            <p>
+              To proceed, please go to{' '}
+              <a
+                href={`${window.formturaBuilder?.adminUrl || '/wp-admin/'}admin.php?page=formtura-settings&tab=payments`}
+                style={{ color: 'var(--fta-builder-primary)', textDecoration: 'none', fontWeight: '600' }}
+              >
+                Formtura Settings » Payments » PayPal
+              </a>
+              {' '}and press{' '}
+              <strong>Connect with PayPal</strong> button.
+            </p>
+          </>
+        }
+        buttonText="OK"
+        onClose={() => setShowPayPalDialog(false)}
+      />
+
+      {/* Square Info Dialog */}
+      <InfoDialog
+        isOpen={showSquareDialog}
+        title="Heads up!"
+        message={
+          <>
+            <p style={{ marginBottom: '12px' }}>
+              Square account connection is required when using the Square field.
+            </p>
+            <p>
+              To proceed, please go to{' '}
+              <a
+                href={`${window.formturaBuilder?.adminUrl || '/wp-admin/'}admin.php?page=formtura-settings&tab=payments`}
+                style={{ color: 'var(--fta-builder-primary)', textDecoration: 'none', fontWeight: '600' }}
+              >
+                Formtura Settings » Payments » Square
+              </a>
+              {' '}and press{' '}
+              <strong>Connect with Square</strong> button.
+            </p>
+          </>
+        }
+        buttonText="OK"
+        onClose={() => setShowSquareDialog(false)}
+      />
+    </div>
+  );
+};
+
+// WYSIWYG Editor Component for HTML field
+const WysiwygEditor = ({ value, onChange }) => {
+  const editorRef = React.useRef(null);
+  const [mode, setMode] = React.useState('visual'); // 'visual' or 'code'
+  const [codeValue, setCodeValue] = React.useState(value || '');
+
+  // Sync content from prop to editor on initial render
+  React.useEffect(() => {
+    if (mode === 'visual' && editorRef.current && value !== editorRef.current.innerHTML) {
+      editorRef.current.innerHTML = value || '';
+    }
+    if (mode === 'code') {
+      setCodeValue(value || '');
+    }
+  }, []); // Only on mount
+
+  // Sync when switching modes
+  React.useEffect(() => {
+    if (mode === 'visual' && editorRef.current) {
+      editorRef.current.innerHTML = value || '';
+    } else if (mode === 'code') {
+      setCodeValue(value || '');
+    }
+  }, [mode]);
+
+  const handleInput = () => {
+    if (editorRef.current) {
+      onChange(editorRef.current.innerHTML);
+    }
+  };
+
+  const handleCodeChange = (e) => {
+    const newValue = e.target.value;
+    setCodeValue(newValue);
+    onChange(newValue);
+  };
+
+  const execCommand = (command, cmdValue = null) => {
+    document.execCommand(command, false, cmdValue);
+    editorRef.current?.focus();
+    handleInput();
+  };
+
+  const handleLink = () => {
+    const url = prompt('Enter URL:', 'https://');
+    if (url) {
+      execCommand('createLink', url);
+    }
+  };
+
+  const insertTag = (tag) => {
+    const textarea = document.getElementById('formtura-code-editor');
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = codeValue.substring(start, end);
+    let newText;
+
+    switch(tag) {
+      case 'b':
+        newText = `<strong>${selectedText}</strong>`;
+        break;
+      case 'i':
+        newText = `<em>${selectedText}</em>`;
+        break;
+      case 'link':
+        const url = prompt('Enter URL:', 'https://');
+        if (!url) return;
+        newText = `<a href="${url}">${selectedText || url}</a>`;
+        break;
+      case 'b-quote':
+        newText = `<blockquote>${selectedText}</blockquote>`;
+        break;
+      case 'del':
+        newText = `<del>${selectedText}</del>`;
+        break;
+      case 'ins':
+        newText = `<ins>${selectedText}</ins>`;
+        break;
+      case 'img':
+        const imgUrl = prompt('Enter image URL:', 'https://');
+        if (!imgUrl) return;
+        newText = `<img src="${imgUrl}" alt="${selectedText || ''}" />`;
+        break;
+      case 'ul':
+        newText = `<ul>\n  <li>${selectedText || 'Item'}</li>\n</ul>`;
+        break;
+      case 'ol':
+        newText = `<ol>\n  <li>${selectedText || 'Item'}</li>\n</ol>`;
+        break;
+      case 'li':
+        newText = `<li>${selectedText}</li>`;
+        break;
+      case 'code':
+        newText = `<code>${selectedText}</code>`;
+        break;
+      case 'more':
+        newText = `<!--more-->`;
+        break;
+      default:
+        newText = selectedText;
+    }
+
+    const newValue = codeValue.substring(0, start) + newText + codeValue.substring(end);
+    setCodeValue(newValue);
+    onChange(newValue);
+  };
+
+  const tagButtonStyle = {
+    padding: '2px 8px',
+    border: '1px solid #c3c4c7',
+    background: '#f6f7f7',
+    borderRadius: '3px',
+    cursor: 'pointer',
+    fontSize: '12px',
+    color: '#2271b1',
+    fontFamily: 'inherit',
+  };
+
+  const tabStyle = (active) => ({
+    padding: '6px 12px',
+    border: 'none',
+    background: active ? '#fff' : 'transparent',
+    cursor: 'pointer',
+    fontSize: '13px',
+    fontWeight: active ? '600' : '400',
+    color: active ? '#1e1e1e' : '#646970',
+    borderRadius: '3px 3px 0 0',
+    marginLeft: '4px',
+  });
+
+  return (
+    <div className="formtura-wysiwyg-editor">
+      {/* Toolbar Row */}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'flex-end',
+        background: '#f0f0f1',
+        border: '1px solid #c3c4c7',
+        borderBottom: 'none',
+        borderRadius: '4px 4px 0 0',
+        padding: '0',
+      }}>
+        {/* Quick Tags for Code mode / Format buttons for Visual */}
+        <div style={{
+          display: 'flex',
+          gap: '2px',
+          padding: '8px',
+          flexWrap: 'wrap',
+        }}>
+          {mode === 'code' ? (
+            <>
+              <button type="button" onClick={() => insertTag('b')} style={tagButtonStyle}>b</button>
+              <button type="button" onClick={() => insertTag('i')} style={tagButtonStyle}>i</button>
+              <button type="button" onClick={() => insertTag('link')} style={tagButtonStyle}>link</button>
+              <button type="button" onClick={() => insertTag('b-quote')} style={tagButtonStyle}>b-quote</button>
+              <button type="button" onClick={() => insertTag('del')} style={tagButtonStyle}>del</button>
+              <button type="button" onClick={() => insertTag('ins')} style={tagButtonStyle}>ins</button>
+              <button type="button" onClick={() => insertTag('img')} style={tagButtonStyle}>img</button>
+              <button type="button" onClick={() => insertTag('ul')} style={tagButtonStyle}>ul</button>
+              <button type="button" onClick={() => insertTag('ol')} style={tagButtonStyle}>ol</button>
+              <button type="button" onClick={() => insertTag('li')} style={tagButtonStyle}>li</button>
+              <button type="button" onClick={() => insertTag('code')} style={tagButtonStyle}>code</button>
+              <button type="button" onClick={() => insertTag('more')} style={tagButtonStyle}>more</button>
+            </>
+          ) : (
+            <>
+              <button type="button" onClick={() => execCommand('bold')} style={tagButtonStyle} title="Bold">
+                <strong>B</strong>
+              </button>
+              <button type="button" onClick={() => execCommand('italic')} style={tagButtonStyle} title="Italic">
+                <em>I</em>
+              </button>
+              <button type="button" onClick={handleLink} style={tagButtonStyle} title="Insert Link">
+                link
+              </button>
+              <button type="button" onClick={() => execCommand('formatBlock', 'blockquote')} style={tagButtonStyle} title="Blockquote">
+                b-quote
+              </button>
+              <button type="button" onClick={() => execCommand('strikeThrough')} style={tagButtonStyle} title="Strikethrough">
+                del
+              </button>
+              <button type="button" onClick={() => execCommand('underline')} style={tagButtonStyle} title="Underline">
+                ins
+              </button>
+              <button type="button" onClick={() => execCommand('insertUnorderedList')} style={tagButtonStyle} title="Bullet List">
+                ul
+              </button>
+              <button type="button" onClick={() => execCommand('insertOrderedList')} style={tagButtonStyle} title="Numbered List">
+                ol
+              </button>
+              <button type="button" onClick={() => execCommand('removeFormat')} style={tagButtonStyle} title="Clear Formatting">
+                close tags
+              </button>
+            </>
+          )}
+        </div>
+
+        {/* Visual / Code Tabs */}
+        <div style={{ display: 'flex', paddingRight: '4px' }}>
+          <button
+            type="button"
+            onClick={() => setMode('visual')}
+            style={tabStyle(mode === 'visual')}
+          >
+            Visual
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode('code')}
+            style={tabStyle(mode === 'code')}
+          >
+            Code
+          </button>
+        </div>
+      </div>
+
+      {/* Content Area */}
+      {mode === 'visual' ? (
+        <div
+          ref={editorRef}
+          contentEditable
+          onInput={handleInput}
+          onBlur={handleInput}
+          className="formtura-wysiwyg-content"
+          style={{
+            minBlockSize: '32rem',
+            maxBlockSize: '40rem',
+            overflowY: 'auto',
+            padding: '12px',
+            border: '1px solid #c3c4c7',
+            borderBlockStart: 'none',
+            borderRadius: '0 0 4px 4px',
+            outline: 'none',
+            background: '#fff',
+            lineHeight: '1.6',
+          }}
+          dangerouslySetInnerHTML={{ __html: value || '' }}
+        />
+      ) : (
+        <textarea
+          id="formtura-code-editor"
+          value={codeValue}
+          onChange={handleCodeChange}
+          style={{
+            inlineSize: '100%',
+            minBlockSize: '32rem',
+            maxBlockSize: '40rem',
+            padding: '12px',
+            border: '1px solid #c3c4c7',
+            borderBlockStart: 'none',
+            borderRadius: '0 0 4px 4px',
+            outline: 'none',
+            background: '#fff',
+            fontFamily: 'Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace',
+            fontSize: '13px',
+            lineHeight: '1.5',
+            resize: 'vertical',
+            boxSizing: 'border-box',
+          }}
+          placeholder="Enter HTML code here..."
+        />
       )}
     </div>
   );
@@ -1034,17 +1477,62 @@ const GeneralTab = ({ field, onUpdate }) => {
       {/* Render field-specific options */}
       {renderFieldSpecificOptions()}
 
-      <div className="formtura-form-group">
-        <label htmlFor="field-description">
-          Description <Tooltip text="Enter text for the form field description." />
-        </label>
-        <textarea
-          id="field-description"
-          value={field.description || ''}
-          onChange={(e) => handleChange('description', e.target.value)}
-          rows={4}
-        />
-      </div>
+      {/* Description - WYSIWYG for HTML fields, textarea for others */}
+      {field.type === 'html' ? (
+        <div className="formtura-form-group">
+          <label>
+            Content <Tooltip text="Enter HTML content that will be displayed in the form. Use the toolbar to format text, add links, and create lists." />
+          </label>
+          <WysiwygEditor
+            value={field.description || ''}
+            onChange={(html) => handleChange('description', html)}
+          />
+        </div>
+      ) : (
+        <div className="formtura-form-group">
+          <label htmlFor="field-description">
+            Description <Tooltip text="Enter text for the form field description." />
+          </label>
+          <textarea
+            id="field-description"
+            value={field.description || ''}
+            onChange={(e) => handleChange('description', e.target.value)}
+            rows={4}
+          />
+        </div>
+      )}
+
+      {/* Enable Summary for Total field - After Description */}
+      {field.type === 'total' && (
+        <div className="formtura-form-group">
+          <div className="formtura-toggle-group">
+            <label className="formtura-toggle">
+              <input
+                type="checkbox"
+                checked={field.enableSummary || false}
+                onChange={(e) => handleChange('enableSummary', e.target.checked)}
+              />
+              <span className="formtura-toggle-slider"></span>
+            </label>
+            <span className="formtura-toggle-label">
+              Enable Summary <Tooltip text="Enable order summary for this field." />
+            </span>
+          </div>
+          {field.enableSummary && (
+            <p className="formtura-info-message" style={{
+              marginTop: '0.75rem',
+              padding: '0.75rem',
+              background: '#e8f4fc',
+              borderRadius: '4px',
+              color: '#1e73be',
+              fontSize: '13px',
+              lineHeight: '1.5',
+            }}>
+              Example data is shown in the form editor. Actual products and totals will be displayed when you preview or embed your form.
+            </p>
+          )}
+        </div>
+      )}
 
       {/* Number Slider Fields - After Description */}
       {field.type === 'number-slider' && (
@@ -1799,10 +2287,28 @@ const AdvancedTab = ({ field, onUpdate }) => {
             </label>
             <span className="formtura-toggle-label">
               Enable Calculation <Tooltip text="Enable mathematical calculations using values from other form fields." />
-              <span className="formtura-pro-badge">PRO</span>
             </span>
           </div>
         </div>
+
+        {field.enableCalculation && (
+          <div className="formtura-form-group">
+            <label htmlFor="field-calculation-formula">
+              Calculation Formula <Tooltip text="Enter a mathematical formula using field IDs. Example: {field_1} + {field_2} * 2. Supported operators: +, -, *, /, (). Use {field_ID} to reference other number fields." />
+            </label>
+            <textarea
+              id="field-calculation-formula"
+              value={field.calculationFormula || ''}
+              onChange={(e) => handleChange('calculationFormula', e.target.value)}
+              placeholder="e.g., {field_1} + {field_2} * 0.1"
+              rows={3}
+              className="formtura-textarea"
+            />
+            <p className="formtura-field-description">
+              Use <code>{'{field_ID}'}</code> to reference other number fields. Supported operators: <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>()</code>
+            </p>
+          </div>
+        )}
       </div>
     );
   }
@@ -1950,6 +2456,240 @@ const AdvancedTab = ({ field, onUpdate }) => {
             </label>
             <span className="formtura-toggle-label">
               Read-Only <Tooltip text="Check this option to display the field's value without allowing changes. The value will still be submitted." />
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // HTML Field has specific Advanced options
+  if (field.type === 'html') {
+    return (
+      <div className="formtura-field-options">
+        <div className="formtura-field-options-title">
+          <strong>{field.label}</strong> <span className="formtura-field-id">(ID #{field.id.slice(-4)})</span>
+        </div>
+
+        <div className="formtura-form-group">
+          <label htmlFor="field-visibility">
+            Visibility <Tooltip text="Determines who can see this field. Select 'Everyone' for public visibility or choose specific user roles." />
+          </label>
+          <select
+            id="field-visibility"
+            value={field.visibility || 'everyone'}
+            onChange={(e) => handleChange('visibility', e.target.value)}
+          >
+            <option value="everyone">Everyone</option>
+            <option value="logged_in">Logged In Users</option>
+            {window.formturaBuilderData?.userRoles?.map(role => (
+              <option key={role.value} value={role.value}>{role.label}</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="formtura-form-group">
+          <label htmlFor="field-css-classes">
+            CSS Classes <Tooltip text="Enter CSS class names for the form field container. Separate multiple class names with spaces." />
+          </label>
+          <input
+            id="field-css-classes"
+            type="text"
+            value={field.cssClasses || ''}
+            onChange={(e) => handleChange('cssClasses', e.target.value)}
+          />
+          <button
+            className="formtura-btn-link"
+            type="button"
+            onClick={() => setShowLayouts(!showLayouts)}
+          >
+            <Tag size={14} /> {showLayouts ? 'Hide Layouts' : 'Show Layouts'}
+          </button>
+
+          {showLayouts && (
+            <div className="formtura-layout-selector">
+              <p className="formtura-layout-title">Select your layout</p>
+              <div className="formtura-layout-grid">
+                <div className="formtura-layout-option" title="2 Columns (1/2 + 1/2)">
+                  <div className="formtura-layout-preview">
+                    <button
+                      type="button"
+                      className="formtura-layout-col formtura-layout-col-clickable"
+                      onClick={() => handleLayoutSelect('1-1', 0)}
+                      title="First column (1/2)"
+                    ></button>
+                    <button
+                      type="button"
+                      className="formtura-layout-col formtura-layout-col-clickable"
+                      onClick={() => handleLayoutSelect('1-1', 1)}
+                      title="Second column (1/2)"
+                    ></button>
+                  </div>
+                </div>
+                <div className="formtura-layout-option" title="3 Columns (1/3 + 1/3 + 1/3)">
+                  <div className="formtura-layout-preview">
+                    <button
+                      type="button"
+                      className="formtura-layout-col formtura-layout-col-clickable"
+                      onClick={() => handleLayoutSelect('1-2', 0)}
+                      title="First column (1/3)"
+                    ></button>
+                    <button
+                      type="button"
+                      className="formtura-layout-col formtura-layout-col-clickable"
+                      onClick={() => handleLayoutSelect('1-2', 1)}
+                      title="Second column (1/3)"
+                    ></button>
+                    <button
+                      type="button"
+                      className="formtura-layout-col formtura-layout-col-clickable"
+                      onClick={() => handleLayoutSelect('1-2', 2)}
+                      title="Third column (1/3)"
+                    ></button>
+                  </div>
+                </div>
+                <div className="formtura-layout-option" title="4 Columns (1/4 + 1/4 + 1/4 + 1/4)">
+                  <div className="formtura-layout-preview">
+                    <button
+                      type="button"
+                      className="formtura-layout-col formtura-layout-col-clickable"
+                      onClick={() => handleLayoutSelect('1-3', 0)}
+                      title="First column (1/4)"
+                    ></button>
+                    <button
+                      type="button"
+                      className="formtura-layout-col formtura-layout-col-clickable"
+                      onClick={() => handleLayoutSelect('1-3', 1)}
+                      title="Second column (1/4)"
+                    ></button>
+                    <button
+                      type="button"
+                      className="formtura-layout-col formtura-layout-col-clickable"
+                      onClick={() => handleLayoutSelect('1-3', 2)}
+                      title="Third column (1/4)"
+                    ></button>
+                    <button
+                      type="button"
+                      className="formtura-layout-col formtura-layout-col-clickable"
+                      onClick={() => handleLayoutSelect('1-3', 3)}
+                      title="Fourth column (1/4)"
+                    ></button>
+                  </div>
+                </div>
+                <div className="formtura-layout-option" title="2 Columns (1/3 + 2/3)">
+                  <div className="formtura-layout-preview">
+                    <button
+                      type="button"
+                      className="formtura-layout-col formtura-layout-col-clickable"
+                      style={{flex: '1'}}
+                      onClick={() => handleLayoutSelect('2-1', 0)}
+                      title="First column (1/3)"
+                    ></button>
+                    <button
+                      type="button"
+                      className="formtura-layout-col formtura-layout-col-clickable"
+                      style={{flex: '2'}}
+                      onClick={() => handleLayoutSelect('2-1', 1)}
+                      title="Second column (2/3)"
+                    ></button>
+                  </div>
+                </div>
+                <div className="formtura-layout-option" title="2 Columns (2/3 + 1/3)">
+                  <div className="formtura-layout-preview">
+                    <button
+                      type="button"
+                      className="formtura-layout-col formtura-layout-col-clickable"
+                      style={{flex: '2'}}
+                      onClick={() => handleLayoutSelect('2-2', 0)}
+                      title="First column (2/3)"
+                    ></button>
+                    <button
+                      type="button"
+                      className="formtura-layout-col formtura-layout-col-clickable"
+                      style={{flex: '1'}}
+                      onClick={() => handleLayoutSelect('2-2', 1)}
+                      title="Second column (1/3)"
+                    ></button>
+                  </div>
+                </div>
+                <div className="formtura-layout-option" title="2 Columns (1/4 + 3/4)">
+                  <div className="formtura-layout-preview">
+                    <button
+                      type="button"
+                      className="formtura-layout-col formtura-layout-col-clickable"
+                      style={{flex: '1'}}
+                      onClick={() => handleLayoutSelect('3-1', 0)}
+                      title="First column (1/4)"
+                    ></button>
+                    <button
+                      type="button"
+                      className="formtura-layout-col formtura-layout-col-clickable"
+                      style={{flex: '3'}}
+                      onClick={() => handleLayoutSelect('3-1', 1)}
+                      title="Second column (3/4)"
+                    ></button>
+                  </div>
+                </div>
+                <div className="formtura-layout-option" title="2 Columns (3/4 + 1/4)">
+                  <div className="formtura-layout-preview">
+                    <button
+                      type="button"
+                      className="formtura-layout-col formtura-layout-col-clickable"
+                      style={{flex: '3'}}
+                      onClick={() => handleLayoutSelect('3-2', 0)}
+                      title="First column (3/4)"
+                    ></button>
+                    <button
+                      type="button"
+                      className="formtura-layout-col formtura-layout-col-clickable"
+                      style={{flex: '1'}}
+                      onClick={() => handleLayoutSelect('3-2', 1)}
+                      title="Second column (1/4)"
+                    ></button>
+                  </div>
+                </div>
+                <div className="formtura-layout-option" title="3 Columns (1/4 + 2/4 + 1/4)">
+                  <div className="formtura-layout-preview">
+                    <button
+                      type="button"
+                      className="formtura-layout-col formtura-layout-col-clickable"
+                      style={{flex: '1'}}
+                      onClick={() => handleLayoutSelect('4-1', 0)}
+                      title="First column (1/4)"
+                    ></button>
+                    <button
+                      type="button"
+                      className="formtura-layout-col formtura-layout-col-clickable"
+                      style={{flex: '2'}}
+                      onClick={() => handleLayoutSelect('4-1', 1)}
+                      title="Second column (2/4)"
+                    ></button>
+                    <button
+                      type="button"
+                      className="formtura-layout-col formtura-layout-col-clickable"
+                      style={{flex: '1'}}
+                      onClick={() => handleLayoutSelect('4-1', 2)}
+                      title="Third column (1/4)"
+                    ></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="formtura-form-group">
+          <div className="formtura-toggle-group">
+            <label className="formtura-toggle">
+              <input
+                type="checkbox"
+                checked={field.hideLabel || false}
+                onChange={(e) => handleChange('hideLabel', e.target.checked)}
+              />
+              <span className="formtura-toggle-slider"></span>
+            </label>
+            <span className="formtura-toggle-label">
+              Hide Label <Tooltip text="Check this option to hide the form field label." />
             </span>
           </div>
         </div>
@@ -2198,54 +2938,81 @@ const AdvancedTab = ({ field, onUpdate }) => {
         </div>
       </div>
 
-      <div className="formtura-form-group">
-        <div className="formtura-toggle-group">
-          <label className="formtura-toggle">
-            <input
-              type="checkbox"
-              checked={field.readOnly || false}
-              onChange={(e) => handleChange('readOnly', e.target.checked)}
-            />
-            <span className="formtura-toggle-slider"></span>
-          </label>
-          <span className="formtura-toggle-label">
-            Read-Only <Tooltip text="Check this option to display the field's value without allowing changes. The value will still be submitted." />
-          </span>
+      {/* Read-Only - Not shown for Total field */}
+      {field.type !== 'total' && (
+        <div className="formtura-form-group">
+          <div className="formtura-toggle-group">
+            <label className="formtura-toggle">
+              <input
+                type="checkbox"
+                checked={field.readOnly || false}
+                onChange={(e) => handleChange('readOnly', e.target.checked)}
+              />
+              <span className="formtura-toggle-slider"></span>
+            </label>
+            <span className="formtura-toggle-label">
+              Read-Only <Tooltip text="Check this option to display the field's value without allowing changes. The value will still be submitted." />
+            </span>
+          </div>
         </div>
-      </div>
+      )}
 
-      <div className="formtura-form-group">
-        <div className="formtura-toggle-group">
-          <label className="formtura-toggle">
-            <input
-              type="checkbox"
-              checked={field.enableAutocomplete || false}
-              onChange={(e) => handleChange('enableAutocomplete', e.target.checked)}
-            />
-            <span className="formtura-toggle-slider"></span>
-          </label>
-          <span className="formtura-toggle-label">
-            Enable Address Autocomplete <Tooltip text="Enable Google Maps autocomplete for address fields to help users quickly enter their address." />
-          </span>
+      {/* Enable Address Autocomplete - Not shown for Total field */}
+      {field.type !== 'total' && (
+        <div className="formtura-form-group">
+          <div className="formtura-toggle-group">
+            <label className="formtura-toggle">
+              <input
+                type="checkbox"
+                checked={field.enableAutocomplete || false}
+                onChange={(e) => handleChange('enableAutocomplete', e.target.checked)}
+              />
+              <span className="formtura-toggle-slider"></span>
+            </label>
+            <span className="formtura-toggle-label">
+              Enable Address Autocomplete <Tooltip text="Enable Google Maps autocomplete for address fields to help users quickly enter their address." />
+            </span>
+          </div>
         </div>
-      </div>
+      )}
 
-      <div className="formtura-form-group">
-        <div className="formtura-toggle-group">
-          <label className="formtura-toggle">
-            <input
-              type="checkbox"
-              checked={field.enableCalculation || false}
-              onChange={(e) => handleChange('enableCalculation', e.target.checked)}
-            />
-            <span className="formtura-toggle-slider"></span>
-          </label>
-          <span className="formtura-toggle-label">
-            Enable Calculation <Tooltip text="Enable mathematical calculations using values from other form fields." />
-            <span className="formtura-pro-badge">PRO</span>
-          </span>
+      {/* Enable Calculation - Not shown for Total field */}
+      {field.type !== 'total' && (
+        <div className="formtura-form-group">
+          <div className="formtura-toggle-group">
+            <label className="formtura-toggle">
+              <input
+                type="checkbox"
+                checked={field.enableCalculation || false}
+                onChange={(e) => handleChange('enableCalculation', e.target.checked)}
+              />
+              <span className="formtura-toggle-slider"></span>
+            </label>
+            <span className="formtura-toggle-label">
+              Enable Calculation <Tooltip text="Enable mathematical calculations using values from other form fields." />
+            </span>
+          </div>
         </div>
-      </div>
+      )}
+
+      {field.enableCalculation && field.type !== 'total' && (
+        <div className="formtura-form-group">
+          <label htmlFor="field-calculation-formula">
+            Calculation Formula <Tooltip text="Enter a mathematical formula using field IDs. Example: {field_1} + {field_2} * 2. Supported operators: +, -, *, /, (). Use {field_ID} to reference other number fields." />
+          </label>
+          <textarea
+            id="field-calculation-formula"
+            value={field.calculationFormula || ''}
+            onChange={(e) => handleChange('calculationFormula', e.target.value)}
+            placeholder="e.g., {field_1} + {field_2} * 0.1"
+            rows={3}
+            className="formtura-textarea"
+          />
+          <p className="formtura-field-description">
+            Use <code>{'{field_ID}'}</code> to reference other number fields. Supported operators: <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>()</code>
+          </p>
+        </div>
+      )}
     </div>
   );
 };

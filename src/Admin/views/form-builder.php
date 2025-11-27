@@ -28,7 +28,8 @@ window.formturaBuilder = {
 	nonce: '<?php echo wp_create_nonce( 'formtura_admin' ); ?>',
 	formId: '<?php echo esc_js( $form_id ); ?>',
 	editUrl: '<?php echo esc_url( admin_url( 'admin.php?page=formtura-builder' ) ); ?>',
-	formsUrl: '<?php echo esc_url( admin_url( 'admin.php?page=formtura' ) ); ?>'
+	formsUrl: '<?php echo esc_url( admin_url( 'admin.php?page=formtura' ) ); ?>',
+	adminUrl: '<?php echo esc_url( admin_url() ); ?>'
 };
 
 </script>

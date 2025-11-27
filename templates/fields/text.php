@@ -15,12 +15,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$field_name = isset( $field['name'] ) ? $field['name'] : '';
-$field_label = isset( $field['label'] ) ? $field['label'] : '';
+$field_id          = isset( $field['id'] ) ? $field['id'] : '';
+$field_name        = isset( $field['name'] ) ? $field['name'] : $field_id;
+$field_label       = isset( $field['label'] ) ? $field['label'] : '';
 $field_placeholder = isset( $field['placeholder'] ) ? $field['placeholder'] : '';
 $field_description = isset( $field['description'] ) ? $field['description'] : '';
-$field_required = isset( $field['required'] ) ? $field['required'] : false;
-$field_value = isset( $field['value'] ) ? $field['value'] : '';
+$field_required    = isset( $field['required'] ) ? $field['required'] : false;
+$field_value       = isset( $field['value'] ) ? $field['value'] : '';
 ?>
 
 <div class="fta-field fta-field-text">
@@ -37,6 +38,7 @@ $field_value = isset( $field['value'] ) ? $field['value'] : '';
 		class="fta-field-input"
 		placeholder="<?php echo esc_attr( $field_placeholder ); ?>"
 		value="<?php echo esc_attr( $field_value ); ?>"
+		data-field-id="<?php echo esc_attr( $field_id ); ?>"
 		<?php echo $field_required ? 'required' : ''; ?>
 	/>
 

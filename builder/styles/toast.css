@@ -118,3 +118,165 @@
     min-width: auto;
   }
 }
+
+/* Confirm Dialog */
+.formtura-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100000;
+  animation: fadeIn 0.15s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.formtura-confirm-dialog {
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  padding: 24px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  animation: scaleIn 0.2s ease-out;
+  border-top: 4px solid var(--fta-builder-primary, hsl(356, 91%, 56%));
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.formtura-confirm-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.formtura-confirm-content {
+  margin-bottom: 24px;
+}
+
+.formtura-confirm-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 8px 0;
+}
+
+.formtura-confirm-message {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.formtura-confirm-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.formtura-confirm-btn {
+  padding: 10px 24px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+  min-width: 100px;
+}
+
+.formtura-confirm-btn:focus {
+  outline: 2px solid var(--fta-builder-primary, hsl(356, 91%, 56%));
+  outline-offset: 2px;
+}
+
+.formtura-confirm-btn-primary {
+  background: var(--fta-builder-primary, hsl(356, 91%, 56%));
+  color: #ffffff;
+  border-color: var(--fta-builder-primary, hsl(356, 91%, 56%));
+}
+
+.formtura-confirm-btn-primary:hover {
+  background: var(--fta-builder-primary-hover, hsl(356, 91%, 46%));
+  border-color: var(--fta-builder-primary-hover, hsl(356, 91%, 46%));
+}
+
+.formtura-confirm-btn-secondary {
+  background: #ffffff;
+  color: #374151;
+  border-color: #d1d5db;
+}
+
+.formtura-confirm-btn-secondary:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .formtura-confirm-dialog {
+    padding: 20px;
+  }
+
+  .formtura-confirm-actions {
+    flex-direction: column;
+  }
+
+  .formtura-confirm-btn {
+    width: 100%;
+  }
+}
+
+/* Info Dialog - single button variant */
+.formtura-info-dialog .formtura-confirm-message {
+  text-align: center;
+}
+
+.formtura-info-dialog .formtura-confirm-message a {
+  color: var(--fta-builder-primary, hsl(356, 91%, 56%));
+  text-decoration: underline;
+  font-weight: 500;
+}
+
+.formtura-info-dialog .formtura-confirm-message a:hover {
+  color: var(--fta-builder-primary-hover, hsl(356, 91%, 46%));
+}
+
+/* Clickable field items (non-draggable) */
+.formtura-field-item-clickable {
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.formtura-field-item-clickable:hover {
+  background-color: var(--fta-builder-field-dark-blue, hsl(216, 46%, 35%));
+  color: #ffffff;
+}
+
+.formtura-field-item-clickable:hover .formtura-field-icon {
+  color: #ffffff;
+}
+
+.formtura-field-item-clickable:hover .formtura-field-label {
+  color: #ffffff;
+}

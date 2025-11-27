@@ -449,6 +449,12 @@ class Form_Builder {
 			$sanitized['enableCalculation'] = (bool) $field['enableCalculation'];
 		}
 
+		// Sanitize calculation formula.
+		if ( isset( $field['calculationFormula'] ) ) {
+			// Allow basic math operators and field references like {field_id}
+			$sanitized['calculationFormula'] = sanitize_text_field( $field['calculationFormula'] );
+		}
+
 		// Sanitize conditional logic (new format).
 		if ( isset( $field['conditionalLogic'] ) && is_array( $field['conditionalLogic'] ) ) {
 			$sanitized['conditionalLogic'] = $field['conditionalLogic'];

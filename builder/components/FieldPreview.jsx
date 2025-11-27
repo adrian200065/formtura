@@ -437,6 +437,57 @@ const FieldPreview = ({ field }) => {
           </div>
         );
 
+      case 'total':
+        if (field.enableSummary) {
+          // Show order summary table
+          return (
+            <table className="formtura-order-summary" style={{
+              width: '100%',
+              borderCollapse: 'collapse',
+              fontSize: '14px',
+            }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid #e5e7eb' }}>
+                  <th style={{ textAlign: 'left', padding: '8px 12px', fontWeight: '600' }}>Item</th>
+                  <th style={{ textAlign: 'right', padding: '8px 12px', fontWeight: '600', width: '80px' }}>Quantity</th>
+                  <th style={{ textAlign: 'right', padding: '8px 12px', fontWeight: '600', width: '80px' }}>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style={{ borderBottom: '1px solid #f3f4f6' }}>
+                  <td style={{ padding: '8px 12px', color: '#6b7280' }}>Example Product 1</td>
+                  <td style={{ textAlign: 'right', padding: '8px 12px', color: '#6b7280' }}>3</td>
+                  <td style={{ textAlign: 'right', padding: '8px 12px', color: '#6b7280' }}>$30.00</td>
+                </tr>
+                <tr style={{ borderBottom: '1px solid #f3f4f6' }}>
+                  <td style={{ padding: '8px 12px', color: '#6b7280' }}>Example Product 2</td>
+                  <td style={{ textAlign: 'right', padding: '8px 12px', color: '#6b7280' }}>2</td>
+                  <td style={{ textAlign: 'right', padding: '8px 12px', color: '#6b7280' }}>$20.00</td>
+                </tr>
+                <tr style={{ borderBottom: '1px solid #f3f4f6' }}>
+                  <td style={{ padding: '8px 12px', color: '#6b7280' }}>Example Product 3</td>
+                  <td style={{ textAlign: 'right', padding: '8px 12px', color: '#6b7280' }}>1</td>
+                  <td style={{ textAlign: 'right', padding: '8px 12px', color: '#6b7280' }}>$10.00</td>
+                </tr>
+                <tr>
+                  <td style={{ padding: '8px 12px', fontWeight: '600' }}>Total</td>
+                  <td style={{ textAlign: 'right', padding: '8px 12px' }}></td>
+                  <td style={{ textAlign: 'right', padding: '8px 12px', fontWeight: '600' }}>$60.00</td>
+                </tr>
+              </tbody>
+            </table>
+          );
+        }
+        // Default total display (without summary)
+        return (
+          <div className="formtura-total-display" style={{
+            fontSize: '16px',
+            color: '#374151',
+          }}>
+            $0.00
+          </div>
+        );
+
       default:
         return (
           <input

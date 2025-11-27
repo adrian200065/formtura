@@ -241,6 +241,18 @@ class Admin {
 				];
 			}
 
+			// Get all WordPress user roles for visibility settings
+			global $wp_roles;
+			$user_roles = [];
+			if ( ! empty( $wp_roles->roles ) ) {
+				foreach ( $wp_roles->roles as $role_key => $role_data ) {
+					$user_roles[] = [
+						'value' => $role_key,
+						'label' => translate_user_role( $role_data['name'] ),
+					];
+				}
+			}
+
 			// Localize builder script with dynamic data
 			wp_localize_script(
 				'formtura-builder',
@@ -248,6 +260,7 @@ class Admin {
 				[
 					'postTypes'  => $post_type_options,
 					'taxonomies' => $taxonomy_options,
+					'userRoles'  => $user_roles,
 					'ajaxUrl'    => admin_url( 'admin-ajax.php' ),
 					'nonce'      => wp_create_nonce( 'formtura_admin' ),
 				]

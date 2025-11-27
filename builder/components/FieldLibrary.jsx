@@ -24,6 +24,7 @@ import {
     MapPin,
     MessageSquare,
     Minus,
+    MoreHorizontal,
     PenTool,
     Phone,
     Plus,
@@ -240,7 +241,7 @@ const fieldTypes = [
       { type: 'entry-preview', label: 'Entry Preview', icon: Eye },
       { type: 'signature', label: 'Signature', icon: PenTool },
       { type: 'custom-captcha', label: 'Custom Captcha', icon: Lock },
-      { type: 'rating', label: 'Rating', icon: Star },
+      { type: 'rating', label: 'Star Rating', icon: Star },
       { type: 'likert-scale', label: 'Likert Scale', icon: TrendingUp },
       { type: 'net-promoter', label: 'Net Promoter Score', icon: TrendingUp },
     ],
@@ -1456,6 +1457,210 @@ const GeneralTab = ({ field, onUpdate }) => {
         />
       </div>
 
+      {/* File Upload Options Section - After Label for file-upload field type */}
+      {field.type === 'file-upload' && (
+        <div className="formtura-collapsible-section">
+          <details open>
+            <summary className="formtura-collapsible-header">
+              <span>File Upload Options</span>
+              <ChevronDown size={16} className="formtura-collapsible-icon" />
+            </summary>
+            <div className="formtura-collapsible-content">
+              {/* Warning notice */}
+              <div className="formtura-warning-notice" style={{
+                background: '#fef3c7',
+                border: '1px solid #f59e0b',
+                borderRadius: '6px',
+                padding: '12px',
+                marginBottom: '16px',
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '8px',
+              }}>
+                <span style={{ fontSize: '16px' }}>⚠</span>
+                <span style={{ fontSize: '13px', color: '#92400e', lineHeight: '1.5' }}>
+                  Uploads are public. File access can be updated in{' '}
+                  <a href="#" style={{ color: '#1e73be', textDecoration: 'underline' }}>Form Permissions Settings</a>.{' '}
+                  <Tooltip text="Files uploaded with this field can be viewed by anyone with access to a link and could be indexed by search engines. If this is a concern, we recommend enabling file protection and turning off indexing." />
+                </span>
+              </div>
+
+              {/* Toggle options */}
+              <div className="formtura-form-group">
+                <div className="formtura-toggle-group">
+                  <label className="formtura-toggle">
+                    <input
+                      type="checkbox"
+                      checked={field.allowMultiple || false}
+                      onChange={(e) => handleChange('allowMultiple', e.target.checked)}
+                    />
+                    <span className="formtura-toggle-slider"></span>
+                  </label>
+                  <span className="formtura-toggle-label">Allow multiple files to be uploaded</span>
+                </div>
+              </div>
+
+              <div className="formtura-form-group">
+                <div className="formtura-toggle-group">
+                  <label className="formtura-toggle">
+                    <input
+                      type="checkbox"
+                      checked={field.attachToEmail || false}
+                      onChange={(e) => handleChange('attachToEmail', e.target.checked)}
+                    />
+                    <span className="formtura-toggle-slider"></span>
+                  </label>
+                  <span className="formtura-toggle-label">Attach this file to the email notification</span>
+                </div>
+              </div>
+
+              <div className="formtura-form-group">
+                <div className="formtura-toggle-group">
+                  <label className="formtura-toggle">
+                    <input
+                      type="checkbox"
+                      checked={field.deleteOnReplace || false}
+                      onChange={(e) => handleChange('deleteOnReplace', e.target.checked)}
+                    />
+                    <span className="formtura-toggle-slider"></span>
+                  </label>
+                  <span className="formtura-toggle-label">Permanently delete old files when replaced or when the entry is deleted</span>
+                </div>
+              </div>
+
+              <div className="formtura-form-group">
+                <div className="formtura-toggle-group">
+                  <label className="formtura-toggle">
+                    <input
+                      type="checkbox"
+                      checked={field.autoResize || false}
+                      onChange={(e) => handleChange('autoResize', e.target.checked)}
+                    />
+                    <span className="formtura-toggle-slider"></span>
+                  </label>
+                  <span className="formtura-toggle-label">
+                    Automatically resize files before upload{' '}
+                    <Tooltip text="When a large image is uploaded, resize it before you save it to your site." />
+                  </span>
+              </div>
+              </div>
+
+              {/* Allowed file types */}
+              <div className="formtura-form-group">
+                <label>Allowed file types</label>
+                <div className="formtura-radio-inline-group">
+                  <label className="formtura-radio-inline">
+                    <input
+                      type="radio"
+                      name={`file-types-${field.id}`}
+                      checked={field.allowedFileTypes === 'all'}
+                      onChange={() => handleChange('allowedFileTypes', 'all')}
+                    />
+                    <span>Allow all file types</span>
+                  </label>
+                  <label className="formtura-radio-inline">
+                    <input
+                      type="radio"
+                      name={`file-types-${field.id}`}
+                      checked={field.allowedFileTypes === 'specify' || !field.allowedFileTypes}
+                      onChange={() => handleChange('allowedFileTypes', 'specify')}
+                    />
+                    <span>Specify allowed types</span>
+                  </label>
+                </div>
+                {(field.allowedFileTypes === 'specify' || !field.allowedFileTypes) && (
+                  <select
+                    value={field.specifiedTypes || 'jpg, jpeg, jpe, png, gif'}
+                    onChange={(e) => handleChange('specifiedTypes', e.target.value)}
+                    style={{ marginTop: '8px' }}
+                  >
+                    <option value="jpg, jpeg, jpe, png, gif">jpg, jpeg, jpe, png, gif</option>
+                    <option value="pdf">pdf</option>
+                    <option value="doc, docx">doc, docx</option>
+                    <option value="xls, xlsx">xls, xlsx</option>
+                    <option value="jpg, jpeg, jpe, png, gif, pdf">Images & PDF</option>
+                    <option value="jpg, jpeg, jpe, png, gif, pdf, doc, docx">Images, PDF & Documents</option>
+                  </select>
+                )}
+              </div>
+
+              {/* File size limits */}
+              <div className="formtura-form-group">
+                <label>File size limits</label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '8px' }}>
+                  <div>
+                    <label style={{ fontSize: '13px', color: '#6b7280', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      Min file size (MB){' '}
+                      <Tooltip text="Set the minimum file size limit for each file uploaded." />
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.1"
+                      value={field.minFileSize || ''}
+                      onChange={(e) => handleChange('minFileSize', e.target.value)}
+                      placeholder=""
+                    />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '13px', color: '#6b7280', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      Max file size (MB){' '}
+                      <Tooltip text="Set the file size limit for each file uploaded. Your server settings allow a maximum of 256 MB." />
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.1"
+                      value={field.maxFileSize || ''}
+                      onChange={(e) => handleChange('maxFileSize', e.target.value)}
+                      placeholder=""
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Upload text */}
+              <div className="formtura-form-group">
+                <label htmlFor="upload-text">Upload text</label>
+                <input
+                  id="upload-text"
+                  type="text"
+                  value={field.uploadText || 'Drop a file here or click to upload'}
+                  onChange={(e) => handleChange('uploadText', e.target.value)}
+                />
+              </div>
+
+              {/* Compact upload text */}
+              <div className="formtura-form-group">
+                <label htmlFor="compact-upload-text">
+                  Compact upload text{' '}
+                  <Tooltip text="The label shown when the file upload field is compacted with fta_compact CSS layout class." />
+                </label>
+                <input
+                  id="compact-upload-text"
+                  type="text"
+                  value={field.compactUploadText || 'Choose File'}
+                  onChange={(e) => handleChange('compactUploadText', e.target.value)}
+                />
+              </div>
+            </div>
+          </details>
+        </div>
+      )}
+
+      {/* Rich Text Editor - After Label for rich-text field type */}
+      {field.type === 'rich-text' && (
+        <div className="formtura-form-group">
+          <label>
+            Content <Tooltip text="Enter rich text content that users can edit. Use the toolbar to format text, add links, and create lists." />
+          </label>
+          <WysiwygEditor
+            value={field.content || ''}
+            onChange={(html) => handleChange('content', html)}
+          />
+        </div>
+      )}
+
       {/* Name Field Format Selector */}
       {field.type === 'name' && (
         <div className="formtura-form-group">
@@ -1477,7 +1682,7 @@ const GeneralTab = ({ field, onUpdate }) => {
       {/* Render field-specific options */}
       {renderFieldSpecificOptions()}
 
-      {/* Description - WYSIWYG for HTML fields, textarea for others */}
+      {/* Description - WYSIWYG for HTML fields, skip for rich-text (content already shown), textarea for others */}
       {field.type === 'html' ? (
         <div className="formtura-form-group">
           <label>
@@ -1488,7 +1693,7 @@ const GeneralTab = ({ field, onUpdate }) => {
             onChange={(html) => handleChange('description', html)}
           />
         </div>
-      ) : (
+      ) : field.type !== 'rich-text' && (
         <div className="formtura-form-group">
           <label htmlFor="field-description">
             Description <Tooltip text="Enter text for the form field description." />
@@ -1499,6 +1704,39 @@ const GeneralTab = ({ field, onUpdate }) => {
             onChange={(e) => handleChange('description', e.target.value)}
             rows={4}
           />
+        </div>
+      )}
+
+      {/* Rich Text Field - Field Size and Rows after Description area */}
+      {field.type === 'rich-text' && (
+        <div className="formtura-form-group" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+          <div>
+            <label htmlFor="field-size-richtext">
+              Field Size <Tooltip text="Set the width unit for the field." />
+            </label>
+            <select
+              id="field-size-richtext"
+              value={field.fieldSize || 'px'}
+              onChange={(e) => handleChange('fieldSize', e.target.value)}
+            >
+              <option value="px">px</option>
+              <option value="%">%</option>
+              <option value="em">em</option>
+              <option value="rem">rem</option>
+            </select>
+          </div>
+          <div>
+            <label htmlFor="field-rows">
+              Rows <Tooltip text="Set the number of visible text rows for the editor." />
+            </label>
+            <input
+              id="field-rows"
+              type="number"
+              min={1}
+              value={field.rows || 7}
+              onChange={(e) => handleChange('rows', parseInt(e.target.value) || 7)}
+            />
+          </div>
         </div>
       )}
 
@@ -1592,8 +1830,49 @@ const GeneralTab = ({ field, onUpdate }) => {
         </>
       )}
 
-      {/* Required toggle - not shown for number-slider */}
-      {field.type !== 'number-slider' && (
+      {/* Repeater Field - Collapsible and Repeat Layout */}
+      {field.type === 'repeater' && (
+        <>
+          <div className="formtura-form-group">
+            <div className="formtura-toggle-group">
+              <label className="formtura-toggle">
+                <input
+                  type="checkbox"
+                  checked={field.collapsible || false}
+                  onChange={(e) => handleChange('collapsible', e.target.checked)}
+                />
+                <span className="formtura-toggle-slider"></span>
+              </label>
+              <span className="formtura-toggle-label">
+                Collapsible <Tooltip text="Collapsible: This section will slide open and closed." />
+              </span>
+            </div>
+          </div>
+
+          <div className="formtura-form-group">
+            <label htmlFor="field-repeat-layout">
+              Repeat Layout <Tooltip text="Choose how repeater rows are displayed." />
+            </label>
+            <select
+              id="field-repeat-layout"
+              value={field.repeatLayout || 'default'}
+              onChange={(e) => handleChange('repeatLayout', e.target.value)}
+            >
+              <option value="default">Default</option>
+              <option value="inline">Inline</option>
+              <option value="grid">Grid</option>
+            </select>
+            <span className="formtura-field-help">
+              {field.repeatLayout === 'default' && 'No automatic formatting'}
+              {field.repeatLayout === 'inline' && 'Display each field and label in one row'}
+              {field.repeatLayout === 'grid' && 'Display labels as headings above rows of fields'}
+            </span>
+          </div>
+        </>
+      )}
+
+      {/* Required toggle - not shown for number-slider or repeater */}
+      {field.type !== 'number-slider' && field.type !== 'repeater' && (
         <div className="formtura-form-group">
           <div className="formtura-toggle-group">
             <label className="formtura-toggle">
@@ -1610,74 +1889,162 @@ const GeneralTab = ({ field, onUpdate }) => {
           </div>
         </div>
       )}
+
+      {/* Unique toggle - shown for rating field */}
+      {field.type === 'rating' && (
+        <div className="formtura-form-group">
+          <div className="formtura-toggle-group">
+            <label className="formtura-toggle">
+              <input
+                type="checkbox"
+                checked={field.unique || false}
+                onChange={(e) => handleChange('unique', e.target.checked)}
+              />
+              <span className="formtura-toggle-slider"></span>
+            </label>
+            <span className="formtura-toggle-label">
+              Unique <Tooltip text="Unique: Do not allow the same response multiple times. For example, if one user enters 'Joe', then no one else will be allowed to enter the same name." />
+            </span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Style Classes Data
+const styleClassesData = {
+  layouts: [
+    { label: '1/2', value: 'fta-one-half', width: '50%' },
+    { label: '1/2', value: 'fta-one-half', width: '50%' },
+    { label: '1/3', value: 'fta-one-third', width: '33.33%' },
+    { label: '2/3', value: 'fta-two-thirds', width: '66.66%' },
+    { label: '1/4', value: 'fta-one-fourth', width: '25%' },
+    { label: '3/4', value: 'fta-three-fourths', width: '75%' },
+    { label: '1/6', value: 'fta-one-sixth', width: '16.66%' },
+    { label: '5/6', value: 'fta-five-sixths', width: '83.33%' },
+    { label: '100%', value: 'fta-full', width: '100%' },
+  ],
+  otherStyles: [
+    { label: 'Total', value: 'fta_total', tooltip: 'Add this to read-only field to display the text in bold without a border or background.' },
+    { label: 'Big Total', value: 'fta_total_big', tooltip: 'Add this to read-only field to display the text in large, bold text without a border or background.' },
+    { label: 'Scroll Box', value: 'fta_scroll_box', tooltip: 'If you have many checkbox or radio button options, you may add this class to allow your user to easily scroll through the options. Or add a scrolling area around content in an HTML field.' },
+    { label: 'First', value: 'fta_first', tooltip: 'Add this to the first field in each row along with a width. ie fta_first fta4.' },
+    { label: 'Right', value: 'fta_alignright' },
+    { label: 'First Grid Row', value: 'fta_grid_first' },
+    { label: 'Even Grid Row', value: 'fta_grid' },
+    { label: 'Odd Grid Row', value: 'fta_grid_odd' },
+    { label: 'Color Block', value: 'fta_color_block', tooltip: 'Add a background color to the field or section.' },
+    { label: 'Capitalize', value: 'fta_capitalize', tooltip: 'Automatically capitalize the first letter in each word.' },
+  ],
+};
+
+// Reusable CSS Layout Classes Field Component
+const CSSLayoutClassesField = ({ field, onUpdate }) => {
+  const [showStyleClasses, setShowStyleClasses] = React.useState(false);
+  const containerRef = React.useRef(null);
+
+  // Close dropdown when clicking outside
+  React.useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (containerRef.current && !containerRef.current.contains(event.target)) {
+        setShowStyleClasses(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleChange = (value) => {
+    onUpdate(field.id, { cssClasses: value });
+  };
+
+  const handleStyleClassSelect = (classValue) => {
+    const currentClasses = field.cssClasses || '';
+    const classesArray = currentClasses.split(' ').filter(c => c.trim());
+    if (!classesArray.includes(classValue)) {
+      const newClasses = currentClasses ? `${currentClasses} ${classValue}` : classValue;
+      handleChange(newClasses);
+    }
+  };
+
+  return (
+    <div className="formtura-form-group formtura-css-layout-field" ref={containerRef}>
+      <label htmlFor="field-css-classes">
+        CSS Layout Classes <Tooltip text="Add a class for the form field container. Use our predefined classes to align multiple fields in a single row." />
+      </label>
+      <div className="formtura-input-with-button">
+        <input
+          id="field-css-classes"
+          type="text"
+          value={field.cssClasses || ''}
+          onChange={(e) => handleChange(e.target.value)}
+        />
+        <button
+          type="button"
+          className="formtura-ellipsis-btn"
+          onClick={() => setShowStyleClasses(!showStyleClasses)}
+          title="Show style classes"
+        >
+          <MoreHorizontal size={16} />
+        </button>
+      </div>
+
+      {showStyleClasses && (
+        <div className="formtura-style-classes-dropdown">
+          <div className="formtura-style-classes-section">
+            <div className="formtura-style-classes-layouts">
+              <div className="formtura-layout-row">
+                <button type="button" className="formtura-layout-btn" style={{width: '50%'}} onClick={() => handleStyleClassSelect('fta-one-half')}>1/2</button>
+                <button type="button" className="formtura-layout-btn" style={{width: '50%'}} onClick={() => handleStyleClassSelect('fta-one-half')}>1/2</button>
+              </div>
+              <div className="formtura-layout-row">
+                <button type="button" className="formtura-layout-btn" style={{width: '33.33%'}} onClick={() => handleStyleClassSelect('fta-one-third')}>1/3</button>
+                <button type="button" className="formtura-layout-btn" style={{width: '66.66%'}} onClick={() => handleStyleClassSelect('fta-two-thirds')}>2/3</button>
+              </div>
+              <div className="formtura-layout-row">
+                <button type="button" className="formtura-layout-btn" style={{width: '25%'}} onClick={() => handleStyleClassSelect('fta-one-fourth')}>1/4</button>
+                <button type="button" className="formtura-layout-btn" style={{width: '75%'}} onClick={() => handleStyleClassSelect('fta-three-fourths')}>3/4</button>
+              </div>
+              <div className="formtura-layout-row">
+                <button type="button" className="formtura-layout-btn" style={{width: '16.66%'}} onClick={() => handleStyleClassSelect('fta-one-sixth')}>1/6</button>
+                <button type="button" className="formtura-layout-btn" style={{width: '83.33%'}} onClick={() => handleStyleClassSelect('fta-five-sixths')}>5/6</button>
+              </div>
+              <div className="formtura-layout-row">
+                <button type="button" className="formtura-layout-btn" style={{width: '100%'}} onClick={() => handleStyleClassSelect('fta-full')}>100%</button>
+              </div>
+            </div>
+          </div>
+          <div className="formtura-style-classes-section">
+            <div className="formtura-style-classes-header">
+              <span>Other Style Classes</span>
+              <ChevronDown size={14} />
+            </div>
+            <div className="formtura-style-classes-list">
+              {styleClassesData.otherStyles.map((item) => (
+                <button
+                  key={item.value}
+                  type="button"
+                  className="formtura-style-class-item"
+                  onClick={() => handleStyleClassSelect(item.value)}
+                  title={item.tooltip || ''}
+                >
+                  <span>{item.label}</span>
+                  <span className="formtura-style-class-value">{item.value}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
 // Advanced Tab Component
 const AdvancedTab = ({ field, onUpdate }) => {
-  const [showLayouts, setShowLayouts] = React.useState(false);
-
   const handleChange = (key, value) => {
     onUpdate(field.id, { [key]: value });
-  };
-
-  const handleLayoutSelect = (layout, position) => {
-    let cssClasses = '';
-    const isFirst = position === 0;
-
-    switch(layout) {
-      case '1-1': // 2 columns (1/2 + 1/2)
-        cssClasses = isFirst ? 'fta-one-half fta-first' : 'fta-one-half';
-        break;
-      case '1-2': // 3 columns (1/3 + 1/3 + 1/3)
-        cssClasses = isFirst ? 'fta-one-third fta-first' : 'fta-one-third';
-        break;
-      case '1-3': // 4 columns (1/4 + 1/4 + 1/4 + 1/4)
-        cssClasses = isFirst ? 'fta-one-fourth fta-first' : 'fta-one-fourth';
-        break;
-      case '2-1': // 2 columns (1/3 + 2/3)
-        if (position === 0) {
-          cssClasses = 'fta-one-third fta-first';
-        } else {
-          cssClasses = 'fta-two-thirds';
-        }
-        break;
-      case '2-2': // 2 columns (2/3 + 1/3)
-        if (position === 0) {
-          cssClasses = 'fta-two-thirds fta-first';
-        } else {
-          cssClasses = 'fta-one-third';
-        }
-        break;
-      case '3-1': // 2 columns (1/4 + 3/4)
-        if (position === 0) {
-          cssClasses = 'fta-one-fourth fta-first';
-        } else {
-          cssClasses = 'fta-three-fourths';
-        }
-        break;
-      case '3-2': // 2 columns (3/4 + 1/4)
-        if (position === 0) {
-          cssClasses = 'fta-three-fourths fta-first';
-        } else {
-          cssClasses = 'fta-one-fourth';
-        }
-        break;
-      case '4-1': // 3 columns (1/4 + 2/4 + 1/4)
-        if (position === 0) {
-          cssClasses = 'fta-one-fourth fta-first';
-        } else if (position === 1) {
-          cssClasses = 'fta-two-fourths';
-        } else {
-          cssClasses = 'fta-one-fourth';
-        }
-        break;
-      default:
-        cssClasses = '';
-    }
-    handleChange('cssClasses', cssClasses);
-    setShowLayouts(false);
   };
 
   // Name field has different Advanced options
@@ -1807,24 +2174,7 @@ const AdvancedTab = ({ field, onUpdate }) => {
           </div>
         )}
 
-        <div className="formtura-form-group">
-          <label htmlFor="field-css-classes">
-            CSS Classes <Tooltip text="Enter CSS class names for the form field container. Separate multiple class names with spaces." />
-          </label>
-          <input
-            id="field-css-classes"
-            type="text"
-            value={field.cssClasses || ''}
-            onChange={(e) => handleChange('cssClasses', e.target.value)}
-          />
-          <button
-            className="formtura-btn-link"
-            type="button"
-            onClick={() => setShowLayouts(!showLayouts)}
-          >
-            <Tag size={14} /> {showLayouts ? 'Hide Layouts' : 'Show Layouts'}
-          </button>
-        </div>
+        <CSSLayoutClassesField field={field} onUpdate={onUpdate} />
 
         <div className="formtura-form-group">
           <div className="formtura-toggle-group">
@@ -1913,24 +2263,7 @@ const AdvancedTab = ({ field, onUpdate }) => {
           />
         </div>
 
-        <div className="formtura-form-group">
-          <label htmlFor="field-css-classes">
-            CSS Classes <Tooltip text="Enter CSS class names for the form field container. Separate multiple class names with spaces." />
-          </label>
-          <input
-            id="field-css-classes"
-            type="text"
-            value={field.cssClasses || ''}
-            onChange={(e) => handleChange('cssClasses', e.target.value)}
-          />
-          <button
-            className="formtura-btn-link"
-            type="button"
-            onClick={() => setShowLayouts(!showLayouts)}
-          >
-            <Tag size={14} /> {showLayouts ? 'Hide Layouts' : 'Show Layouts'}
-          </button>
-        </div>
+        <CSSLayoutClassesField field={field} onUpdate={onUpdate} />
 
         <div className="formtura-form-group">
           <div className="formtura-toggle-group">
@@ -1960,6 +2293,106 @@ const AdvancedTab = ({ field, onUpdate }) => {
             </label>
             <span className="formtura-toggle-label">
               Read-Only <Tooltip text="Check this option to display the field's value without allowing changes. The value will still be submitted." />
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Repeater field has specific Advanced options
+  if (field.type === 'repeater') {
+    return (
+      <div className="formtura-field-options">
+        <div className="formtura-field-options-title">
+          <strong>{field.label}</strong> <span className="formtura-field-id">(ID #{field.id.slice(-4)})</span>
+        </div>
+
+        <div className="formtura-form-group">
+          <label htmlFor="field-size">
+            Field Size <Tooltip text="Select the default size for the field." />
+          </label>
+          <select
+            id="field-size"
+            value={field.fieldSize || 'medium'}
+            onChange={(e) => handleChange('fieldSize', e.target.value)}
+          >
+            <option value="small">Small</option>
+            <option value="medium">Medium</option>
+            <option value="large">Large</option>
+          </select>
+        </div>
+
+        <div className="formtura-form-group" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+          <div>
+            <label htmlFor="field-add-label">
+              Add New Label <Tooltip text="Text for the add button." />
+            </label>
+            <input
+              id="field-add-label"
+              type="text"
+              value={field.addNewLabel || 'Add'}
+              onChange={(e) => handleChange('addNewLabel', e.target.value)}
+              placeholder="Add"
+            />
+          </div>
+          <div>
+            <label htmlFor="field-remove-label">
+              Remove Label <Tooltip text="Text for the remove button." />
+            </label>
+            <input
+              id="field-remove-label"
+              type="text"
+              value={field.removeLabel || 'Remove'}
+              onChange={(e) => handleChange('removeLabel', e.target.value)}
+              placeholder="Remove"
+            />
+          </div>
+        </div>
+
+        <div className="formtura-form-group" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+          <div>
+            <label htmlFor="field-min-rows">
+              Min Repeater Rows <Tooltip text="Minimum number of repeater rows." />
+            </label>
+            <input
+              id="field-min-rows"
+              type="number"
+              value={field.minRows || ''}
+              onChange={(e) => handleChange('minRows', e.target.value)}
+              placeholder=""
+              min="0"
+            />
+          </div>
+          <div>
+            <label htmlFor="field-max-rows">
+              Max Repeater Rows <Tooltip text="The maximum number of times the end user is allowed to duplicate this section of fields in one entry." />
+            </label>
+            <input
+              id="field-max-rows"
+              type="number"
+              value={field.maxRows || ''}
+              onChange={(e) => handleChange('maxRows', e.target.value)}
+              placeholder=""
+              min="1"
+            />
+          </div>
+        </div>
+
+        <CSSLayoutClassesField field={field} onUpdate={onUpdate} />
+
+        <div className="formtura-form-group">
+          <div className="formtura-toggle-group">
+            <label className="formtura-toggle">
+              <input
+                type="checkbox"
+                checked={field.hideLabel || false}
+                onChange={(e) => handleChange('hideLabel', e.target.checked)}
+              />
+              <span className="formtura-toggle-slider"></span>
+            </label>
+            <span className="formtura-toggle-label">
+              Hide Label <Tooltip text="Check this option to hide the form field label." />
             </span>
           </div>
         </div>
@@ -2088,24 +2521,7 @@ const AdvancedTab = ({ field, onUpdate }) => {
           </div>
         )}
 
-        <div className="formtura-form-group">
-          <label htmlFor="field-css-classes">
-            CSS Classes <Tooltip text="Enter CSS class names for the form field container. Separate multiple class names with spaces." />
-          </label>
-          <input
-            id="field-css-classes"
-            type="text"
-            value={field.cssClasses || ''}
-            onChange={(e) => handleChange('cssClasses', e.target.value)}
-          />
-          <button
-            className="formtura-btn-link"
-            type="button"
-            onClick={() => setShowLayouts(!showLayouts)}
-          >
-            <Tag size={14} /> {showLayouts ? 'Hide Layouts' : 'Show Layouts'}
-          </button>
-        </div>
+        <CSSLayoutClassesField field={field} onUpdate={onUpdate} />
 
         <div className="formtura-form-group">
           <div className="formtura-toggle-group">
@@ -2224,24 +2640,7 @@ const AdvancedTab = ({ field, onUpdate }) => {
           </div>
         </div>
 
-        <div className="formtura-form-group">
-          <label htmlFor="field-css-classes">
-            CSS Classes <Tooltip text="Enter CSS class names for the form field container. Separate multiple class names with spaces." />
-          </label>
-          <input
-            id="field-css-classes"
-            type="text"
-            value={field.cssClasses || ''}
-            onChange={(e) => handleChange('cssClasses', e.target.value)}
-          />
-          <button
-            className="formtura-btn-link"
-            type="button"
-            onClick={() => setShowLayouts(!showLayouts)}
-          >
-            <Tag size={14} /> {showLayouts ? 'Hide Layouts' : 'Show Layouts'}
-          </button>
-        </div>
+        <CSSLayoutClassesField field={field} onUpdate={onUpdate} />
 
         <div className="formtura-form-group">
           <div className="formtura-toggle-group">
@@ -2409,24 +2808,7 @@ const AdvancedTab = ({ field, onUpdate }) => {
           </div>
         )}
 
-        <div className="formtura-form-group">
-          <label htmlFor="field-css-classes">
-            CSS Classes <Tooltip text="Enter CSS class names for the form field container. Separate multiple class names with spaces." />
-          </label>
-          <input
-            id="field-css-classes"
-            type="text"
-            value={field.cssClasses || ''}
-            onChange={(e) => handleChange('cssClasses', e.target.value)}
-          />
-          <button
-            className="formtura-btn-link"
-            type="button"
-            onClick={() => setShowLayouts(!showLayouts)}
-          >
-            <Tag size={14} /> {showLayouts ? 'Hide Layouts' : 'Show Layouts'}
-          </button>
-        </div>
+        <CSSLayoutClassesField field={field} onUpdate={onUpdate} />
 
         <div className="formtura-form-group">
           <div className="formtura-toggle-group">
@@ -2488,195 +2870,131 @@ const AdvancedTab = ({ field, onUpdate }) => {
           </select>
         </div>
 
+        <CSSLayoutClassesField field={field} onUpdate={onUpdate} />
+
         <div className="formtura-form-group">
-          <label htmlFor="field-css-classes">
-            CSS Classes <Tooltip text="Enter CSS class names for the form field container. Separate multiple class names with spaces." />
+          <div className="formtura-toggle-group">
+            <label className="formtura-toggle">
+              <input
+                type="checkbox"
+                checked={field.hideLabel || false}
+                onChange={(e) => handleChange('hideLabel', e.target.checked)}
+              />
+              <span className="formtura-toggle-slider"></span>
+            </label>
+            <span className="formtura-toggle-label">
+              Hide Label <Tooltip text="Check this option to hide the form field label." />
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Star Rating field has specific Advanced options
+  if (field.type === 'rating') {
+    return (
+      <div className="formtura-field-options">
+        <div className="formtura-field-options-title">
+          <strong>{field.label}</strong> <span className="formtura-field-id">(ID #{field.id.slice(-4)})</span>
+        </div>
+
+        <div className="formtura-form-group">
+          <label htmlFor="field-size">
+            Field Size <Tooltip text="Select the default size for the field." />
+          </label>
+          <select
+            id="field-size"
+            value={field.fieldSize || 'medium'}
+            onChange={(e) => handleChange('fieldSize', e.target.value)}
+          >
+            <option value="small">Small</option>
+            <option value="medium">Medium</option>
+            <option value="large">Large</option>
+          </select>
+        </div>
+
+        <div className="formtura-form-group">
+          <label htmlFor="max-rating">
+            Maximum Rating <Tooltip text="Set the maximum number of stars that will be displayed in the rating field." />
           </label>
           <input
-            id="field-css-classes"
-            type="text"
-            value={field.cssClasses || ''}
-            onChange={(e) => handleChange('cssClasses', e.target.value)}
+            id="max-rating"
+            type="number"
+            min={1}
+            max={10}
+            value={field.maxRating || 5}
+            onChange={(e) => handleChange('maxRating', parseInt(e.target.value) || 5)}
           />
-          <button
-            className="formtura-btn-link"
-            type="button"
-            onClick={() => setShowLayouts(!showLayouts)}
-          >
-            <Tag size={14} /> {showLayouts ? 'Hide Layouts' : 'Show Layouts'}
-          </button>
-
-          {showLayouts && (
-            <div className="formtura-layout-selector">
-              <p className="formtura-layout-title">Select your layout</p>
-              <div className="formtura-layout-grid">
-                <div className="formtura-layout-option" title="2 Columns (1/2 + 1/2)">
-                  <div className="formtura-layout-preview">
-                    <button
-                      type="button"
-                      className="formtura-layout-col formtura-layout-col-clickable"
-                      onClick={() => handleLayoutSelect('1-1', 0)}
-                      title="First column (1/2)"
-                    ></button>
-                    <button
-                      type="button"
-                      className="formtura-layout-col formtura-layout-col-clickable"
-                      onClick={() => handleLayoutSelect('1-1', 1)}
-                      title="Second column (1/2)"
-                    ></button>
-                  </div>
-                </div>
-                <div className="formtura-layout-option" title="3 Columns (1/3 + 1/3 + 1/3)">
-                  <div className="formtura-layout-preview">
-                    <button
-                      type="button"
-                      className="formtura-layout-col formtura-layout-col-clickable"
-                      onClick={() => handleLayoutSelect('1-2', 0)}
-                      title="First column (1/3)"
-                    ></button>
-                    <button
-                      type="button"
-                      className="formtura-layout-col formtura-layout-col-clickable"
-                      onClick={() => handleLayoutSelect('1-2', 1)}
-                      title="Second column (1/3)"
-                    ></button>
-                    <button
-                      type="button"
-                      className="formtura-layout-col formtura-layout-col-clickable"
-                      onClick={() => handleLayoutSelect('1-2', 2)}
-                      title="Third column (1/3)"
-                    ></button>
-                  </div>
-                </div>
-                <div className="formtura-layout-option" title="4 Columns (1/4 + 1/4 + 1/4 + 1/4)">
-                  <div className="formtura-layout-preview">
-                    <button
-                      type="button"
-                      className="formtura-layout-col formtura-layout-col-clickable"
-                      onClick={() => handleLayoutSelect('1-3', 0)}
-                      title="First column (1/4)"
-                    ></button>
-                    <button
-                      type="button"
-                      className="formtura-layout-col formtura-layout-col-clickable"
-                      onClick={() => handleLayoutSelect('1-3', 1)}
-                      title="Second column (1/4)"
-                    ></button>
-                    <button
-                      type="button"
-                      className="formtura-layout-col formtura-layout-col-clickable"
-                      onClick={() => handleLayoutSelect('1-3', 2)}
-                      title="Third column (1/4)"
-                    ></button>
-                    <button
-                      type="button"
-                      className="formtura-layout-col formtura-layout-col-clickable"
-                      onClick={() => handleLayoutSelect('1-3', 3)}
-                      title="Fourth column (1/4)"
-                    ></button>
-                  </div>
-                </div>
-                <div className="formtura-layout-option" title="2 Columns (1/3 + 2/3)">
-                  <div className="formtura-layout-preview">
-                    <button
-                      type="button"
-                      className="formtura-layout-col formtura-layout-col-clickable"
-                      style={{flex: '1'}}
-                      onClick={() => handleLayoutSelect('2-1', 0)}
-                      title="First column (1/3)"
-                    ></button>
-                    <button
-                      type="button"
-                      className="formtura-layout-col formtura-layout-col-clickable"
-                      style={{flex: '2'}}
-                      onClick={() => handleLayoutSelect('2-1', 1)}
-                      title="Second column (2/3)"
-                    ></button>
-                  </div>
-                </div>
-                <div className="formtura-layout-option" title="2 Columns (2/3 + 1/3)">
-                  <div className="formtura-layout-preview">
-                    <button
-                      type="button"
-                      className="formtura-layout-col formtura-layout-col-clickable"
-                      style={{flex: '2'}}
-                      onClick={() => handleLayoutSelect('2-2', 0)}
-                      title="First column (2/3)"
-                    ></button>
-                    <button
-                      type="button"
-                      className="formtura-layout-col formtura-layout-col-clickable"
-                      style={{flex: '1'}}
-                      onClick={() => handleLayoutSelect('2-2', 1)}
-                      title="Second column (1/3)"
-                    ></button>
-                  </div>
-                </div>
-                <div className="formtura-layout-option" title="2 Columns (1/4 + 3/4)">
-                  <div className="formtura-layout-preview">
-                    <button
-                      type="button"
-                      className="formtura-layout-col formtura-layout-col-clickable"
-                      style={{flex: '1'}}
-                      onClick={() => handleLayoutSelect('3-1', 0)}
-                      title="First column (1/4)"
-                    ></button>
-                    <button
-                      type="button"
-                      className="formtura-layout-col formtura-layout-col-clickable"
-                      style={{flex: '3'}}
-                      onClick={() => handleLayoutSelect('3-1', 1)}
-                      title="Second column (3/4)"
-                    ></button>
-                  </div>
-                </div>
-                <div className="formtura-layout-option" title="2 Columns (3/4 + 1/4)">
-                  <div className="formtura-layout-preview">
-                    <button
-                      type="button"
-                      className="formtura-layout-col formtura-layout-col-clickable"
-                      style={{flex: '3'}}
-                      onClick={() => handleLayoutSelect('3-2', 0)}
-                      title="First column (3/4)"
-                    ></button>
-                    <button
-                      type="button"
-                      className="formtura-layout-col formtura-layout-col-clickable"
-                      style={{flex: '1'}}
-                      onClick={() => handleLayoutSelect('3-2', 1)}
-                      title="Second column (1/4)"
-                    ></button>
-                  </div>
-                </div>
-                <div className="formtura-layout-option" title="3 Columns (1/4 + 2/4 + 1/4)">
-                  <div className="formtura-layout-preview">
-                    <button
-                      type="button"
-                      className="formtura-layout-col formtura-layout-col-clickable"
-                      style={{flex: '1'}}
-                      onClick={() => handleLayoutSelect('4-1', 0)}
-                      title="First column (1/4)"
-                    ></button>
-                    <button
-                      type="button"
-                      className="formtura-layout-col formtura-layout-col-clickable"
-                      style={{flex: '2'}}
-                      onClick={() => handleLayoutSelect('4-1', 1)}
-                      title="Second column (2/4)"
-                    ></button>
-                    <button
-                      type="button"
-                      className="formtura-layout-col formtura-layout-col-clickable"
-                      style={{flex: '1'}}
-                      onClick={() => handleLayoutSelect('4-1', 2)}
-                      title="Third column (1/4)"
-                    ></button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
+
+        <CSSLayoutClassesField field={field} onUpdate={onUpdate} />
+
+        <div className="formtura-form-group">
+          <div className="formtura-toggle-group">
+            <label className="formtura-toggle">
+              <input
+                type="checkbox"
+                checked={field.hideLabel || false}
+                onChange={(e) => handleChange('hideLabel', e.target.checked)}
+              />
+              <span className="formtura-toggle-slider"></span>
+            </label>
+            <span className="formtura-toggle-label">
+              Hide Label <Tooltip text="Check this option to hide the form field label." />
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Date/Time field has specific Advanced options
+  if (field.type === 'datetime') {
+    return (
+      <div className="formtura-field-options">
+        <div className="formtura-field-options-title">
+          <strong>{field.label}</strong> <span className="formtura-field-id">(ID #{field.id.slice(-4)})</span>
+        </div>
+
+        <div className="formtura-form-group">
+          <label htmlFor="field-size">
+            Field Size <Tooltip text="Select the default size for the field." />
+          </label>
+          <select
+            id="field-size"
+            value={field.fieldSize || 'medium'}
+            onChange={(e) => handleChange('fieldSize', e.target.value)}
+          >
+            <option value="small">Small</option>
+            <option value="medium">Medium</option>
+            <option value="large">Large</option>
+          </select>
+        </div>
+
+        <div className="formtura-form-group">
+          <label>
+            Year Range <Tooltip text="Use four digit years or +/- years to make it dynamic. For example, use -5 for the start of the year and +5 for the end of the year." />
+          </label>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+            <input
+              id="year-range-start"
+              type="text"
+              value={field.yearRangeStart || '-10'}
+              onChange={(e) => handleChange('yearRangeStart', e.target.value)}
+              placeholder="-10"
+            />
+            <input
+              id="year-range-end"
+              type="text"
+              value={field.yearRangeEnd || '+10'}
+              onChange={(e) => handleChange('yearRangeEnd', e.target.value)}
+              placeholder="+10"
+            />
+          </div>
+        </div>
+
+        <CSSLayoutClassesField field={field} onUpdate={onUpdate} />
 
         <div className="formtura-form-group">
           <div className="formtura-toggle-group">
@@ -2731,196 +3049,7 @@ const AdvancedTab = ({ field, onUpdate }) => {
         />
       </div>
 
-
-      <div className="formtura-form-group">
-        <label htmlFor="field-css-classes">
-          CSS Classes <Tooltip text="Enter CSS class names for the form field container. Separate multiple class names with spaces." />
-        </label>
-        <input
-          id="field-css-classes"
-          type="text"
-          value={field.cssClasses || ''}
-          onChange={(e) => handleChange('cssClasses', e.target.value)}
-        />
-        <button
-          className="formtura-btn-link"
-          type="button"
-          onClick={() => setShowLayouts(!showLayouts)}
-        >
-          <Tag size={14} /> {showLayouts ? 'Hide Layouts' : 'Show Layouts'}
-        </button>
-
-        {showLayouts && (
-          <div className="formtura-layout-selector">
-            <p className="formtura-layout-title">Select your layout</p>
-            <div className="formtura-layout-grid">
-              <div className="formtura-layout-option" title="2 Columns (1/2 + 1/2)">
-                <div className="formtura-layout-preview">
-                  <button
-                    type="button"
-                    className="formtura-layout-col formtura-layout-col-clickable"
-                    onClick={() => handleLayoutSelect('1-1', 0)}
-                    title="First column (1/2)"
-                  ></button>
-                  <button
-                    type="button"
-                    className="formtura-layout-col formtura-layout-col-clickable"
-                    onClick={() => handleLayoutSelect('1-1', 1)}
-                    title="Second column (1/2)"
-                  ></button>
-                </div>
-              </div>
-              <div className="formtura-layout-option" title="3 Columns (1/3 + 1/3 + 1/3)">
-                <div className="formtura-layout-preview">
-                  <button
-                    type="button"
-                    className="formtura-layout-col formtura-layout-col-clickable"
-                    onClick={() => handleLayoutSelect('1-2', 0)}
-                    title="First column (1/3)"
-                  ></button>
-                  <button
-                    type="button"
-                    className="formtura-layout-col formtura-layout-col-clickable"
-                    onClick={() => handleLayoutSelect('1-2', 1)}
-                    title="Second column (1/3)"
-                  ></button>
-                  <button
-                    type="button"
-                    className="formtura-layout-col formtura-layout-col-clickable"
-                    onClick={() => handleLayoutSelect('1-2', 2)}
-                    title="Third column (1/3)"
-                  ></button>
-                </div>
-              </div>
-              <div className="formtura-layout-option" title="4 Columns (1/4 + 1/4 + 1/4 + 1/4)">
-                <div className="formtura-layout-preview">
-                  <button
-                    type="button"
-                    className="formtura-layout-col formtura-layout-col-clickable"
-                    onClick={() => handleLayoutSelect('1-3', 0)}
-                    title="First column (1/4)"
-                  ></button>
-                  <button
-                    type="button"
-                    className="formtura-layout-col formtura-layout-col-clickable"
-                    onClick={() => handleLayoutSelect('1-3', 1)}
-                    title="Second column (1/4)"
-                  ></button>
-                  <button
-                    type="button"
-                    className="formtura-layout-col formtura-layout-col-clickable"
-                    onClick={() => handleLayoutSelect('1-3', 2)}
-                    title="Third column (1/4)"
-                  ></button>
-                  <button
-                    type="button"
-                    className="formtura-layout-col formtura-layout-col-clickable"
-                    onClick={() => handleLayoutSelect('1-3', 3)}
-                    title="Fourth column (1/4)"
-                  ></button>
-                </div>
-              </div>
-              <div className="formtura-layout-option" title="2 Columns (1/3 + 2/3)">
-                <div className="formtura-layout-preview">
-                  <button
-                    type="button"
-                    className="formtura-layout-col formtura-layout-col-clickable"
-                    style={{flex: '1'}}
-                    onClick={() => handleLayoutSelect('2-1', 0)}
-                    title="First column (1/3)"
-                  ></button>
-                  <button
-                    type="button"
-                    className="formtura-layout-col formtura-layout-col-clickable"
-                    style={{flex: '2'}}
-                    onClick={() => handleLayoutSelect('2-1', 1)}
-                    title="Second column (2/3)"
-                  ></button>
-                </div>
-              </div>
-              <div className="formtura-layout-option" title="2 Columns (2/3 + 1/3)">
-                <div className="formtura-layout-preview">
-                  <button
-                    type="button"
-                    className="formtura-layout-col formtura-layout-col-clickable"
-                    style={{flex: '2'}}
-                    onClick={() => handleLayoutSelect('2-2', 0)}
-                    title="First column (2/3)"
-                  ></button>
-                  <button
-                    type="button"
-                    className="formtura-layout-col formtura-layout-col-clickable"
-                    style={{flex: '1'}}
-                    onClick={() => handleLayoutSelect('2-2', 1)}
-                    title="Second column (1/3)"
-                  ></button>
-                </div>
-              </div>
-              <div className="formtura-layout-option" title="2 Columns (1/4 + 3/4)">
-                <div className="formtura-layout-preview">
-                  <button
-                    type="button"
-                    className="formtura-layout-col formtura-layout-col-clickable"
-                    style={{flex: '1'}}
-                    onClick={() => handleLayoutSelect('3-1', 0)}
-                    title="First column (1/4)"
-                  ></button>
-                  <button
-                    type="button"
-                    className="formtura-layout-col formtura-layout-col-clickable"
-                    style={{flex: '3'}}
-                    onClick={() => handleLayoutSelect('3-1', 1)}
-                    title="Second column (3/4)"
-                  ></button>
-                </div>
-              </div>
-              <div className="formtura-layout-option" title="2 Columns (3/4 + 1/4)">
-                <div className="formtura-layout-preview">
-                  <button
-                    type="button"
-                    className="formtura-layout-col formtura-layout-col-clickable"
-                    style={{flex: '3'}}
-                    onClick={() => handleLayoutSelect('3-2', 0)}
-                    title="First column (3/4)"
-                  ></button>
-                  <button
-                    type="button"
-                    className="formtura-layout-col formtura-layout-col-clickable"
-                    style={{flex: '1'}}
-                    onClick={() => handleLayoutSelect('3-2', 1)}
-                    title="Second column (1/4)"
-                  ></button>
-                </div>
-              </div>
-              <div className="formtura-layout-option" title="3 Columns (1/4 + 2/4 + 1/4)">
-                <div className="formtura-layout-preview">
-                  <button
-                    type="button"
-                    className="formtura-layout-col formtura-layout-col-clickable"
-                    style={{flex: '1'}}
-                    onClick={() => handleLayoutSelect('4-1', 0)}
-                    title="First column (1/4)"
-                  ></button>
-                  <button
-                    type="button"
-                    className="formtura-layout-col formtura-layout-col-clickable"
-                    style={{flex: '2'}}
-                    onClick={() => handleLayoutSelect('4-1', 1)}
-                    title="Second column (2/4)"
-                  ></button>
-                  <button
-                    type="button"
-                    className="formtura-layout-col formtura-layout-col-clickable"
-                    style={{flex: '1'}}
-                    onClick={() => handleLayoutSelect('4-1', 2)}
-                    title="Third column (1/4)"
-                  ></button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
+      <CSSLayoutClassesField field={field} onUpdate={onUpdate} />
 
       <div className="formtura-form-group">
         <div className="formtura-toggle-group">
@@ -2957,8 +3086,8 @@ const AdvancedTab = ({ field, onUpdate }) => {
         </div>
       )}
 
-      {/* Enable Address Autocomplete - Not shown for Total field */}
-      {field.type !== 'total' && (
+      {/* Enable Address Autocomplete - Not shown for Total, Rating, or DateTime field */}
+      {field.type !== 'total' && field.type !== 'rating' && field.type !== 'datetime' && (
         <div className="formtura-form-group">
           <div className="formtura-toggle-group">
             <label className="formtura-toggle">
@@ -2976,8 +3105,8 @@ const AdvancedTab = ({ field, onUpdate }) => {
         </div>
       )}
 
-      {/* Enable Calculation - Not shown for Total field */}
-      {field.type !== 'total' && (
+      {/* Enable Calculation - Not shown for Total, Rating, or DateTime field */}
+      {field.type !== 'total' && field.type !== 'rating' && field.type !== 'datetime' && (
         <div className="formtura-form-group">
           <div className="formtura-toggle-group">
             <label className="formtura-toggle">

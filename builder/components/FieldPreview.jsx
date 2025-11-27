@@ -415,6 +415,15 @@ const FieldPreview = ({ field }) => {
           />
         );
 
+      case 'datetime':
+        return (
+          <input
+            type="date"
+            required={field.required}
+            readOnly
+          />
+        );
+
       case 'number-slider':
         const minValue = field.minValue !== undefined ? field.minValue : 0;
         const maxValue = field.maxValue !== undefined ? field.maxValue : 10;
@@ -485,6 +494,99 @@ const FieldPreview = ({ field }) => {
             color: '#374151',
           }}>
             $0.00
+          </div>
+        );
+
+      case 'file-upload':
+        const uploadText = field.uploadText || 'Drop a file here or click to upload';
+        const maxFileSizeDisplay = field.maxFileSize || '516';
+
+        return (
+          <div className="formtura-file-upload-preview">
+            <div className="formtura-file-upload-dropzone">
+              <div className="formtura-file-upload-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="17 8 12 3 7 8" />
+                  <line x1="12" y1="3" x2="12" y2="15" />
+                </svg>
+              </div>
+              <div className="formtura-file-upload-text">{uploadText}</div>
+              <div className="formtura-file-upload-size">Maximum file size: {maxFileSizeDisplay}MB</div>
+            </div>
+          </div>
+        );
+
+      case 'repeater':
+        const addLabel = field.addNewLabel || 'Add';
+        const removeLabel = field.removeLabel || 'Remove';
+
+        return (
+          <div className="formtura-repeater-container">
+            <div className="formtura-repeater-controls">
+              <button
+                type="button"
+                className="formtura-repeater-btn formtura-repeater-btn-add"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <span className="formtura-repeater-btn-icon">+</span> {addLabel}
+              </button>
+              <button
+                type="button"
+                className="formtura-repeater-btn formtura-repeater-btn-remove"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <span className="formtura-repeater-btn-icon">−</span> {removeLabel}
+              </button>
+            </div>
+            <div className="formtura-repeater-dropzone">
+              <span className="formtura-repeater-dropzone-text">Add Fields Here</span>
+            </div>
+          </div>
+        );
+
+      case 'rating':
+        const maxStars = field.maxRating || 5;
+        const stars = [];
+        for (let i = 0; i < maxStars; i++) {
+          stars.push(
+            <span key={i} className="formtura-star formtura-star-empty">★</span>
+          );
+        }
+        return (
+          <div className="formtura-star-rating">
+            {stars}
+          </div>
+        );
+
+      case 'rich-text':
+        return (
+          <div className="formtura-richtext-preview">
+            <div className="formtura-richtext-toolbar">
+              <div className="formtura-richtext-buttons">
+                <button type="button" className="formtura-richtext-btn">b</button>
+                <button type="button" className="formtura-richtext-btn formtura-richtext-btn-italic">i</button>
+                <button type="button" className="formtura-richtext-btn formtura-richtext-btn-underline">link</button>
+                <button type="button" className="formtura-richtext-btn">b-quote</button>
+                <button type="button" className="formtura-richtext-btn">del</button>
+                <button type="button" className="formtura-richtext-btn">ins</button>
+                <button type="button" className="formtura-richtext-btn">img</button>
+                <button type="button" className="formtura-richtext-btn">ul</button>
+                <button type="button" className="formtura-richtext-btn">ol</button>
+                <button type="button" className="formtura-richtext-btn">li</button>
+                <button type="button" className="formtura-richtext-btn">code</button>
+                <button type="button" className="formtura-richtext-btn">more</button>
+                <button type="button" className="formtura-richtext-btn">close tags</button>
+              </div>
+              <div className="formtura-richtext-tabs">
+                <button type="button" className="formtura-richtext-tab formtura-richtext-tab-active">Visual</button>
+                <button type="button" className="formtura-richtext-tab">Code</button>
+              </div>
+            </div>
+            <div
+              className="formtura-richtext-content"
+              style={{ minHeight: `${(field.rows || 7) * 1.5}rem` }}
+            ></div>
           </div>
         );
 

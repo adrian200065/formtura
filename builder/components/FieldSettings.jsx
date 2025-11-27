@@ -353,8 +353,49 @@ const GeneralTab = ({ field, onUpdate }) => {
         </>
       )}
 
-      {/* Required toggle - not shown for number-slider */}
-      {field.type !== 'number-slider' && (
+      {/* Repeater Field - Collapsible and Repeat Layout */}
+      {field.type === 'repeater' && (
+        <>
+          <div className="formtura-form-group">
+            <div className="formtura-toggle-group">
+              <label className="formtura-toggle">
+                <input
+                  type="checkbox"
+                  checked={field.collapsible || false}
+                  onChange={(e) => handleChange('collapsible', e.target.checked)}
+                />
+                <span className="formtura-toggle-slider"></span>
+              </label>
+              <span className="formtura-toggle-label">
+                Collapsible <Info size={14} className="formtura-help-icon" title="Collapsible: This section will slide open and closed." />
+              </span>
+            </div>
+          </div>
+
+          <div className="formtura-form-group">
+            <label htmlFor="field-repeat-layout">
+              Repeat Layout <Info size={14} className="formtura-help-icon" />
+            </label>
+            <select
+              id="field-repeat-layout"
+              value={field.repeatLayout || 'default'}
+              onChange={(e) => handleChange('repeatLayout', e.target.value)}
+            >
+              <option value="default">Default</option>
+              <option value="inline">Inline</option>
+              <option value="grid">Grid</option>
+            </select>
+            <span className="formtura-field-help">
+              {field.repeatLayout === 'default' && 'No automatic formatting'}
+              {field.repeatLayout === 'inline' && 'Display each field and label in one row'}
+              {field.repeatLayout === 'grid' && 'Display labels as headings above rows of fields'}
+            </span>
+          </div>
+        </>
+      )}
+
+      {/* Required toggle - not shown for number-slider or repeater */}
+      {field.type !== 'number-slider' && field.type !== 'repeater' && (
         <div className="formtura-form-group">
           <div className="formtura-toggle-group">
             <label className="formtura-toggle">
@@ -460,6 +501,119 @@ const AdvancedTab = ({ field, onUpdate }) => {
             </label>
             <span className="formtura-toggle-label">
               Read-Only <Info size={14} className="formtura-help-icon" />
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Repeater field has specific Advanced options
+  if (field.type === 'repeater') {
+    return (
+      <div className="formtura-field-options">
+        <div className="formtura-field-options-title">
+          <strong>{field.label}</strong> <span className="formtura-field-id">(ID #{field.id.slice(-4)})</span>
+        </div>
+
+        <div className="formtura-form-group">
+          <label htmlFor="field-size">
+            Field Size <Info size={14} className="formtura-help-icon" />
+          </label>
+          <select
+            id="field-size"
+            value={field.fieldSize || 'medium'}
+            onChange={(e) => handleChange('fieldSize', e.target.value)}
+          >
+            <option value="small">Small</option>
+            <option value="medium">Medium</option>
+            <option value="large">Large</option>
+          </select>
+        </div>
+
+        <div className="formtura-form-group formtura-form-group-row">
+          <div className="formtura-form-group-col">
+            <label htmlFor="field-add-label">
+              Add New Label <Info size={14} className="formtura-help-icon" />
+            </label>
+            <input
+              id="field-add-label"
+              type="text"
+              value={field.addNewLabel || 'Add'}
+              onChange={(e) => handleChange('addNewLabel', e.target.value)}
+              placeholder="Add"
+            />
+          </div>
+          <div className="formtura-form-group-col">
+            <label htmlFor="field-remove-label">
+              Remove Label <Info size={14} className="formtura-help-icon" />
+            </label>
+            <input
+              id="field-remove-label"
+              type="text"
+              value={field.removeLabel || 'Remove'}
+              onChange={(e) => handleChange('removeLabel', e.target.value)}
+              placeholder="Remove"
+            />
+          </div>
+        </div>
+
+        <div className="formtura-form-group formtura-form-group-row">
+          <div className="formtura-form-group-col">
+            <label htmlFor="field-min-rows">
+              Min Repeater Rows <Info size={14} className="formtura-help-icon" />
+            </label>
+            <input
+              id="field-min-rows"
+              type="number"
+              value={field.minRows || ''}
+              onChange={(e) => handleChange('minRows', e.target.value)}
+              placeholder=""
+              min="0"
+            />
+          </div>
+          <div className="formtura-form-group-col">
+            <label htmlFor="field-max-rows">
+              Max Repeater Rows <Info size={14} className="formtura-help-icon" title="The maximum number of times the end user is allowed to duplicate this section of fields in one entry." />
+            </label>
+            <input
+              id="field-max-rows"
+              type="number"
+              value={field.maxRows || ''}
+              onChange={(e) => handleChange('maxRows', e.target.value)}
+              placeholder=""
+              min="1"
+            />
+          </div>
+        </div>
+
+        <div className="formtura-form-group">
+          <label htmlFor="field-css-classes">
+            CSS Classes <Info size={14} className="formtura-help-icon" />
+          </label>
+          <input
+            id="field-css-classes"
+            type="text"
+            value={field.cssClasses || ''}
+            onChange={(e) => handleChange('cssClasses', e.target.value)}
+          />
+          <button className="formtura-btn-link" type="button">
+            <Tag size={14} /> Show Layouts
+          </button>
+        </div>
+
+        <div className="formtura-form-group">
+          <div className="formtura-toggle-group">
+            <label className="formtura-toggle">
+              <input
+                type="checkbox"
+                checked={field.hideLabel || false}
+                onChange={(e) => handleChange('hideLabel', e.target.checked)}
+              />
+              <span className="formtura-toggle-slider"></span>
+            </label>
+            <span className="formtura-toggle-label">
+              Hide Label <Info size={14} className="formtura-help-icon" />
             </span>
           </div>
         </div>

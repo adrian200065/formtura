@@ -102,6 +102,61 @@ const FormBuilder = ({ formId }) => {
           increment: 1,
           valueDisplay: 'Selected Value: {value}',
         };
+      case 'repeater':
+        return {
+          ...baseField,
+          label: 'Repeater',
+          collapsible: false,
+          repeatLayout: 'default',
+          addNewLabel: 'Add',
+          removeLabel: 'Remove',
+          minRows: '',
+          maxRows: '',
+          children: [],
+        };
+      case 'rating':
+        return {
+          ...baseField,
+          label: 'Star Rating',
+          maxRating: 5,
+          unique: false,
+        };
+      case 'datetime':
+        return {
+          ...baseField,
+          label: 'Date',
+          yearRangeStart: '-10',
+          yearRangeEnd: '+10',
+        };
+      case 'rich-text':
+        return {
+          ...baseField,
+          label: 'Rich Text',
+          content: '',
+          fieldSize: 'px',
+          rows: 7,
+        };
+      case 'html':
+        return {
+          ...baseField,
+          label: 'HTML',
+          content: '',
+        };
+      case 'file-upload':
+        return {
+          ...baseField,
+          label: 'File Upload',
+          allowMultiple: false,
+          attachToEmail: false,
+          deleteOnReplace: false,
+          autoResize: false,
+          allowedFileTypes: 'specify',
+          specifiedTypes: 'jpg, jpeg, jpe, png, gif',
+          minFileSize: '',
+          maxFileSize: '',
+          uploadText: 'Drop a file here or click to upload',
+          compactUploadText: 'Choose File',
+        };
       default:
         return baseField;
     }
@@ -120,6 +175,12 @@ const FormBuilder = ({ formId }) => {
       phone: 'Phone Number',
       date: 'Date',
       'number-slider': 'Number Slider',
+      'repeater': 'Repeater',
+      'rating': 'Star Rating',
+      'datetime': 'Date',
+      'rich-text': 'Rich Text',
+      'html': 'HTML',
+      'file-upload': 'File Upload',
     };
     return labels[type] || 'Field';
   };

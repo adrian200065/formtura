@@ -63,7 +63,7 @@
     line-height: 1.5;
     position: relative;
     display: grid;
-    grid-template-columns: 25rem 1fr;
+    grid-template-columns: 30rem 1fr;
     grid-template-rows: auto 1fr;
     grid-template-areas:
         "header header"
@@ -693,6 +693,33 @@ select.formtura-field-size-large {
     margin-block-end: var(--fta-builder-space-md);
 }
 
+.formtura-form-group-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--fta-builder-space-md);
+}
+
+.formtura-form-group-row .formtura-form-group-col {
+    display: flex;
+    flex-direction: column;
+}
+
+.formtura-form-group-row .formtura-form-group-col label {
+    font-size: .875rem;
+    font-weight: 500;
+    display: block;
+    margin-block-end: var(--fta-builder-space-xs);
+}
+
+.formtura-form-group-row .formtura-form-group-col input {
+    font-family: inherit;
+    font-size: .875rem;
+    inline-size: 100%;
+    padding: var(--fta-builder-space-sm);
+    border: 1px solid var(--fta-builder-border);
+    border-radius: var(--fta-builder-radius-sm);
+}
+
 .formtura-form-group label {
     font-size: .875rem;
     font-weight: 500;
@@ -886,7 +913,7 @@ select.formtura-field-size-large {
 /* Toggle Switch */
 .formtura-toggle-group {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: var(--fta-builder-space-sm);
 }
 
@@ -895,6 +922,8 @@ select.formtura-field-size-large {
     display: inline-block;
     inline-size: 2.5rem;
     block-size: 1.25rem;
+    flex-shrink: 0;
+    margin-top: 2px;
 }
 
 .formtura-toggle input {
@@ -936,8 +965,10 @@ select.formtura-field-size-large {
     color: var(--fta-builder-text);
     font-size: .875rem;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
+    flex-wrap: wrap;
     gap: var(--fta-builder-space-xs);
+    line-height: 1.4;
 }
 
 /* Badge */
@@ -2135,4 +2166,735 @@ input[type="range"]::-moz-range-thumb:hover {
 .formtura-wysiwyg-content a {
     color: var(--fta-builder-primary);
     text-decoration: underline;
+}
+
+/* Repeater Field Styles */
+.formtura-repeater-container {
+    width: 100%;
+}
+
+.formtura-repeater-controls {
+    display: flex;
+    gap: var(--fta-builder-space-sm);
+    margin-bottom: var(--fta-builder-space-sm);
+}
+
+.formtura-repeater-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    border-radius: var(--fta-builder-radius);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    border: 1px solid;
+}
+
+.formtura-repeater-btn-add {
+    color: var(--fta-builder-field-dark-blue);
+    background-color: transparent;
+    border-color: var(--fta-builder-field-dark-blue);
+}
+
+.formtura-repeater-btn-add:hover {
+    color: var(--fta-builder-text-light);
+    background-color: var(--fta-builder-field-dark-blue);
+}
+
+.formtura-repeater-btn-remove {
+    color: var(--fta-builder-field-light-blue);
+    background-color: transparent;
+    border-color: var(--fta-builder-field-light-blue);
+}
+
+.formtura-repeater-btn-remove:hover {
+    color: var(--fta-builder-text-light);
+    background-color: var(--fta-builder-field-light-blue);
+}
+
+.formtura-repeater-btn-icon {
+    font-weight: 700;
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.formtura-repeater-dropzone {
+    border: 2px dashed var(--fta-builder-border);
+    border-radius: var(--fta-builder-radius);
+    padding: var(--fta-builder-space-xl) var(--fta-builder-space-lg);
+    text-align: center;
+    background-color: hsl(0, 0%, 99%);
+    min-height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.formtura-repeater-dropzone-text {
+    color: var(--fta-builder-text-muted);
+    font-size: 0.875rem;
+}
+
+/* Repeater field when selected - add connector line */
+.formtura-dropped-field.selected .formtura-repeater-dropzone {
+    border-color: var(--fta-builder-field-dark-blue);
+    position: relative;
+}
+
+.formtura-dropped-field.selected .formtura-repeater-dropzone::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: linear-gradient(to bottom, var(--fta-builder-field-dark-blue) 0%, var(--fta-builder-field-dark-blue) 50%, transparent 50%, transparent 100%);
+    background-size: 3px 8px;
+    border-radius: 2px 0 0 2px;
+}
+
+/* Star Rating Field Styles */
+.formtura-star-rating {
+    display: flex;
+    gap: 0.25rem;
+    padding: 0.5rem 0;
+}
+
+.formtura-star {
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: color 0.15s ease;
+    line-height: 1;
+}
+
+.formtura-star-empty {
+    color: #d1d5db;
+}
+
+.formtura-star-filled {
+    color: #fbbf24;
+}
+
+.formtura-star:hover {
+    color: #f59e0b;
+}
+
+/* Date/Time Field Styles */
+.formtura-datetime-preview {
+    width: 100%;
+    position: relative;
+}
+
+.formtura-datetime-input {
+    width: 100%;
+    padding: 0.625rem 0.75rem;
+    border: 2px solid #3b82f6;
+    border-radius: var(--fta-builder-radius);
+    font-size: 0.875rem;
+    background: #fff;
+    cursor: pointer;
+}
+
+.formtura-calendar-preview {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 1000;
+    background: #fff;
+    border-radius: var(--fta-builder-radius);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 1rem;
+    width: 280px;
+    margin-top: 0.25rem;
+}
+
+.formtura-calendar-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.formtura-calendar-nav {
+    background: none;
+    border: none;
+    padding: 0.25rem 0.5rem;
+    cursor: pointer;
+    color: var(--fta-builder-text-muted);
+    font-size: 0.875rem;
+}
+
+.formtura-calendar-nav:hover {
+    color: var(--fta-builder-text);
+}
+
+.formtura-calendar-month,
+.formtura-calendar-year {
+    padding: 0.25rem 0.5rem;
+    border: 1px solid var(--fta-builder-border);
+    border-radius: var(--fta-builder-radius-sm);
+    font-size: 0.875rem;
+    background: #fff;
+    cursor: pointer;
+}
+
+.formtura-calendar-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--fta-builder-text-muted);
+    margin-bottom: 0.5rem;
+}
+
+.formtura-calendar-weekdays span {
+    padding: 0.25rem;
+}
+
+.formtura-calendar-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-size: 0.8125rem;
+    gap: 0.125rem;
+}
+
+.formtura-calendar-day {
+    padding: 0.375rem;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.formtura-calendar-day:hover {
+    background: #f3f4f6;
+}
+
+.formtura-calendar-today {
+    background: #e5e7eb;
+    font-weight: 600;
+}
+
+.formtura-calendar-selected {
+    background: #3b82f6 !important;
+    color: #fff;
+    font-weight: 600;
+}
+
+/* CSS Layout Classes Field Styles */
+.formtura-css-layout-field {
+    position: relative;
+}
+
+.formtura-input-with-button {
+    display: flex;
+    gap: 0;
+    position: relative;
+}
+
+.formtura-input-with-button input {
+    flex: 1;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-right: none;
+}
+
+.formtura-ellipsis-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 0.75rem;
+    background: #fff;
+    border: 1px solid var(--fta-builder-border);
+    border-left: none;
+    border-radius: 0 var(--fta-builder-radius) var(--fta-builder-radius) 0;
+    cursor: pointer;
+    color: var(--fta-builder-text-muted);
+    transition: all 0.15s ease;
+}
+
+.formtura-ellipsis-btn:hover {
+    background: #f3f4f6;
+    color: var(--fta-builder-text);
+}
+
+.formtura-style-classes-dropdown {
+    position: absolute;
+    top: calc(100% + 0.25rem);
+    left: 0;
+    right: 0;
+    z-index: 99999;
+    background: #fff;
+    border: 1px solid var(--fta-builder-border);
+    border-radius: var(--fta-builder-radius);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    max-height: 350px;
+    overflow-y: auto;
+}
+
+.formtura-style-classes-section {
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--fta-builder-border);
+}
+
+.formtura-style-classes-section:last-child {
+    border-bottom: none;
+}
+
+.formtura-style-classes-layouts {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.formtura-layout-row {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.formtura-layout-btn {
+    padding: 0.5rem;
+    background: #fff;
+    border: 1px solid #3b82f6;
+    border-radius: var(--fta-builder-radius);
+    color: #3b82f6;
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-align: center;
+}
+
+.formtura-layout-btn:hover {
+    background: #3b82f6;
+    color: #fff;
+}
+
+.formtura-style-classes-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--fta-builder-text);
+    cursor: pointer;
+}
+
+.formtura-style-classes-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.formtura-style-class-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    background: none;
+    border: none;
+    border-bottom: 1px solid #f3f4f6;
+    cursor: pointer;
+    text-align: left;
+    font-size: 0.875rem;
+    transition: background 0.15s ease;
+    width: 100%;
+}
+
+.formtura-style-class-item:last-child {
+    border-bottom: none;
+}
+
+.formtura-style-class-item:hover {
+    background: #f9fafb;
+}
+
+.formtura-style-class-value {
+    color: var(--fta-builder-text-muted);
+    font-family: monospace;
+    font-size: 0.8125rem;
+}
+
+/* Rich Text Field Preview Styles */
+.formtura-richtext-preview {
+    width: 100%;
+    border: 1px solid #c3c4c7;
+    border-radius: var(--fta-builder-radius);
+    overflow: hidden;
+}
+
+.formtura-richtext-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    background: #f0f0f1;
+    padding: 0;
+    border-bottom: 1px solid #c3c4c7;
+}
+
+.formtura-richtext-buttons {
+    display: flex;
+    gap: 2px;
+    padding: 8px;
+    flex-wrap: wrap;
+}
+
+.formtura-richtext-btn {
+    padding: 2px 8px;
+    border: 1px solid #c3c4c7;
+    background: #f6f7f7;
+    border-radius: 3px;
+    cursor: default;
+    font-size: 12px;
+    color: #2271b1;
+    font-family: inherit;
+    line-height: 1.4;
+}
+
+.formtura-richtext-btn-italic {
+    font-style: italic;
+}
+
+.formtura-richtext-btn-underline {
+    text-decoration: underline;
+}
+
+.formtura-richtext-tabs {
+    display: flex;
+    padding-right: 4px;
+}
+
+.formtura-richtext-tab {
+    padding: 6px 12px;
+    border: none;
+    background: transparent;
+    cursor: default;
+    font-size: 13px;
+    font-weight: 400;
+    color: #646970;
+    border-radius: 3px 3px 0 0;
+    margin-left: 4px;
+}
+
+.formtura-richtext-tab-active {
+    background: #fff;
+    font-weight: 600;
+    color: #1e1e1e;
+}
+
+.formtura-richtext-content {
+    background: #fff;
+    padding: 12px;
+    min-height: 10.5rem;
+}
+
+/* Form Preview - Star Rating Interactive */
+.formtura-star-rating-interactive .formtura-star {
+    cursor: pointer;
+    transition: color 0.15s ease, transform 0.1s ease;
+}
+
+.formtura-star-rating-interactive .formtura-star:hover {
+    color: #fbbf24;
+    transform: scale(1.1);
+}
+
+/* Form Preview - Repeater Field */
+.formtura-repeater-preview {
+    border: 1px dashed #d1d5db;
+    border-radius: var(--fta-builder-radius);
+    padding: 1rem;
+}
+
+.formtura-repeater-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: var(--fta-builder-radius);
+    margin-bottom: 0.75rem;
+}
+
+.formtura-repeater-row-content {
+    flex: 1;
+}
+
+.formtura-repeater-row-placeholder {
+    color: var(--fta-builder-text-muted);
+    font-size: 0.875rem;
+    font-style: italic;
+}
+
+.formtura-repeater-remove-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.375rem 0.75rem;
+    background: #fee2e2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+    border-radius: var(--fta-builder-radius);
+    font-size: 0.8125rem;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.formtura-repeater-remove-btn:hover {
+    background: #fecaca;
+}
+
+.formtura-repeater-add-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.5rem 1rem;
+    background: #dbeafe;
+    color: #2563eb;
+    border: 1px solid #bfdbfe;
+    border-radius: var(--fta-builder-radius);
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.formtura-repeater-add-btn:hover {
+    background: #bfdbfe;
+}
+
+/* Form Preview - Rich Text Editor */
+.formtura-richtext-editor-preview {
+    width: 100%;
+    border: 1px solid #c3c4c7;
+    border-radius: var(--fta-builder-radius);
+    overflow: hidden;
+}
+
+.formtura-richtext-toolbar-preview {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    background: #f0f0f1;
+    padding: 0;
+    border-bottom: 1px solid #c3c4c7;
+}
+
+.formtura-richtext-buttons-preview {
+    display: flex;
+    gap: 2px;
+    padding: 8px;
+    flex-wrap: wrap;
+}
+
+.formtura-richtext-buttons-preview button {
+    padding: 2px 8px;
+    border: 1px solid #c3c4c7;
+    background: #f6f7f7;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+    color: #2271b1;
+    font-family: inherit;
+    line-height: 1.4;
+    transition: background 0.15s ease;
+}
+
+.formtura-richtext-buttons-preview button:hover {
+    background: #e5e5e5;
+}
+
+.formtura-richtext-tabs-preview {
+    display: flex;
+    padding-right: 4px;
+}
+
+.formtura-richtext-tabs-preview button {
+    padding: 6px 12px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 400;
+    color: #646970;
+    border-radius: 3px 3px 0 0;
+    margin-left: 4px;
+}
+
+.formtura-richtext-tabs-preview button.active {
+    background: #fff;
+    font-weight: 600;
+    color: #1e1e1e;
+}
+
+.formtura-richtext-content-preview {
+    background: #fff;
+    padding: 12px;
+    min-height: 10.5rem;
+    outline: none;
+    line-height: 1.6;
+}
+
+.formtura-richtext-content-preview:focus {
+    box-shadow: inset 0 0 0 1px #2271b1;
+}
+
+/* Form Preview - HTML Content */
+.formtura-html-content {
+    padding: 0.5rem 0;
+    line-height: 1.6;
+}
+
+.formtura-html-content p {
+    margin: 0 0 1rem 0;
+}
+
+.formtura-html-content p:last-child {
+    margin-bottom: 0;
+}
+
+/* ========================================
+   File Upload Field Styles
+   ======================================== */
+
+/* Canvas preview styles */
+.formtura-file-upload-preview {
+    width: 100%;
+}
+
+.formtura-file-upload-dropzone {
+    border: .125rem dashed #c3c4c7;
+    border-radius: .375rem;
+    padding: 1.5rem 1.25rem;
+    text-align: center;
+    background: #f6f7f7;
+    transition: border-color 0.2s, background-color 0.2s;
+    cursor: pointer;
+}
+
+.formtura-file-upload-dropzone:hover {
+    border-color: #2271b1;
+    background: #f0f6fc;
+}
+
+.formtura-file-upload-icon {
+    color: #646970;
+    margin-bottom: .5rem;
+}
+
+.formtura-file-upload-icon svg {
+    width: 2rem;
+    height: 2rem;
+}
+
+.formtura-file-upload-text {
+    color: #1e1e1e;
+    font-size: .875rem;
+    font-weight: 400;
+    margin-bottom: .25rem;
+}
+
+.formtura-file-upload-size {
+    color: #2271b1;
+    font-size: .75rem;
+}
+
+/* Collapsible section for File Upload Options */
+.formtura-collapsible-section {
+    margin-bottom: 1rem;
+}
+
+.formtura-collapsible-section details {
+    border: .0625rem solid var(--fta-builder-border);
+    border-radius: var(--fta-builder-radius);
+    background: #fff;
+}
+
+.formtura-collapsible-section summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: .75rem 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+}
+
+.formtura-collapsible-section summary::-webkit-details-marker {
+    display: none;
+}
+
+.formtura-collapsible-section summary::marker {
+    display: none;
+}
+
+.formtura-collapsible-section details[open] summary {
+    border-bottom: .0625rem solid var(--fta-builder-border);
+}
+
+.formtura-collapsible-section .formtura-collapsible-icon {
+    transition: transform 0.2s;
+}
+
+.formtura-collapsible-section details[open] .formtura-collapsible-icon {
+    transform: rotate(180deg);
+}
+
+.formtura-collapsible-content {
+    padding: 1rem;
+}
+
+/* Radio Inline Group - for file type selection */
+.formtura-radio-inline-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem 1.5rem;
+    margin-top: .5rem;
+}
+
+.formtura-radio-inline {
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+    gap: .625rem;
+    cursor: pointer;
+    font-size: .875rem;
+}
+
+.formtura-radio-inline input[type="radio"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 1rem;
+    height: 1rem;
+    border: .125rem solid #d1d5db;
+    border-radius: 50%;
+    margin: 0;
+    margin-inline-end: .25rem;
+    cursor: pointer;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.formtura-radio-inline input[type="radio"]:checked {
+    border-color: var(--fta-builder-primary);
+}
+
+.formtura-radio-inline input[type="radio"]:checked::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: .5rem;
+    height: .5rem;
+    background: var(--fta-builder-primary);
+    border-radius: 50%;
+}
+
+.formtura-radio-inline span {
+    white-space: nowrap;
 }

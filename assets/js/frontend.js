@@ -34,8 +34,13 @@
 			// Real-time validation
 			$(document).on('blur', '.fta-field-input, .fta-field-textarea, .fta-field-select', this.validateField);
 
-			// File upload
-			$(document).on('change', '.fta-file-upload-input', this.handleFileUpload);
+			// File upload - change event
+			$(document).on('change', '.fta-file-upload-input, .fta-file-upload-input-compact', this.handleFileUpload);
+
+			// File upload - drag and drop events
+			$(document).on('dragover dragenter', '.fta-file-upload', this.handleDragOver);
+			$(document).on('dragleave dragend', '.fta-file-upload', this.handleDragLeave);
+			$(document).on('drop', '.fta-file-upload', this.handleDrop);
 
 			// Character counter
 			$(document).on('input', '[data-char-limit]', this.updateCharCounter);
@@ -229,17 +234,142 @@
 		},
 
 		/**
-		 * Handle file upload.
+		 * Handle file upload change event.
 		 */
 		handleFileUpload(e) {
 			const $input = $(this);
-			const $uploadArea = $input.closest('.fta-file-upload');
 			const files = e.target.files;
 
 			if (files.length > 0) {
-				const fileNames = Array.from(files).map(file => file.name).join(', ');
-				$uploadArea.find('.fta-file-upload-text').text(fileNames);
+				FormturaFrontend.updateFileUploadUI($input, files);
+				FormturaFrontend.validateFileUpload($input, files);
 			}
+		},
+
+		/**
+		 * Handle drag over event for file upload.
+		 */
+		handleDragOver(e) {
+			e.preventDefault();
+			e.stopPropagation();
+			$(this).addClass('fta-file-upload-dragover');
+		},
+
+		/**
+		 * Handle drag leave event for file upload.
+		 */
+		handleDragLeave(e) {
+			e.preventDefault();
+			e.stopPropagation();
+			$(this).removeClass('fta-file-upload-dragover');
+		},
+
+		/**
+		 * Handle drop event for file upload.
+		 */
+		handleDrop(e) {
+			e.preventDefault();
+			e.stopPropagation();
+
+			const $uploadArea = $(this);
+			$uploadArea.removeClass('fta-file-upload-dragover');
+
+			const $input = $uploadArea.find('.fta-file-upload-input');
+			const files = e.originalEvent.dataTransfer.files;
+
+			if (files.length > 0) {
+				// Create a new DataTransfer to assign files to the input
+				const dataTransfer = new DataTransfer();
+				const allowMultiple = $input.prop('multiple');
+
+				if (allowMultiple) {
+					for (let i = 0; i < files.length; i++) {
+						dataTransfer.items.add(files[i]);
+					}
+				} else {
+					dataTransfer.items.add(files[0]);
+				}
+
+				$input[0].files = dataTransfer.files;
+				FormturaFrontend.updateFileUploadUI($input, dataTransfer.files);
+				FormturaFrontend.validateFileUpload($input, dataTransfer.files);
+			}
+		},
+
+		/**
+		 * Update file upload UI with selected files.
+		 */
+		updateFileUploadUI($input, files) {
+			const $uploadArea = $input.closest('.fta-file-upload');
+			const $compactArea = $input.closest('.fta-file-upload-compact');
+			const $previewArea = $uploadArea.siblings('.fta-file-upload-preview');
+			const fileNames = Array.from(files).map(file => file.name);
+
+			if ($uploadArea.length) {
+				// Dropzone style - update text
+				$uploadArea.find('.fta-file-upload-text').text(fileNames.join(', '));
+				$uploadArea.addClass('fta-file-upload-has-files');
+
+				// Show preview for images
+				if ($previewArea.length) {
+					$previewArea.empty();
+					Array.from(files).forEach(file => {
+						if (file.type.startsWith('image/')) {
+							const reader = new FileReader();
+							reader.onload = function(e) {
+								$previewArea.append(`
+									<div class="fta-file-preview-item">
+										<img src="${e.target.result}" alt="${file.name}" />
+										<span class="fta-file-preview-name">${file.name}</span>
+									</div>
+								`);
+							};
+							reader.readAsDataURL(file);
+						} else {
+							$previewArea.append(`
+								<div class="fta-file-preview-item">
+									<span class="fta-file-preview-icon">📄</span>
+									<span class="fta-file-preview-name">${file.name}</span>
+								</div>
+							`);
+						}
+					});
+				}
+			}
+
+			if ($compactArea.length) {
+				// Compact style - update filename display
+				$compactArea.find('.fta-file-upload-filename').text(fileNames.join(', '));
+			}
+		},
+
+		/**
+		 * Validate file upload (size limits).
+		 */
+		validateFileUpload($input, files) {
+			const $fieldWrapper = $input.closest('.fta-field');
+			const minSize = parseFloat($input.data('min-size')) || 0;
+			const maxSize = parseFloat($input.data('max-size')) || 256;
+
+			// Remove previous errors
+			$fieldWrapper.removeClass('has-error');
+			$fieldWrapper.find('.fta-field-error').remove();
+
+			for (const file of files) {
+				const fileSizeMB = file.size / (1024 * 1024);
+
+				if (minSize > 0 && fileSizeMB < minSize) {
+					FormturaFrontend.addFieldError($fieldWrapper, `File "${file.name}" is too small. Minimum size is ${minSize}MB.`);
+					return false;
+				}
+
+				if (maxSize > 0 && fileSizeMB > maxSize) {
+					FormturaFrontend.addFieldError($fieldWrapper, `File "${file.name}" is too large. Maximum size is ${maxSize}MB.`);
+					return false;
+				}
+			}
+
+			return true;
 		},
 
 		/**

@@ -25,7 +25,7 @@ $submit_text = isset( $form_settings['submit_button_text'] ) ? $form_settings['s
 ?>
 
 <div class="fta-form-container" id="fta-form-<?php echo esc_attr( $form_id ); ?>">
-	<form class="fta-form" data-form-id="<?php echo esc_attr( $form_id ); ?>" method="post">
+	<form class="fta-form" data-form-id="<?php echo esc_attr( $form_id ); ?>" method="post" enctype="multipart/form-data">
 
 		<?php if ( $form_title || $form_description ) : ?>
 			<div class="fta-form-header">

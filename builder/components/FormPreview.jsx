@@ -570,35 +570,16 @@ const FormPreview = ({ fields, formSettings, onClose }) => {
           return <RepeaterPreview field={field} />;
 
         case 'rich-text':
+          // Renders as a plain textarea on the frontend, so the preview must
+          // not advertise an editor toolbar the visitor never gets.
           return (
-            <div className="formtura-richtext-editor-preview">
-              <div className="formtura-richtext-toolbar-preview">
-                <div className="formtura-richtext-buttons-preview">
-                  <button type="button">b</button>
-                  <button type="button"><em>i</em></button>
-                  <button type="button"><u>link</u></button>
-                  <button type="button">b-quote</button>
-                  <button type="button">del</button>
-                  <button type="button">ins</button>
-                  <button type="button">img</button>
-                  <button type="button">ul</button>
-                  <button type="button">ol</button>
-                  <button type="button">li</button>
-                  <button type="button">code</button>
-                  <button type="button">more</button>
-                  <button type="button">close tags</button>
-                </div>
-                <div className="formtura-richtext-tabs-preview">
-                  <button type="button" className="active">Visual</button>
-                  <button type="button">Code</button>
-                </div>
-              </div>
-              <div
-                className="formtura-richtext-content-preview"
-                contentEditable
-                dangerouslySetInnerHTML={{ __html: field.content || '' }}
-              />
-            </div>
+            <textarea
+              placeholder={field.placeholder}
+              rows={field.rows || 7}
+              required={field.required}
+              readOnly={field.readOnly}
+              className={fieldSizeClass}
+            />
           );
 
         case 'file-upload':

@@ -359,7 +359,6 @@
   font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
 }
 
-.formtura-richtext-preview,
 .formtura-richtext-editor-preview,
 .formtura-wysiwyg-editor {
   background: var(--bg-card);
@@ -368,7 +367,6 @@
   border-radius: var(--radius-md);
 }
 
-.formtura-richtext-toolbar,
 .formtura-richtext-toolbar-preview,
 .formtura-wysiwyg-toolbar {
   background: var(--surface-subtle);
@@ -429,36 +427,13 @@
   font-size: var(--text-xs);
 }
 
-.formtura-richtext-buttons,
 .formtura-richtext-buttons-preview,
-.formtura-richtext-tabs,
 .formtura-richtext-tabs-preview {
   display: flex;
   align-items: center;
   gap: var(--space-1);
 }
 
-.formtura-richtext-btn,
-.formtura-richtext-tab {
-  color: var(--text-muted);
-  background: transparent;
-  min-block-size: 2rem;
-  padding-inline: var(--space-2);
-  border: 1px solid transparent;
-  border-radius: var(--radius-sm);
-  font-size: var(--text-xs);
-  cursor: pointer;
-}
-
-.formtura-richtext-btn:hover,
-.formtura-richtext-tab:hover,
-.formtura-richtext-tab-active {
-  color: var(--text-main);
-  background: var(--bg-card);
-  border-color: var(--border-light);
-}
-
-.formtura-richtext-content,
 .formtura-richtext-content-preview,
 .formtura-wysiwyg-content {
   min-block-size: 9rem;

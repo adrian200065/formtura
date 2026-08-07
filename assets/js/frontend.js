@@ -25,6 +25,7 @@
 			this.initSliders();
 			this.renderRecaptchaWidgets();
 			this.initSignaturePads();
+			this.initPayments();
 		},
 
 		/**
@@ -298,6 +299,103 @@
 					.find('.fta-slider-value')
 					.text(String(template).replace('{value}', $slider.val()));
 			});
+		},
+
+		/**
+		 * Keep every form's total display in step with its selections.
+		 *
+		 * Display-side convenience only: the server recomputes the amount
+		 * from the form definition on submission and ignores this value.
+		 */
+		initPayments() {
+			$(document).on('change', '.fta-payment-input, .fta-payment-select', function() {
+				FormturaFrontend.recalculateTotal($(this).closest('.fta-form'));
+			});
+
+			// Initial state: single items count before any interaction.
+			$('.fta-form').each(function() {
+				const $form = $(this);
+				if ($form.find('.fta-field-total').length) {
+					FormturaFrontend.recalculateTotal($form);
+				}
+			});
+		},
+
+		/**
+		 * Collect the currently selected payment items in a form.
+		 *
+		 * @return {Array<{label: string, price: number}>}
+		 */
+		selectedPaymentItems($form) {
+			const items = [];
+
+			$form.find('.fta-payment-input').each(function() {
+				const $input = $(this);
+				const type = ($input.attr('type') || '').toLowerCase();
+
+				if ((type === 'checkbox' || type === 'radio') && !$input.prop('checked')) {
+					return;
+				}
+
+				items.push({
+					label: $input.data('item-label') || '',
+					price: parseFloat($input.data('price')) || 0,
+				});
+			});
+
+			$form.find('.fta-payment-select').each(function() {
+				const $option = $(this).find('option:selected');
+				const price = parseFloat($option.data('price')) || 0;
+
+				if ($option.val()) {
+					items.push({ label: $option.data('item-label') || $option.text(), price });
+				}
+			});
+
+			return items;
+		},
+
+		/**
+		 * Format an amount with the localized currency symbol.
+		 */
+		formatPrice(amount) {
+			const symbol = (window.formturaFrontend && formturaFrontend.currency && formturaFrontend.currency.symbol) || '$';
+			return symbol + amount.toFixed(2);
+		},
+
+		/**
+		 * Recompute and render a form's total display and summary.
+		 */
+		recalculateTotal($form) {
+			const $total = $form.find('.fta-field-total');
+
+			if (!$total.length) {
+				return;
+			}
+
+			const items = FormturaFrontend.selectedPaymentItems($form);
+			let amount = items.reduce((sum, item) => sum + item.price, 0);
+
+			// A validated coupon (set by the coupon apply flow) discounts the
+			// displayed amount; the server re-validates independently.
+			const coupon = $form.data('ftaCoupon');
+			if (coupon) {
+				amount -= coupon.type === 'percent' ? (amount * coupon.value) / 100 : coupon.value;
+			}
+			amount = Math.max(0, Math.round(amount * 100) / 100);
+
+			$total.find('.fta-total-amount').text(FormturaFrontend.formatPrice(amount));
+
+			const $summary = $total.find('.fta-order-summary-body');
+			if ($summary.length) {
+				$summary.empty();
+				items.forEach(item => {
+					$('<tr>')
+						.append($('<td>').text(item.label))
+						.append($('<td>').text(FormturaFrontend.formatPrice(item.price)))
+						.appendTo($summary);
+				});
+			}
 		},
 
 		/**

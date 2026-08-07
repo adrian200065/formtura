@@ -101,6 +101,9 @@ class Frontend {
 							'action'  => $recaptcha['action'],
 						]
 						: null,
+					'currency'  => [
+						'symbol' => fta_get_currency_symbol(),
+					],
 					'strings'   => [
 						'submitting'       => __( 'Submitting...', FORMTURA_TEXTDOMAIN ),
 						'error'            => __( 'An error occurred. Please try again.', FORMTURA_TEXTDOMAIN ),

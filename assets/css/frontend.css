@@ -253,6 +253,32 @@
 	font-size: var(--fta-form-text-sm);
 }
 
+/* Payments */
+.fta-choice-price {
+	color: hsl(210, 9%, 46%);
+	margin-inline-start: 0.5em;
+}
+
+.fta-total-display {
+	display: flex;
+	justify-content: space-between;
+	font-weight: 600;
+	padding-block: var(--fta-form-space-sm);
+	border-block-start: 1px solid var(--fta-form-border);
+}
+
+.fta-order-summary {
+	width: 100%;
+	border-collapse: collapse;
+	margin-block-end: var(--fta-form-space-sm);
+}
+
+.fta-order-summary td,
+.fta-order-summary th {
+	text-align: start;
+	padding-block: 0.25em;
+}
+
 /* Submit Button */
 .fta-form-footer {
 	margin-block-start: var(--fta-form-space-xl);

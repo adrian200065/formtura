@@ -200,6 +200,8 @@ const FormBuilder = ({ formId }) => {
           ],
           showPriceAfterLabels: true,
         };
+      case 'total':
+        return { ...baseField, label: 'Total', enableSummary: false };
       default:
         return baseField;
     }
@@ -233,6 +235,7 @@ const FormBuilder = ({ formId }) => {
       'payment-checkbox': 'Checkbox Items',
       'payment-multiple': 'Multiple Items',
       'payment-dropdown': 'Dropdown Items',
+      'total': 'Total',
     };
     return labels[type] || 'Field';
   };

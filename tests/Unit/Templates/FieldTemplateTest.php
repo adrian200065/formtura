@@ -358,6 +358,25 @@ class FieldTemplateTest extends TestCase {
 		$this->assertStringNotContainsString( '<input', $html );
 	}
 
+	public function test_total_renders_a_display_amount_and_posts_nothing() {
+		$html = $this->render( $this->field( 'total' ) );
+
+		$this->assertStringContainsString( 'fta-total-amount', $html );
+		$this->assertStringContainsString( '$0.00', $html );
+
+		// Display-only: the server recomputes the amount from the form
+		// definition, so the total must not post a value at all.
+		$this->assertStringNotContainsString( '<input', $html );
+	}
+
+	public function test_total_renders_the_summary_table_only_when_enabled() {
+		$without = $this->render( $this->field( 'total' ) );
+		$with    = $this->render( $this->field( 'total', [ 'enableSummary' => true ] ) );
+
+		$this->assertStringNotContainsString( 'fta-order-summary', $without );
+		$this->assertStringContainsString( 'fta-order-summary-body', $with );
+	}
+
 	public function test_label_is_omitted_when_hidden() {
 		$shown  = $this->render( $this->field( 'text' ) );
 		$hidden = $this->render( $this->field( 'text', [ 'hideLabel' => true ] ) );

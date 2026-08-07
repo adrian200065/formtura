@@ -25,8 +25,9 @@ to 29/38.
 - **`page-break`, `entry-preview`, `layout`** — blocked on the multi-page
   subsystem, unchanged from before.
 - **`paypal`, `stripe`, `square`, `authorize-net`** — payment gateways are
-  server-side integrations, not templates. Out of scope; palette treatment
-  (info dialog or removal) is a separate decision.
+  server-side integrations, not templates. Out of scope. Their palette
+  entries already open info dialogs pointing at a payments settings tab,
+  so no palette work is needed this cycle.
 - **`captcha`** — resolved outside this cycle: protection is form-wide via
   the reCAPTCHA settings (see commit 03baefa), and the palette item opens an
   info dialog pointing there. Comes off the missing list without a template.
@@ -123,8 +124,11 @@ the file-upload template's visual style (compact variant).
 
 ### Price model
 
-- Payment choice fields reuse the existing `choices` array with an added
-  numeric `price` per choice. `payment-single` has a single `price`
+- Payment choice fields use a `items` array of
+  `{ label, value, price, isDefault }` — this is the shape the builder's
+  existing payment-dropdown items editor already saves, so
+  payment-checkbox and payment-multiple adopt it rather than inventing a
+  parallel `choices`+price shape. `payment-single` has a single `price`
   setting.
 - Prices exist only in the form definition. The page shows formatted
   prices and carries `data-price` attributes for display math; none of it

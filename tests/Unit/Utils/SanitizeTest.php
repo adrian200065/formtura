@@ -36,7 +36,9 @@ class SanitizeTest extends TestCase {
 	public function test_integer() {
 		$this->assertEquals( 42, Sanitize::integer( 42 ) );
 		$this->assertEquals( 42, Sanitize::integer( '42' ) );
-		$this->assertEquals( 0, Sanitize::integer( -5 ) );
+		// Sanitize::integer() wraps absint(), which takes the absolute value
+		// rather than clamping negatives to zero.
+		$this->assertEquals( 5, Sanitize::integer( -5 ) );
 		$this->assertEquals( 0, Sanitize::integer( 'abc' ) );
 	}
 

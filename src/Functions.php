@@ -361,6 +361,246 @@ function fta_get_field_types() {
 }
 
 /**
+ * Get the submission key for a field.
+ *
+ * This is the single source of truth for a field's `name` attribute. The React
+ * builder identifies fields by `id` only and never assigns a separate `name`,
+ * so the id doubles as the submission key. Templates and the submission handler
+ * must both go through this helper or submitted values will not line up with
+ * the saved field definitions.
+ *
+ * @since 1.0.3
+ * @param array $field Field configuration.
+ * @return string Field submission key.
+ */
+function fta_get_field_name( $field ) {
+	if ( ! empty( $field['name'] ) ) {
+		return (string) $field['name'];
+	}
+
+	return isset( $field['id'] ) ? (string) $field['id'] : '';
+}
+
+/**
+ * Get the DOM id used for a field's primary input.
+ *
+ * @since 1.0.3
+ * @param array  $field  Field configuration.
+ * @param string $suffix Optional suffix for fields rendering multiple inputs.
+ * @return string Input DOM id.
+ */
+function fta_get_field_input_id( $field, $suffix = '' ) {
+	$id = 'fta-field-' . fta_get_field_name( $field );
+
+	if ( '' !== $suffix ) {
+		$id .= '-' . $suffix;
+	}
+
+	return $id;
+}
+
+/**
+ * Normalize a single choice into a label/value/default triplet.
+ *
+ * Choices arrive either as objects from the builder's choice editor or as plain
+ * strings from the legacy `options` array.
+ *
+ * @since 1.0.3
+ * @param mixed $choice Raw choice.
+ * @return array Normalized choice.
+ */
+function fta_normalize_field_choice( $choice ) {
+	if ( is_array( $choice ) ) {
+		$label = isset( $choice['label'] ) ? $choice['label'] : '';
+		$value = isset( $choice['value'] ) && '' !== $choice['value'] ? $choice['value'] : $label;
+
+		return [
+			'label'     => (string) $label,
+			'value'     => (string) $value,
+			'isDefault' => ! empty( $choice['isDefault'] ),
+		];
+	}
+
+	return [
+		'label'     => (string) $choice,
+		'value'     => (string) $choice,
+		'isDefault' => false,
+	];
+}
+
+/**
+ * Resolve the choices for a choice-based field.
+ *
+ * Mirrors the builder preview: manual choices by default, or posts/terms when
+ * the field is populated dynamically. Randomization is applied last so it
+ * affects dynamic sources too.
+ *
+ * @since 1.0.3
+ * @param array $field Field configuration.
+ * @return array List of normalized choices.
+ */
+function fta_get_field_choices( $field ) {
+	$source  = isset( $field['dynamicChoices'] ) ? $field['dynamicChoices'] : '';
+	$choices = [];
+
+	if ( 'post_type' === $source && ! empty( $field['dynamicPostType'] ) ) {
+		$posts = get_posts( [
+			'post_type'      => sanitize_key( $field['dynamicPostType'] ),
+			'posts_per_page' => 100,
+			'post_status'    => 'publish',
+			'orderby'        => 'title',
+			'order'          => 'ASC',
+		] );
+
+		foreach ( $posts as $post ) {
+			$choices[] = [
+				'label'     => $post->post_title,
+				'value'     => (string) $post->ID,
+				'isDefault' => false,
+			];
+		}
+	} elseif ( 'taxonomy' === $source && ! empty( $field['dynamicTaxonomy'] ) ) {
+		$terms = get_terms( [
+			'taxonomy'   => sanitize_key( $field['dynamicTaxonomy'] ),
+			'hide_empty' => false,
+			'number'     => 100,
+		] );
+
+		if ( ! is_wp_error( $terms ) ) {
+			foreach ( $terms as $term ) {
+				$choices[] = [
+					'label'     => $term->name,
+					'value'     => (string) $term->term_id,
+					'isDefault' => false,
+				];
+			}
+		}
+	} else {
+		$raw = [];
+
+		if ( ! empty( $field['choices'] ) && is_array( $field['choices'] ) ) {
+			$raw = $field['choices'];
+		} elseif ( ! empty( $field['options'] ) && is_array( $field['options'] ) ) {
+			$raw = $field['options'];
+		}
+
+		$choices = array_map( 'fta_normalize_field_choice', $raw );
+	}
+
+	if ( ! empty( $field['randomizeChoices'] ) ) {
+		shuffle( $choices );
+	}
+
+	return $choices;
+}
+
+/**
+ * Build the CSS classes for a field wrapper.
+ *
+ * @since 1.0.3
+ * @param array  $field      Field configuration.
+ * @param string $base_class Type-specific wrapper class.
+ * @return string Space separated class list.
+ */
+function fta_get_field_wrapper_class( $field, $base_class = '' ) {
+	$classes = [ 'fta-field' ];
+
+	if ( $base_class ) {
+		$classes[] = $base_class;
+	}
+
+	if ( ! empty( $field['fieldSize'] ) ) {
+		$classes[] = 'fta-field-size-' . sanitize_html_class( $field['fieldSize'] );
+	}
+
+	if ( ! empty( $field['choiceLayout'] ) ) {
+		$classes[] = 'fta-choices-' . sanitize_html_class( $field['choiceLayout'] );
+	}
+
+	if ( ! empty( $field['cssClasses'] ) ) {
+		foreach ( preg_split( '/\s+/', $field['cssClasses'] ) as $custom_class ) {
+			if ( '' !== $custom_class ) {
+				$classes[] = sanitize_html_class( $custom_class );
+			}
+		}
+	}
+
+	return implode( ' ', array_unique( $classes ) );
+}
+
+/**
+ * Build the wrapper data attributes for a field.
+ *
+ * Emits the `data-conditional-logic` payload that assets/js/frontend.js reads
+ * when deciding whether to show or hide a field.
+ *
+ * @since 1.0.3
+ * @param array $field Field configuration.
+ * @return string Escaped attribute string, ready to echo inside a tag.
+ */
+function fta_get_field_wrapper_data( $field ) {
+	$attributes = sprintf( ' data-field-id="%s"', esc_attr( fta_get_field_name( $field ) ) );
+
+	// The builder writes `conditionalLogic`; older forms used `conditional_logic`.
+	$logic = null;
+
+	if ( ! empty( $field['conditionalLogic'] ) && is_array( $field['conditionalLogic'] ) ) {
+		$logic = $field['conditionalLogic'];
+	} elseif ( ! empty( $field['conditional_logic'] ) && is_array( $field['conditional_logic'] ) ) {
+		$logic = $field['conditional_logic'];
+	}
+
+	if ( $logic && ! empty( $logic['enabled'] ) ) {
+		$attributes .= sprintf(
+			' data-conditional-logic="%s"',
+			esc_attr( wp_json_encode( $logic ) )
+		);
+	}
+
+	return $attributes;
+}
+
+/**
+ * Render the label for a field.
+ *
+ * @since 1.0.3
+ * @param array  $field  Field configuration.
+ * @param string $for_id Optional id of the control the label points at.
+ */
+function fta_field_label( $field, $for_id = '' ) {
+	if ( ! empty( $field['hideLabel'] ) || empty( $field['label'] ) ) {
+		return;
+	}
+
+	$for_id   = '' !== $for_id ? $for_id : fta_get_field_input_id( $field );
+	$required = ! empty( $field['required'] ) ? ' required' : '';
+
+	printf(
+		'<label for="%1$s" class="fta-field-label%2$s">%3$s</label>',
+		esc_attr( $for_id ),
+		esc_attr( $required ),
+		esc_html( $field['label'] )
+	);
+}
+
+/**
+ * Render the description for a field.
+ *
+ * @since 1.0.3
+ * @param array $field Field configuration.
+ */
+function fta_field_description( $field ) {
+	if ( empty( $field['description'] ) ) {
+		return;
+	}
+
+	printf(
+		'<span class="fta-field-description">%s</span>',
+		esc_html( $field['description'] )
+	);
+}
+
+/**
  * Log debug message.
  *
  * @since 1.0.0
@@ -386,6 +626,7 @@ function fta_log( $message, $level = 'info' ) {
  * @param string $slug Template slug.
  * @param string $name Optional. Template name.
  * @param array  $args Optional. Arguments to pass to template.
+ * @return bool True when a template was located and included.
  */
 function fta_get_template_part( $slug, $name = '', $args = [] ) {
 	$templates = [];
@@ -415,7 +656,11 @@ function fta_get_template_part( $slug, $name = '', $args = [] ) {
 	if ( $located ) {
 		extract( $args );
 		include $located;
+
+		return true;
 	}
+
+	return false;
 }
 
 /**

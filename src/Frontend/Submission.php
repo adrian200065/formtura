@@ -142,21 +142,28 @@ class Submission {
 		}
 
 		foreach ( $form['fields'] as $field ) {
-			$field_name = isset( $field['name'] ) ? $field['name'] : '';
+			$field_name = fta_get_field_name( $field );
+
+			if ( '' === $field_name || $this->is_presentational_field( $field ) ) {
+				continue;
+			}
+
 			$field_value = isset( $submission[ $field_name ] ) ? $submission[ $field_name ] : '';
 
+			$is_empty = $this->is_empty_value( $field_value );
+
 			// Required field validation.
-			if ( ! empty( $field['required'] ) && empty( $field_value ) ) {
+			if ( ! empty( $field['required'] ) && $is_empty ) {
 				$errors[ $field_name ] = sprintf(
 					/* translators: %s: field label */
 					__( '%s is required.', FORMTURA_TEXTDOMAIN ),
-					$field['label']
+					isset( $field['label'] ) ? $field['label'] : $field_name
 				);
 				continue;
 			}
 
 			// Skip validation if field is empty and not required.
-			if ( empty( $field_value ) ) {
+			if ( $is_empty ) {
 				continue;
 			}
 
@@ -195,6 +202,11 @@ class Submission {
 	private function validate_field_type( $value, $field ) {
 		$type = isset( $field['type'] ) ? $field['type'] : 'text';
 
+		// Multi-value fields are validated per selected value.
+		if ( is_array( $value ) ) {
+			return true;
+		}
+
 		switch ( $type ) {
 			case 'email':
 				if ( ! is_email( $value ) ) {
@@ -202,6 +214,9 @@ class Submission {
 				}
 				break;
 
+			// The builder registers this type as `website`; `url` is kept for
+			// forms saved before the field was renamed.
+			case 'website':
 			case 'url':
 				if ( ! filter_var( $value, FILTER_VALIDATE_URL ) ) {
 					return new \WP_Error( 'invalid_url', __( 'Please enter a valid URL.', FORMTURA_TEXTDOMAIN ) );
@@ -209,6 +224,8 @@ class Submission {
 				break;
 
 			case 'number':
+			case 'number-slider':
+			case 'rating':
 				if ( ! is_numeric( $value ) ) {
 					return new \WP_Error( 'invalid_number', __( 'Please enter a valid number.', FORMTURA_TEXTDOMAIN ) );
 				}
@@ -216,6 +233,43 @@ class Submission {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Check whether a submitted value counts as empty.
+	 *
+	 * Unlike empty(), a literal "0" is treated as a real answer so a zero
+	 * rating or slider value satisfies a required field.
+	 *
+	 * @since 1.0.3
+	 * @param mixed $value Submitted value.
+	 * @return bool True when no answer was provided.
+	 */
+	private function is_empty_value( $value ) {
+		if ( is_array( $value ) ) {
+			return 0 === count( array_filter( $value, function( $item ) {
+				return ! $this->is_empty_value( $item );
+			} ) );
+		}
+
+		return '' === trim( (string) $value );
+	}
+
+	/**
+	 * Check whether a field is display-only and carries no submitted value.
+	 *
+	 * @since 1.0.3
+	 * @param array $field Field configuration.
+	 * @return bool True for presentational fields.
+	 */
+	private function is_presentational_field( $field ) {
+		$type = isset( $field['type'] ) ? $field['type'] : 'text';
+
+		return in_array(
+			$type,
+			[ 'html', 'content', 'page-break', 'section-divider', 'entry-preview', 'layout' ],
+			true
+		);
 	}
 
 	/**
@@ -234,9 +288,25 @@ class Submission {
 		}
 
 		foreach ( $form['fields'] as $field ) {
-			$field_name = isset( $field['name'] ) ? $field['name'] : '';
-			$field_type = isset( $field['type'] ) ? $field['type'] : 'text';
+			$field_name = fta_get_field_name( $field );
+
+			if ( '' === $field_name || $this->is_presentational_field( $field ) ) {
+				continue;
+			}
+
+			$field_type  = isset( $field['type'] ) ? $field['type'] : 'text';
 			$field_value = isset( $submission[ $field_name ] ) ? $submission[ $field_name ] : '';
+
+			if ( is_array( $field_value ) ) {
+				$sanitized[ $field_name ] = array_map(
+					function( $item ) use ( $field_type ) {
+						return fta_sanitize_field( $item, $field_type );
+					},
+					$field_value
+				);
+
+				continue;
+			}
 
 			$sanitized[ $field_name ] = fta_sanitize_field( $field_value, $field_type );
 		}

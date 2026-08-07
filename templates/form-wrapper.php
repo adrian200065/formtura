@@ -46,7 +46,27 @@ $submit_text = isset( $form_settings['submit_button_text'] ) ? $form_settings['s
 					$field_type = isset( $field['type'] ) ? $field['type'] : 'text';
 
 					// Load field template.
-					fta_get_template_part( 'fields/' . $field_type, '', [ 'field' => $field ] );
+					$rendered = fta_get_template_part( 'fields/' . $field_type, '', [ 'field' => $field ] );
+
+					// A field type offered by the builder but missing a template
+					// would otherwise vanish from the page without a trace.
+					if ( ! $rendered ) {
+						fta_log(
+							sprintf( 'No frontend template for field type "%s" (form %d).', $field_type, $form_id ),
+							'warning'
+						);
+
+						if ( defined( 'WP_DEBUG' ) && WP_DEBUG && current_user_can( 'manage_options' ) ) {
+							printf(
+								'<div class="fta-field fta-field-missing"><strong>%s</strong></div>',
+								esc_html( sprintf(
+									/* translators: %s: field type slug */
+									__( 'Formtura: no frontend template for field type "%s". This notice is only visible to administrators with WP_DEBUG enabled.', FORMTURA_TEXTDOMAIN ),
+									$field_type
+								) )
+							);
+						}
+					}
 				}
 			}
 			?>

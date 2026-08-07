@@ -19,10 +19,7 @@
     "autoload": {
         "psr-4": {
             "Formtura\\": "src/"
-        },
-        "files": [
-            "src/Functions.php"
-        ]
+        }
     },
     "config": {
         "optimize-autoloader": true,

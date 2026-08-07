@@ -291,6 +291,13 @@ class Form_Builder {
 			$sanitized['type'] = sanitize_key( $field['type'] );
 		}
 
+		// Sanitize field name (submission key). The builder does not set one
+		// today, in which case the field id is used instead - see
+		// fta_get_field_name().
+		if ( isset( $field['name'] ) ) {
+			$sanitized['name'] = sanitize_text_field( $field['name'] );
+		}
+
 		// Sanitize label.
 		if ( isset( $field['label'] ) ) {
 			$sanitized['label'] = sanitize_text_field( $field['label'] );
@@ -435,7 +442,11 @@ class Form_Builder {
 			$sanitized['maxValue'] = floatval( $field['maxValue'] );
 		}
 		if ( isset( $field['defaultValue'] ) ) {
-			$sanitized['defaultValue'] = floatval( $field['defaultValue'] );
+			// Numeric fields (slider) need a float; hidden and text fields
+			// store their default verbatim.
+			$sanitized['defaultValue'] = is_numeric( $field['defaultValue'] )
+				? floatval( $field['defaultValue'] )
+				: sanitize_text_field( $field['defaultValue'] );
 		}
 		if ( isset( $field['increment'] ) ) {
 			$sanitized['increment'] = floatval( $field['increment'] );
@@ -453,6 +464,27 @@ class Form_Builder {
 		if ( isset( $field['calculationFormula'] ) ) {
 			// Allow basic math operators and field references like {field_id}
 			$sanitized['calculationFormula'] = sanitize_text_field( $field['calculationFormula'] );
+		}
+
+		// Sanitize rich content (HTML and Rich Text fields).
+		if ( isset( $field['content'] ) ) {
+			$sanitized['content'] = wp_kses_post( $field['content'] );
+		}
+
+		// Sanitize maximum rating (Star Rating field).
+		if ( isset( $field['maxRating'] ) ) {
+			$sanitized['maxRating'] = max( 1, absint( $field['maxRating'] ) );
+		}
+
+		// Sanitize date/time field options.
+		if ( isset( $field['dateTimeFormat'] ) ) {
+			$sanitized['dateTimeFormat'] = sanitize_text_field( $field['dateTimeFormat'] );
+		}
+		if ( isset( $field['yearRangeStart'] ) ) {
+			$sanitized['yearRangeStart'] = sanitize_text_field( $field['yearRangeStart'] );
+		}
+		if ( isset( $field['yearRangeEnd'] ) ) {
+			$sanitized['yearRangeEnd'] = sanitize_text_field( $field['yearRangeEnd'] );
 		}
 
 		// Sanitize conditional logic (new format).

@@ -468,3 +468,148 @@
 		transition-duration: .01ms !important;
 	}
 }
+
+/* Fieldset Reset
+   Choice-based fields group their inputs in a fieldset for screen readers;
+   browsers ship opinionated defaults that must be cleared. */
+.fta-field-fieldset {
+	border: 0;
+	margin: 0;
+	padding: 0;
+	min-inline-size: 0;
+}
+
+.fta-field-fieldset > .fta-field-label {
+	display: block;
+	padding: 0;
+}
+
+/* Choice Layouts */
+.fta-choices-inline .fta-field-choices {
+	flex-direction: row;
+	flex-wrap: wrap;
+	column-gap: var(--fta-form-space-lg);
+}
+
+.fta-choices-two-columns .fta-field-choices,
+.fta-choices-three-columns .fta-field-choices {
+	display: grid;
+	column-gap: var(--fta-form-space-lg);
+}
+
+.fta-choices-two-columns .fta-field-choices {
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.fta-choices-three-columns .fta-field-choices {
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media (max-width: 600px) {
+	.fta-choices-two-columns .fta-field-choices,
+	.fta-choices-three-columns .fta-field-choices {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}
+
+/* Multi-select */
+.fta-field-select select[multiple] {
+	padding: var(--fta-form-space-sm);
+}
+
+/* Name Field */
+.fta-name-group {
+	display: grid;
+	gap: var(--fta-form-space-md);
+}
+
+.fta-name-group-2 {
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.fta-name-group-3 {
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media (max-width: 600px) {
+	.fta-name-group-2,
+	.fta-name-group-3 {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}
+
+.fta-name-sublabel {
+	display: block;
+	margin-block-start: calc(var(--fta-form-space-sm) / 2);
+	color: var(--fta-form-text);
+	font-size: var(--fta-form-text-sm);
+	opacity: .7;
+}
+
+/* Slider Field */
+.fta-slider-container {
+	display: flex;
+	align-items: center;
+	gap: var(--fta-form-space-md);
+}
+
+.fta-field-slider {
+	flex: 1 1 auto;
+	accent-color: var(--fta-form-focus);
+	inline-size: 100%;
+	cursor: pointer;
+}
+
+.fta-slider-value {
+	flex: 0 0 auto;
+	color: var(--fta-form-text);
+	font-size: var(--fta-form-text-sm);
+	white-space: nowrap;
+}
+
+/* Star Rating
+   Painted with a reversed flex row so plain CSS sibling selectors can
+   highlight every star up to the one hovered or checked. */
+.fta-rating-stars {
+	display: flex;
+	flex-direction: row-reverse;
+	justify-content: flex-end;
+	gap: .125rem;
+}
+
+.fta-rating-input {
+	position: absolute;
+	inline-size: 1px;
+	block-size: 1px;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+}
+
+.fta-rating-star {
+	color: var(--fta-form-border);
+	font-size: 1.75rem;
+	line-height: 1;
+	cursor: pointer;
+	transition: color .15s ease;
+}
+
+.fta-rating-input:checked ~ .fta-rating-star,
+.fta-rating-star:hover,
+.fta-rating-star:hover ~ .fta-rating-star {
+	color: hsl(45, 93%, 47%);
+}
+
+.fta-rating-input:focus-visible + .fta-rating-star {
+	outline: 2px solid var(--fta-form-focus);
+	outline-offset: 2px;
+}
+
+/* Administrator notice for a field type with no frontend template */
+.fta-field-missing {
+	border: 1px dashed var(--fta-form-error);
+	border-radius: var(--fta-form-radius);
+	padding: var(--fta-form-space-md);
+	color: var(--fta-form-error);
+	font-size: var(--fta-form-text-sm);
+}

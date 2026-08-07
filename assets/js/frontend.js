@@ -22,6 +22,22 @@
 			this.bindEvents();
 			this.initConditionalLogic();
 			this.initCalculations();
+			this.initSliders();
+		},
+
+		/**
+		 * Keep each slider's readout in step with its value.
+		 */
+		initSliders() {
+			$(document).on('input change', '.fta-field-slider', function() {
+				const $slider = $(this);
+				const template = $slider.data('value-display') || '{value}';
+
+				$slider
+					.closest('.fta-slider-container')
+					.find('.fta-slider-value')
+					.text(String(template).replace('{value}', $slider.val()));
+			});
 		},
 
 		/**

@@ -34,6 +34,13 @@ if ( file_exists( FORMTURA_PLUGIN_DIR . 'vendor/autoload.php' ) ) {
 	require_once FORMTURA_PLUGIN_DIR . 'vendor/autoload.php';
 }
 
+// Load global helper functions.
+//
+// Deliberately required here rather than through Composer's `files` autoload:
+// Functions.php exits when ABSPATH is undefined, which would abort any process
+// that loads the autoloader outside WordPress - PHPUnit included.
+require_once FORMTURA_PLUGIN_DIR . 'src/Functions.php';
+
 /**
  * Initialize the plugin.
  *

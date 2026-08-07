@@ -105,11 +105,26 @@ class Submission {
 			] );
 		}
 
+		// Signatures arrive as data URLs in $_POST but end life as stored
+		// files, so they follow the uploads path, not the text path.
+		$signatures = ( new Signature() )->process_form_signatures( $form );
+
+		if ( is_wp_error( $signatures ) ) {
+			wp_send_json_error( [
+				'message' => $signatures->get_error_message(),
+				'errors'  => $signatures->get_error_data(),
+			] );
+		}
+
 		// Sanitize submission data.
 		$entry_data = $this->sanitize_submission( $form, $_POST );
 
 		// File records are produced by the upload handler, already sanitized.
 		foreach ( $uploads as $field_name => $files ) {
+			$entry_data[ $field_name ] = $files;
+		}
+
+		foreach ( $signatures as $field_name => $files ) {
 			$entry_data[ $field_name ] = $files;
 		}
 
@@ -167,9 +182,12 @@ class Submission {
 				continue;
 			}
 
-			// File fields arrive in $_FILES and are handled by Uploads, which
-			// runs its own required check.
-			if ( Uploads::is_file_field( $field ) ) {
+			// File fields arrive in $_FILES and are handled by Uploads, and
+			// signatures arrive as data URLs handled by Signature — both run
+			// their own required check.
+			$skip_type = isset( $field['type'] ) ? $field['type'] : '';
+
+			if ( Uploads::is_file_field( $field ) || 'signature' === $skip_type ) {
 				continue;
 			}
 
@@ -353,9 +371,12 @@ class Submission {
 				continue;
 			}
 
-			// File fields arrive in $_FILES and are handled by Uploads, which
-			// runs its own required check.
-			if ( Uploads::is_file_field( $field ) ) {
+			// File fields arrive in $_FILES and are handled by Uploads, and
+			// signatures arrive as data URLs handled by Signature — the raw
+			// data URL must never be stored as sanitized text.
+			$skip_type = isset( $field['type'] ) ? $field['type'] : '';
+
+			if ( Uploads::is_file_field( $field ) || 'signature' === $skip_type ) {
 				continue;
 			}
 

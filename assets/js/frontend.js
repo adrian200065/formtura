@@ -484,7 +484,15 @@
 					FormturaFrontend.recalculateTotal($form);
 				},
 				error() {
-					$status.text(strings.couponInvalid || 'This coupon code is not valid.');
+					// A transport/network failure (including a stale nonce on
+					// cached HTML, which check_ajax_referer() 403s) is not the
+					// same thing as a wrong code - telling the visitor their
+					// code is invalid here would be false. Also clear any
+					// previously-applied discount so the status message and
+					// the displayed total never disagree.
+					$form.removeData('ftaCoupon');
+					$status.text(strings.error || 'An error occurred. Please try again.');
+					FormturaFrontend.recalculateTotal($form);
 				},
 				complete() {
 					$button.prop('disabled', false);

@@ -502,6 +502,88 @@ class Form_Builder {
 			$sanitized['conditional_logic'] = $field['conditional_logic'];
 		}
 
+		// Sanitize payment items (for payment-checkbox, payment-multiple,
+		// payment-dropdown). Mirrors how choices above is sanitized. Non-array
+		// entries are dropped rather than coerced, and array_values() re-keys
+		// the result sequentially so a dropped middle entry still round-trips
+		// through wp_json_encode() as a JSON array, not an object with a gap.
+		if ( isset( $field['items'] ) && is_array( $field['items'] ) ) {
+			$sanitized['items'] = array_values( array_map( function( $item ) {
+				return [
+					'label'     => isset( $item['label'] ) ? sanitize_text_field( $item['label'] ) : '',
+					'value'     => isset( $item['value'] ) ? sanitize_text_field( $item['value'] ) : '',
+					'price'     => isset( $item['price'] ) ? floatval( $item['price'] ) : 0.0,
+					'isDefault' => isset( $item['isDefault'] ) ? (bool) $item['isDefault'] : false,
+				];
+			}, array_filter( $field['items'], 'is_array' ) ) );
+		}
+
+		// Sanitize single item price (for payment-single).
+		if ( isset( $field['price'] ) ) {
+			$sanitized['price'] = floatval( $field['price'] );
+		}
+
+		// Sanitize show-price-after-labels (for payment-checkbox,
+		// payment-multiple, payment-dropdown).
+		if ( isset( $field['showPriceAfterLabels'] ) ) {
+			$sanitized['showPriceAfterLabels'] = (bool) $field['showPriceAfterLabels'];
+		}
+
+		// Sanitize enable summary (for total field).
+		if ( isset( $field['enableSummary'] ) ) {
+			$sanitized['enableSummary'] = (bool) $field['enableSummary'];
+		}
+
+		// Sanitize coupon codes (for coupon field). Value is not clamped here
+		// - PaymentTotals::find_coupon() already clamps value >= 0 and percent
+		// <= 100, and duplicating that would create two places to keep in
+		// step. As with items above, non-array entries are dropped and the
+		// result is re-keyed so the gap survives wp_json_encode() as an array.
+		if ( isset( $field['coupons'] ) && is_array( $field['coupons'] ) ) {
+			$sanitized['coupons'] = array_values( array_map( function( $coupon ) {
+				return [
+					'code'  => isset( $coupon['code'] ) ? sanitize_text_field( $coupon['code'] ) : '',
+					'type'  => isset( $coupon['type'] ) && 'percent' === $coupon['type'] ? 'percent' : 'fixed',
+					'value' => isset( $coupon['value'] ) ? floatval( $coupon['value'] ) : 0.0,
+				];
+			}, array_filter( $field['coupons'], 'is_array' ) ) );
+		}
+
+		// Sanitize address scheme.
+		if ( isset( $field['scheme'] ) ) {
+			$sanitized['scheme'] = in_array( $field['scheme'], [ 'us', 'international' ], true ) ? $field['scheme'] : 'us';
+		}
+
+		// Sanitize file upload options.
+		if ( isset( $field['allowMultiple'] ) ) {
+			$sanitized['allowMultiple'] = (bool) $field['allowMultiple'];
+		}
+		if ( isset( $field['attachToEmail'] ) ) {
+			$sanitized['attachToEmail'] = (bool) $field['attachToEmail'];
+		}
+		if ( isset( $field['allowedFileTypes'] ) ) {
+			// Only values the builder itself emits (FieldLibrary.jsx): "all"
+			// or "specify". Anything else falls back to the safer default.
+			$sanitized['allowedFileTypes'] = in_array( $field['allowedFileTypes'], [ 'all', 'specify' ], true )
+				? $field['allowedFileTypes']
+				: 'specify';
+		}
+		if ( isset( $field['specifiedTypes'] ) ) {
+			$sanitized['specifiedTypes'] = sanitize_text_field( $field['specifiedTypes'] );
+		}
+		if ( isset( $field['minFileSize'] ) ) {
+			$sanitized['minFileSize'] = is_numeric( $field['minFileSize'] ) ? floatval( $field['minFileSize'] ) : '';
+		}
+		if ( isset( $field['maxFileSize'] ) ) {
+			$sanitized['maxFileSize'] = is_numeric( $field['maxFileSize'] ) ? floatval( $field['maxFileSize'] ) : '';
+		}
+		if ( isset( $field['uploadText'] ) ) {
+			$sanitized['uploadText'] = sanitize_text_field( $field['uploadText'] );
+		}
+		if ( isset( $field['compactUploadText'] ) ) {
+			$sanitized['compactUploadText'] = sanitize_text_field( $field['compactUploadText'] );
+		}
+
 		return $sanitized;
 	}
 

@@ -26,6 +26,7 @@ function loadFrontend() {
 		strings: {
 			couponApplied: 'Coupon applied.',
 			couponInvalid: 'This coupon code is not valid.',
+			error: 'An error occurred. Please try again.',
 		},
 	};
 
@@ -106,5 +107,101 @@ describe('coupon apply flow', () => {
 		jQuery('.fta-coupon-apply').trigger('click');
 
 		expect(ajaxMock).not.toHaveBeenCalled();
+	});
+
+	/**
+	 * A transport/network failure (including a stale nonce on cached HTML,
+	 * which check_ajax_referer() 403s) is not the same thing as a wrong
+	 * code. Telling the visitor their code is invalid here would be false -
+	 * it must show the generic error string instead.
+	 */
+	test('a transport failure shows the generic error, not the invalid-code message', async () => {
+		renderForm();
+		await loadFrontend();
+
+		jQuery('.fta-coupon-input').val('SAVE5');
+		jQuery('.fta-coupon-apply').trigger('click');
+
+		ajaxMock.mock.calls[0][0].error();
+
+		const status = document.querySelector('.fta-coupon-status').textContent;
+		expect(status).toContain('An error occurred');
+		expect(status).not.toContain('not valid');
+	});
+
+	/**
+	 * A previously-applied discount must not survive a later rejection - the
+	 * status and the displayed total must never disagree.
+	 */
+	test('a previously applied coupon is cleared when a later code is rejected', async () => {
+		renderForm();
+		await loadFrontend();
+
+		jQuery('.fta-coupon-input').val('SAVE5');
+		jQuery('.fta-coupon-apply').trigger('click');
+		ajaxMock.mock.calls[0][0].success({ success: true, data: { code: 'SAVE5', type: 'fixed', value: 5 } });
+		ajaxMock.mock.calls[0][0].complete();
+		expect(document.querySelector('.fta-total-amount').textContent).toBe('$15.00');
+
+		jQuery('.fta-coupon-input').val('NOPE');
+		jQuery('.fta-coupon-apply').trigger('click');
+		ajaxMock.mock.calls[1][0].success({ success: false, data: { message: 'This coupon code is not valid.' } });
+
+		expect(document.querySelector('.fta-total-amount').textContent).toBe('$20.00');
+		expect(document.querySelector('.fta-coupon-status').textContent).toContain('not valid');
+	});
+
+	/**
+	 * The same guarantee, but the second attempt fails at the transport
+	 * level rather than being answered "invalid" - the stale discount must
+	 * still be cleared and the total must still revert.
+	 */
+	test('a previously applied coupon is cleared when a later attempt hits a transport error', async () => {
+		renderForm();
+		await loadFrontend();
+
+		jQuery('.fta-coupon-input').val('SAVE5');
+		jQuery('.fta-coupon-apply').trigger('click');
+		ajaxMock.mock.calls[0][0].success({ success: true, data: { code: 'SAVE5', type: 'fixed', value: 5 } });
+		ajaxMock.mock.calls[0][0].complete();
+		expect(document.querySelector('.fta-total-amount').textContent).toBe('$15.00');
+
+		jQuery('.fta-coupon-input').val('SAVE5');
+		jQuery('.fta-coupon-apply').trigger('click');
+		ajaxMock.mock.calls[1][0].error();
+
+		expect(document.querySelector('.fta-total-amount').textContent).toBe('$20.00');
+		expect(document.querySelector('.fta-coupon-status').textContent).toContain('An error occurred');
+	});
+
+	/**
+	 * The Apply button must come back on every outcome - success, a
+	 * rejected code, and a transport error alike - so a visitor is never
+	 * left staring at a permanently disabled button.
+	 */
+	test('the Apply button is re-enabled after every outcome, including a transport error', async () => {
+		renderForm();
+		await loadFrontend();
+		const $button = jQuery('.fta-coupon-apply');
+
+		jQuery('.fta-coupon-input').val('SAVE5');
+		$button.trigger('click');
+		expect($button.prop('disabled')).toBe(true);
+		const first = ajaxMock.mock.calls[0][0];
+		first.success({ success: true, data: { code: 'SAVE5', type: 'fixed', value: 5 } });
+		first.complete();
+		expect($button.prop('disabled')).toBe(false);
+
+		$button.trigger('click');
+		const second = ajaxMock.mock.calls[1][0];
+		second.success({ success: false, data: { message: 'This coupon code is not valid.' } });
+		second.complete();
+		expect($button.prop('disabled')).toBe(false);
+
+		$button.trigger('click');
+		const third = ajaxMock.mock.calls[2][0];
+		third.error();
+		third.complete();
+		expect($button.prop('disabled')).toBe(false);
 	});
 });

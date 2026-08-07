@@ -191,11 +191,30 @@ class Submission {
 	public function ajax_validate_coupon() {
 		check_ajax_referer( 'formtura_frontend', 'nonce' );
 
+		// A cheap per-IP throttle. This endpoint has no reCAPTCHA and creates
+		// no entry, so it is a far cheaper oracle to sweep through candidate
+		// codes with than an actual submission - throttle before doing any
+		// lookup work at all, regardless of which form/field/code is named.
+		if ( $this->coupon_attempts_throttled() ) {
+			wp_send_json_error( [
+				'message' => __( 'This coupon code is not valid.', FORMTURA_TEXTDOMAIN ),
+			] );
+		}
+
 		$form_id  = isset( $_POST['form_id'] ) ? absint( $_POST['form_id'] ) : 0;
 		$field_id = isset( $_POST['field_id'] ) ? sanitize_text_field( wp_unslash( $_POST['field_id'] ) ) : '';
 		$code     = isset( $_POST['code'] ) ? sanitize_text_field( wp_unslash( $_POST['code'] ) ) : '';
 
 		$form = $form_id ? fta_get_form( $form_id ) : null;
+
+		// An inactive form's codes must not be probeable through this
+		// endpoint either, and the failure must look identical to a wrong
+		// code - not a distinguishable "this form is inactive" message,
+		// unlike ajax_submit_form() which can afford to say so because it is
+		// not an oracle a visitor is meant to be able to sweep.
+		if ( $form && isset( $form['status'] ) && 'active' !== $form['status'] ) {
+			$form = null;
+		}
 
 		if ( ! $form || '' === $field_id || '' === $code ) {
 			wp_send_json_error( [
@@ -219,6 +238,34 @@ class Submission {
 		}
 
 		wp_send_json_success( $coupon );
+	}
+
+	/**
+	 * Cheap per-IP throttle against sweeping this endpoint for valid codes.
+	 *
+	 * Generous on purpose: a real visitor mistyping a code a handful of
+	 * times in a session must never be blocked. Twenty attempts per five
+	 * minutes comfortably covers that while still bounding an automated
+	 * sweep to a few codes per window per IP - the endpoint grants no
+	 * discount on its own (PaymentTotals re-validates on submission), so the
+	 * bar here only needs to be "not free," not airtight.
+	 *
+	 * @since 1.0.4
+	 * @return bool True when this IP is over the limit.
+	 */
+	private function coupon_attempts_throttled() {
+		$key   = 'fta_coupon_attempts_' . md5( $this->get_user_ip() );
+		$count = (int) get_transient( $key );
+
+		if ( $count >= 20 ) {
+			return true;
+		}
+
+		// 5 minutes. Not MINUTE_IN_SECONDS - a spelled-out literal so the
+		// window is legible without chasing a WordPress core constant.
+		set_transient( $key, $count + 1, 5 * 60 );
+
+		return false;
 	}
 
 	/**

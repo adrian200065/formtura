@@ -53,13 +53,16 @@ namespace Formtura\Tests\Unit\Frontend {
 
 			$this->submission = new Submission();
 			$_POST            = [];
-			$GLOBALS['fta_test_ajax_forms']         = [];
-			$GLOBALS['fta_test_ajax_referer_valid'] = true;
+			$_SERVER['REMOTE_ADDR']                  = '203.0.113.1';
+			$GLOBALS['fta_test_ajax_forms']          = [];
+			$GLOBALS['fta_test_ajax_referer_valid']  = true;
+			$GLOBALS['fta_test_transients']          = [];
 		}
 
 		protected function tearDown(): void {
 			$_POST = [];
-			unset( $GLOBALS['fta_test_ajax_forms'], $GLOBALS['fta_test_ajax_referer_valid'] );
+			unset( $_SERVER['REMOTE_ADDR'] );
+			unset( $GLOBALS['fta_test_ajax_forms'], $GLOBALS['fta_test_ajax_referer_valid'], $GLOBALS['fta_test_transients'] );
 
 			parent::tearDown();
 		}
@@ -190,12 +193,17 @@ namespace Formtura\Tests\Unit\Frontend {
 				'id'     => 8,
 				'fields' => [ [ 'id' => 'field_coupon', 'type' => 'text' ] ],
 			];
+			$GLOBALS['fta_test_ajax_forms'][9] = array_merge(
+				$this->couponForm( 9, [ [ 'code' => 'SAVE5', 'type' => 'fixed', 'value' => '5' ] ] ),
+				[ 'status' => 'inactive' ]
+			);
 
 			$cases = [
 				'wrong code'               => [ 'form_id' => 7, 'field_id' => 'field_coupon', 'code' => 'NOPE' ],
 				'form does not exist'      => [ 'form_id' => 999, 'field_id' => 'field_coupon', 'code' => 'SAVE5' ],
 				'field id from other form' => [ 'form_id' => 8, 'field_id' => 'field_coupon', 'code' => 'SAVE5' ],
 				'non-coupon field id'      => [ 'form_id' => 8, 'field_id' => 'field_coupon', 'code' => 'ANY' ],
+				'inactive form'            => [ 'form_id' => 9, 'field_id' => 'field_coupon', 'code' => 'SAVE5' ],
 			];
 
 			$messages = [];
@@ -222,6 +230,105 @@ namespace Formtura\Tests\Unit\Frontend {
 			$response = $this->callAjax();
 
 			$this->assertFalse( $response->success );
+		}
+
+		/**
+		 * An inactive form's coupon codes must not be probeable through this
+		 * endpoint - unlike ajax_submit_form(), which tells a visitor a form
+		 * is inactive (they already reached the page), this endpoint would
+		 * otherwise let a request confirm a code is genuinely valid on a form
+		 * that isn't accepting submissions at all.
+		 */
+		public function test_inactive_form_rejects_an_otherwise_valid_code() {
+			$GLOBALS['fta_test_ajax_forms'][7] = array_merge(
+				$this->couponForm( 7, [ [ 'code' => 'SAVE5', 'type' => 'fixed', 'value' => '5' ] ] ),
+				[ 'status' => 'inactive' ]
+			);
+
+			$_POST = [ 'form_id' => 7, 'field_id' => 'field_coupon', 'code' => 'SAVE5' ];
+
+			$response = $this->callAjax();
+
+			$this->assertFalse( $response->success );
+		}
+
+		/**
+		 * A form with no status key at all (the common case - status
+		 * defaults to active) must still validate normally. The inactive
+		 * check above must not have turned into "no status set => rejected."
+		 */
+		public function test_form_with_no_status_key_still_validates() {
+			$GLOBALS['fta_test_ajax_forms'][7] = $this->couponForm( 7, [
+				[ 'code' => 'SAVE5', 'type' => 'fixed', 'value' => '5' ],
+			] );
+
+			$_POST = [ 'form_id' => 7, 'field_id' => 'field_coupon', 'code' => 'SAVE5' ];
+
+			$response = $this->callAjax();
+
+			$this->assertTrue( $response->success );
+		}
+
+		/**
+		 * The per-IP throttle: a real visitor mistyping a code a handful of
+		 * times must never be blocked. Comfortably under the 20-per-window
+		 * limit must keep validating normally.
+		 */
+		public function test_throttle_does_not_block_a_handful_of_attempts() {
+			$GLOBALS['fta_test_ajax_forms'][7] = $this->couponForm( 7, [
+				[ 'code' => 'SAVE5', 'type' => 'fixed', 'value' => '5' ],
+			] );
+
+			for ( $i = 0; $i < 5; $i++ ) {
+				$_POST    = [ 'form_id' => 7, 'field_id' => 'field_coupon', 'code' => 'SAVE5' ];
+				$response = $this->callAjax();
+
+				$this->assertTrue( $response->success, "Attempt {$i} was unexpectedly throttled." );
+			}
+		}
+
+		/**
+		 * Past the limit, the same IP is throttled to the identical generic
+		 * message - not a distinguishable "too many attempts" response that
+		 * would itself leak information about how the limit works.
+		 */
+		public function test_throttle_blocks_after_the_limit_with_the_identical_message() {
+			$GLOBALS['fta_test_ajax_forms'][7] = $this->couponForm( 7, [
+				[ 'code' => 'SAVE5', 'type' => 'fixed', 'value' => '5' ],
+			] );
+
+			$last = null;
+
+			for ( $i = 0; $i < 21; $i++ ) {
+				$_POST = [ 'form_id' => 7, 'field_id' => 'field_coupon', 'code' => 'SAVE5' ];
+				$last  = $this->callAjax();
+			}
+
+			$this->assertFalse( $last->success, 'The 21st attempt from the same IP must be throttled.' );
+			$this->assertSame( 'This coupon code is not valid.', $last->data['message'] );
+		}
+
+		/**
+		 * The throttle key is per-IP: a different visitor (different
+		 * REMOTE_ADDR) must not inherit another visitor's exhausted budget.
+		 */
+		public function test_throttle_is_scoped_per_ip() {
+			$GLOBALS['fta_test_ajax_forms'][7] = $this->couponForm( 7, [
+				[ 'code' => 'SAVE5', 'type' => 'fixed', 'value' => '5' ],
+			] );
+
+			for ( $i = 0; $i < 21; $i++ ) {
+				$_POST = [ 'form_id' => 7, 'field_id' => 'field_coupon', 'code' => 'SAVE5' ];
+				$this->callAjax();
+			}
+
+			// A different visitor arrives on the same form.
+			$_SERVER['REMOTE_ADDR'] = '198.51.100.7';
+			$_POST                  = [ 'form_id' => 7, 'field_id' => 'field_coupon', 'code' => 'SAVE5' ];
+
+			$response = $this->callAjax();
+
+			$this->assertTrue( $response->success, 'A different IP must not be throttled by another visitor\'s attempts.' );
 		}
 	}
 }

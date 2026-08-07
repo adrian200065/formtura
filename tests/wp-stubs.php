@@ -204,6 +204,33 @@ if ( ! function_exists( 'update_option' ) ) {
 	}
 }
 
+if ( ! function_exists( 'get_transient' ) ) {
+	/**
+	 * Reads from $GLOBALS['fta_test_transients'] so time-based throttling can
+	 * be exercised without a real object cache. Expiration is not modelled -
+	 * tests that care about expiry seed or clear the global directly.
+	 */
+	function get_transient( $key ) {
+		return isset( $GLOBALS['fta_test_transients'][ $key ] ) ? $GLOBALS['fta_test_transients'][ $key ] : false;
+	}
+}
+
+if ( ! function_exists( 'set_transient' ) ) {
+	function set_transient( $key, $value, $expiration = 0 ) {
+		$GLOBALS['fta_test_transients'][ $key ] = $value;
+
+		return true;
+	}
+}
+
+if ( ! function_exists( 'delete_transient' ) ) {
+	function delete_transient( $key ) {
+		unset( $GLOBALS['fta_test_transients'][ $key ] );
+
+		return true;
+	}
+}
+
 if ( ! function_exists( 'apply_filters' ) ) {
 	function apply_filters( $hook, $value, ...$args ) {
 		return $value;

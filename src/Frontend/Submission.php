@@ -113,6 +113,24 @@ class Submission {
 			$entry_data[ $field_name ] = $records;
 		}
 
+		// Payment forms carry an authoritative server-side computed order.
+		$payments = new PaymentTotals();
+
+		if ( $payments->form_has_payment_fields( $form ) ) {
+			$payment = $payments->compute( $form, wp_unslash( $_POST ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+
+			if ( is_wp_error( $payment ) ) {
+				wp_send_json_error( [
+					'message' => $payment->get_error_message(),
+					'errors'  => $payment->get_error_data(),
+				] );
+			}
+
+			// Reserved key: field names are field_<timestamp>_<suffix>, so
+			// _payment cannot collide with real field data.
+			$entry_data['_payment'] = $payment;
+		}
+
 		// Save entry to database.
 		$entry_id = fta_create_entry( [
 			'form_id'    => $form_id,
@@ -405,10 +423,15 @@ class Submission {
 
 			// File fields arrive in $_FILES and are handled by Uploads, and
 			// signatures arrive as data URLs handled by Signature — the raw
-			// data URL must never be stored as sanitized text.
+			// data URL must never be stored as sanitized text. A payment
+			// form's running total is display-only and is never posted by
+			// current markup, but the skip is kept as defence-in-depth
+			// against a stale saved form or hand-written template that does
+			// post one - the client's claimed total must never land in
+			// entry data regardless.
 			$skip_type = isset( $field['type'] ) ? $field['type'] : '';
 
-			if ( Uploads::is_file_field( $field ) || 'signature' === $skip_type ) {
+			if ( Uploads::is_file_field( $field ) || in_array( $skip_type, [ 'signature', 'total' ], true ) ) {
 				continue;
 			}
 

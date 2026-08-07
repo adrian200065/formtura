@@ -332,6 +332,10 @@ if ( ! function_exists( 'wp_nonce_field' ) ) {
 
 if ( ! function_exists( 'wp_unslash' ) ) {
 	function wp_unslash( $value ) {
+		if ( is_array( $value ) ) {
+			return array_map( 'wp_unslash', $value );
+		}
+
 		return is_string( $value ) ? stripslashes( $value ) : $value;
 	}
 }

@@ -32,7 +32,7 @@ $show_price     = ! isset( $field['showPriceAfterLabels'] ) || ! empty( $field['
 		class="fta-field-select fta-payment-select"
 		<?php echo $field_required ? 'required' : ''; ?>
 	>
-		<option value="" data-price="0"><?php esc_html_e( 'Select an item', FORMTURA_TEXTDOMAIN ); ?></option>
+		<option value="" data-price="0.00"><?php esc_html_e( 'Select an item', FORMTURA_TEXTDOMAIN ); ?></option>
 
 		<?php foreach ( $items as $item ) : ?>
 			<option

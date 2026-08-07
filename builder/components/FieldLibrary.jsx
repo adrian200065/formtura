@@ -1380,18 +1380,27 @@ const GeneralTab = ({ field, onUpdate }) => {
             <div className="formtura-items-list">
               {(field.items || []).map((item, index) => (
                 <div key={index} className="formtura-item-row">
-                  <input
-                    type="radio"
-                    checked={item.isDefault || false}
-                    onChange={() => {
-                      const newItems = field.items.map((it, i) => ({
-                        ...it,
-                        isDefault: i === index
-                      }));
-                      handleChange('items', newItems);
-                    }}
-                    className="formtura-choice-radio"
-                  />
+                  {field.type === 'payment-checkbox' ? (
+                    <input
+                      type="checkbox"
+                      checked={item.isDefault || false}
+                      onChange={(e) => handleItemChange(index, 'isDefault', e.target.checked)}
+                      className="formtura-choice-radio"
+                    />
+                  ) : (
+                    <input
+                      type="radio"
+                      checked={item.isDefault || false}
+                      onChange={() => {
+                        const newItems = field.items.map((it, i) => ({
+                          ...it,
+                          isDefault: i === index
+                        }));
+                        handleChange('items', newItems);
+                      }}
+                      className="formtura-choice-radio"
+                    />
+                  )}
                   <GripVertical className="formtura-choice-drag" aria-hidden="true" />
                   <input
                     type="text"
@@ -1436,8 +1445,8 @@ const GeneralTab = ({ field, onUpdate }) => {
               <label className="formtura-toggle">
                 <input
                   type="checkbox"
-                  checked={field.showPriceAfterLabel || false}
-                  onChange={(e) => handleChange('showPriceAfterLabel', e.target.checked)}
+                  checked={field.showPriceAfterLabels || false}
+                  onChange={(e) => handleChange('showPriceAfterLabels', e.target.checked)}
                 />
                 <span className="formtura-toggle-slider"></span>
               </label>

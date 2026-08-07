@@ -72,7 +72,7 @@
 ### Templates
 - [x] form-wrapper.php - Main form template
 - [x] email/notification.php - Email template
-- [x] fields/ - 17 field templates plus 2 legacy aliases (see Field Type Coverage)
+- [x] fields/ - 29 field templates plus 2 legacy aliases (see Field Type Coverage)
 
 ### Admin Views
 - [x] views/forms-list.php - Forms list page
@@ -121,41 +121,46 @@
 
 ---
 
-## 🔴 Field Type Coverage (PRIMARY GAP)
+## 🟡 Field Type Coverage
 
-The builder palette offers **38 field types**. **17 render on the frontend**;
-the remaining 21 are selectable in the builder but have no template, so a form
-using them renders a gap on the public site.
+The builder palette offers **38 field types**. **29 render on the
+frontend**. Of the other 9: 8 are genuine gaps blocked on missing
+subsystems (a form using one renders nothing on the public site), and 1
+(`captcha`) needs no template - it is complete by design, see below.
 
 Since 1.0.3 a missing template is logged, and shown inline to administrators
 when `WP_DEBUG` is on, rather than failing silently.
 
-### Rendering end to end (17)
+### Rendering end to end (29)
 - [x] text, textarea, name, email, select, radio, checkbox
 - [x] number, phone, website, html, hidden
 - [x] datetime, password, file-upload, rating, number-slider
+- [x] content, section-divider, rich-text, address, camera, signature
+- [x] payment-single, payment-checkbox, payment-multiple, payment-dropdown
+- [x] coupon, total
+
+Payment amounts (`payment-single`/`-checkbox`/`-multiple`/`-dropdown`,
+`coupon`, `total`) are **recorded with the entry**; no payment is collected,
+since no gateway integration exists yet.
 
 Legacy aliases kept for forms saved before 1.0.3: `checkboxes` → checkbox,
 `date` → datetime.
 
-### In the palette, no frontend template (21)
-- [ ] captcha
-- [ ] address
-- [ ] camera
-- [ ] layout
-- [ ] repeater (builder preview exists)
-- [ ] page-break
-- [ ] section-divider
-- [ ] rich-text (builder preview exists)
-- [ ] content
-- [ ] entry-preview
-- [ ] signature
-- [ ] payment-single, payment-checkbox, payment-multiple, payment-dropdown
-- [ ] paypal, stripe, square, authorize-net
-- [ ] coupon, total (builder preview exists)
+### In the palette, no frontend template (8)
+- [ ] repeater — blocked on builder nesting support: the builder saves
+      `children: []` with no UI to fill it
+- [ ] page-break, entry-preview, layout — blocked on the multi-page
+      subsystem, which does not exist
+- [ ] paypal, stripe, square, authorize-net — payment gateway integrations,
+      not templates; their palette entries already open info dialogs
 
-> As of 1.0.3 `readme.txt` documents only the 17 types that render. Add each
-> type back to it as its template lands.
+`captcha` is not on this list, and is not a gap: it is the 9th type that
+does not render, but protection is form-wide via the reCAPTCHA settings
+(1.0.4), and its palette item opens an info dialog by design rather than
+needing a per-field template.
+
+> `readme.txt` documents the 29 types that render. Add each remaining type
+> to it as its template lands.
 
 ---
 
@@ -170,7 +175,7 @@ Legacy aliases kept for forms saved before 1.0.3: `checkboxes` → checkbox,
 - [ ] Geolocation
 - [~] Calculations — number field emits `data-calculation` and frontend.js
       evaluates it; no builder UI for formulas beyond a text input
-- [ ] Signature field
+- [x] Signature field
 - [x] Rating field
 - [ ] Likert scale
 

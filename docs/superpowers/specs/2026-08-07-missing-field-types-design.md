@@ -1,7 +1,7 @@
 # Missing Field Types — Design
 
 **Date:** 2026-08-07
-**Status:** Approved scope, pending implementation
+**Status:** Implemented (see docs/superpowers/plans/2026-08-07-missing-field-types.md)
 **Baseline:** 17 of the 38 palette types render on the frontend (see
 `doc/CHECKLIST.md`, Field Type Coverage). This cycle adds 12, taking coverage
 to 29/38.

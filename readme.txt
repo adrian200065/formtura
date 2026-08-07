@@ -18,7 +18,7 @@ Formtura is the modern, intuitive, and powerful form builder for WordPress. Crea
 
 * **Beautiful Drag & Drop Builder** - Intuitive interface with real-time preview
 * **Pre-built Templates** - Start quickly with professionally designed form templates
-* **Seventeen Field Types** - From single line text to file uploads, star ratings and sliders
+* **Twenty-Nine Field Types** - From single line text to file uploads, signatures and priced payment items
 * **File Uploads** - Validated, safely stored, and optionally attached to your notification emails
 * **Built-in SMTP** - Ensure reliable email delivery with integrated SMTP configuration
 * **Entry Management** - View, search, and export form submissions
@@ -49,6 +49,28 @@ Formtura is the modern, intuitive, and powerful form builder for WordPress. Crea
 * File Upload
 * Star Rating
 * Slider
+* Address
+* Camera
+* Signature
+
+= Presentation Fields =
+
+* Content
+* Section Divider
+* Rich Text
+
+= Payment Fields =
+
+* Single Item
+* Checkbox Items
+* Multiple Items
+* Dropdown Items
+* Coupon
+* Total
+
+Payment fields record the amount with the form entry so you can see what
+was ordered. They do not collect payment - Formtura has no payment
+gateway integration yet, so no card is charged and no money moves.
 
 == Installation ==
 

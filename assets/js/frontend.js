@@ -146,7 +146,11 @@
 		 *
 		 * Canvas drawing cannot be delegated the way form events are, so
 		 * pads are initialized directly; window.formturaInitSignaturePads()
-		 * re-runs this for markup inserted after page load.
+		 * re-runs this for markup inserted after page load. Each pad's
+		 * clear function is stashed on the pad's jQuery data so the
+		 * submit-success path (clearSignatures) and the Clear button can
+		 * share one code path instead of duplicating canvas state that
+		 * otherwise only lives inside this closure.
 		 */
 		initSignaturePads() {
 			$('[data-fta-signature]').each(function() {
@@ -178,6 +182,28 @@
 					};
 				};
 
+				// Ends the current stroke. A cancelled stroke (OS touch-cancel,
+				// palm/stylus rejection, the window losing focus) still
+				// serializes whatever was drawn up to that point rather than
+				// discarding it - the alternative would leave the hidden input
+				// stale while the canvas shows an in-progress signature, the
+				// same disagreement this fix is closing on the success path.
+				const endStroke = () => {
+					if (!drawing) {
+						return;
+					}
+					drawing = false;
+					$value.val(canvas.toDataURL('image/png')).trigger('change');
+				};
+
+				const clear = () => {
+					drawing = false;
+					ctx.clearRect(0, 0, canvas.width, canvas.height);
+					$value.val('').trigger('change');
+				};
+
+				$pad.data('fta-signature-clear-fn', clear);
+
 				canvas.addEventListener('pointerdown', (e) => {
 					e.preventDefault();
 					drawing = true;
@@ -196,17 +222,42 @@
 					ctx.stroke();
 				});
 
-				canvas.addEventListener('pointerup', () => {
-					if (!drawing) return;
-					drawing = false;
-					// Serialize on stroke end so the value is always current.
-					$value.val(canvas.toDataURL('image/png')).trigger('change');
-				});
+				canvas.addEventListener('pointerup', endStroke);
 
-				$pad.find('.fta-signature-clear').on('click', () => {
-					ctx.clearRect(0, 0, canvas.width, canvas.height);
-					$value.val('').trigger('change');
-				});
+				// The browser's canonical "this pointer stopped generating
+				// events" signal - covers OS touch-cancel and palm/stylus
+				// rejection. setPointerCapture only guarantees pointerup
+				// still targets the canvas when released outside it; it does
+				// nothing for an interaction the OS aborts outright.
+				canvas.addEventListener('pointercancel', endStroke);
+
+				// A window losing focus mid-stroke (alt-tab, a native dialog)
+				// does not reliably fire pointercancel; without this, `drawing`
+				// would stay true and a later unrelated pointermove (e.g. the
+				// mouse re-entering the canvas with no button held) would
+				// silently resume drawing a spurious line.
+				window.addEventListener('blur', endStroke);
+
+				$pad.find('.fta-signature-clear').on('click', clear);
+			});
+		},
+
+		/**
+		 * Wipe every signature pad's canvas and hidden input together.
+		 *
+		 * form.reset() (called on a successful submission) clears the
+		 * hidden input but never touches the canvas pixels - without this,
+		 * the pad would still show a signature the value no longer has,
+		 * which the visitor reads as a bug when a second submission is
+		 * blocked as unsigned. Mirrors resetRecaptcha($form).
+		 */
+		clearSignatures($form) {
+			$form.find('[data-fta-signature]').each(function() {
+				const clear = $(this).data('fta-signature-clear-fn');
+
+				if (typeof clear === 'function') {
+					clear();
+				}
 			});
 		},
 
@@ -352,6 +403,11 @@
 						// form.reset() does not clear the widget, and the token
 						// is single-use, so a second submission needs a new one.
 						FormturaFrontend.resetRecaptcha($form);
+
+						// form.reset() clears the hidden input but leaves any
+						// drawn strokes on the canvas - wipe both together so
+						// they can never disagree on a second submission.
+						FormturaFrontend.clearSignatures($form);
 
 						// Trigger custom event
 						$(document).trigger('formtura:submit:success', [formId, response.data]);

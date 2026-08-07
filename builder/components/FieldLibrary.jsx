@@ -40,27 +40,122 @@ import {
     Zap
 } from 'lucide-react';
 import React from 'react';
+import { createPortal } from 'react-dom';
 import InfoDialog from './InfoDialog';
 
 // Tooltip Component
 const Tooltip = ({ text, children }) => {
   const [isVisible, setIsVisible] = React.useState(false);
+  const [position, setPosition] = React.useState({
+    block: '0rem',
+    inline: '0rem',
+    placement: 'top',
+    ready: false,
+  });
+  const triggerRef = React.useRef(null);
   const tooltipRef = React.useRef(null);
+  const tooltipId = React.useId();
+
+  const updatePosition = React.useCallback(() => {
+    if (!triggerRef.current || !tooltipRef.current) {
+      return;
+    }
+
+    const triggerBounds = triggerRef.current.getBoundingClientRect();
+    const tooltipBounds = tooltipRef.current.getBoundingClientRect();
+    const rootFontSize = Number.parseFloat(
+      window.getComputedStyle(document.documentElement).fontSize
+    ) || 16;
+    const isRtl = window.getComputedStyle(document.documentElement).direction === 'rtl';
+    const viewportPadding = rootFontSize * 0.75;
+    const tooltipGap = rootFontSize * 0.5;
+    const fitsAbove = triggerBounds.top - tooltipBounds.height - tooltipGap >= viewportPadding;
+    const fitsBelow = triggerBounds.bottom + tooltipBounds.height + tooltipGap <= window.innerHeight - viewportPadding;
+    const placement = fitsAbove || !fitsBelow ? 'top' : 'bottom';
+    const unclampedBlock = placement === 'top'
+      ? triggerBounds.top - tooltipBounds.height - tooltipGap
+      : triggerBounds.bottom + tooltipGap;
+    const unclampedInline = triggerBounds.left + (triggerBounds.width / 2) - (tooltipBounds.width / 2);
+    const maxInline = window.innerWidth - tooltipBounds.width - viewportPadding;
+    const block = Math.max(
+      viewportPadding,
+      Math.min(unclampedBlock, window.innerHeight - tooltipBounds.height - viewportPadding)
+    );
+    const inline = Math.max(viewportPadding, Math.min(unclampedInline, maxInline));
+    const logicalInline = isRtl
+      ? window.innerWidth - inline - tooltipBounds.width
+      : inline;
+
+    setPosition({
+      block: `${block / rootFontSize}rem`,
+      inline: `${logicalInline / rootFontSize}rem`,
+      placement,
+      ready: true,
+    });
+  }, []);
+
+  React.useLayoutEffect(() => {
+    if (!isVisible) {
+      return undefined;
+    }
+
+    const animationFrame = window.requestAnimationFrame(updatePosition);
+    window.addEventListener('resize', updatePosition);
+    document.addEventListener('scroll', updatePosition, true);
+
+    return () => {
+      window.cancelAnimationFrame(animationFrame);
+      window.removeEventListener('resize', updatePosition);
+      document.removeEventListener('scroll', updatePosition, true);
+    };
+  }, [isVisible, updatePosition]);
 
   return (
     <span
       className="formtura-tooltip-wrapper"
-      onMouseEnter={() => setIsVisible(true)}
+      onMouseEnter={() => {
+        setPosition((current) => ({ ...current, ready: false }));
+        setIsVisible(true);
+      }}
       onMouseLeave={() => setIsVisible(false)}
-      onFocus={() => setIsVisible(true)}
+      onFocus={() => {
+        setPosition((current) => ({ ...current, ready: false }));
+        setIsVisible(true);
+      }}
       onBlur={() => setIsVisible(false)}
-      ref={tooltipRef}
+      onKeyDown={(event) => {
+        if (event.key === 'Escape') {
+          setIsVisible(false);
+        }
+      }}
+      ref={triggerRef}
     >
-      {children || <HelpCircle size={14} className="formtura-help-icon" tabIndex={0} aria-label="Help" />}
-      {isVisible && (
-        <span className="formtura-tooltip" role="tooltip">
+      {children || (
+        <button
+          type="button"
+          className="formtura-help-trigger"
+          aria-label="Help"
+          aria-describedby={isVisible ? tooltipId : undefined}
+        >
+          <HelpCircle className="formtura-help-icon" aria-hidden="true" />
+        </button>
+      )}
+      {isVisible && typeof document !== 'undefined' && createPortal(
+        <span
+          id={tooltipId}
+          ref={tooltipRef}
+          className="formtura-tooltip"
+          role="tooltip"
+          data-placement={position.placement}
+          data-ready={position.ready}
+          style={{
+            insetBlockStart: position.block,
+            insetInlineStart: position.inline,
+          }}
+        >
           {text}
-        </span>
+        </span>,
+        document.body
       )}
     </span>
   );

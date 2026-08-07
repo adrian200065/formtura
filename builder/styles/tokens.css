@@ -69,6 +69,7 @@
   --layer-header: 20;
   --layer-popover: 40;
   --layer-modal: 60;
+  --layer-tooltip: 100000;
 
   /* Compatibility aliases for existing field components */
   --fta-builder-primary: var(--color-primary);

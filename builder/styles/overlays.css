@@ -184,23 +184,32 @@
 .formtura-tooltip-wrapper {
   position: relative;
   display: inline-flex;
+  vertical-align: middle;
 }
 
 .formtura-tooltip {
   color: var(--text-on-dark);
   background: var(--color-brand-midnight);
-  position: absolute;
-  inset-block-end: calc(100% + var(--space-2));
-  inset-inline-start: 50%;
-  z-index: var(--layer-popover);
+  position: fixed;
+  z-index: var(--layer-tooltip);
+  box-sizing: border-box;
   inline-size: max-content;
-  max-inline-size: 16rem;
+  max-inline-size: min(16rem, calc(100vw - var(--space-6)));
   padding-block: var(--space-2);
   padding-inline: var(--space-3);
+  border: 1px solid var(--surface-dark-hover);
   border-radius: var(--radius-sm);
   box-shadow: var(--shadow-md);
   font-size: var(--text-xs);
-  transform: translateX(-50%);
+  line-height: var(--leading-normal);
+  overflow-wrap: anywhere;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-fast);
+}
+
+.formtura-tooltip[data-ready="true"] {
+  opacity: 1;
 }
 
 .formtura-smart-tags-popup,
@@ -256,8 +265,7 @@
   background: var(--surface-subtle);
 }
 
-.formtura-smart-tag-btn,
-.formtura-help-icon {
+.formtura-smart-tag-btn {
   color: var(--text-muted);
   background: transparent;
   inline-size: 2.25rem;
@@ -268,6 +276,36 @@
   border: 1px solid var(--border-light);
   border-radius: var(--radius-md);
   cursor: pointer;
+}
+
+.formtura-help-trigger {
+  color: var(--text-muted);
+  background: transparent;
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  display: inline-grid;
+  place-items: center;
+  padding: var(--space-0);
+  border: 1px solid var(--border-light);
+  border-radius: 50%;
+  cursor: help;
+  transition:
+    color var(--transition-fast),
+    background-color var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.formtura-help-trigger:hover,
+.formtura-help-trigger:focus-visible {
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+  border-color: var(--color-primary);
+}
+
+.formtura-help-icon {
+  inline-size: 0.75rem;
+  block-size: 0.75rem;
+  stroke-width: 2;
 }
 
 @media (min-width: 40em) {

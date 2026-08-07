@@ -22,6 +22,7 @@ $form_description = isset( $form['description'] ) ? $form['description'] : '';
 $form_fields = isset( $form['fields'] ) ? $form['fields'] : [];
 $form_settings = isset( $form['settings'] ) ? $form['settings'] : [];
 $submit_text = isset( $form_settings['submit_button_text'] ) ? $form_settings['submit_button_text'] : __( 'Submit', FORMTURA_TEXTDOMAIN );
+$recaptcha = fta_get_recaptcha_config();
 ?>
 
 <div class="fta-form-container" id="fta-form-<?php echo esc_attr( $form_id ); ?>">
@@ -71,6 +72,17 @@ $submit_text = isset( $form_settings['submit_button_text'] ) ? $form_settings['s
 			}
 			?>
 		</div><!-- /.fta-form-body -->
+
+		<?php if ( $recaptcha['enabled'] && 'v2' === $recaptcha['version'] ) : ?>
+			<?php // Google's API renders the checkbox into this container, and the
+			// token lands in a textarea inside it - inside the form, so the
+			// submission picks it up with the rest of the fields. ?>
+			<div class="fta-field fta-field-recaptcha">
+				<div class="fta-recaptcha"
+					data-fta-recaptcha
+					data-sitekey="<?php echo esc_attr( $recaptcha['site_key'] ); ?>"></div>
+			</div><!-- /.fta-field-recaptcha -->
+		<?php endif; ?>
 
 		<div class="fta-form-footer">
 			<button type="submit" class="fta-submit-button">

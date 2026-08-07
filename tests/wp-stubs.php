@@ -160,7 +160,15 @@ if ( ! function_exists( 'selected' ) ) {
 }
 
 if ( ! function_exists( 'get_option' ) ) {
+	/**
+	 * Reads from $GLOBALS['fta_test_options'] when a test has seeded it, so
+	 * settings-dependent code can be exercised without a database.
+	 */
 	function get_option( $option, $default = false ) {
+		if ( isset( $GLOBALS['fta_test_options'] ) && array_key_exists( $option, $GLOBALS['fta_test_options'] ) ) {
+			return $GLOBALS['fta_test_options'][ $option ];
+		}
+
 		return $default;
 	}
 }
@@ -282,5 +290,56 @@ if ( ! function_exists( 'get_bloginfo' ) ) {
 if ( ! function_exists( 'locate_template' ) ) {
 	function locate_template( $template_names, $load = false, $require_once = true ) {
 		return '';
+	}
+}
+
+if ( ! function_exists( 'wp_nonce_field' ) ) {
+	function wp_nonce_field( $action = -1, $name = '_wpnonce', $referer = true, $echo = true ) {
+		$field = sprintf( '<input type="hidden" name="%s" value="test-nonce">', $name );
+
+		if ( $echo ) {
+			echo $field;
+		}
+
+		return $field;
+	}
+}
+
+if ( ! function_exists( 'wp_unslash' ) ) {
+	function wp_unslash( $value ) {
+		return is_string( $value ) ? stripslashes( $value ) : $value;
+	}
+}
+
+if ( ! function_exists( 'add_action' ) ) {
+	function add_action( $hook, $callback, $priority = 10, $accepted_args = 1 ) {
+		return true;
+	}
+}
+
+if ( ! function_exists( 'add_filter' ) ) {
+	function add_filter( $hook, $callback, $priority = 10, $accepted_args = 1 ) {
+		return true;
+	}
+}
+
+if ( ! function_exists( 'wp_remote_post' ) ) {
+	/**
+	 * Delegates to the callable in $GLOBALS['fta_test_http_handler'] so tests can
+	 * decide what the remote endpoint returns. Unhandled requests are an error:
+	 * a unit test must never reach the network.
+	 */
+	function wp_remote_post( $url, $args = [] ) {
+		if ( isset( $GLOBALS['fta_test_http_handler'] ) && is_callable( $GLOBALS['fta_test_http_handler'] ) ) {
+			return call_user_func( $GLOBALS['fta_test_http_handler'], $url, $args );
+		}
+
+		return new \WP_Error( 'http_request_failed', 'No HTTP handler registered for this test.' );
+	}
+}
+
+if ( ! function_exists( 'wp_remote_retrieve_body' ) ) {
+	function wp_remote_retrieve_body( $response ) {
+		return isset( $response['body'] ) ? $response['body'] : '';
 	}
 }

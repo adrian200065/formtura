@@ -23,6 +23,121 @@
 			this.initConditionalLogic();
 			this.initCalculations();
 			this.initSliders();
+			this.renderRecaptchaWidgets();
+		},
+
+		/**
+		 * reCAPTCHA configuration, or null when it is not set up.
+		 */
+		recaptchaConfig() {
+			return (window.formturaFrontend && formturaFrontend.recaptcha) || null;
+		},
+
+		/**
+		 * Render the v2 checkbox into every widget container on the page.
+		 *
+		 * Rendering explicitly (rather than letting api.js find .g-recaptcha
+		 * divs) is what gives us each widget's ID, which is needed to read its
+		 * token and to reset it once a submission has consumed it.
+		 */
+		renderRecaptchaWidgets() {
+			const config = FormturaFrontend.recaptchaConfig();
+
+			if (!config || config.version !== 'v2') {
+				return;
+			}
+
+			// Google's API may not have arrived yet; formturaRecaptchaOnload
+			// calls back into here when it does.
+			if (typeof window.grecaptcha === 'undefined' || !grecaptcha.render) {
+				return;
+			}
+
+			$('[data-fta-recaptcha]').each(function() {
+				const $container = $(this);
+
+				// Already rendered - re-rendering would throw.
+				if ($container.data('fta-widget-id') !== undefined) {
+					return;
+				}
+
+				try {
+					const widgetId = grecaptcha.render(this, {
+						sitekey: $container.data('sitekey') || config.siteKey
+					});
+
+					$container.data('fta-widget-id', widgetId);
+				} catch (e) {
+					console.error('Formtura: could not render reCAPTCHA', e);
+				}
+			});
+		},
+
+		/**
+		 * Resolve with the reCAPTCHA token for a form, or with null when
+		 * reCAPTCHA is not in play.
+		 *
+		 * Rejects with a user-facing message when a token cannot be obtained,
+		 * so the submission stops instead of being refused by the server.
+		 */
+		getRecaptchaToken($form) {
+			const config = FormturaFrontend.recaptchaConfig();
+
+			if (!config) {
+				return Promise.resolve(null);
+			}
+
+			const strings = (window.formturaFrontend && formturaFrontend.strings) || {};
+
+			if (typeof window.grecaptcha === 'undefined') {
+				return Promise.reject(new Error(strings.recaptchaError || 'reCAPTCHA could not be loaded.'));
+			}
+
+			if (config.version === 'v2') {
+				const $container = $form.find('[data-fta-recaptcha]').first();
+				const widgetId = $container.data('fta-widget-id');
+
+				if (widgetId === undefined) {
+					return Promise.reject(new Error(strings.recaptchaError || 'reCAPTCHA could not be loaded.'));
+				}
+
+				const token = grecaptcha.getResponse(widgetId);
+
+				// The visitor has not ticked the box yet.
+				if (!token) {
+					return Promise.reject(new Error(strings.recaptchaMissing || 'Please confirm you are not a robot.'));
+				}
+
+				return Promise.resolve(token);
+			}
+
+			// v3: mint a fresh token for this submission.
+			return new Promise((resolve, reject) => {
+				grecaptcha.ready(() => {
+					grecaptcha.execute(config.siteKey, { action: config.action })
+						.then(resolve)
+						.catch(() => {
+							reject(new Error(strings.recaptchaError || 'reCAPTCHA could not be loaded.'));
+						});
+				});
+			});
+		},
+
+		/**
+		 * Clear a consumed v2 token so the next submission gets a fresh one.
+		 */
+		resetRecaptcha($form) {
+			const config = FormturaFrontend.recaptchaConfig();
+
+			if (!config || config.version !== 'v2' || typeof window.grecaptcha === 'undefined') {
+				return;
+			}
+
+			const widgetId = $form.find('[data-fta-recaptcha]').first().data('fta-widget-id');
+
+			if (widgetId !== undefined) {
+				grecaptcha.reset(widgetId);
+			}
 		},
 
 		/**
@@ -95,11 +210,33 @@
 			// Disable submit button and show loading state
 			$submitButton.prop('disabled', true).addClass('loading');
 
+			// The token has to be in hand before the request goes out, so the
+			// submission waits on it.
+			FormturaFrontend.getRecaptchaToken($form)
+				.then(token => {
+					FormturaFrontend.sendSubmission($form, formId, $submitButton, token);
+				})
+				.catch(error => {
+					FormturaFrontend.showError($form, error.message);
+					$submitButton.prop('disabled', false).removeClass('loading');
+				});
+		},
+
+		/**
+		 * Post a validated form, with its reCAPTCHA token when there is one.
+		 */
+		sendSubmission($form, formId, $submitButton, recaptchaToken) {
 			// Prepare form data
 			const formData = new FormData($form[0]);
 			formData.append('action', 'fta_submit_form');
 			formData.append('form_id', formId);
 			formData.append('nonce', formturaFrontend.nonce);
+
+			if (recaptchaToken) {
+				// set(), not append(): the v2 widget already put its textarea in
+				// the form, and only one value should reach the server.
+				formData.set('g-recaptcha-response', recaptchaToken);
+			}
 
 			// Submit via AJAX
 			$.ajax({
@@ -113,6 +250,10 @@
 						FormturaFrontend.showSuccess($form, response.data.message);
 						$form[0].reset();
 
+						// form.reset() does not clear the widget, and the token
+						// is single-use, so a second submission needs a new one.
+						FormturaFrontend.resetRecaptcha($form);
+
 						// Trigger custom event
 						$(document).trigger('formtura:submit:success', [formId, response.data]);
 
@@ -124,6 +265,11 @@
 						}
 					} else {
 						FormturaFrontend.showError($form, response.data.message);
+
+						// A rejected token is spent either way.
+						if (response.data.recaptcha) {
+							FormturaFrontend.resetRecaptcha($form);
+						}
 
 						// Show field-specific errors
 						if (response.data.errors) {
@@ -591,5 +737,18 @@
 	$(document).ready(() => {
 		FormturaFrontend.init();
 	});
+
+	// Called by Google's api.js once it has loaded (v2, explicit rendering).
+	// The API script depends on this file, so this is defined before it runs.
+	window.formturaRecaptchaOnload = function() {
+		$(document).ready(() => {
+			FormturaFrontend.renderRecaptchaWidgets();
+		});
+	};
+
+	// Let integrations render widgets in markup added after page load.
+	window.formturaRenderRecaptcha = function() {
+		FormturaFrontend.renderRecaptchaWidgets();
+	};
 
 })(jQuery);

@@ -75,9 +75,12 @@ class Submission {
 		}
 
 		// Validate reCAPTCHA if enabled.
-		if ( ! $this->validate_recaptcha() ) {
+		$recaptcha_result = $this->validate_recaptcha();
+
+		if ( is_wp_error( $recaptcha_result ) ) {
 			wp_send_json_error( [
-				'message' => __( 'reCAPTCHA verification failed. Please try again.', FORMTURA_TEXTDOMAIN ),
+				'message'   => $recaptcha_result->get_error_message(),
+				'recaptcha' => $recaptcha_result->get_error_code(),
 			] );
 		}
 
@@ -345,39 +348,88 @@ class Submission {
 	/**
 	 * Validate reCAPTCHA.
 	 *
+	 * Verification fails closed: if Google cannot be reached the submission is
+	 * rejected rather than let through unchecked.
+	 *
 	 * @since 1.0.0
-	 * @return bool True if valid or not enabled, false if invalid.
+	 * @return true|\WP_Error True if valid or not enabled, WP_Error otherwise.
 	 */
 	private function validate_recaptcha() {
-		$recaptcha_secret = fta_get_setting( 'recaptcha_secret_key', '' );
+		$config = fta_get_recaptcha_config();
 
-		// If reCAPTCHA is not configured, skip validation.
-		if ( empty( $recaptcha_secret ) ) {
+		// If reCAPTCHA is not fully configured, skip validation.
+		if ( ! $config['enabled'] ) {
 			return true;
 		}
 
-		$recaptcha_response = isset( $_POST['g-recaptcha-response'] ) ? $_POST['g-recaptcha-response'] : '';
+		$token = isset( $_POST['g-recaptcha-response'] )
+			? sanitize_text_field( wp_unslash( $_POST['g-recaptcha-response'] ) )
+			: '';
 
-		if ( empty( $recaptcha_response ) ) {
-			return false;
+		if ( '' === $token ) {
+			return new \WP_Error(
+				'recaptcha_missing',
+				'v2' === $config['version']
+					? __( 'Please confirm you are not a robot.', FORMTURA_TEXTDOMAIN )
+					: __( 'reCAPTCHA verification could not be completed. Please reload the page and try again.', FORMTURA_TEXTDOMAIN )
+			);
 		}
 
 		// Verify with Google.
 		$response = wp_remote_post( 'https://www.google.com/recaptcha/api/siteverify', [
-			'body' => [
-				'secret'   => $recaptcha_secret,
-				'response' => $recaptcha_response,
+			'timeout' => 15,
+			'body'    => [
+				'secret'   => $config['secret_key'],
+				'response' => $token,
 				'remoteip' => $this->get_user_ip(),
 			],
 		] );
 
 		if ( is_wp_error( $response ) ) {
-			return false;
+			fta_log( 'reCAPTCHA verification request failed: ' . $response->get_error_message(), 'error' );
+
+			return new \WP_Error( 'recaptcha_unavailable', $this->recaptcha_failure_message() );
 		}
 
 		$body = json_decode( wp_remote_retrieve_body( $response ), true );
 
-		return isset( $body['success'] ) && $body['success'] === true;
+		if ( ! is_array( $body ) || empty( $body['success'] ) ) {
+			$codes = isset( $body['error-codes'] ) && is_array( $body['error-codes'] )
+				? implode( ', ', $body['error-codes'] )
+				: 'unknown';
+
+			fta_log( 'reCAPTCHA rejected the token: ' . $codes, 'warning' );
+
+			return new \WP_Error( 'recaptcha_failed', $this->recaptcha_failure_message() );
+		}
+
+		// v2 responses carry no score or action, so those checks are v3 only.
+		if ( 'v3' === $config['version'] ) {
+			// A token minted elsewhere on the site must not be replayable here.
+			if ( isset( $body['action'] ) && $body['action'] !== $config['action'] ) {
+				fta_log( sprintf( 'reCAPTCHA action mismatch: expected "%s", got "%s".', $config['action'], $body['action'] ), 'warning' );
+
+				return new \WP_Error( 'recaptcha_failed', $this->recaptcha_failure_message() );
+			}
+
+			if ( isset( $body['score'] ) && (float) $body['score'] < $config['score_threshold'] ) {
+				fta_log( sprintf( 'reCAPTCHA score %s is below the %s threshold.', $body['score'], $config['score_threshold'] ), 'warning' );
+
+				return new \WP_Error( 'recaptcha_failed', $this->recaptcha_failure_message() );
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Message shown when a token is present but does not check out.
+	 *
+	 * @since 1.0.4
+	 * @return string
+	 */
+	private function recaptcha_failure_message() {
+		return __( 'reCAPTCHA verification failed. Please try again.', FORMTURA_TEXTDOMAIN );
 	}
 
 	/**

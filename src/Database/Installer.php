@@ -120,14 +120,15 @@ class Installer {
 		// Set default settings if not already set.
 		if ( ! get_option( 'fta_settings' ) ) {
 			$default_settings = [
-				'load_css'               => true,
-				'load_js'                => true,
-				'debug_mode'             => false,
-				'recaptcha_site_key'     => '',
-				'recaptcha_secret_key'   => '',
-				'recaptcha_version'      => 'v2',
-				'currency'               => 'USD',
-				'keep_data_on_uninstall' => false,
+				'load_css'                  => true,
+				'load_js'                   => true,
+				'debug_mode'                => false,
+				'recaptcha_site_key'        => '',
+				'recaptcha_secret_key'      => '',
+				'recaptcha_version'         => 'v2',
+				'recaptcha_score_threshold' => 0.5,
+				'currency'                  => 'USD',
+				'keep_data_on_uninstall'    => false,
 			];
 
 			add_option( 'fta_settings', $default_settings );

@@ -220,6 +220,17 @@
 	margin-block-start: var(--fta-form-space-sm);
 }
 
+/* reCAPTCHA */
+.fta-field-recaptcha {
+	margin-block-start: var(--fta-form-space-lg);
+}
+
+/* The widget is a fixed-width iframe; let it shrink rather than overflow. */
+.fta-recaptcha {
+	max-width: 100%;
+	overflow: hidden;
+}
+
 /* Submit Button */
 .fta-form-footer {
 	margin-block-start: var(--fta-form-space-xl);

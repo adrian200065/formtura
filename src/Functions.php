@@ -174,6 +174,43 @@ function fta_get_smtp_setting( $key = '', $default = null ) {
 }
 
 /**
+ * Get the reCAPTCHA configuration.
+ *
+ * Single source of truth for whether reCAPTCHA is active. Both halves of the
+ * flow have to agree: without a site key the browser cannot mint a token, and
+ * without a secret key the server cannot verify one. Enabling on either key
+ * alone leaves the form unsubmittable, so both are required.
+ *
+ * @since 1.0.4
+ * @return array {
+ *     @type bool   $enabled         Whether reCAPTCHA should be applied.
+ *     @type string $site_key        Public site key.
+ *     @type string $secret_key      Private secret key.
+ *     @type string $version         Either 'v2' or 'v3'.
+ *     @type string $action          Action name submitted with v3 tokens.
+ *     @type float  $score_threshold Minimum accepted v3 score, 0.0-1.0.
+ * }
+ */
+function fta_get_recaptcha_config() {
+	$site_key   = trim( (string) fta_get_setting( 'recaptcha_site_key', '' ) );
+	$secret_key = trim( (string) fta_get_setting( 'recaptcha_secret_key', '' ) );
+	$version    = 'v3' === fta_get_setting( 'recaptcha_version', 'v2' ) ? 'v3' : 'v2';
+
+	$threshold = fta_get_setting( 'recaptcha_score_threshold', 0.5 );
+	$threshold = is_numeric( $threshold ) ? (float) $threshold : 0.5;
+	$threshold = max( 0.0, min( 1.0, $threshold ) );
+
+	return [
+		'enabled'         => '' !== $site_key && '' !== $secret_key,
+		'site_key'        => $site_key,
+		'secret_key'      => $secret_key,
+		'version'         => $version,
+		'action'          => 'formtura_submit',
+		'score_threshold' => $threshold,
+	];
+}
+
+/**
  * Sanitize form field data.
  *
  * @since 1.0.0

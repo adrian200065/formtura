@@ -127,6 +127,37 @@ describe('FieldPreview', () => {
       expect(screen.getByText('Yes')).toBeInTheDocument();
       expect(screen.getByText('No')).toBeInTheDocument();
     });
+
+    it('should not render checkboxes', () => {
+      const field = {
+        id: 'field_1',
+        type: 'radio',
+        label: 'Select One',
+        options: ['Yes', 'No'],
+      };
+
+      const { container } = render(<FieldPreview field={field} />);
+
+      expect(container.querySelectorAll('input[type="checkbox"]')).toHaveLength(0);
+    });
+  });
+
+  // `checkbox` is the multi-answer field. Before 1.0.3 it rendered radios and
+  // `checkboxes` held this meaning.
+  describe('checkbox field', () => {
+    it('should render checkboxes, not radio buttons', () => {
+      const field = {
+        id: 'field_1',
+        type: 'checkbox',
+        label: 'Select Multiple',
+        options: ['Apple', 'Banana'],
+      };
+
+      const { container } = render(<FieldPreview field={field} />);
+
+      expect(container.querySelectorAll('input[type="checkbox"]')).toHaveLength(2);
+      expect(container.querySelectorAll('input[type="radio"]')).toHaveLength(0);
+    });
   });
 
   describe('checkboxes field', () => {

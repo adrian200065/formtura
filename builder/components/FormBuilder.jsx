@@ -88,7 +88,14 @@ const FormBuilder = ({ formId }) => {
       case 'select':
       case 'radio':
       case 'checkbox':
-        return { ...baseField, options: ['Option 1', 'Option 2', 'Option 3'] };
+        return {
+          ...baseField,
+          choices: [
+            { label: 'First Choice', value: 'first-choice', isDefault: false },
+            { label: 'Second Choice', value: 'second-choice', isDefault: false },
+            { label: 'Third Choice', value: 'third-choice', isDefault: false },
+          ],
+        };
       case 'name':
         return {
           ...baseField,
@@ -178,7 +185,7 @@ const FormBuilder = ({ formId }) => {
       textarea: 'Message',
       number: 'Number',
       select: 'Dropdown',
-      radio: 'Radio Buttons',
+      radio: 'Multiple Choice',
       checkbox: 'Checkboxes',
       name: 'Name',
       phone: 'Phone Number',

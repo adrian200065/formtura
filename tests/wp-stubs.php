@@ -9,6 +9,54 @@
  * @package Formtura
  */
 
+if ( ! class_exists( 'WP_Error' ) ) {
+	/**
+	 * Minimal stand-in for WordPress's WP_Error.
+	 */
+	class WP_Error {
+
+		/**
+		 * @var array<string, string[]>
+		 */
+		private $errors = [];
+
+		/**
+		 * @var array<string, mixed>
+		 */
+		private $error_data = [];
+
+		public function __construct( $code = '', $message = '', $data = '' ) {
+			if ( '' === $code ) {
+				return;
+			}
+
+			$this->errors[ $code ][] = $message;
+
+			if ( '' !== $data ) {
+				$this->error_data[ $code ] = $data;
+			}
+		}
+
+		public function get_error_code() {
+			$codes = array_keys( $this->errors );
+
+			return empty( $codes ) ? '' : $codes[0];
+		}
+
+		public function get_error_message( $code = '' ) {
+			$code = '' === $code ? $this->get_error_code() : $code;
+
+			return isset( $this->errors[ $code ][0] ) ? $this->errors[ $code ][0] : '';
+		}
+
+		public function get_error_data( $code = '' ) {
+			$code = '' === $code ? $this->get_error_code() : $code;
+
+			return isset( $this->error_data[ $code ] ) ? $this->error_data[ $code ] : null;
+		}
+	}
+}
+
 if ( ! function_exists( 'esc_attr' ) ) {
 	function esc_attr( $text ) {
 		return htmlspecialchars( (string) $text, ENT_QUOTES, 'UTF-8' );
@@ -156,6 +204,78 @@ if ( ! function_exists( 'get_terms' ) ) {
 if ( ! function_exists( 'is_wp_error' ) ) {
 	function is_wp_error( $thing ) {
 		return $thing instanceof \WP_Error;
+	}
+}
+
+if ( ! function_exists( 'wp_max_upload_size' ) ) {
+	function wp_max_upload_size() {
+		return 64 * 1024 * 1024;
+	}
+}
+
+if ( ! function_exists( 'wp_generate_password' ) ) {
+	function wp_generate_password( $length = 12, $special_chars = true, $extra_special_chars = false ) {
+		return substr( str_repeat( 'abcdefghijklmnopqrstuvwxyz0123456789', 4 ), 0, $length );
+	}
+}
+
+if ( ! function_exists( 'sanitize_file_name' ) ) {
+	function sanitize_file_name( $filename ) {
+		return preg_replace( '/[^A-Za-z0-9._-]/', '', (string) $filename );
+	}
+}
+
+if ( ! function_exists( 'wp_check_filetype_and_ext' ) ) {
+	function wp_check_filetype_and_ext( $file, $filename, $mimes = null ) {
+		$ext  = strtolower( pathinfo( $filename, PATHINFO_EXTENSION ) );
+		$map  = [
+			'jpg'  => 'image/jpeg',
+			'jpeg' => 'image/jpeg',
+			'png'  => 'image/png',
+			'gif'  => 'image/gif',
+			'pdf'  => 'application/pdf',
+			'txt'  => 'text/plain',
+			'zip'  => 'application/zip',
+		];
+
+		return [
+			'ext'             => isset( $map[ $ext ] ) ? $ext : false,
+			'type'            => isset( $map[ $ext ] ) ? $map[ $ext ] : false,
+			'proper_filename' => false,
+		];
+	}
+}
+
+if ( ! function_exists( 'wp_mkdir_p' ) ) {
+	function wp_mkdir_p( $target ) {
+		return is_dir( $target ) || mkdir( $target, 0777, true );
+	}
+}
+
+if ( ! function_exists( 'wp_delete_file' ) ) {
+	function wp_delete_file( $file ) {
+		return file_exists( $file ) ? unlink( $file ) : false;
+	}
+}
+
+if ( ! function_exists( 'wp_upload_dir' ) ) {
+	function wp_upload_dir( $time = null, $create_dir = true, $refresh_cache = false ) {
+		$base = sys_get_temp_dir() . '/formtura-tests-uploads';
+
+		return [
+			'path'    => $base,
+			'url'     => 'https://example.com/uploads',
+			'subdir'  => '',
+			'basedir' => $base,
+			'baseurl' => 'https://example.com/uploads',
+			'error'   => false,
+		];
+	}
+}
+
+if ( ! function_exists( 'get_bloginfo' ) ) {
+	function get_bloginfo( $show = '', $filter = 'raw' ) {
+		return 'Test Site';
 	}
 }
 

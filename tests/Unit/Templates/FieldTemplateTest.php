@@ -164,14 +164,14 @@ class FieldTemplateTest extends TestCase {
 		$this->assertStringContainsString( 'multiple', $html );
 	}
 
-	public function test_checkboxes_post_an_array_but_radio_does_not() {
+	public function test_checkbox_posts_an_array_but_radio_does_not() {
 		$choices = [ [ 'label' => 'A', 'value' => 'a' ], [ 'label' => 'B', 'value' => 'b' ] ];
 
-		$checkboxes = $this->render( $this->field( 'checkboxes', [ 'choices' => $choices ] ) );
-		$radio      = $this->render( $this->field( 'radio', [ 'choices' => $choices ] ) );
+		$checkbox = $this->render( $this->field( 'checkbox', [ 'choices' => $choices ] ) );
+		$radio    = $this->render( $this->field( 'radio', [ 'choices' => $choices ] ) );
 
-		$this->assertStringContainsString( 'name="field_1699_abc[]"', $checkboxes );
-		$this->assertStringContainsString( 'type="checkbox"', $checkboxes );
+		$this->assertStringContainsString( 'name="field_1699_abc[]"', $checkbox );
+		$this->assertStringContainsString( 'type="checkbox"', $checkbox );
 
 		$this->assertStringContainsString( 'name="field_1699_abc"', $radio );
 		$this->assertStringContainsString( 'type="radio"', $radio );
@@ -179,16 +179,28 @@ class FieldTemplateTest extends TestCase {
 	}
 
 	/**
-	 * The builder labels its single-answer field "Multiple Choice" under the
-	 * type `checkbox`, and previews it as radio inputs.
+	 * `radio` is the single-answer field; `checkbox` is multi-answer. Before
+	 * 1.0.3 the builder had these inverted.
 	 */
-	public function test_checkbox_type_renders_radio_inputs() {
-		$html = $this->render( $this->field( 'checkbox', [
+	public function test_radio_renders_radio_inputs_only() {
+		$html = $this->render( $this->field( 'radio', [
 			'choices' => [ [ 'label' => 'A', 'value' => 'a' ] ],
 		] ) );
 
 		$this->assertStringContainsString( 'type="radio"', $html );
 		$this->assertStringNotContainsString( 'type="checkbox"', $html );
+	}
+
+	/**
+	 * Forms saved before 1.0.3 may still hold the `checkboxes` slug.
+	 */
+	public function test_legacy_checkboxes_slug_renders_checkboxes() {
+		$html = $this->render( $this->field( 'checkboxes', [
+			'choices' => [ [ 'label' => 'A', 'value' => 'a' ] ],
+		] ) );
+
+		$this->assertStringContainsString( 'type="checkbox"', $html );
+		$this->assertStringContainsString( 'name="field_1699_abc[]"', $html );
 	}
 
 	public function test_name_field_formats_render_expected_parts() {

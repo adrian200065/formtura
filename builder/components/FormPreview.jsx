@@ -360,8 +360,7 @@ const FormPreview = ({ fields, formSettings, onClose }) => {
             </select>
           );
 
-        case 'radio':
-        case 'checkbox': {
+        case 'radio': {
           // Get choice layout class
           const getRadioLayoutClass = () => {
             switch(field.choiceLayout) {
@@ -397,12 +396,11 @@ const FormPreview = ({ fields, formSettings, onClose }) => {
           }
 
           const radioLayoutClass = getRadioLayoutClass();
-          const radioGroupClass = field.type === 'checkbox' ? 'formtura-preview-checkbox-group' : 'formtura-preview-radio-group';
 
           return (
-            <div className={`${radioGroupClass} ${radioLayoutClass}`}>
+            <div className={`formtura-preview-radio-group ${radioLayoutClass}`}>
               {radioChoices.map((choice, index) => (
-                <label key={index} className={field.type === 'checkbox' ? 'formtura-preview-checkbox' : 'formtura-preview-radio'}>
+                <label key={index} className="formtura-preview-radio">
                   <input
                     type="radio"
                     name={field.id}
@@ -417,6 +415,8 @@ const FormPreview = ({ fields, formSettings, onClose }) => {
           );
         }
 
+        // `checkboxes` is the pre-1.0.3 slug for this field.
+        case 'checkbox':
         case 'checkboxes': {
           // Get choice layout class
           const getCheckboxesLayoutClass = () => {

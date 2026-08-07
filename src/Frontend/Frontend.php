@@ -49,8 +49,8 @@ class Frontend {
 	 * @since 1.0.0
 	 */
 	private function init_components() {
-		new Submission();
-		new Notifications();
+		// Submission and Notifications are constructed by Core so their AJAX
+		// hooks are registered on admin-ajax.php requests too.
 	}
 
 	/**

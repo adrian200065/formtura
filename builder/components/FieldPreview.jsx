@@ -161,8 +161,7 @@ const FieldPreview = ({ field }) => {
           </select>
         );
 
-      case 'radio':
-      case 'checkbox': {
+      case 'radio': {
         // Get choices based on dynamic choices setting
         const getRadioChoices = () => {
           if (field.dynamicChoices === 'post_type') {
@@ -235,13 +234,11 @@ const FieldPreview = ({ field }) => {
         };
 
         const layoutClass = getChoiceLayoutClass();
-        const groupClass = field.type === 'checkbox' ? 'formtura-checkbox-choices-group' : 'formtura-radio-group';
-        const itemClass = field.type === 'checkbox' ? 'formtura-checkbox-choice-item' : 'formtura-radio-item';
 
         return (
-          <div className={`${groupClass} ${layoutClass}`}>
+          <div className={`formtura-radio-group ${layoutClass}`}>
             {radioChoices.map((choice, index) => (
-              <div key={index} className={itemClass}>
+              <div key={index} className="formtura-radio-item">
                 <label>
                   <input
                     type="radio"
@@ -259,6 +256,8 @@ const FieldPreview = ({ field }) => {
         );
       }
 
+      // `checkboxes` is the pre-1.0.3 slug for this field.
+      case 'checkbox':
       case 'checkboxes': {
         // Get choices based on dynamic choices setting
         const getCheckboxChoices = () => {

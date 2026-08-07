@@ -59,6 +59,25 @@ describe('helpers utility functions', () => {
       expect(result.valid).toBe(true);
     });
 
+    it('should return valid for a choice field using the choices shape', () => {
+      const field = {
+        label: 'Checkboxes',
+        type: 'checkbox',
+        choices: [{ label: 'First Choice', value: 'first-choice' }]
+      };
+      const result = validateField(field);
+
+      expect(result.valid).toBe(true);
+    });
+
+    it('should return invalid for a radio field with no choices', () => {
+      const field = { label: 'Multiple Choice', type: 'radio', choices: [] };
+      const result = validateField(field);
+
+      expect(result.valid).toBe(false);
+      expect(result.message).toBe('At least one option is required');
+    });
+
     it('should validate radio and checkbox fields for options', () => {
       const radioField = { label: 'Radio', type: 'radio', options: [] };
       const checkboxField = { label: 'Checkbox', type: 'checkbox', options: [] };

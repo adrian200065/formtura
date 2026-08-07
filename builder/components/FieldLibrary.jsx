@@ -206,8 +206,8 @@ const fieldTypes = [
       { type: 'name', label: 'Name', icon: User },
       { type: 'email', label: 'Email', icon: Mail },
       { type: 'select', label: 'Dropdown', icon: ChevronDown },
-      { type: 'checkbox', label: 'Multiple Choice', icon: CheckSquare },
-      { type: 'checkboxes', label: 'Checkboxes', icon: CheckSquare },
+      { type: 'radio', label: 'Multiple Choice', icon: Circle },
+      { type: 'checkbox', label: 'Checkboxes', icon: CheckSquare },
       { type: 'number', label: 'Numbers', icon: Hash },
       { type: 'phone', label: 'Phone', icon: Phone },
       { type: 'website', label: 'Website / URL', icon: Globe },
@@ -849,7 +849,7 @@ const GeneralTab = ({ field, onUpdate }) => {
 
   // Initialize choices if not present
   React.useEffect(() => {
-    if ((field.type === 'select' || field.type === 'checkbox' || field.type === 'checkboxes') && !field.choices) {
+    if ((field.type === 'select' || field.type === 'radio' || field.type === 'checkbox' || field.type === 'checkboxes') && !field.choices) {
       handleChange('choices', [
         { label: 'First Choice', value: 'first-choice', isDefault: false },
         { label: 'Second Choice', value: 'second-choice', isDefault: false },
@@ -1037,8 +1037,8 @@ const GeneralTab = ({ field, onUpdate }) => {
       );
     }
 
-    // Multiple Choice field (checkbox - radio buttons)
-    if (field.type === 'checkbox') {
+    // Multiple Choice field (single answer, radio buttons)
+    if (field.type === 'radio') {
       return (
         <>
           <div className="formtura-form-group">
@@ -1182,8 +1182,8 @@ const GeneralTab = ({ field, onUpdate }) => {
       );
     }
 
-    // Checkboxes field
-    if (field.type === 'checkboxes') {
+    // Checkboxes field (multiple answers). `checkboxes` is the pre-1.0.3 slug.
+    if (field.type === 'checkbox' || field.type === 'checkboxes') {
       return (
         <>
           <div className="formtura-form-group">

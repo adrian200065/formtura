@@ -113,8 +113,11 @@ class Notifications {
 		// Wrap message in email template.
 		$message = $this->get_email_template( $message, $form );
 
+		// Attach uploads from any File Upload field set to "attach to email".
+		$attachments = Uploads::get_email_attachments( $form, $entry_data );
+
 		// Send email.
-		$sent = wp_mail( $to, $subject, $message, $headers );
+		$sent = wp_mail( $to, $subject, $message, $headers, $attachments );
 
 		// Log if debug mode is enabled.
 		if ( fta_get_setting( 'debug_mode', false ) ) {
@@ -140,17 +143,65 @@ class Notifications {
 	private function parse_smart_tags( $text, $entry_data ) {
 		// Replace field values.
 		foreach ( $entry_data as $field_name => $field_value ) {
-			$text = str_replace( '{' . $field_name . '}', $field_value, $text );
+			$text = str_replace(
+				'{' . $field_name . '}',
+				$this->format_value( $field_value ),
+				$text
+			);
 		}
 
 		// Replace system tags.
-		$text = str_replace( '{site_name}', get_blogname(), $text );
+		$text = str_replace( '{site_name}', get_bloginfo( 'name' ), $text );
 		$text = str_replace( '{site_url}', get_site_url(), $text );
 		$text = str_replace( '{admin_email}', get_option( 'admin_email' ), $text );
 		$text = str_replace( '{date}', date_i18n( get_option( 'date_format' ) ), $text );
 		$text = str_replace( '{time}', date_i18n( get_option( 'time_format' ) ), $text );
 
 		return apply_filters( 'fta_parse_smart_tags', $text, $entry_data );
+	}
+
+	/**
+	 * Render a stored field value as text for an email.
+	 *
+	 * Multi-value fields (checkboxes, multi-selects) hold a list, name fields
+	 * hold parts keyed by position, and file fields hold records - none of
+	 * which can be concatenated directly.
+	 *
+	 * @since 1.0.3
+	 * @param mixed $value Stored field value.
+	 * @return string Human readable value.
+	 */
+	private function format_value( $value ) {
+		if ( ! is_array( $value ) ) {
+			return (string) $value;
+		}
+
+		$parts = [];
+
+		foreach ( $value as $item ) {
+			if ( is_array( $item ) ) {
+				// A file record: show its original name, linked when possible.
+				if ( isset( $item['name'] ) && isset( $item['url'] ) ) {
+					$parts[] = sprintf(
+						'<a href="%s">%s</a>',
+						esc_url( $item['url'] ),
+						esc_html( $item['name'] )
+					);
+
+					continue;
+				}
+
+				$parts[] = $this->format_value( $item );
+
+				continue;
+			}
+
+			if ( '' !== trim( (string) $item ) ) {
+				$parts[] = (string) $item;
+			}
+		}
+
+		return implode( ', ', $parts );
 	}
 
 	/**

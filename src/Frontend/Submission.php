@@ -91,8 +91,24 @@ class Submission {
 			] );
 		}
 
+		// Store uploaded files. Runs after the rest of the form validates so a
+		// rejected submission does not leave files behind.
+		$uploads = ( new Uploads() )->process_form_uploads( $form );
+
+		if ( is_wp_error( $uploads ) ) {
+			wp_send_json_error( [
+				'message' => $uploads->get_error_message(),
+				'errors'  => $uploads->get_error_data(),
+			] );
+		}
+
 		// Sanitize submission data.
 		$entry_data = $this->sanitize_submission( $form, $_POST );
+
+		// File records are produced by the upload handler, already sanitized.
+		foreach ( $uploads as $field_name => $files ) {
+			$entry_data[ $field_name ] = $files;
+		}
 
 		// Save entry to database.
 		$entry_id = fta_create_entry( [
@@ -145,6 +161,12 @@ class Submission {
 			$field_name = fta_get_field_name( $field );
 
 			if ( '' === $field_name || $this->is_presentational_field( $field ) ) {
+				continue;
+			}
+
+			// File fields arrive in $_FILES and are handled by Uploads, which
+			// runs its own required check.
+			if ( 'file-upload' === ( isset( $field['type'] ) ? $field['type'] : '' ) ) {
 				continue;
 			}
 
@@ -291,6 +313,12 @@ class Submission {
 			$field_name = fta_get_field_name( $field );
 
 			if ( '' === $field_name || $this->is_presentational_field( $field ) ) {
+				continue;
+			}
+
+			// File fields arrive in $_FILES and are handled by Uploads, which
+			// runs its own required check.
+			if ( 'file-upload' === ( isset( $field['type'] ) ? $field['type'] : '' ) ) {
 				continue;
 			}
 

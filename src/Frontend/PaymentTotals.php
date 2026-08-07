@@ -65,7 +65,11 @@ class PaymentTotals {
 		$coupon      = null;
 		$coupon_code = null;
 
-		foreach ( $form['fields'] as $field ) {
+		// A published method: guard the same shape form_has_payment_fields()
+		// already guards, rather than trust the caller to have checked it.
+		$fields = isset( $form['fields'] ) && is_array( $form['fields'] ) ? $form['fields'] : [];
+
+		foreach ( $fields as $field ) {
 			$type       = isset( $field['type'] ) ? $field['type'] : '';
 			$field_name = fta_get_field_name( $field );
 
@@ -85,14 +89,40 @@ class PaymentTotals {
 			if ( in_array( $type, [ 'payment-checkbox', 'payment-multiple', 'payment-dropdown' ], true ) ) {
 				$submitted = isset( $submission[ $field_name ] ) ? $submission[ $field_name ] : [];
 				$submitted = is_array( $submitted ) ? $submitted : [ $submitted ];
-				$defined   = fta_get_field_items( $field );
+
+				// Single-select types have exactly one real selection. An
+				// array with more than one element can only come from a
+				// crafted request, and summing every element would record a
+				// total the visitor never saw - take the first and ignore
+				// the rest.
+				if ( in_array( $type, [ 'payment-multiple', 'payment-dropdown' ], true ) ) {
+					$submitted = array_slice( $submitted, 0, 1 );
+				}
+
+				$defined = fta_get_field_items( $field );
+				$seen    = [];
 
 				foreach ( $submitted as $value ) {
+					// A nested array (e.g. a crafted field_items[][]=x
+					// request) is not a valid value shape. Casting it with
+					// (string) trips an "Array to string conversion"
+					// warning; treat it the same as any value the
+					// definition doesn't recognise instead, without the
+					// cast.
+					if ( is_array( $value ) ) {
+						$errors[ $field_name ] = __( 'Invalid selection.', FORMTURA_TEXTDOMAIN );
+						break;
+					}
+
 					$value = trim( (string) $value );
 
-					if ( '' === $value ) {
+					// A repeated value (field_items[]=small twice) is only
+					// counted once.
+					if ( '' === $value || isset( $seen[ $value ] ) ) {
 						continue;
 					}
+
+					$seen[ $value ] = true;
 
 					$match = null;
 
@@ -120,7 +150,17 @@ class PaymentTotals {
 			}
 
 			if ( 'coupon' === $type ) {
-				$code = isset( $submission[ $field_name ] ) ? trim( (string) $submission[ $field_name ] ) : '';
+				$raw_code = isset( $submission[ $field_name ] ) ? $submission[ $field_name ] : '';
+
+				// As with item values above: a nested array reaching
+				// trim( (string) $value ) trips a warning rather than
+				// producing the field error this shape should get.
+				if ( is_array( $raw_code ) ) {
+					$errors[ $field_name ] = __( 'This coupon code is not valid.', FORMTURA_TEXTDOMAIN );
+					continue;
+				}
+
+				$code = trim( (string) $raw_code );
 
 				if ( '' === $code ) {
 					continue;
@@ -178,19 +218,41 @@ class PaymentTotals {
 	public static function find_coupon( $field, $code ) {
 		$coupons = isset( $field['coupons'] ) && is_array( $field['coupons'] ) ? $field['coupons'] : [];
 
+		// A published method that Task 11's AJAX endpoint calls directly
+		// with a raw $_POST value - which could be an array. No code in the
+		// definition can ever equal that shape, so it simply never matches.
+		if ( is_array( $code ) ) {
+			return null;
+		}
+
+		$code = trim( (string) $code );
+
 		foreach ( $coupons as $coupon ) {
 			if ( ! is_array( $coupon ) || ! isset( $coupon['code'] ) ) {
 				continue;
 			}
 
-			if ( 0 !== strcasecmp( trim( (string) $coupon['code'] ), trim( $code ) ) ) {
+			if ( 0 !== strcasecmp( trim( (string) $coupon['code'] ), $code ) ) {
 				continue;
+			}
+
+			$type  = isset( $coupon['type'] ) && 'percent' === $coupon['type'] ? 'percent' : 'fixed';
+			$value = isset( $coupon['value'] ) && is_numeric( $coupon['value'] ) ? (float) $coupon['value'] : 0.0;
+
+			// A negative value would act as a surcharge (amount -= -50
+			// increases the total) and a percent above 100 would multiply
+			// the amount up - neither is a discount, so clamp both here
+			// rather than rely on the zero-floor downstream to hide them.
+			$value = max( 0.0, $value );
+
+			if ( 'percent' === $type ) {
+				$value = min( 100.0, $value );
 			}
 
 			return [
 				'code'  => (string) $coupon['code'],
-				'type'  => isset( $coupon['type'] ) && 'percent' === $coupon['type'] ? 'percent' : 'fixed',
-				'value' => isset( $coupon['value'] ) && is_numeric( $coupon['value'] ) ? (float) $coupon['value'] : 0.0,
+				'type'  => $type,
+				'value' => $value,
 			];
 		}
 

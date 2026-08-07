@@ -94,6 +94,29 @@ class Submission {
 			] );
 		}
 
+		// Payment forms carry an authoritative server-side computed order.
+		// Computed here, before any files are stored: compute() only reads
+		// $form and $_POST and never touches disk, so a forged item
+		// selection or coupon code is rejected before process_files() below
+		// moves any upload or writes any signature PNG. Running this after
+		// process_files() (as originally placed) would let a visitor post a
+		// forged selection alongside a real file repeatedly to leak stored
+		// files - the same leak process_signatures() was written to avoid,
+		// reintroduced one step later.
+		$payments = new PaymentTotals();
+		$payment  = null;
+
+		if ( $payments->form_has_payment_fields( $form ) ) {
+			$payment = $payments->compute( $form, wp_unslash( $_POST ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+
+			if ( is_wp_error( $payment ) ) {
+				wp_send_json_error( [
+					'message' => $payment->get_error_message(),
+					'errors'  => $payment->get_error_data(),
+				] );
+			}
+		}
+
 		// Store uploaded files and signatures. Runs after the rest of the form
 		// validates so a rejected submission does not leave files behind.
 		$files = $this->process_files( $form );
@@ -113,21 +136,12 @@ class Submission {
 			$entry_data[ $field_name ] = $records;
 		}
 
-		// Payment forms carry an authoritative server-side computed order.
-		$payments = new PaymentTotals();
-
-		if ( $payments->form_has_payment_fields( $form ) ) {
-			$payment = $payments->compute( $form, wp_unslash( $_POST ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-
-			if ( is_wp_error( $payment ) ) {
-				wp_send_json_error( [
-					'message' => $payment->get_error_message(),
-					'errors'  => $payment->get_error_data(),
-				] );
-			}
-
+		if ( null !== $payment ) {
 			// Reserved key: field names are field_<timestamp>_<suffix>, so
-			// _payment cannot collide with real field data.
+			// _payment cannot collide with real field data. Assigned after
+			// sanitize_submission() builds $entry_data so the server-computed
+			// value always wins, regardless of anything sanitize_submission()
+			// put there.
 			$entry_data['_payment'] = $payment;
 		}
 

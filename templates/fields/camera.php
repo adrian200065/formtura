@@ -18,9 +18,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$field_name     = fta_get_field_name( $field );
-$field_input_id = fta_get_field_input_id( $field );
-$field_required = ! empty( $field['required'] );
+$field_name         = fta_get_field_name( $field );
+$field_input_id     = fta_get_field_input_id( $field );
+$field_required     = ! empty( $field['required'] );
+$compact_upload_text = isset( $field['compactUploadText'] ) && '' !== $field['compactUploadText']
+	? $field['compactUploadText']
+	: __( 'Take Photo', FORMTURA_TEXTDOMAIN );
 ?>
 
 <div class="<?php echo esc_attr( fta_get_field_wrapper_class( $field, 'fta-field-camera' ) ); ?>"<?php echo fta_get_field_wrapper_data( $field ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
@@ -36,6 +39,9 @@ $field_required = ! empty( $field['required'] );
 			capture="environment"
 			<?php echo $field_required ? 'required' : ''; ?>
 		/>
+		<label for="<?php echo esc_attr( $field_input_id ); ?>" class="fta-file-upload-compact-label">
+			<?php echo esc_html( $compact_upload_text ); ?>
+		</label>
 		<span class="fta-file-upload-filename"></span>
 	</div>
 

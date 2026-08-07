@@ -122,6 +122,25 @@ class FieldTemplateTest extends TestCase {
 		);
 	}
 
+	/**
+	 * The compact file input is visually hidden by CSS and has no delegated
+	 * click handler of its own; only a native <label for="..."> can open it.
+	 * That trigger must survive hideLabel, since fta_field_label() renders
+	 * nothing in that case.
+	 */
+	public function test_camera_field_keeps_a_clickable_trigger_when_the_label_is_hidden() {
+		$field = $this->field( 'camera', [ 'hideLabel' => true ] );
+		$html  = $this->render( $field );
+
+		$input_id = fta_get_field_input_id( $field );
+
+		$this->assertMatchesRegularExpression(
+			'/<label[^>]*for="' . preg_quote( $input_id, '/' ) . '"[^>]*>/',
+			$html,
+			'Camera field lost its clickable trigger when hideLabel was set.'
+		);
+	}
+
 	public function test_missing_template_is_reported_not_silent() {
 		$rendered = fta_get_template_part( 'fields/no-such-field', '', [ 'field' => [] ] );
 

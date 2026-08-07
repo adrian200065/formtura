@@ -31,7 +31,7 @@ require_once __DIR__ . '/wp-stubs.php';
 require_once dirname( __DIR__ ) . '/src/Functions.php';
 
 // Define plugin constants
-define( 'FORMTURA_VERSION', '1.0.2' );
+define( 'FORMTURA_VERSION', '1.0.3' );
 define( 'FORMTURA_PLUGIN_FILE', dirname( __DIR__ ) . '/formtura.php' );
 define( 'FORMTURA_PLUGIN_DIR', dirname( __DIR__ ) . '/' );
 define( 'FORMTURA_PLUGIN_URL', 'https://example.com/wp-content/plugins/formtura/' );

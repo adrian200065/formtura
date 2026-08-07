@@ -4,7 +4,7 @@ Tags: form, form builder, contact form, drag and drop, forms
 Requires at least: 5.8
 Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.0.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -103,6 +103,14 @@ Yes, you can export entries to CSV format from the Entries page.
 
 == Changelog ==
 
+= 1.0.3 =
+* Added frontend rendering for 14 more field types, including Dropdown, Multiple Choice, Checkboxes, Name, Date, Star Rating and Slider
+* Added server-side file upload handling: size and file type validation, protected storage, and the option to attach uploads to notification emails
+* Fixed form submissions not being saved. Submitted values are now stored against the correct field
+* Fixed email notifications failing to send
+* Renamed the choice fields so they match what they do: "Multiple Choice" accepts one answer, "Checkboxes" accepts several. Existing forms are updated automatically on upgrade
+* Fields with no frontend template no longer disappear from the page without warning
+
 = 1.0.0 =
 * Initial release
 * Drag-and-drop form builder
@@ -114,6 +122,9 @@ Yes, you can export entries to CSV format from the Entries page.
 * CAPTCHA support
 
 == Upgrade Notice ==
+
+= 1.0.3 =
+Fixes form submissions not being saved and notification emails not sending. This upgrade rewrites the choice fields in your saved forms, so please back up your database first.
 
 = 1.0.0 =
 Initial release of Formtura - the modern form builder for WordPress.

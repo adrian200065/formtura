@@ -271,28 +271,62 @@ namespace Formtura\Tests\Unit\Frontend {
 
 		/**
 		 * The per-IP throttle: a real visitor mistyping a code a handful of
-		 * times must never be blocked. Comfortably under the 20-per-window
-		 * limit must keep validating normally.
+		 * times must never be blocked, and a subsequent correct attempt must
+		 * still succeed - a few failures do not exhaust the budget.
 		 */
-		public function test_throttle_does_not_block_a_handful_of_attempts() {
+		public function test_throttle_does_not_block_a_handful_of_failed_attempts() {
 			$GLOBALS['fta_test_ajax_forms'][7] = $this->couponForm( 7, [
 				[ 'code' => 'SAVE5', 'type' => 'fixed', 'value' => '5' ],
 			] );
 
 			for ( $i = 0; $i < 5; $i++ ) {
+				$_POST    = [ 'form_id' => 7, 'field_id' => 'field_coupon', 'code' => 'NOPE' ];
+				$response = $this->callAjax();
+
+				$this->assertFalse( $response->success );
+				$this->assertSame(
+					'This coupon code is not valid.',
+					$response->data['message'],
+					"Attempt {$i} returned a different message than a normal wrong-code failure - it should not have been throttled yet."
+				);
+			}
+
+			$_POST    = [ 'form_id' => 7, 'field_id' => 'field_coupon', 'code' => 'SAVE5' ];
+			$response = $this->callAjax();
+
+			$this->assertTrue( $response->success, 'A correct code after only 5 prior failures must still validate.' );
+		}
+
+		/**
+		 * A successful validation must never consume throttle budget - a
+		 * visitor applying a genuinely valid code repeatedly (e.g. re-reading
+		 * the total, or a NAT/CGNAT egress shared with other visitors doing
+		 * the same) must not eventually be told their working code "is not
+		 * valid" just because a counter filled up on successes.
+		 */
+		public function test_successful_validation_does_not_consume_throttle_budget() {
+			$GLOBALS['fta_test_ajax_forms'][7] = $this->couponForm( 7, [
+				[ 'code' => 'SAVE5', 'type' => 'fixed', 'value' => '5' ],
+			] );
+
+			// Comfortably more than the 20-attempt failure budget - if
+			// successes counted against it, this would start failing well
+			// before the 25th attempt.
+			for ( $i = 0; $i < 25; $i++ ) {
 				$_POST    = [ 'form_id' => 7, 'field_id' => 'field_coupon', 'code' => 'SAVE5' ];
 				$response = $this->callAjax();
 
-				$this->assertTrue( $response->success, "Attempt {$i} was unexpectedly throttled." );
+				$this->assertTrue( $response->success, "Successful attempt {$i} was unexpectedly throttled." );
 			}
 		}
 
 		/**
-		 * Past the limit, the same IP is throttled to the identical generic
-		 * message - not a distinguishable "too many attempts" response that
-		 * would itself leak information about how the limit works.
+		 * Repeated failures - and only failures - eventually throttle, with
+		 * the identical generic message rather than a distinguishable
+		 * "too many attempts" response that would itself leak information
+		 * about how the limit works.
 		 */
-		public function test_throttle_blocks_after_the_limit_with_the_identical_message() {
+		public function test_repeated_failures_eventually_throttle_with_the_identical_message() {
 			$GLOBALS['fta_test_ajax_forms'][7] = $this->couponForm( 7, [
 				[ 'code' => 'SAVE5', 'type' => 'fixed', 'value' => '5' ],
 			] );
@@ -300,12 +334,21 @@ namespace Formtura\Tests\Unit\Frontend {
 			$last = null;
 
 			for ( $i = 0; $i < 21; $i++ ) {
-				$_POST = [ 'form_id' => 7, 'field_id' => 'field_coupon', 'code' => 'SAVE5' ];
+				$_POST = [ 'form_id' => 7, 'field_id' => 'field_coupon', 'code' => 'NOPE' ];
 				$last  = $this->callAjax();
 			}
 
-			$this->assertFalse( $last->success, 'The 21st attempt from the same IP must be throttled.' );
+			$this->assertFalse( $last->success, 'The 21st failed attempt from the same IP must be throttled.' );
 			$this->assertSame( 'This coupon code is not valid.', $last->data['message'] );
+
+			// Throttled means throttled: even the genuinely correct code is
+			// refused once the budget is spent, since granting it here would
+			// just be a slower way to confirm the same code the sweep is
+			// trying to find.
+			$_POST    = [ 'form_id' => 7, 'field_id' => 'field_coupon', 'code' => 'SAVE5' ];
+			$response = $this->callAjax();
+
+			$this->assertFalse( $response->success, 'A correct code must also be refused once the IP is throttled.' );
 		}
 
 		/**
@@ -318,7 +361,7 @@ namespace Formtura\Tests\Unit\Frontend {
 			] );
 
 			for ( $i = 0; $i < 21; $i++ ) {
-				$_POST = [ 'form_id' => 7, 'field_id' => 'field_coupon', 'code' => 'SAVE5' ];
+				$_POST = [ 'form_id' => 7, 'field_id' => 'field_coupon', 'code' => 'NOPE' ];
 				$this->callAjax();
 			}
 

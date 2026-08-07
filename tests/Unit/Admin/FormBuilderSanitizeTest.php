@@ -114,6 +114,33 @@ class FormBuilderSanitizeTest extends TestCase {
 	}
 
 	/**
+	 * A nested array where the coupon value scalar belongs must not become
+	 * a bogus 1.0 via a bare floatval() cast - the same is_numeric() guard
+	 * already used for minFileSize/maxFileSize.
+	 */
+	public function test_coupon_value_as_a_nested_array_does_not_survive_as_a_number() {
+		$result = $this->sanitize( [
+			'coupons' => [ [ 'code' => 'X', 'type' => 'fixed', 'value' => [ 'nested' ] ] ],
+		] );
+
+		$this->assertSame( 0.0, $result['coupons'][0]['value'] );
+	}
+
+	/**
+	 * A coupon code that is itself a nested array (a crafted or corrupted
+	 * POST) must sanitize to an empty string, not trip a cast warning -
+	 * exercises the wp-stubs.php sanitize_text_field() fix that mirrors real
+	 * WordPress's array/object early-return.
+	 */
+	public function test_coupon_code_as_a_nested_array_sanitizes_to_empty_string() {
+		$result = $this->sanitize( [
+			'coupons' => [ [ 'code' => [ 'nested' => 'array' ], 'type' => 'fixed', 'value' => '5' ] ],
+		] );
+
+		$this->assertSame( '', $result['coupons'][0]['code'] );
+	}
+
+	/**
 	 * Payment items (payment-checkbox, payment-multiple, payment-dropdown):
 	 * every price an author sets must survive.
 	 */
@@ -153,12 +180,34 @@ class FormBuilderSanitizeTest extends TestCase {
 	}
 
 	/**
+	 * A nested array where an item's price scalar belongs must not become a
+	 * bogus 1.0 via a bare floatval() cast.
+	 */
+	public function test_item_price_as_a_nested_array_does_not_survive_as_a_number() {
+		$result = $this->sanitize( [
+			'items' => [ [ 'label' => 'A', 'value' => 'a', 'price' => [ 'nested' ] ] ],
+		] );
+
+		$this->assertSame( 0.0, $result['items'][0]['price'] );
+	}
+
+	/**
 	 * Single item price (payment-single).
 	 */
 	public function test_single_item_price_round_trips_as_a_float() {
 		$result = $this->sanitize( [ 'price' => '19.99' ] );
 
 		$this->assertSame( 19.99, $result['price'] );
+	}
+
+	/**
+	 * A nested array where the single item price scalar belongs must not
+	 * survive as a bogus 1.0.
+	 */
+	public function test_single_item_price_as_a_nested_array_does_not_survive_as_a_number() {
+		$result = $this->sanitize( [ 'price' => [ 'nested' ] ] );
+
+		$this->assertSame( 0.0, $result['price'] );
 	}
 
 	/**

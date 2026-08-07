@@ -193,8 +193,13 @@ class Submission {
 
 		// A cheap per-IP throttle. This endpoint has no reCAPTCHA and creates
 		// no entry, so it is a far cheaper oracle to sweep through candidate
-		// codes with than an actual submission - throttle before doing any
+		// codes with than an actual submission - checked before doing any
 		// lookup work at all, regardless of which form/field/code is named.
+		// Only failed attempts (below) count against the budget: a visitor
+		// who applies a genuinely valid code, or who shares a NAT/CGNAT
+		// egress IP with other visitors doing the same, must never be told a
+		// working code "is not valid" just because the window filled up on
+		// successes.
 		if ( $this->coupon_attempts_throttled() ) {
 			wp_send_json_error( [
 				'message' => __( 'This coupon code is not valid.', FORMTURA_TEXTDOMAIN ),
@@ -217,6 +222,7 @@ class Submission {
 		}
 
 		if ( ! $form || '' === $field_id || '' === $code ) {
+			$this->record_failed_coupon_attempt();
 			wp_send_json_error( [
 				'message' => __( 'This coupon code is not valid.', FORMTURA_TEXTDOMAIN ),
 			] );
@@ -232,6 +238,7 @@ class Submission {
 		}
 
 		if ( null === $coupon ) {
+			$this->record_failed_coupon_attempt();
 			wp_send_json_error( [
 				'message' => __( 'This coupon code is not valid.', FORMTURA_TEXTDOMAIN ),
 			] );
@@ -241,31 +248,58 @@ class Submission {
 	}
 
 	/**
-	 * Cheap per-IP throttle against sweeping this endpoint for valid codes.
+	 * Whether this IP is currently over the coupon-attempt budget.
 	 *
-	 * Generous on purpose: a real visitor mistyping a code a handful of
-	 * times in a session must never be blocked. Twenty attempts per five
-	 * minutes comfortably covers that while still bounding an automated
-	 * sweep to a few codes per window per IP - the endpoint grants no
-	 * discount on its own (PaymentTotals re-validates on submission), so the
-	 * bar here only needs to be "not free," not airtight.
+	 * Read-only: does not itself count as an attempt. Only
+	 * record_failed_coupon_attempt() increments the counter, so a
+	 * successful validation never consumes budget.
 	 *
 	 * @since 1.0.4
 	 * @return bool True when this IP is over the limit.
 	 */
 	private function coupon_attempts_throttled() {
-		$key   = 'fta_coupon_attempts_' . md5( $this->get_user_ip() );
-		$count = (int) get_transient( $key );
+		return (int) get_transient( $this->coupon_throttle_key() ) >= 20;
+	}
 
-		if ( $count >= 20 ) {
-			return true;
-		}
+	/**
+	 * Record one failed coupon attempt against this IP's budget.
+	 *
+	 * Called only from the failure paths in ajax_validate_coupon() - after a
+	 * lookup has already come back with no match, never before the lookup
+	 * and never on a match. Twenty failures per five minutes comfortably
+	 * covers a real visitor mistyping a code a handful of times, while still
+	 * bounding an automated sweep - which is nothing but failures - to a few
+	 * attempts per window per IP. The endpoint grants no discount on its own
+	 * (PaymentTotals re-validates on submission), so the bar only needs to
+	 * be "not free," not airtight.
+	 *
+	 * @since 1.0.4
+	 */
+	private function record_failed_coupon_attempt() {
+		$key   = $this->coupon_throttle_key();
+		$count = (int) get_transient( $key );
 
 		// 5 minutes. Not MINUTE_IN_SECONDS - a spelled-out literal so the
 		// window is legible without chasing a WordPress core constant.
 		set_transient( $key, $count + 1, 5 * 60 );
+	}
 
-		return false;
+	/**
+	 * Transient key for this request's coupon-attempt budget.
+	 *
+	 * Keyed on get_user_ip(), which - like the rest of this plugin - prefers
+	 * client-supplied headers (HTTP_CLIENT_IP, HTTP_X_FORWARDED_FOR) over
+	 * REMOTE_ADDR. Those headers are attacker-controlled: a request that
+	 * rotates them gets a fresh budget each time, so this throttle raises
+	 * the cost of a casual sweep but is not a hard guarantee against a
+	 * determined one. The real backstop remains PaymentTotals re-validating
+	 * independently on submission.
+	 *
+	 * @since 1.0.4
+	 * @return string
+	 */
+	private function coupon_throttle_key() {
+		return 'fta_coupon_attempts_' . md5( $this->get_user_ip() );
 	}
 
 	/**

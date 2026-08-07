@@ -112,7 +112,18 @@ if ( ! function_exists( '_e' ) ) {
 }
 
 if ( ! function_exists( 'sanitize_text_field' ) ) {
+	/**
+	 * Mirrors real WordPress: _sanitize_text_fields() early-returns '' for an
+	 * array or object, rather than letting it reach a string cast. Without
+	 * this guard, (string) on an array here would only emit a PHP warning in
+	 * this stub - not the '' a caller written against real WordPress
+	 * behaviour is entitled to assume.
+	 */
 	function sanitize_text_field( $str ) {
+		if ( is_array( $str ) || is_object( $str ) ) {
+			return '';
+		}
+
 		return trim( strip_tags( (string) $str ) );
 	}
 }

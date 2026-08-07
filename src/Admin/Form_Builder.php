@@ -512,7 +512,7 @@ class Form_Builder {
 				return [
 					'label'     => isset( $item['label'] ) ? sanitize_text_field( $item['label'] ) : '',
 					'value'     => isset( $item['value'] ) ? sanitize_text_field( $item['value'] ) : '',
-					'price'     => isset( $item['price'] ) ? floatval( $item['price'] ) : 0.0,
+					'price'     => isset( $item['price'] ) && is_numeric( $item['price'] ) ? floatval( $item['price'] ) : 0.0,
 					'isDefault' => isset( $item['isDefault'] ) ? (bool) $item['isDefault'] : false,
 				];
 			}, array_filter( $field['items'], 'is_array' ) ) );
@@ -520,7 +520,7 @@ class Form_Builder {
 
 		// Sanitize single item price (for payment-single).
 		if ( isset( $field['price'] ) ) {
-			$sanitized['price'] = floatval( $field['price'] );
+			$sanitized['price'] = is_numeric( $field['price'] ) ? floatval( $field['price'] ) : 0.0;
 		}
 
 		// Sanitize show-price-after-labels (for payment-checkbox,
@@ -544,7 +544,7 @@ class Form_Builder {
 				return [
 					'code'  => isset( $coupon['code'] ) ? sanitize_text_field( $coupon['code'] ) : '',
 					'type'  => isset( $coupon['type'] ) && 'percent' === $coupon['type'] ? 'percent' : 'fixed',
-					'value' => isset( $coupon['value'] ) ? floatval( $coupon['value'] ) : 0.0,
+					'value' => isset( $coupon['value'] ) && is_numeric( $coupon['value'] ) ? floatval( $coupon['value'] ) : 0.0,
 				];
 			}, array_filter( $field['coupons'], 'is_array' ) ) );
 		}

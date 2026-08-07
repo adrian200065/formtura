@@ -275,6 +275,32 @@ class FieldTemplateTest extends TestCase {
 		$this->assertSame( '', trim( $html ) );
 	}
 
+	public function test_content_field_renders_its_stored_markup() {
+		$html = $this->render( $this->field( 'content', [
+			'content' => '<p>Welcome to <strong>our</strong> form.</p>',
+		] ) );
+
+		$this->assertStringContainsString( '<strong>our</strong>', $html );
+		$this->assertStringContainsString( 'fta-field-content', $html );
+	}
+
+	public function test_content_field_with_no_content_renders_nothing() {
+		$html = $this->render( $this->field( 'content', [ 'content' => '  ' ] ) );
+
+		$this->assertSame( '', trim( $html ) );
+	}
+
+	public function test_section_divider_renders_heading_and_rule() {
+		$html = $this->render( $this->field( 'section-divider', [
+			'label'       => 'Shipping Details',
+			'description' => 'Where should we send it?',
+		] ) );
+
+		$this->assertStringContainsString( 'Shipping Details', $html );
+		$this->assertStringContainsString( '<hr', $html );
+		$this->assertStringNotContainsString( '<input', $html );
+	}
+
 	public function test_label_is_omitted_when_hidden() {
 		$shown  = $this->render( $this->field( 'text' ) );
 		$hidden = $this->render( $this->field( 'text', [ 'hideLabel' => true ] ) );

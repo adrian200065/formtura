@@ -109,6 +109,13 @@ const FormBuilder = ({ formId }) => {
           middleNameDefault: '',
           hideSublabels: false,
         };
+      case 'address':
+        return {
+          ...baseField,
+          label: 'Address',
+          scheme: 'us',
+          hideSublabels: false,
+        };
       case 'number-slider':
         return {
           ...baseField,
@@ -188,6 +195,7 @@ const FormBuilder = ({ formId }) => {
       radio: 'Multiple Choice',
       checkbox: 'Checkboxes',
       name: 'Name',
+      address: 'Address',
       phone: 'Phone Number',
       date: 'Date',
       'number-slider': 'Slider',

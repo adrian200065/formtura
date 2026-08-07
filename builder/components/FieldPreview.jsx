@@ -562,6 +562,22 @@ const FieldPreview = ({ field }) => {
           />
         );
 
+      case 'address':
+        return (
+          <div className="formtura-address-preview">
+            <input type="text" placeholder="Address Line 1" readOnly />
+            <input type="text" placeholder="Address Line 2" readOnly />
+            <div className="formtura-address-preview-row">
+              <input type="text" placeholder="City" readOnly />
+              <input type="text" placeholder={field.scheme === 'international' ? 'State / Province / Region' : 'State'} readOnly />
+            </div>
+            <div className="formtura-address-preview-row">
+              <input type="text" placeholder={field.scheme === 'international' ? 'Postal Code' : 'ZIP Code'} readOnly />
+              <input type="text" placeholder="Country" readOnly />
+            </div>
+          </div>
+        );
+
       default:
         return (
           <input

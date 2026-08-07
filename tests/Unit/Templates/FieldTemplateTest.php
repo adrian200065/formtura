@@ -72,6 +72,7 @@ class FieldTemplateTest extends TestCase {
 			'checkbox'      => [ 'checkbox', $choices ],
 			'checkboxes'    => [ 'checkboxes', $choices ],
 			'name'          => [ 'name', [] ],
+			'address'       => [ 'address', [] ],
 			'phone'         => [ 'phone', [] ],
 			'website'       => [ 'website', [] ],
 			'password'      => [ 'password', [] ],
@@ -114,7 +115,7 @@ class FieldTemplateTest extends TestCase {
 		);
 
 		$this->assertMatchesRegularExpression(
-			'/name="' . preg_quote( $expected, '/' ) . '(\[[a-z]*\])?"/',
+			'/name="' . preg_quote( $expected, '/' ) . '(\[[a-z0-9]*\])?"/',
 			$html,
 			"Field type '{$type}' does not post under its field id."
 		);

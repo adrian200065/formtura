@@ -227,6 +227,11 @@ class Submission {
 	private function validate_field_type( $value, $field ) {
 		$type = isset( $field['type'] ) ? $field['type'] : 'text';
 
+		// Address posts an array of parts with its own completeness rule.
+		if ( 'address' === $type ) {
+			return $this->validate_address( $value, $field );
+		}
+
 		// Multi-value fields are validated per selected value.
 		if ( is_array( $value ) ) {
 			return true;
@@ -255,6 +260,35 @@ class Submission {
 					return new \WP_Error( 'invalid_number', __( 'Please enter a valid number.', FORMTURA_TEXTDOMAIN ) );
 				}
 				break;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Validate an address field's parts.
+	 *
+	 * Required means street line 1, city, state and ZIP are all present.
+	 * Line 2 and country are always optional.
+	 *
+	 * @since 1.0.4
+	 * @param mixed $value Submitted value.
+	 * @param array $field Field configuration.
+	 * @return true|\WP_Error
+	 */
+	private function validate_address( $value, $field ) {
+		if ( ! is_array( $value ) ) {
+			return new \WP_Error( 'invalid_address', __( 'Please enter a valid address.', FORMTURA_TEXTDOMAIN ) );
+		}
+
+		if ( empty( $field['required'] ) ) {
+			return true;
+		}
+
+		foreach ( [ 'line1', 'city', 'state', 'zip' ] as $part ) {
+			if ( ! isset( $value[ $part ] ) || '' === trim( (string) $value[ $part ] ) ) {
+				return new \WP_Error( 'incomplete_address', __( 'Please complete the address.', FORMTURA_TEXTDOMAIN ) );
+			}
 		}
 
 		return true;

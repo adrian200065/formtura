@@ -1700,6 +1700,23 @@ const GeneralTab = ({ field, onUpdate }) => {
         </div>
       )}
 
+      {/* Address Scheme Selector */}
+      {field.type === 'address' && (
+        <div className="formtura-form-group">
+          <label htmlFor="field-scheme">
+            Scheme <Tooltip text="US shows State and ZIP Code; International shows Province/Region and Postal Code." />
+          </label>
+          <select
+            id="field-scheme"
+            value={field.scheme || 'us'}
+            onChange={(e) => handleChange('scheme', e.target.value)}
+          >
+            <option value="us">United States</option>
+            <option value="international">International</option>
+          </select>
+        </div>
+      )}
+
       {/* Render field-specific options */}
       {renderFieldSpecificOptions()}
 

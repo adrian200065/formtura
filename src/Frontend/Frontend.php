@@ -106,6 +106,7 @@ class Frontend {
 						'error'            => __( 'An error occurred. Please try again.', FORMTURA_TEXTDOMAIN ),
 						'recaptchaMissing' => __( 'Please confirm you are not a robot.', FORMTURA_TEXTDOMAIN ),
 						'recaptchaError'   => __( 'reCAPTCHA could not be loaded. Please reload the page and try again.', FORMTURA_TEXTDOMAIN ),
+						'signatureMissing' => __( 'Please add your signature.', FORMTURA_TEXTDOMAIN ),
 					],
 				]
 			);

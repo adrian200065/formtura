@@ -182,6 +182,8 @@ const FormBuilder = ({ formId }) => {
         };
       case 'camera':
         return { ...baseField, label: 'Camera' };
+      case 'signature':
+        return { ...baseField, label: 'Signature' };
       default:
         return baseField;
     }
@@ -210,6 +212,7 @@ const FormBuilder = ({ formId }) => {
       'camera': 'Camera',
       'website': 'Website',
       'hidden': 'Hidden Field',
+      'signature': 'Signature',
     };
     return labels[type] || 'Field';
   };

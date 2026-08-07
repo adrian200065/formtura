@@ -588,6 +588,14 @@ const FieldPreview = ({ field }) => {
           </div>
         );
 
+      case 'signature':
+        return (
+          <div className="formtura-signature-preview">
+            <div className="formtura-signature-preview-canvas">✕ Sign here</div>
+            <button type="button" onClick={(e) => e.stopPropagation()}>Clear</button>
+          </div>
+        );
+
       default:
         return (
           <input

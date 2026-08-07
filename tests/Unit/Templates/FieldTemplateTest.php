@@ -84,6 +84,7 @@ class FieldTemplateTest extends TestCase {
 			'file-upload'   => [ 'file-upload', [] ],
 			'camera'        => [ 'camera', [] ],
 			'rich-text'     => [ 'rich-text', [] ],
+			'signature'     => [ 'signature', [] ],
 		];
 	}
 

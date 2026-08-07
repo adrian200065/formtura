@@ -231,6 +231,28 @@
 	overflow: hidden;
 }
 
+/* Signature */
+.fta-signature-canvas {
+	width: 100%;
+	max-width: 100%;
+	border: 1px solid var(--fta-form-border);
+	border-radius: var(--fta-form-radius, 4px);
+	background: hsl(0, 0%, 100%);
+	touch-action: none; /* the pad owns touch gestures */
+	cursor: crosshair;
+	display: block;
+}
+
+.fta-signature-clear {
+	margin-block-start: var(--fta-form-space-sm);
+	background: none;
+	border: none;
+	color: var(--fta-form-focus);
+	cursor: pointer;
+	padding: 0;
+	font-size: var(--fta-form-text-sm, 0.875rem);
+}
+
 /* Submit Button */
 .fta-form-footer {
 	margin-block-start: var(--fta-form-space-xl);

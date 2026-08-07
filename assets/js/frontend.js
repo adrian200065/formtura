@@ -24,6 +24,7 @@
 			this.initCalculations();
 			this.initSliders();
 			this.renderRecaptchaWidgets();
+			this.initSignaturePads();
 		},
 
 		/**
@@ -141,6 +142,99 @@
 		},
 
 		/**
+		 * Wire up every signature pad on the page.
+		 *
+		 * Canvas drawing cannot be delegated the way form events are, so
+		 * pads are initialized directly; window.formturaInitSignaturePads()
+		 * re-runs this for markup inserted after page load.
+		 */
+		initSignaturePads() {
+			$('[data-fta-signature]').each(function() {
+				const $pad = $(this);
+
+				if ($pad.data('fta-signature-ready')) {
+					return;
+				}
+				$pad.data('fta-signature-ready', true);
+
+				const canvas = $pad.find('.fta-signature-canvas')[0];
+				const $value = $pad.find('.fta-signature-value');
+
+				if (!canvas || !canvas.getContext) {
+					return;
+				}
+
+				const ctx = canvas.getContext('2d');
+				let drawing = false;
+
+				const point = (e) => {
+					const rect = canvas.getBoundingClientRect();
+					// jsdom reports a zero-size rect; guard the scale factors.
+					const scaleX = rect.width ? canvas.width / rect.width : 1;
+					const scaleY = rect.height ? canvas.height / rect.height : 1;
+					return {
+						x: (e.clientX - rect.left) * scaleX,
+						y: (e.clientY - rect.top) * scaleY,
+					};
+				};
+
+				canvas.addEventListener('pointerdown', (e) => {
+					e.preventDefault();
+					drawing = true;
+					if (canvas.setPointerCapture && e.pointerId !== undefined) {
+						canvas.setPointerCapture(e.pointerId);
+					}
+					const p = point(e);
+					ctx.beginPath();
+					ctx.moveTo(p.x, p.y);
+				});
+
+				canvas.addEventListener('pointermove', (e) => {
+					if (!drawing) return;
+					const p = point(e);
+					ctx.lineTo(p.x, p.y);
+					ctx.stroke();
+				});
+
+				canvas.addEventListener('pointerup', () => {
+					if (!drawing) return;
+					drawing = false;
+					// Serialize on stroke end so the value is always current.
+					$value.val(canvas.toDataURL('image/png')).trigger('change');
+				});
+
+				$pad.find('.fta-signature-clear').on('click', () => {
+					ctx.clearRect(0, 0, canvas.width, canvas.height);
+					$value.val('').trigger('change');
+				});
+			});
+		},
+
+		/**
+		 * Block submission when a required pad is empty.
+		 *
+		 * @return {boolean} True when all required pads are signed.
+		 */
+		validateSignatures($form) {
+			const strings = (window.formturaFrontend && formturaFrontend.strings) || {};
+			let valid = true;
+
+			$form.find('.fta-signature-value[data-required]').each(function() {
+				const $value = $(this);
+
+				if (!$value.val()) {
+					FormturaFrontend.addFieldError(
+						$value.closest('.fta-field'),
+						strings.signatureMissing || 'Please add your signature.'
+					);
+					valid = false;
+				}
+			});
+
+			return valid;
+		},
+
+		/**
 		 * Keep each slider's readout in step with its value.
 		 */
 		initSliders() {
@@ -203,6 +297,11 @@
 			});
 
 			if (!isValid) {
+				FormturaFrontend.showError($form, 'Please correct the errors below.');
+				return;
+			}
+
+			if (!FormturaFrontend.validateSignatures($form)) {
 				FormturaFrontend.showError($form, 'Please correct the errors below.');
 				return;
 			}
@@ -749,6 +848,11 @@
 	// Let integrations render widgets in markup added after page load.
 	window.formturaRenderRecaptcha = function() {
 		FormturaFrontend.renderRecaptchaWidgets();
+	};
+
+	// Let integrations initialize pads in markup added after page load.
+	window.formturaInitSignaturePads = function() {
+		FormturaFrontend.initSignaturePads();
 	};
 
 })(jQuery);

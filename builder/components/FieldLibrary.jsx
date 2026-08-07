@@ -951,7 +951,7 @@ const GeneralTab = ({ field, onUpdate }) => {
         { label: 'Third Choice', value: 'third-choice', isDefault: false }
       ]);
     }
-    if (field.type === 'payment-dropdown' && !field.items) {
+    if (['payment-dropdown', 'payment-checkbox', 'payment-multiple'].includes(field.type) && !field.items) {
       handleChange('items', [
         { label: 'First Item', value: 'first-item', price: '10.00', isDefault: false },
         { label: 'Second Item', value: 'second-item', price: '25.00', isDefault: false },
@@ -1368,8 +1368,8 @@ const GeneralTab = ({ field, onUpdate }) => {
       );
     }
 
-    // Dropdown Items (payment-dropdown)
-    if (field.type === 'payment-dropdown') {
+    // Dropdown Items (payment-dropdown, payment-checkbox, payment-multiple)
+    if (['payment-dropdown', 'payment-checkbox', 'payment-multiple'].includes(field.type)) {
       return (
         <>
           <div className="formtura-form-group">
@@ -1463,6 +1463,26 @@ const GeneralTab = ({ field, onUpdate }) => {
             </div>
           </div>
         </>
+      );
+    }
+
+    // Single Item price
+    if (field.type === 'payment-single') {
+      return (
+        <div className="formtura-form-group">
+          <label htmlFor="field-price">
+            Item Price <Tooltip text="The amount this item adds to the order total." />
+          </label>
+          <input
+            id="field-price"
+            type="number"
+            min="0"
+            step="0.01"
+            className="formtura-price-input"
+            value={field.price || ''}
+            onChange={(e) => handleChange('price', e.target.value)}
+          />
+        </div>
       );
     }
 

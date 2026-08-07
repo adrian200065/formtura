@@ -596,6 +596,42 @@ const FieldPreview = ({ field }) => {
           </div>
         );
 
+      case 'payment-single':
+        return (
+          <div className="formtura-total-display">
+            <span>{field.label || 'Single Item'}</span>
+            <span>${parseFloat(field.price || 0).toFixed(2)}</span>
+          </div>
+        );
+
+      case 'payment-checkbox':
+      case 'payment-multiple':
+        return (
+          <div className="formtura-choices-preview">
+            {(field.items || []).map((item, i) => (
+              <div key={i} className="formtura-choice-preview-item">
+                <input type={field.type === 'payment-checkbox' ? 'checkbox' : 'radio'} readOnly disabled />
+                <span>
+                  {item.label}
+                  {field.showPriceAfterLabels !== false && ` — $${parseFloat(item.price || 0).toFixed(2)}`}
+                </span>
+              </div>
+            ))}
+          </div>
+        );
+
+      case 'payment-dropdown':
+        return (
+          <select disabled>
+            {(field.items || []).map((item, i) => (
+              <option key={i}>
+                {item.label}
+                {field.showPriceAfterLabels !== false && ` — $${parseFloat(item.price || 0).toFixed(2)}`}
+              </option>
+            ))}
+          </select>
+        );
+
       default:
         return (
           <input

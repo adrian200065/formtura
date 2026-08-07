@@ -184,6 +184,22 @@ const FormBuilder = ({ formId }) => {
         return { ...baseField, label: 'Camera' };
       case 'signature':
         return { ...baseField, label: 'Signature' };
+      case 'payment-single':
+        return { ...baseField, label: 'Single Item', price: '10.00' };
+      case 'payment-checkbox':
+      case 'payment-multiple':
+      case 'payment-dropdown':
+        return {
+          ...baseField,
+          label: type === 'payment-checkbox' ? 'Checkbox Items'
+            : type === 'payment-multiple' ? 'Multiple Items' : 'Dropdown Items',
+          items: [
+            { label: 'First Item', value: 'first-item', price: '10.00', isDefault: false },
+            { label: 'Second Item', value: 'second-item', price: '25.00', isDefault: false },
+            { label: 'Third Item', value: 'third-item', price: '50.00', isDefault: false },
+          ],
+          showPriceAfterLabels: true,
+        };
       default:
         return baseField;
     }
@@ -213,6 +229,10 @@ const FormBuilder = ({ formId }) => {
       'website': 'Website',
       'hidden': 'Hidden Field',
       'signature': 'Signature',
+      'payment-single': 'Single Item',
+      'payment-checkbox': 'Checkbox Items',
+      'payment-multiple': 'Multiple Items',
+      'payment-dropdown': 'Dropdown Items',
     };
     return labels[type] || 'Field';
   };

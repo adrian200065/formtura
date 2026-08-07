@@ -62,6 +62,13 @@ class FieldTemplateTest extends TestCase {
 			],
 		];
 
+		$payment_items = [
+			'items' => [
+				[ 'label' => 'Small', 'value' => 'small', 'price' => '10.00', 'isDefault' => false ],
+				[ 'label' => 'Large', 'value' => 'large', 'price' => '25.00', 'isDefault' => false ],
+			],
+		];
+
 		return [
 			'text'          => [ 'text', [] ],
 			'email'         => [ 'email', [] ],
@@ -85,6 +92,10 @@ class FieldTemplateTest extends TestCase {
 			'camera'        => [ 'camera', [] ],
 			'rich-text'     => [ 'rich-text', [] ],
 			'signature'     => [ 'signature', [] ],
+			'payment-single'   => [ 'payment-single', [ 'price' => '10.00' ] ],
+			'payment-checkbox' => [ 'payment-checkbox', $payment_items ],
+			'payment-multiple' => [ 'payment-multiple', $payment_items ],
+			'payment-dropdown' => [ 'payment-dropdown', $payment_items ],
 		];
 	}
 
@@ -224,6 +235,29 @@ class FieldTemplateTest extends TestCase {
 
 		$this->assertStringContainsString( 'type="checkbox"', $html );
 		$this->assertStringContainsString( 'name="field_1699_abc[]"', $html );
+	}
+
+	public function test_payment_items_render_prices_for_display_only() {
+		$html = $this->render( $this->field( 'payment-multiple', [
+			'items' => [
+				[ 'label' => 'Small', 'value' => 'small', 'price' => '10.00', 'isDefault' => false ],
+			],
+		] ) );
+
+		$this->assertStringContainsString( 'data-price="10.00"', $html );
+		$this->assertStringContainsString( '$10.00', $html );
+		$this->assertStringContainsString( 'fta-payment-input', $html );
+	}
+
+	public function test_payment_single_posts_a_marker_not_a_price() {
+		$field = $this->field( 'payment-single', [ 'price' => '25.00' ] );
+		$html  = $this->render( $field );
+
+		// The visitor sees the price...
+		$this->assertStringContainsString( '$25.00', $html );
+		// ...but the posted value is only an inclusion marker. The server
+		// takes prices from the form definition, never from the request.
+		$this->assertStringContainsString( 'name="field_1699_abc" value="1"', $html );
 	}
 
 	public function test_name_field_formats_render_expected_parts() {

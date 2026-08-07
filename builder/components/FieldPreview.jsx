@@ -132,7 +132,7 @@ const FieldPreview = ({ field }) => {
               disabled
               aria-label={field.hideLabel ? field.label : undefined}
               aria-required={field.required}
-              style={{ minHeight: '80px' }}
+              className="formtura-select-multiple"
             >
               {dropdownChoices.map((choice, index) => (
                 <option key={index} value={choice.value || choice}>
@@ -440,7 +440,6 @@ const FieldPreview = ({ field }) => {
               value={defaultValue}
               step={field.increment || 1}
               readOnly
-              style={{ width: '100%' }}
             />
             <div className="formtura-slider-value">{displayText}</div>
           </div>
@@ -450,38 +449,34 @@ const FieldPreview = ({ field }) => {
         if (field.enableSummary) {
           // Show order summary table
           return (
-            <table className="formtura-order-summary" style={{
-              width: '100%',
-              borderCollapse: 'collapse',
-              fontSize: '14px',
-            }}>
+            <table className="formtura-order-summary">
               <thead>
-                <tr style={{ borderBottom: '1px solid #e5e7eb' }}>
-                  <th style={{ textAlign: 'left', padding: '8px 12px', fontWeight: '600' }}>Item</th>
-                  <th style={{ textAlign: 'right', padding: '8px 12px', fontWeight: '600', width: '80px' }}>Quantity</th>
-                  <th style={{ textAlign: 'right', padding: '8px 12px', fontWeight: '600', width: '80px' }}>Total</th>
+                <tr>
+                  <th scope="col">Item</th>
+                  <th scope="col">Quantity</th>
+                  <th scope="col">Total</th>
                 </tr>
               </thead>
               <tbody>
-                <tr style={{ borderBottom: '1px solid #f3f4f6' }}>
-                  <td style={{ padding: '8px 12px', color: '#6b7280' }}>Example Product 1</td>
-                  <td style={{ textAlign: 'right', padding: '8px 12px', color: '#6b7280' }}>3</td>
-                  <td style={{ textAlign: 'right', padding: '8px 12px', color: '#6b7280' }}>$30.00</td>
-                </tr>
-                <tr style={{ borderBottom: '1px solid #f3f4f6' }}>
-                  <td style={{ padding: '8px 12px', color: '#6b7280' }}>Example Product 2</td>
-                  <td style={{ textAlign: 'right', padding: '8px 12px', color: '#6b7280' }}>2</td>
-                  <td style={{ textAlign: 'right', padding: '8px 12px', color: '#6b7280' }}>$20.00</td>
-                </tr>
-                <tr style={{ borderBottom: '1px solid #f3f4f6' }}>
-                  <td style={{ padding: '8px 12px', color: '#6b7280' }}>Example Product 3</td>
-                  <td style={{ textAlign: 'right', padding: '8px 12px', color: '#6b7280' }}>1</td>
-                  <td style={{ textAlign: 'right', padding: '8px 12px', color: '#6b7280' }}>$10.00</td>
+                <tr>
+                  <td>Example Product 1</td>
+                  <td>3</td>
+                  <td>$30.00</td>
                 </tr>
                 <tr>
-                  <td style={{ padding: '8px 12px', fontWeight: '600' }}>Total</td>
-                  <td style={{ textAlign: 'right', padding: '8px 12px' }}></td>
-                  <td style={{ textAlign: 'right', padding: '8px 12px', fontWeight: '600' }}>$60.00</td>
+                  <td>Example Product 2</td>
+                  <td>2</td>
+                  <td>$20.00</td>
+                </tr>
+                <tr>
+                  <td>Example Product 3</td>
+                  <td>1</td>
+                  <td>$10.00</td>
+                </tr>
+                <tr className="formtura-order-summary-total">
+                  <th scope="row">Total</th>
+                  <td />
+                  <td>$60.00</td>
                 </tr>
               </tbody>
             </table>
@@ -489,11 +484,9 @@ const FieldPreview = ({ field }) => {
         }
         // Default total display (without summary)
         return (
-          <div className="formtura-total-display" style={{
-            fontSize: '16px',
-            color: '#374151',
-          }}>
-            $0.00
+          <div className="formtura-total-display">
+            <span>Total</span>
+            <span>$0.00</span>
           </div>
         );
 
@@ -585,8 +578,7 @@ const FieldPreview = ({ field }) => {
             </div>
             <div
               className="formtura-richtext-content"
-              style={{ minHeight: `${(field.rows || 7) * 1.5}rem` }}
-            ></div>
+            />
           </div>
         );
 
@@ -606,7 +598,7 @@ const FieldPreview = ({ field }) => {
       {!field.hideLabel && (
         <label id={fieldId} htmlFor={`${fieldId}-input`}>
           {field.label}
-          {field.required && <span style={{ color: 'red' }} aria-label="required"> *</span>}
+          {field.required && <span className="formtura-required" aria-label="required"> *</span>}
         </label>
       )}
       <div className={getFieldSizeClass()} aria-describedby={descriptionId}>

@@ -250,6 +250,7 @@ function fta_render_form( $form_id, $args = [] ) {
  */
 function fta_get_field_types() {
 	return apply_filters( 'fta_field_types', [
+		// Standard Fields
 		'text' => [
 			'label'     => __( 'Single Line Text', FORMTURA_TEXTDOMAIN ),
 			'icon'      => 'text',
@@ -260,14 +261,14 @@ function fta_get_field_types() {
 			'icon'      => 'align-left',
 			'category'  => 'standard',
 		],
+		'name' => [
+			'label'     => __( 'Name', FORMTURA_TEXTDOMAIN ),
+			'icon'      => 'user',
+			'category'  => 'standard',
+		],
 		'email' => [
 			'label'     => __( 'Email', FORMTURA_TEXTDOMAIN ),
 			'icon'      => 'mail',
-			'category'  => 'standard',
-		],
-		'number' => [
-			'label'     => __( 'Number', FORMTURA_TEXTDOMAIN ),
-			'icon'      => 'hash',
 			'category'  => 'standard',
 		],
 		'select' => [
@@ -285,10 +286,76 @@ function fta_get_field_types() {
 			'icon'      => 'check-square',
 			'category'  => 'standard',
 		],
-		'name' => [
-			'label'     => __( 'Name', FORMTURA_TEXTDOMAIN ),
-			'icon'      => 'user',
+		'number' => [
+			'label'     => __( 'Number', FORMTURA_TEXTDOMAIN ),
+			'icon'      => 'hash',
 			'category'  => 'standard',
+		],
+		'phone' => [
+			'label'     => __( 'Phone', FORMTURA_TEXTDOMAIN ),
+			'icon'      => 'phone',
+			'category'  => 'standard',
+		],
+		'website' => [
+			'label'     => __( 'Website / URL', FORMTURA_TEXTDOMAIN ),
+			'icon'      => 'globe',
+			'category'  => 'standard',
+		],
+		'html' => [
+			'label'     => __( 'HTML', FORMTURA_TEXTDOMAIN ),
+			'icon'      => 'code',
+			'category'  => 'standard',
+		],
+		'hidden' => [
+			'label'     => __( 'Hidden Field', FORMTURA_TEXTDOMAIN ),
+			'icon'      => 'eye-off',
+			'category'  => 'standard',
+		],
+		'captcha' => [
+			'label'     => __( 'CAPTCHA', FORMTURA_TEXTDOMAIN ),
+			'icon'      => 'lock',
+			'category'  => 'standard',
+		],
+		// Advanced Fields
+		'address' => [
+			'label'     => __( 'Address', FORMTURA_TEXTDOMAIN ),
+			'icon'      => 'map-pin',
+			'category'  => 'advanced',
+		],
+		'datetime' => [
+			'label'     => __( 'Date / Time', FORMTURA_TEXTDOMAIN ),
+			'icon'      => 'calendar',
+			'category'  => 'advanced',
+		],
+		'password' => [
+			'label'     => __( 'Password', FORMTURA_TEXTDOMAIN ),
+			'icon'      => 'lock',
+			'category'  => 'advanced',
+		],
+		'file-upload' => [
+			'label'     => __( 'File Upload', FORMTURA_TEXTDOMAIN ),
+			'icon'      => 'upload',
+			'category'  => 'advanced',
+		],
+		'number-slider' => [
+			'label'     => __( 'Slider', FORMTURA_TEXTDOMAIN ),
+			'icon'      => 'trending-up',
+			'category'  => 'advanced',
+		],
+		'rating' => [
+			'label'     => __( 'Star Rating', FORMTURA_TEXTDOMAIN ),
+			'icon'      => 'star',
+			'category'  => 'advanced',
+		],
+		'repeater' => [
+			'label'     => __( 'Repeater', FORMTURA_TEXTDOMAIN ),
+			'icon'      => 'repeat',
+			'category'  => 'advanced',
+		],
+		'signature' => [
+			'label'     => __( 'Signature', FORMTURA_TEXTDOMAIN ),
+			'icon'      => 'pen-tool',
+			'category'  => 'advanced',
 		],
 	] );
 }
@@ -349,4 +416,23 @@ function fta_get_template_part( $slug, $name = '', $args = [] ) {
 		extract( $args );
 		include $located;
 	}
+}
+
+/**
+ * Get a cache-busting version for a local plugin asset.
+ *
+ * Uses the file modification time when the asset exists so watched development
+ * builds are immediately visible. Falls back to the plugin version for packaged
+ * installs where the requested file is unavailable.
+ *
+ * @since 1.0.2
+ * @param string $relative_path Plugin-relative asset path.
+ * @return string Asset version.
+ */
+function fta_asset_version( $relative_path ) {
+	$asset_path = FORMTURA_PLUGIN_DIR . ltrim( $relative_path, '/' );
+
+	return file_exists( $asset_path )
+		? (string) filemtime( $asset_path )
+		: FORMTURA_VERSION;
 }

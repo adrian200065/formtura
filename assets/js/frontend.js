@@ -37,6 +37,9 @@
 			// File upload - change event
 			$(document).on('change', '.fta-file-upload-input, .fta-file-upload-input-compact', this.handleFileUpload);
 
+			// File upload - click to trigger file input (fallback for label issues)
+			$(document).on('click', '.fta-file-upload', this.handleFileUploadClick);
+
 			// File upload - drag and drop events
 			$(document).on('dragover dragenter', '.fta-file-upload', this.handleDragOver);
 			$(document).on('dragleave dragend', '.fta-file-upload', this.handleDragLeave);
@@ -234,6 +237,32 @@
 		},
 
 		/**
+		 * Handle file upload click event (fallback for label issues).
+		 */
+		handleFileUploadClick(e) {
+			// Don't trigger if clicking directly on the input
+			if ($(e.target).is('input[type="file"]')) {
+				return;
+			}
+
+			const $uploadArea = $(this);
+
+			let $input = $uploadArea.find('.fta-file-upload-input');
+
+			if (!$input.length) {
+				$input = $uploadArea.find('.fta-file-upload-input-compact');
+			}
+			if (!$input.length) {
+				$input = $uploadArea.find('input[type="file"]');
+			}
+
+			if ($input.length) {
+				// Programmatically trigger the file input click
+				$input[0].click();
+			}
+		},
+
+		/**
 		 * Handle file upload change event.
 		 */
 		handleFileUpload(e) {
@@ -274,10 +303,19 @@
 			const $uploadArea = $(this);
 			$uploadArea.removeClass('fta-file-upload-dragover');
 
-			const $input = $uploadArea.find('.fta-file-upload-input');
+			// Find the file input - could be either class
+			let $input = $uploadArea.find('.fta-file-upload-input');
+			if (!$input.length) {
+				$input = $uploadArea.find('.fta-file-upload-input-compact');
+			}
+			// Also check if the input is a direct child of the upload area
+			if (!$input.length) {
+				$input = $uploadArea.find('input[type="file"]');
+			}
+
 			const files = e.originalEvent.dataTransfer.files;
 
-			if (files.length > 0) {
+			if (files.length > 0 && $input.length > 0) {
 				// Create a new DataTransfer to assign files to the input
 				const dataTransfer = new DataTransfer();
 				const allowMultiple = $input.prop('multiple');
@@ -291,6 +329,10 @@
 				}
 
 				$input[0].files = dataTransfer.files;
+
+				// Trigger change event to ensure handlers are called
+				$input.trigger('change');
+
 				FormturaFrontend.updateFileUploadUI($input, dataTransfer.files);
 				FormturaFrontend.validateFileUpload($input, dataTransfer.files);
 			}

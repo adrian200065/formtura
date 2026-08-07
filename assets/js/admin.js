@@ -171,8 +171,10 @@
 		showNotice(message, type = 'info') {
 			const $notice = $('<div>', {
 				class: `fta-notice fta-notice-${type}`,
-				html: `<p>${message}</p>`
+				role: type === 'error' ? 'alert' : 'status',
+				'aria-live': type === 'error' ? 'assertive' : 'polite'
 			});
+			$notice.append($('<p>').text(message));
 
 			$('.fta-admin-page').prepend($notice);
 
@@ -181,6 +183,9 @@
 			}, 5000);
 		}
 	};
+
+	// Expose the notice API to view-specific workflows.
+	window.FormturaAdmin = FormturaAdmin;
 
 	// Initialize when document is ready
 	$(document).ready(() => {

@@ -97,7 +97,7 @@ class Admin {
 		);
 
 		// Form Builder (hidden from menu).
-		add_submenu_page(
+		$builder_hook = add_submenu_page(
 			null, // Hidden from menu
 			__( 'Form Builder', FORMTURA_TEXTDOMAIN ),
 			__( 'Form Builder', FORMTURA_TEXTDOMAIN ),
@@ -105,6 +105,15 @@ class Admin {
 			'formtura-builder',
 			[ $this, 'render_builder_page' ]
 		);
+
+		/*
+		 * Hidden admin pages are not present in the menu arrays WordPress uses
+		 * to resolve the document title. Set it before admin-header.php runs so
+		 * PHP 8.1+ never receives null in strip_tags().
+		 */
+		if ( $builder_hook ) {
+			add_action( 'load-' . $builder_hook, [ $this, 'set_builder_page_title' ] );
+		}
 
 		// Entries.
 		add_submenu_page(
@@ -138,6 +147,17 @@ class Admin {
 	}
 
 	/**
+	 * Set the document title for the hidden form builder screen.
+	 *
+	 * @since 1.0.0
+	 */
+	public function set_builder_page_title() {
+		global $title;
+
+		$title = __( 'Form Builder', FORMTURA_TEXTDOMAIN );
+	}
+
+	/**
 	 * Enqueue admin assets.
 	 *
 	 * @since 1.0.0
@@ -154,7 +174,7 @@ class Admin {
 			'formtura-admin',
 			FORMTURA_PLUGIN_URL . 'assets/css/admin.css',
 			[],
-			FORMTURA_VERSION
+			fta_asset_version( 'assets/css/admin.css' )
 		);
 
 		// Enqueue admin JS.
@@ -162,7 +182,7 @@ class Admin {
 			'formtura-admin',
 			FORMTURA_PLUGIN_URL . 'assets/js/admin.js',
 			[ 'jquery' ],
-			FORMTURA_VERSION,
+			fta_asset_version( 'assets/js/admin.js' ),
 			true
 		);
 
@@ -190,18 +210,12 @@ class Admin {
 		);
 
 		if ( $is_builder_page ) {
-			// Use file modification time for cache busting in development
-			$css_file = FORMTURA_PLUGIN_DIR . 'assets/css/builder.css';
-			$js_file  = FORMTURA_PLUGIN_DIR . 'assets/js/builder.js';
-			$css_version = file_exists( $css_file ) ? filemtime( $css_file ) : FORMTURA_VERSION;
-			$js_version  = file_exists( $js_file ) ? filemtime( $js_file ) : FORMTURA_VERSION;
-
 			// Enqueue React builder CSS
 			wp_enqueue_style(
 				'formtura-builder',
 				FORMTURA_PLUGIN_URL . 'assets/css/builder.css',
 				[],
-				$css_version
+				fta_asset_version( 'assets/css/builder.css' )
 			);
 
 			// Enqueue React builder JS
@@ -209,7 +223,7 @@ class Admin {
 				'formtura-builder',
 				FORMTURA_PLUGIN_URL . 'assets/js/builder.js',
 				[],
-				$js_version,
+				fta_asset_version( 'assets/js/builder.js' ),
 				true
 			);
 

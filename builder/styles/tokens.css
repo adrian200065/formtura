@@ -1,0 +1,95 @@
+:root {
+  /* Brand Colors */
+  --color-brand-dark: hsl(222, 47%, 11%);
+  --color-brand-midnight: hsl(238, 46%, 12%);
+  --color-brand-forest: hsl(154, 41%, 22%);
+
+  /* Primary Action */
+  --color-primary: hsl(158, 64%, 42%);
+  --color-primary-hover: hsl(158, 64%, 35%);
+  --color-primary-light: hsl(154, 41%, 95%);
+
+  /* Neutrals */
+  --bg-main: hsl(210, 20%, 98%);
+  --bg-card: hsl(0, 0%, 100%);
+  --text-main: hsl(222, 47%, 11%);
+  --text-muted: hsl(215, 16%, 47%);
+  --border-light: hsl(214, 32%, 91%);
+
+  /* States */
+  --error: hsl(0, 84%, 60%);
+  --focus: hsl(217, 91%, 60%);
+
+  /* Semantic aliases */
+  --surface-subtle: color-mix(in hsl, var(--bg-main) 76%, var(--border-light));
+  --surface-selected: color-mix(in hsl, var(--focus) 7%, var(--bg-card));
+  --surface-danger: color-mix(in hsl, var(--error) 8%, var(--bg-card));
+  --surface-dark-hover: color-mix(in hsl, var(--bg-card) 10%, var(--color-brand-dark));
+  --surface-dark-active: color-mix(in hsl, var(--color-primary) 20%, var(--color-brand-dark));
+  --text-on-dark: var(--bg-card);
+  --text-on-dark-muted: color-mix(in hsl, var(--bg-card) 68%, var(--color-brand-dark));
+  --shadow-color: color-mix(in hsl, var(--color-brand-dark) 14%, transparent);
+  --focus-soft: color-mix(in hsl, var(--focus) 22%, transparent);
+  --error-soft: color-mix(in hsl, var(--error) 22%, transparent);
+
+  /* Spacing */
+  --space-0: 0;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+
+  /* Type */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem;
+  --text-2xl: clamp(1.5rem, 4vw, 2rem);
+  --leading-tight: 1.2;
+  --leading-normal: 1.55;
+
+  /* Shape and depth */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 0.875rem;
+  --radius-xl: 1.25rem;
+  --shadow-sm: 0 0.0625rem 0.125rem var(--shadow-color);
+  --shadow-md: 0 0.75rem 2.5rem var(--shadow-color);
+
+  /* Motion and layers */
+  --transition-fast: 140ms ease;
+  --transition-base: 220ms ease;
+  --layer-header: 20;
+  --layer-popover: 40;
+  --layer-modal: 60;
+
+  /* Compatibility aliases for existing field components */
+  --fta-builder-primary: var(--color-primary);
+  --fta-builder-primary-hover: var(--color-primary-hover);
+  --fta-builder-field-dark-blue: var(--color-brand-dark);
+  --fta-builder-field-light-blue: var(--color-brand-forest);
+  --fta-builder-bg: var(--bg-main);
+  --fta-builder-sidebar: var(--bg-card);
+  --fta-builder-border: var(--border-light);
+  --fta-builder-text: var(--text-main);
+  --fta-builder-text-light: var(--text-on-dark);
+  --fta-builder-text-muted: var(--text-muted);
+  --fta-builder-canvas: var(--bg-card);
+  --fta-builder-field-bg: var(--bg-card);
+  --fta-builder-field-hover: var(--surface-subtle);
+  --fta-builder-field-active: var(--surface-selected);
+  --fta-builder-space-xs: var(--space-1);
+  --fta-builder-space-sm: var(--space-2);
+  --fta-builder-space-md: var(--space-4);
+  --fta-builder-space-lg: var(--space-6);
+  --fta-builder-radius: var(--radius-md);
+  --fta-builder-shadow: var(--shadow-sm);
+  --fta-builder-shadow-lg: var(--shadow-md);
+}

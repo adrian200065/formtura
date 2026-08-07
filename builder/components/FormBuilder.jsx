@@ -1,5 +1,6 @@
-import { closestCenter, DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
-import { arrayMove } from '@dnd-kit/sortable';
+import { closestCenter, DndContext, DragOverlay, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
+import { ArrowLeft, Check, Code2, Eye } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { handleError, handleSuccess } from '../utils/errorHandler';
 import { generateFieldId } from '../utils/helpers';
@@ -7,6 +8,7 @@ import FieldLibrary from './FieldLibrary';
 import FormCanvas from './FormCanvas';
 import FormPreview from './FormPreview';
 import { announce } from './LiveRegion';
+import Button from './ui/Button';
 
 const FormBuilder = ({ formId }) => {
   const [fields, setFields] = useState([]);
@@ -27,7 +29,10 @@ const FormBuilder = ({ formId }) => {
       activationConstraint: {
         distance: 8,
       },
-    })
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
   );
 
   // Load form data if editing existing form
@@ -45,7 +50,11 @@ const FormBuilder = ({ formId }) => {
       if (data.success && data.data) {
         const formData = JSON.parse(data.data.form_data || '{}');
         setFields(formData.fields || []);
-        setFormSettings(formData.settings || formSettings);
+        setFormSettings((currentSettings) => ({
+          ...currentSettings,
+          ...(formData.settings || {}),
+          title: formData.settings?.title || data.data.title || '',
+        }));
       } else {
         handleError('Failed to load form data', {
           userMessage: 'Could not load form. Please try again.',
@@ -174,13 +183,15 @@ const FormBuilder = ({ formId }) => {
       name: 'Name',
       phone: 'Phone Number',
       date: 'Date',
-      'number-slider': 'Number Slider',
+      'number-slider': 'Slider',
       'repeater': 'Repeater',
       'rating': 'Star Rating',
       'datetime': 'Date',
       'rich-text': 'Rich Text',
       'html': 'HTML',
       'file-upload': 'File Upload',
+      'website': 'Website',
+      'hidden': 'Hidden Field',
     };
     return labels[type] || 'Field';
   };
@@ -239,6 +250,13 @@ const FormBuilder = ({ formId }) => {
     setFields(fields.map(field =>
       field.id === fieldId ? { ...field, ...updates } : field
     ));
+  };
+
+  const handleFieldAdd = (fieldType) => {
+    const newField = createField(fieldType);
+    setFields((currentFields) => [...currentFields, newField]);
+    setSelectedField(newField.id);
+    announce(`${newField.label} added`);
   };
 
   const handleFieldDelete = (fieldId) => {
@@ -319,27 +337,54 @@ const FormBuilder = ({ formId }) => {
       onDragEnd={handleDragEnd}
     >
       <div className={`formtura-builder ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+        <a className="formtura-skip-link" href="#formtura-builder-canvas">
+          Skip to form canvas
+        </a>
         <header className="formtura-canvas-header">
-          <h1 className="formtura-canvas-title">Form Builder</h1>
+          <div className="formtura-builder-heading">
+            <a
+              className="formtura-back-link"
+              href={window.formturaBuilder?.formsUrl}
+              aria-label="Back to all forms"
+            >
+              <ArrowLeft aria-hidden="true" />
+            </a>
+            <div>
+              <p className="formtura-builder-eyebrow">Formtura workspace</p>
+              <h1 className="formtura-canvas-title">
+                {formSettings.title || 'Untitled form'}
+              </h1>
+            </div>
+            <span className="formtura-save-status">
+              <span aria-hidden="true" className="formtura-save-status-dot" />
+              Editing
+            </span>
+          </div>
           <div className="formtura-canvas-actions">
-            <button
-              className="formtura-btn formtura-btn-secondary"
-              type="button"
+            <Button
+              variant="ghost"
+              icon={Eye}
               onClick={() => setShowPreview(true)}
             >
               Preview
-            </button>
-            <button className="formtura-btn formtura-btn-secondary" type="button">
+            </Button>
+            <Button
+              variant="secondary"
+              icon={Code2}
+              disabled
+              title="Embed options are not available yet"
+            >
               Embed
-            </button>
-            <button
-              className="formtura-btn formtura-btn-primary"
-              type="button"
+            </Button>
+            <Button
+              variant="primary"
+              icon={Check}
               onClick={handleSaveForm}
               disabled={isSaving}
+              aria-busy={isSaving}
             >
-              {isSaving ? 'Saving...' : '✔ Save'}
-            </button>
+              {isSaving ? 'Saving…' : 'Save form'}
+            </Button>
           </div>
         </header>
 
@@ -349,6 +394,7 @@ const FormBuilder = ({ formId }) => {
           onFieldUpdate={handleFieldUpdate}
           isCollapsed={isSidebarCollapsed}
           onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+          onFieldAdd={handleFieldAdd}
         />
 
         <FormCanvas
@@ -357,6 +403,7 @@ const FormBuilder = ({ formId }) => {
           onFieldSelect={setSelectedField}
           onFieldDelete={handleFieldDelete}
           onFieldDuplicate={handleFieldDuplicate}
+          formSettings={formSettings}
         />
 
         <DragOverlay>

@@ -25,6 +25,7 @@ const ConfirmDialog = ({
 }) => {
   const dialogRef = useRef(null);
   const confirmButtonRef = useRef(null);
+  const previouslyFocusedRef = useRef(null);
 
   // Handle escape key
   useEffect(() => {
@@ -35,6 +36,7 @@ const ConfirmDialog = ({
     };
 
     if (isOpen) {
+      previouslyFocusedRef.current = document.activeElement;
       document.addEventListener('keydown', handleKeyDown);
       // Focus the confirm button when dialog opens
       setTimeout(() => {
@@ -44,6 +46,7 @@ const ConfirmDialog = ({
 
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
+      previouslyFocusedRef.current?.focus?.();
     };
   }, [isOpen, onCancel]);
 
@@ -80,18 +83,6 @@ const ConfirmDialog = ({
 
   if (!isOpen) return null;
 
-  const getIconColor = () => {
-    switch (type) {
-      case 'danger':
-        return 'var(--fta-builder-primary)';
-      case 'warning':
-        return '#f59e0b';
-      case 'info':
-      default:
-        return 'var(--fta-builder-field-dark-blue)';
-    }
-  };
-
   return (
     <div
       className="formtura-confirm-overlay"
@@ -100,14 +91,14 @@ const ConfirmDialog = ({
     >
       <div
         ref={dialogRef}
-        className="formtura-confirm-dialog"
+        className={`formtura-confirm-dialog formtura-confirm-dialog-${type}`}
         role="alertdialog"
         aria-modal="true"
-        aria-labelledby="confirm-dialog-title"
+        aria-labelledby={title ? 'confirm-dialog-title' : undefined}
         aria-describedby="confirm-dialog-message"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="formtura-confirm-icon" style={{ color: getIconColor() }}>
+        <div className="formtura-confirm-icon">
           <AlertCircle size={48} strokeWidth={1.5} />
         </div>
 

@@ -25,7 +25,11 @@ if ( $selected_form_id ) {
 
 <div class="wrap fta-admin-page">
 	<div class="fta-admin-header">
-		<h1><?php esc_html_e( 'Form Entries', FORMTURA_TEXTDOMAIN ); ?></h1>
+		<div class="fta-admin-heading">
+			<p class="fta-admin-eyebrow"><?php esc_html_e( 'Responses', FORMTURA_TEXTDOMAIN ); ?></p>
+			<h1><?php esc_html_e( 'Form entries', FORMTURA_TEXTDOMAIN ); ?></h1>
+			<p class="fta-admin-subtitle"><?php esc_html_e( 'Review and export submissions without leaving WordPress.', FORMTURA_TEXTDOMAIN ); ?></p>
+		</div>
 		<?php if ( $selected_form_id && ! empty( $entries ) ) : ?>
 			<button class="fta-button fta-button-secondary fta-export-entries" data-form-id="<?php echo esc_attr( $selected_form_id ); ?>">
 				<?php esc_html_e( 'Export Entries', FORMTURA_TEXTDOMAIN ); ?>
@@ -64,14 +68,15 @@ if ( $selected_form_id ) {
 						<p><?php esc_html_e( 'This form hasn\'t received any submissions yet.', FORMTURA_TEXTDOMAIN ); ?></p>
 					</div><!-- .fta-empty-state -->
 				<?php else : ?>
+					<div class="fta-table-shell">
 					<table class="wp-list-table widefat fixed striped fta-entries-table">
 						<thead>
 							<tr>
-								<th><?php esc_html_e( 'ID', FORMTURA_TEXTDOMAIN ); ?></th>
-								<th><?php esc_html_e( 'Entry Data', FORMTURA_TEXTDOMAIN ); ?></th>
-								<th><?php esc_html_e( 'Status', FORMTURA_TEXTDOMAIN ); ?></th>
-								<th><?php esc_html_e( 'Submitted', FORMTURA_TEXTDOMAIN ); ?></th>
-								<th><?php esc_html_e( 'Actions', FORMTURA_TEXTDOMAIN ); ?></th>
+								<th scope="col"><?php esc_html_e( 'ID', FORMTURA_TEXTDOMAIN ); ?></th>
+								<th scope="col"><?php esc_html_e( 'Entry Data', FORMTURA_TEXTDOMAIN ); ?></th>
+								<th scope="col"><?php esc_html_e( 'Status', FORMTURA_TEXTDOMAIN ); ?></th>
+								<th scope="col"><?php esc_html_e( 'Submitted', FORMTURA_TEXTDOMAIN ); ?></th>
+								<th scope="col"><?php esc_html_e( 'Actions', FORMTURA_TEXTDOMAIN ); ?></th>
 							</tr>
 						</thead>
 						<tbody>
@@ -113,22 +118,25 @@ if ( $selected_form_id ) {
 									</td>
 									<td><?php echo esc_html( date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), strtotime( $entry['created_at'] ) ) ); ?></td>
 									<td>
+										<div class="fta-table-actions">
 										<?php if ( ! $entry['is_read'] ) : ?>
 											<a href="#" class="fta-mark-read" data-entry-id="<?php echo esc_attr( $entry['id'] ); ?>">
 												<?php esc_html_e( 'Mark as Read', FORMTURA_TEXTDOMAIN ); ?>
-											</a> |
+											</a>
 										<?php endif; ?>
 										<a href="#" class="fta-view-entry" data-entry-id="<?php echo esc_attr( $entry['id'] ); ?>">
 											<?php esc_html_e( 'View', FORMTURA_TEXTDOMAIN ); ?>
-										</a> |
-										<a href="#" class="fta-delete-entry" data-entry-id="<?php echo esc_attr( $entry['id'] ); ?>">
+										</a>
+										<a href="#" class="fta-delete-entry fta-link-button-danger" data-entry-id="<?php echo esc_attr( $entry['id'] ); ?>">
 											<?php esc_html_e( 'Delete', FORMTURA_TEXTDOMAIN ); ?>
 										</a>
+										</div>
 									</td>
 								</tr>
 							<?php endforeach; ?>
 						</tbody>
 					</table>
+					</div>
 				<?php endif; ?>
 			<?php endif; ?>
 		</div><!-- .fta-card -->

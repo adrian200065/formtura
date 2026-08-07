@@ -16,7 +16,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <div class="wrap fta-admin-page">
 	<div class="fta-admin-header">
-		<h1><?php esc_html_e( 'SMTP Settings', FORMTURA_TEXTDOMAIN ); ?></h1>
+		<div class="fta-admin-heading">
+			<p class="fta-admin-eyebrow"><?php esc_html_e( 'Email delivery', FORMTURA_TEXTDOMAIN ); ?></p>
+			<h1><?php esc_html_e( 'SMTP settings', FORMTURA_TEXTDOMAIN ); ?></h1>
+			<p class="fta-admin-subtitle"><?php esc_html_e( 'Configure a reliable sender and verify it with a test message.', FORMTURA_TEXTDOMAIN ); ?></p>
+		</div>
 	</div><!-- .fta-admin-header -->
 
 	<div class="fta-card">
@@ -184,10 +188,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<?php wp_nonce_field( 'formtura_admin', 'formtura_nonce' ); ?>
 			
 			<p class="submit">
-				<button type="submit" class="button button-primary fta-save-smtp">
+				<button type="submit" class="fta-button fta-button-primary fta-save-smtp">
 					<?php esc_html_e( 'Save SMTP Settings', FORMTURA_TEXTDOMAIN ); ?>
 				</button>
-				<button type="button" class="button fta-test-smtp" style="margin-left: 10px;">
+				<button type="button" class="fta-button fta-button-secondary fta-test-smtp">
 					<?php esc_html_e( 'Send Test Email', FORMTURA_TEXTDOMAIN ); ?>
 				</button>
 			</p>
@@ -245,13 +249,13 @@ jQuery(document).ready(function($) {
 			},
 			success: function(response) {
 				if (response.success) {
-					alert('<?php esc_html_e( 'SMTP settings saved successfully!', FORMTURA_TEXTDOMAIN ); ?>');
+					window.FormturaAdmin.showNotice('<?php esc_html_e( 'SMTP settings saved successfully.', FORMTURA_TEXTDOMAIN ); ?>', 'success');
 				} else {
-					alert(response.data.message || '<?php esc_html_e( 'Failed to save SMTP settings.', FORMTURA_TEXTDOMAIN ); ?>');
+					window.FormturaAdmin.showNotice(response.data.message || '<?php esc_html_e( 'Failed to save SMTP settings.', FORMTURA_TEXTDOMAIN ); ?>', 'error');
 				}
 			},
 			error: function() {
-				alert('<?php esc_html_e( 'An error occurred while saving SMTP settings.', FORMTURA_TEXTDOMAIN ); ?>');
+				window.FormturaAdmin.showNotice('<?php esc_html_e( 'An error occurred while saving SMTP settings.', FORMTURA_TEXTDOMAIN ); ?>', 'error');
 			},
 			complete: function() {
 				$button.prop('disabled', false).text(buttonText);
@@ -275,13 +279,13 @@ jQuery(document).ready(function($) {
 			},
 			success: function(response) {
 				if (response.success) {
-					alert('<?php esc_html_e( 'Test email sent successfully! Check your inbox.', FORMTURA_TEXTDOMAIN ); ?>');
+					window.FormturaAdmin.showNotice('<?php esc_html_e( 'Test email sent successfully. Check your inbox.', FORMTURA_TEXTDOMAIN ); ?>', 'success');
 				} else {
-					alert(response.data.message || '<?php esc_html_e( 'Failed to send test email.', FORMTURA_TEXTDOMAIN ); ?>');
+					window.FormturaAdmin.showNotice(response.data.message || '<?php esc_html_e( 'Failed to send test email.', FORMTURA_TEXTDOMAIN ); ?>', 'error');
 				}
 			},
 			error: function() {
-				alert('<?php esc_html_e( 'An error occurred while sending test email.', FORMTURA_TEXTDOMAIN ); ?>');
+				window.FormturaAdmin.showNotice('<?php esc_html_e( 'An error occurred while sending test email.', FORMTURA_TEXTDOMAIN ); ?>', 'error');
 			},
 			complete: function() {
 				$button.prop('disabled', false).text(buttonText);

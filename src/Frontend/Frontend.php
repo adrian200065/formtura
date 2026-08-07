@@ -59,10 +59,9 @@ class Frontend {
 	 * @since 1.0.0
 	 */
 	public function enqueue_assets() {
-		// Only enqueue if there's a form on the page.
-		if ( ! $this->has_form_on_page() ) {
-			return;
-		}
+		// Always enqueue the assets - they use delegated events so it's safe
+		// even if no form is present. This fixes detection issues with
+		// shortcodes in widgets, page builders, etc.
 
 		// Enqueue frontend CSS.
 		if ( fta_get_setting( 'load_css', true ) ) {
@@ -70,7 +69,7 @@ class Frontend {
 				'formtura-frontend',
 				FORMTURA_PLUGIN_URL . 'assets/css/frontend.css',
 				[],
-				FORMTURA_VERSION
+				fta_asset_version( 'assets/css/frontend.css' )
 			);
 		}
 
@@ -80,7 +79,7 @@ class Frontend {
 				'formtura-frontend',
 				FORMTURA_PLUGIN_URL . 'assets/js/frontend.js',
 				[ 'jquery' ],
-				FORMTURA_VERSION,
+				fta_asset_version( 'assets/js/frontend.js' ),
 				true
 			);
 

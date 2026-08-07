@@ -1,0 +1,286 @@
+.formtura-builder,
+.formtura-builder *,
+.formtura-builder *::before,
+.formtura-builder *::after {
+  box-sizing: border-box;
+}
+
+.formtura-builder {
+  color: var(--text-main);
+  background: var(--bg-main);
+  font-family: "Avenir Next", Avenir, "Segoe UI Variable", "Segoe UI", sans-serif;
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  -webkit-font-smoothing: antialiased;
+}
+
+.formtura-builder :where(h1, h2, h3, p) {
+  margin: var(--space-0);
+}
+
+.formtura-builder :where(button, input, select, textarea) {
+  color: inherit;
+  font: inherit;
+}
+
+.formtura-builder :where(button, a, input, select, textarea):focus-visible {
+  outline: 0.125rem solid var(--focus);
+  outline-offset: 0.125rem;
+}
+
+.formtura-builder :where(button, input, select, textarea):disabled {
+  cursor: not-allowed;
+  opacity: 0.52;
+}
+
+.formtura-sr-only {
+  position: absolute;
+  inline-size: 0.0625rem;
+  block-size: 0.0625rem;
+  padding: var(--space-0);
+  margin: -0.0625rem;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.formtura-skip-link {
+  color: var(--text-on-dark);
+  background: var(--color-brand-dark);
+  position: fixed;
+  inset-block-start: var(--space-2);
+  inset-inline-start: var(--space-2);
+  z-index: var(--layer-modal);
+  padding-block: var(--space-2);
+  padding-inline: var(--space-4);
+  border-radius: var(--radius-md);
+  transform: translateY(-200%);
+  transition: transform var(--transition-fast);
+}
+
+.formtura-skip-link:focus {
+  transform: translateY(0);
+}
+
+.formtura-btn,
+.formtura-bulk-add-btn,
+.formtura-generate-choices,
+.formtura-confirm-btn,
+.formtura-icon-btn,
+.formtura-choice-btn,
+.formtura-repeater-btn {
+  min-block-size: 2.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding-block: var(--space-2);
+  padding-inline: var(--space-4);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: 650;
+  line-height: 1;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    color var(--transition-fast),
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.formtura-btn:hover,
+.formtura-bulk-add-btn:hover,
+.formtura-generate-choices:hover,
+.formtura-confirm-btn:hover,
+.formtura-icon-btn:hover,
+.formtura-choice-btn:hover,
+.formtura-repeater-btn:hover {
+  transform: translateY(-0.0625rem);
+}
+
+.formtura-btn:active,
+.formtura-bulk-add-btn:active,
+.formtura-generate-choices:active,
+.formtura-confirm-btn:active,
+.formtura-icon-btn:active,
+.formtura-choice-btn:active,
+.formtura-repeater-btn:active {
+  transform: translateY(0);
+}
+
+.formtura-btn svg,
+.formtura-btn-leading-icon {
+  inline-size: 1rem;
+  block-size: 1rem;
+  flex: 0 0 auto;
+}
+
+.formtura-btn-primary,
+.formtura-confirm-btn-primary {
+  color: var(--color-brand-dark);
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.formtura-btn-primary:hover,
+.formtura-confirm-btn-primary:hover {
+  color: var(--text-on-dark);
+  background: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
+}
+
+.formtura-btn-secondary,
+.formtura-bulk-add-btn,
+.formtura-generate-choices,
+.formtura-confirm-btn-secondary {
+  color: var(--text-main);
+  background: var(--bg-card);
+  border-color: var(--border-light);
+}
+
+.formtura-btn-secondary:hover,
+.formtura-bulk-add-btn:hover,
+.formtura-generate-choices:hover,
+.formtura-confirm-btn-secondary:hover {
+  background: var(--surface-subtle);
+  border-color: var(--text-muted);
+}
+
+.formtura-btn-ghost {
+  color: var(--text-muted);
+  background: transparent;
+}
+
+.formtura-btn-ghost:hover {
+  color: var(--text-main);
+  background: var(--surface-subtle);
+}
+
+.formtura-btn-danger,
+.formtura-choice-btn-remove,
+.formtura-repeater-btn-remove,
+.formtura-btn-remove {
+  color: var(--error);
+  background: var(--surface-danger);
+  border-color: var(--error-soft);
+}
+
+.formtura-btn-add,
+.formtura-choice-btn-add,
+.formtura-repeater-btn-add {
+  color: var(--color-primary-hover);
+  background: var(--color-primary-light);
+  border-color: color-mix(in hsl, var(--color-primary) 24%, transparent);
+}
+
+.formtura-btn-icon,
+.formtura-field-action-btn,
+.formtura-icon-btn,
+.formtura-choice-btn,
+.formtura-repeater-btn {
+  inline-size: 2.25rem;
+  min-block-size: 2.25rem;
+  padding: var(--space-0);
+}
+
+.formtura-field-action-btn > svg + .formtura-sr-only {
+  display: none;
+}
+
+.formtura-form-group {
+  display: grid;
+  gap: var(--space-2);
+  margin-block-end: var(--space-5);
+}
+
+.formtura-form-group-row,
+.formtura-range-row {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.formtura-form-group label,
+.formtura-toggle-label {
+  color: var(--text-main);
+  font-size: var(--text-sm);
+  font-weight: 650;
+}
+
+.formtura-form-group :where(input:not([type="checkbox"], [type="radio"], [type="range"]), select, textarea),
+.formtura-search-input,
+.formtura-smart-tags-search-input,
+.formtura-choice-input,
+.formtura-preview-field :where(input:not([type="checkbox"], [type="radio"], [type="range"]), select, textarea) {
+  color: var(--text-main);
+  background: var(--bg-card);
+  inline-size: 100%;
+  min-block-size: 2.625rem;
+  padding-block: var(--space-2);
+  padding-inline: var(--space-3);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  box-shadow: none;
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.formtura-form-group :where(input, select, textarea):focus,
+.formtura-search-input:focus,
+.formtura-smart-tags-search-input:focus,
+.formtura-choice-input:focus,
+.formtura-preview-field :where(input, select, textarea):focus {
+  border-color: var(--focus);
+  box-shadow: 0 0 0 0.2rem var(--focus-soft);
+  outline: none;
+}
+
+.formtura-form-group textarea,
+.formtura-preview-field textarea {
+  min-block-size: 7rem;
+  resize: vertical;
+}
+
+.formtura-field-help,
+.formtura-field-description-text,
+.formtura-preview-description,
+.formtura-sublabel,
+.formtura-info-message {
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+}
+
+.formtura-input-with-button,
+.formtura-input-with-inline-tag,
+.formtura-input-with-tag {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-2);
+}
+
+.formtura-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+}
+
+@media (min-width: 36em) {
+  .formtura-form-group-row,
+  .formtura-range-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .formtura-builder *,
+  .formtura-builder *::before,
+  .formtura-builder *::after {
+    scroll-behavior: auto;
+    transition-duration: 0.01ms;
+    animation-duration: 0.01ms;
+    animation-iteration-count: 1;
+  }
+}

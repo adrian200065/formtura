@@ -16,7 +16,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <div class="wrap fta-admin-page">
 	<div class="fta-admin-header">
-		<h1><?php esc_html_e( 'Settings', FORMTURA_TEXTDOMAIN ); ?></h1>
+		<div class="fta-admin-heading">
+			<p class="fta-admin-eyebrow"><?php esc_html_e( 'Configuration', FORMTURA_TEXTDOMAIN ); ?></p>
+			<h1><?php esc_html_e( 'Settings', FORMTURA_TEXTDOMAIN ); ?></h1>
+			<p class="fta-admin-subtitle"><?php esc_html_e( 'Manage form security, delivery defaults, and plugin behavior.', FORMTURA_TEXTDOMAIN ); ?></p>
+		</div>
 	</div><!-- .fta-admin-header -->
 
 	<div class="fta-card">
@@ -132,7 +136,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<?php wp_nonce_field( 'formtura_admin', 'formtura_nonce' ); ?>
 			
 			<p class="submit">
-				<button type="submit" class="button button-primary fta-save-settings">
+				<button type="submit" class="fta-button fta-button-primary fta-save-settings">
 					<?php esc_html_e( 'Save Settings', FORMTURA_TEXTDOMAIN ); ?>
 				</button>
 			</p>
@@ -165,13 +169,13 @@ jQuery(document).ready(function($) {
 			},
 			success: function(response) {
 				if (response.success) {
-					alert('<?php esc_html_e( 'Settings saved successfully!', FORMTURA_TEXTDOMAIN ); ?>');
+					window.FormturaAdmin.showNotice('<?php esc_html_e( 'Settings saved successfully.', FORMTURA_TEXTDOMAIN ); ?>', 'success');
 				} else {
-					alert(response.data.message || '<?php esc_html_e( 'Failed to save settings.', FORMTURA_TEXTDOMAIN ); ?>');
+					window.FormturaAdmin.showNotice(response.data.message || '<?php esc_html_e( 'Failed to save settings.', FORMTURA_TEXTDOMAIN ); ?>', 'error');
 				}
 			},
 			error: function() {
-				alert('<?php esc_html_e( 'An error occurred while saving settings.', FORMTURA_TEXTDOMAIN ); ?>');
+				window.FormturaAdmin.showNotice('<?php esc_html_e( 'An error occurred while saving settings.', FORMTURA_TEXTDOMAIN ); ?>', 'error');
 			},
 			complete: function() {
 				$button.prop('disabled', false).text(buttonText);

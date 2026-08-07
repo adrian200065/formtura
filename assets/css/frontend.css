@@ -304,6 +304,7 @@
 
 /* File Upload */
 .fta-file-upload {
+	position: relative;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -338,6 +339,13 @@
 	clip: rect(0, 0, 0, 0);
 	white-space: nowrap;
 	border: 0;
+}
+
+/* Ensure child elements don't block label click */
+.fta-file-upload-icon,
+.fta-file-upload-text,
+.fta-file-upload-info {
+	pointer-events: none;
 }
 
 .fta-file-upload-icon {
@@ -401,6 +409,7 @@
 
 /* Compact File Upload */
 .fta-file-upload-compact {
+	position: relative;
 	display: flex;
 	align-items: center;
 	gap: var(--fta-form-space-sm);

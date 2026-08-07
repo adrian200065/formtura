@@ -31,18 +31,38 @@ Formtura is the modern, intuitive, and powerful form builder for WordPress. Crea
 
 * Single Line Text
 * Paragraph Text
+* Name
+* Email
 * Dropdown
 * Multiple Choice
 * Checkboxes
 * Numbers
-* Name
-* Email
-* Number Slider
+* Phone
+* Website / URL
+* HTML
+* Hidden Field
 * CAPTCHA
+
+= Advanced Fields =
+
+* Address
+* Date / Time
+* Password
+* File Upload
+* Camera
+* Layout
+* Repeater
+* Page Break
+* Section Divider
+* Rich Text
+* Content
+* Entry Preview
+* Signature
+* Star Rating
+* Slider
 
 = Pro Features =
 
-* Advanced field types (Phone, Address, Date/Time, File Upload, Signature, etc.)
 * Payment integrations (PayPal, Stripe, Square, Authorize.Net)
 * Marketing integrations (Mailchimp, ConvertKit, etc.)
 * Email logging

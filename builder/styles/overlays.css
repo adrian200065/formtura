@@ -1,0 +1,281 @@
+.formtura-preview-overlay,
+.formtura-confirm-overlay {
+  background: color-mix(in hsl, var(--color-brand-midnight) 72%, transparent);
+  position: fixed;
+  inset: var(--space-0);
+  z-index: var(--layer-modal);
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  backdrop-filter: blur(0.35rem);
+}
+
+.formtura-preview-modal,
+.formtura-confirm-dialog {
+  color: var(--text-main);
+  background: var(--bg-card);
+  inline-size: min(44rem, 100%);
+  max-block-size: calc(100dvh - var(--space-8));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+}
+
+.formtura-preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding-block: var(--space-4);
+  padding-inline: var(--space-5);
+  border-block-end: 1px solid var(--border-light);
+}
+
+.formtura-preview-header h2 {
+  font-size: var(--text-xl);
+  letter-spacing: -0.025em;
+}
+
+.formtura-preview-close {
+  color: var(--text-muted);
+  background: transparent;
+  inline-size: 2.5rem;
+  block-size: 2.5rem;
+  display: grid;
+  place-items: center;
+  padding: var(--space-0);
+  border: 0;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+
+.formtura-preview-close:hover {
+  color: var(--text-main);
+  background: var(--surface-subtle);
+}
+
+.formtura-preview-body {
+  background: var(--bg-main);
+  padding: var(--space-4);
+  overflow-y: auto;
+}
+
+.formtura-preview-form {
+  background: var(--bg-card);
+  max-inline-size: 38rem;
+  margin-inline: auto;
+  padding: var(--space-6);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+}
+
+.formtura-preview-form-title {
+  font-size: var(--text-2xl);
+  line-height: var(--leading-tight);
+  letter-spacing: -0.035em;
+}
+
+.formtura-preview-form-description {
+  color: var(--text-muted);
+  margin-block-start: var(--space-2);
+}
+
+.formtura-preview-fields {
+  display: grid;
+  gap: var(--space-5);
+  margin-block-start: var(--space-6);
+}
+
+.formtura-preview-field {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.formtura-preview-submit {
+  color: var(--color-brand-dark);
+  background: var(--color-primary);
+  min-block-size: 2.75rem;
+  padding-inline: var(--space-5);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.formtura-preview-submit:hover {
+  color: var(--text-on-dark);
+  background: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
+}
+
+.formtura-preview-empty {
+  color: var(--text-muted);
+  padding-block: var(--space-12);
+  text-align: center;
+}
+
+.formtura-confirm-dialog {
+  inline-size: min(26rem, 100%);
+  align-items: center;
+  padding: var(--space-6);
+  text-align: center;
+}
+
+.formtura-confirm-icon {
+  color: var(--error);
+  background: var(--surface-danger);
+  inline-size: 4rem;
+  block-size: 4rem;
+  display: grid;
+  place-items: center;
+  margin-block-end: var(--space-4);
+  border-radius: 50%;
+}
+
+.formtura-info-dialog .formtura-confirm-icon {
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
+.formtura-confirm-icon svg {
+  inline-size: 2rem;
+  block-size: 2rem;
+}
+
+.formtura-confirm-content {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.formtura-confirm-title {
+  font-size: var(--text-xl);
+  letter-spacing: -0.025em;
+}
+
+.formtura-confirm-message {
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+.formtura-confirm-message a {
+  color: var(--color-primary-hover);
+  font-weight: 650;
+}
+
+.formtura-dialog-lead {
+  margin-block-end: var(--space-3);
+}
+
+.formtura-popover-anchor {
+  position: relative;
+}
+
+.formtura-confirm-actions {
+  inline-size: 100%;
+  display: flex;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-block-start: var(--space-6);
+}
+
+.formtura-tooltip-wrapper {
+  position: relative;
+  display: inline-flex;
+}
+
+.formtura-tooltip {
+  color: var(--text-on-dark);
+  background: var(--color-brand-midnight);
+  position: absolute;
+  inset-block-end: calc(100% + var(--space-2));
+  inset-inline-start: 50%;
+  z-index: var(--layer-popover);
+  inline-size: max-content;
+  max-inline-size: 16rem;
+  padding-block: var(--space-2);
+  padding-inline: var(--space-3);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+  font-size: var(--text-xs);
+  transform: translateX(-50%);
+}
+
+.formtura-smart-tags-popup,
+.formtura-style-classes-dropdown {
+  color: var(--text-main);
+  background: var(--bg-card);
+  position: absolute;
+  inset-block-start: 100%;
+  inset-inline-end: var(--space-0);
+  z-index: var(--layer-popover);
+  inline-size: min(20rem, 88vw);
+  max-block-size: 24rem;
+  overflow: hidden;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+}
+
+.formtura-smart-tags-header,
+.formtura-smart-tags-search {
+  padding-block: var(--space-3);
+  padding-inline: var(--space-4);
+  border-block-end: 1px solid var(--border-light);
+}
+
+.formtura-smart-tags-list {
+  max-block-size: 17rem;
+  overflow-y: auto;
+}
+
+.formtura-smart-tags-category-title {
+  color: var(--text-muted);
+  padding-block: var(--space-2);
+  padding-inline: var(--space-4);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.formtura-smart-tags-item {
+  color: var(--text-main);
+  background: transparent;
+  inline-size: 100%;
+  padding-block: var(--space-2);
+  padding-inline: var(--space-4);
+  border: 0;
+  font-size: var(--text-sm);
+  text-align: start;
+  cursor: pointer;
+}
+
+.formtura-smart-tags-item:hover {
+  background: var(--surface-subtle);
+}
+
+.formtura-smart-tag-btn,
+.formtura-help-icon {
+  color: var(--text-muted);
+  background: transparent;
+  inline-size: 2.25rem;
+  block-size: 2.25rem;
+  display: grid;
+  place-items: center;
+  padding: var(--space-0);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+
+@media (min-width: 40em) {
+  .formtura-preview-body {
+    padding: var(--space-8);
+  }
+
+  .formtura-preview-form {
+    padding: var(--space-8);
+  }
+}

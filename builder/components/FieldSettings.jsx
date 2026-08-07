@@ -302,7 +302,7 @@ const GeneralTab = ({ field, onUpdate }) => {
             <label>
               Value Range <Info size={14} className="formtura-help-icon" />
             </label>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+            <div className="formtura-grid-2">
               <div>
                 <input
                   type="number"

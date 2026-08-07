@@ -4,6 +4,7 @@ import { Copy, GripVertical, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import ConfirmDialog from './ConfirmDialog';
 import FieldPreview from './FieldPreview';
+import Button from './ui/Button';
 
 const DroppedField = ({ field, isSelected, onSelect, onDelete, onDuplicate }) => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -36,48 +37,70 @@ const DroppedField = ({ field, isSelected, onSelect, onDelete, onDuplicate }) =>
     setShowDeleteConfirm(false);
   };
 
+  const handleKeyDown = (event) => {
+    if (event.currentTarget !== event.target) return;
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      onSelect();
+    }
+  };
+
   return (
     <>
-      <div
+      <article
         ref={setNodeRef}
         style={style}
         className={`formtura-dropped-field ${isSelected ? 'selected' : ''} ${isDragging ? 'dragging' : ''}`}
         onClick={onSelect}
+        onKeyDown={handleKeyDown}
+        tabIndex={0}
+        aria-label={`${field.label || 'Untitled field'}, ${isSelected ? 'selected' : 'select to edit'}`}
+        aria-current={isSelected ? 'true' : undefined}
       >
         <div className="formtura-field-header">
           <div className="formtura-field-type">
-            <GripVertical size={16} {...attributes} {...listeners} style={{ cursor: 'grab' }} />
-            {field.type.toUpperCase()}
+            <button
+              className="formtura-drag-handle"
+              type="button"
+              aria-label={`Reorder ${field.label || 'field'}`}
+              {...attributes}
+              {...listeners}
+            >
+              <GripVertical aria-hidden="true" />
+            </button>
+            <span>{field.type.replaceAll('-', ' ')}</span>
           </div>
           <div className="formtura-field-actions">
-            <button
+            <Button
               className="formtura-field-action-btn"
+              variant="ghost"
+              icon={Copy}
+              iconOnly
               onClick={(e) => {
                 e.stopPropagation();
                 onDuplicate();
               }}
-              title="Duplicate field"
-              type="button"
             >
-              <Copy size={16} />
-            </button>
-            <button
-              className="formtura-field-action-btn"
+              Duplicate field
+            </Button>
+            <Button
+              className="formtura-field-action-btn formtura-field-delete-btn"
+              variant="ghost"
+              icon={Trash2}
+              iconOnly
               onClick={handleDeleteClick}
-              title="Delete field"
-              type="button"
             >
-              <Trash2 size={16} />
-            </button>
+              Delete field
+            </Button>
           </div>
         </div>
 
         <FieldPreview field={field} />
-      </div>
+      </article>
 
       <ConfirmDialog
         isOpen={showDeleteConfirm}
-        title=""
+        title="Delete field?"
         message="Are you sure you want to delete this field?"
         confirmText="OK"
         cancelText="Cancel"

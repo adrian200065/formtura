@@ -94,38 +94,23 @@ class Submission {
 			] );
 		}
 
-		// Store uploaded files. Runs after the rest of the form validates so a
-		// rejected submission does not leave files behind.
-		$uploads = ( new Uploads() )->process_form_uploads( $form );
+		// Store uploaded files and signatures. Runs after the rest of the form
+		// validates so a rejected submission does not leave files behind.
+		$files = $this->process_files( $form );
 
-		if ( is_wp_error( $uploads ) ) {
+		if ( is_wp_error( $files ) ) {
 			wp_send_json_error( [
-				'message' => $uploads->get_error_message(),
-				'errors'  => $uploads->get_error_data(),
-			] );
-		}
-
-		// Signatures arrive as data URLs in $_POST but end life as stored
-		// files, so they follow the uploads path, not the text path.
-		$signatures = ( new Signature() )->process_form_signatures( $form );
-
-		if ( is_wp_error( $signatures ) ) {
-			wp_send_json_error( [
-				'message' => $signatures->get_error_message(),
-				'errors'  => $signatures->get_error_data(),
+				'message' => $files->get_error_message(),
+				'errors'  => $files->get_error_data(),
 			] );
 		}
 
 		// Sanitize submission data.
 		$entry_data = $this->sanitize_submission( $form, $_POST );
 
-		// File records are produced by the upload handler, already sanitized.
-		foreach ( $uploads as $field_name => $files ) {
-			$entry_data[ $field_name ] = $files;
-		}
-
-		foreach ( $signatures as $field_name => $files ) {
-			$entry_data[ $field_name ] = $files;
+		// File records are produced by process_files(), already sanitized.
+		foreach ( $files as $field_name => $records ) {
+			$entry_data[ $field_name ] = $records;
 		}
 
 		// Save entry to database.
@@ -158,6 +143,53 @@ class Submission {
 			'redirect_url' => $redirect_url,
 			'entry_id'     => $entry_id,
 		] );
+	}
+
+	/**
+	 * Store every file-producing field on the form: uploads, then signatures.
+	 *
+	 * Split from ajax_submit_form() so the cleanup-on-signature-failure
+	 * behaviour below is reachable without going through the AJAX transport
+	 * (check_ajax_referer(), wp_send_json_*()) in tests.
+	 *
+	 * @since 1.0.4
+	 * @param array $form Form data.
+	 * @return array|\WP_Error Map of field name => file records, or WP_Error.
+	 */
+	private function process_files( $form ) {
+		$uploads = ( new Uploads() )->process_form_uploads( $form );
+
+		if ( is_wp_error( $uploads ) ) {
+			return $uploads;
+		}
+
+		return $this->process_signatures( $form, $uploads );
+	}
+
+	/**
+	 * Store signature fields and merge them with already-stored uploads.
+	 *
+	 * Signatures run after uploads, so by the time this runs $uploads may
+	 * already point at files moved to disk. If signatures fail, those upload
+	 * files must be removed here - otherwise a rejected submission still
+	 * leaves files behind, defeating the point of running signatures after
+	 * uploads validate instead of before.
+	 *
+	 * @since 1.0.4
+	 * @param array $form    Form data.
+	 * @param array $uploads Already-stored upload file records.
+	 * @return array|\WP_Error Map of field name => file records, or WP_Error.
+	 */
+	private function process_signatures( $form, $uploads ) {
+		$signatures = ( new Signature() )->process_form_signatures( $form );
+
+		if ( is_wp_error( $signatures ) ) {
+			Uploads::cleanup( $uploads );
+
+			return $signatures;
+		}
+
+		return array_merge( $uploads, $signatures );
 	}
 
 	/**

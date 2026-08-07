@@ -121,7 +121,7 @@ class Uploads {
 
 		if ( ! empty( $errors ) ) {
 			// Files already moved in this request are orphaned; remove them.
-			$this->cleanup( $results );
+			self::cleanup( $results );
 
 			return new \WP_Error(
 				'upload_failed',
@@ -467,10 +467,14 @@ class Uploads {
 	/**
 	 * Delete files stored earlier in a failed request.
 	 *
+	 * Public so other file-producing steps in the same submission (currently
+	 * Signature) can remove files this class already moved to disk when a
+	 * later step fails - a rejected submission must never leave files behind.
+	 *
 	 * @since 1.0.3
 	 * @param array $results Map of field name => file records.
 	 */
-	private function cleanup( $results ) {
+	public static function cleanup( $results ) {
 		foreach ( $results as $files ) {
 			foreach ( $files as $file ) {
 				if ( ! empty( $file['file'] ) && file_exists( $file['file'] ) ) {

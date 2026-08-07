@@ -329,4 +329,26 @@ class UploadsTest extends TestCase {
 
 		$this->assertSame( [], Uploads::get_email_attachments( $form, $entry ) );
 	}
+
+	/**
+	 * cleanup() is public so Signature can remove already-stored upload
+	 * files when a later step in the same request (a signature field)
+	 * fails - a rejected submission must never leave files behind.
+	 */
+	public function test_cleanup_deletes_stored_files() {
+		$file = tempnam( sys_get_temp_dir(), 'fta' );
+		$this->assertFileExists( $file );
+
+		Uploads::cleanup( [ 'f1' => [ [ 'file' => $file ] ] ] );
+
+		$this->assertFileDoesNotExist( $file );
+	}
+
+	public function test_cleanup_ignores_records_with_no_file_on_disk() {
+		// Must not error when a record's file was never created, or was
+		// already removed by an earlier cleanup call.
+		Uploads::cleanup( [ 'f1' => [ [ 'file' => '/does/not/exist.png' ] ] ] );
+
+		$this->addToAssertionCount( 1 );
+	}
 }

@@ -4,7 +4,8 @@
  *
  * Turns the signature pad's PNG data URL into a stored file. Verification
  * happens before anything touches disk: the value must be a PNG data URL,
- * decode cleanly, stay under the size cap, and carry real PNG magic bytes.
+ * decode cleanly, stay under the size cap, carry real PNG magic bytes, and
+ * parse as a genuine PNG image.
  *
  * @package Formtura
  * @since 1.0.4
@@ -33,6 +34,12 @@ class Signature {
 	 * Mirrors Uploads::process_form_uploads(): returns a map of field name
 	 * to file records, or a WP_Error carrying per-field messages.
 	 *
+	 * Two-phase: every field is decoded and verified first, and only once
+	 * all of them pass does the second phase write anything to disk. This
+	 * matters when a form has more than one signature field - without it, an
+	 * earlier field's file would already be written by the time a later
+	 * field fails, orphaning it.
+	 *
 	 * @since 1.0.4
 	 * @param array $form Form data.
 	 * @return array|\WP_Error Map of field name => file records, or WP_Error.
@@ -40,11 +47,13 @@ class Signature {
 	public function process_form_signatures( $form ) {
 		$results = [];
 		$errors  = [];
+		$decoded = [];
 
 		if ( empty( $form['fields'] ) || ! is_array( $form['fields'] ) ) {
 			return $results;
 		}
 
+		// Phase 1: decode and verify every field. Nothing is written yet.
 		foreach ( $form['fields'] as $field ) {
 			if ( 'signature' !== ( isset( $field['type'] ) ? $field['type'] : '' ) ) {
 				continue;
@@ -58,8 +67,12 @@ class Signature {
 
 			// Deliberately not sanitize_text_field(): a multi-hundred-KB
 			// data URL is not text, and decode_data_url() validates it in
-			// full before anything is done with it.
-			$value = isset( $_POST[ $field_name ] ) ? (string) wp_unslash( $_POST[ $field_name ] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+			// full before anything is done with it. A crafted array value
+			// (e.g. field_sig[]=x) is treated as no value rather than cast
+			// to string, which would emit an "Array to string conversion"
+			// warning and could corrupt the AJAX JSON response.
+			$raw   = isset( $_POST[ $field_name ] ) ? $_POST[ $field_name ] : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+			$value = is_string( $raw ) ? wp_unslash( $raw ) : '';
 
 			if ( '' === $value ) {
 				if ( ! empty( $field['required'] ) ) {
@@ -80,19 +93,40 @@ class Signature {
 				continue;
 			}
 
+			$decoded[ $field_name ] = $binary;
+		}
+
+		if ( ! empty( $errors ) ) {
+			return new \WP_Error(
+				'signature_failed',
+				__( 'Please correct the errors below.', FORMTURA_TEXTDOMAIN ),
+				$errors
+			);
+		}
+
+		// Phase 2: every field verified, so it is now safe to write.
+		foreach ( $decoded as $field_name => $binary ) {
 			$stored = $this->store_png( $binary );
 
 			if ( is_wp_error( $stored ) ) {
 				$errors[ $field_name ] = $stored->get_error_message();
-				continue;
+				break;
 			}
 
 			// A list with one record, matching the uploads shape, so entry
-			// display and email attachment treat both identically.
+			// display (which reads records generically by their 'name' and
+			// 'url' keys) works unchanged. Email attachment does not:
+			// Uploads::get_email_attachments() filters on the literal
+			// 'file-upload' type, so signatures are not attached to
+			// notification emails today.
 			$results[ $field_name ] = [ $stored ];
 		}
 
 		if ( ! empty( $errors ) ) {
+			// A later field's write failed after an earlier one succeeded;
+			// do not leave that earlier file behind.
+			Uploads::cleanup( $results );
+
 			return new \WP_Error(
 				'signature_failed',
 				__( 'Please correct the errors below.', FORMTURA_TEXTDOMAIN ),
@@ -133,6 +167,16 @@ class Signature {
 
 		// Real PNG bytes, not just a claimed mime type.
 		if ( "\x89PNG\r\n\x1a\n" !== substr( $binary, 0, 8 ) ) {
+			return $invalid;
+		}
+
+		// The magic bytes alone only rule out non-PNG content; they say
+		// nothing about whether the rest of the file is a well-formed
+		// image. getimagesizefromstring() parses the header for real,
+		// entirely in memory, so this closes that gap without a temp file.
+		$image = @getimagesizefromstring( $binary ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+
+		if ( false === $image || IMAGETYPE_PNG !== $image[2] ) {
 			return $invalid;
 		}
 

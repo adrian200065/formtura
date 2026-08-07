@@ -406,6 +406,7 @@ const FieldLibrary = ({
   const [showStripeDialog, setShowStripeDialog] = React.useState(false); // Stripe info dialog
   const [showPayPalDialog, setShowPayPalDialog] = React.useState(false); // PayPal info dialog
   const [showSquareDialog, setShowSquareDialog] = React.useState(false); // Square info dialog
+  const [showAuthorizeNetDialog, setShowAuthorizeNetDialog] = React.useState(false); // Authorize.Net info dialog
 
   // Get the selected field data
   const field = fields?.find(f => f.id === selectedField);
@@ -557,6 +558,18 @@ const FieldLibrary = ({
                                 label={fieldItem.label}
                                 icon={fieldItem.icon}
                                 onClick={() => setShowSquareDialog(true)}
+                              />
+                            );
+                          }
+                          // Authorize.Net field shows a popup for connection setup
+                          if (fieldItem.type === 'authorize-net') {
+                            return (
+                              <ClickableField
+                                key={fieldItem.type}
+                                type={fieldItem.type}
+                                label={fieldItem.label}
+                                icon={fieldItem.icon}
+                                onClick={() => setShowAuthorizeNetDialog(true)}
                               />
                             );
                           }
@@ -723,6 +736,31 @@ const FieldLibrary = ({
         }
         buttonText="OK"
         onClose={() => setShowSquareDialog(false)}
+      />
+
+      {/* Authorize.Net Info Dialog */}
+      <InfoDialog
+        isOpen={showAuthorizeNetDialog}
+        title="Heads up!"
+        message={
+          <>
+            <p className="formtura-dialog-lead">
+              Authorize.Net account connection is required when using the Authorize.Net field.
+            </p>
+            <p>
+              To proceed, please go to{' '}
+              <a
+                href={`${window.formturaBuilder?.adminUrl || '/wp-admin/'}admin.php?page=formtura-settings&tab=payments`}
+              >
+                Formtura Settings » Payments » Authorize.Net
+              </a>
+              {' '}and press{' '}
+              <strong>Connect with Authorize.Net</strong> button.
+            </p>
+          </>
+        }
+        buttonText="OK"
+        onClose={() => setShowAuthorizeNetDialog(false)}
       />
     </aside>
   );

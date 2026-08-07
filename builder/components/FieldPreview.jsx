@@ -552,33 +552,14 @@ const FieldPreview = ({ field }) => {
         );
 
       case 'rich-text':
+        // Renders as a plain textarea on the frontend, so the preview must
+        // not advertise an editor toolbar the visitor never gets.
         return (
-          <div className="formtura-richtext-preview">
-            <div className="formtura-richtext-toolbar">
-              <div className="formtura-richtext-buttons">
-                <button type="button" className="formtura-richtext-btn">b</button>
-                <button type="button" className="formtura-richtext-btn formtura-richtext-btn-italic">i</button>
-                <button type="button" className="formtura-richtext-btn formtura-richtext-btn-underline">link</button>
-                <button type="button" className="formtura-richtext-btn">b-quote</button>
-                <button type="button" className="formtura-richtext-btn">del</button>
-                <button type="button" className="formtura-richtext-btn">ins</button>
-                <button type="button" className="formtura-richtext-btn">img</button>
-                <button type="button" className="formtura-richtext-btn">ul</button>
-                <button type="button" className="formtura-richtext-btn">ol</button>
-                <button type="button" className="formtura-richtext-btn">li</button>
-                <button type="button" className="formtura-richtext-btn">code</button>
-                <button type="button" className="formtura-richtext-btn">more</button>
-                <button type="button" className="formtura-richtext-btn">close tags</button>
-              </div>
-              <div className="formtura-richtext-tabs">
-                <button type="button" className="formtura-richtext-tab formtura-richtext-tab-active">Visual</button>
-                <button type="button" className="formtura-richtext-tab">Code</button>
-              </div>
-            </div>
-            <div
-              className="formtura-richtext-content"
-            />
-          </div>
+          <textarea
+            rows={field.rows || 7}
+            placeholder={field.placeholder}
+            readOnly
+          />
         );
 
       default:

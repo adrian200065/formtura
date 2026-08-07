@@ -81,6 +81,7 @@ class FieldTemplateTest extends TestCase {
 			'rating'        => [ 'rating', [] ],
 			'hidden'        => [ 'hidden', [] ],
 			'file-upload'   => [ 'file-upload', [] ],
+			'rich-text'     => [ 'rich-text', [] ],
 		];
 	}
 

@@ -532,6 +532,79 @@ function fta_get_field_choices( $field ) {
 }
 
 /**
+ * Get the symbol for the configured currency.
+ *
+ * @since 1.0.4
+ * @return string Currency symbol, or the currency code when no symbol is known.
+ */
+function fta_get_currency_symbol() {
+	$currency = (string) fta_get_setting( 'currency', 'USD' );
+
+	$symbols = apply_filters( 'fta_currency_symbols', [
+		'USD' => '$',
+		'EUR' => '€',
+		'GBP' => '£',
+		'AUD' => '$',
+		'CAD' => '$',
+		'JPY' => '¥',
+	] );
+
+	return isset( $symbols[ $currency ] ) ? $symbols[ $currency ] : $currency;
+}
+
+/**
+ * Format an amount in the configured currency.
+ *
+ * Display formatting only - payment math happens on unformatted floats.
+ *
+ * @since 1.0.4
+ * @param float|int|string $amount Amount to format.
+ * @return string Formatted price, e.g. "$10.00".
+ */
+function fta_format_price( $amount ) {
+	return fta_get_currency_symbol() . number_format( (float) $amount, 2 );
+}
+
+/**
+ * Get a payment field's items in a predictable shape.
+ *
+ * Items are the payment counterpart of choices: the builder saves
+ * { label, value, price, isDefault } and this helper guarantees that shape
+ * whatever is stored. Prices in the definition are the only prices the
+ * server trusts.
+ *
+ * @since 1.0.4
+ * @param array $field Field configuration.
+ * @return array[] Normalized items.
+ */
+function fta_get_field_items( $field ) {
+	$items      = isset( $field['items'] ) && is_array( $field['items'] ) ? $field['items'] : [];
+	$normalized = [];
+
+	foreach ( $items as $item ) {
+		if ( ! is_array( $item ) ) {
+			continue;
+		}
+
+		$label = isset( $item['label'] ) ? (string) $item['label'] : '';
+		$value = isset( $item['value'] ) && '' !== (string) $item['value'] ? (string) $item['value'] : $label;
+
+		if ( '' === $value ) {
+			continue;
+		}
+
+		$normalized[] = [
+			'label'     => $label,
+			'value'     => $value,
+			'price'     => isset( $item['price'] ) && is_numeric( $item['price'] ) ? (float) $item['price'] : 0.0,
+			'isDefault' => ! empty( $item['isDefault'] ),
+		];
+	}
+
+	return $normalized;
+}
+
+/**
  * Build the CSS classes for a field wrapper.
  *
  * @since 1.0.3

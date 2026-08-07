@@ -110,6 +110,8 @@ class Frontend {
 						'recaptchaMissing' => __( 'Please confirm you are not a robot.', FORMTURA_TEXTDOMAIN ),
 						'recaptchaError'   => __( 'reCAPTCHA could not be loaded. Please reload the page and try again.', FORMTURA_TEXTDOMAIN ),
 						'signatureMissing' => __( 'Please add your signature.', FORMTURA_TEXTDOMAIN ),
+						'couponApplied'    => __( 'Coupon applied.', FORMTURA_TEXTDOMAIN ),
+						'couponInvalid'    => __( 'This coupon code is not valid.', FORMTURA_TEXTDOMAIN ),
 					],
 				]
 			);

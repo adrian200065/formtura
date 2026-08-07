@@ -632,6 +632,14 @@ const FieldPreview = ({ field }) => {
           </select>
         );
 
+      case 'coupon':
+        return (
+          <div className="formtura-coupon-preview">
+            <input type="text" placeholder={field.placeholder || 'Coupon code'} readOnly />
+            <button type="button" onClick={(e) => e.stopPropagation()}>Apply</button>
+          </div>
+        );
+
       default:
         return (
           <input

@@ -434,6 +434,62 @@
 
 			// Character counter
 			$(document).on('input', '[data-char-limit]', this.updateCharCounter);
+
+			// Coupon apply
+			$(document).on('click', '.fta-coupon-apply', this.handleCouponApply);
+		},
+
+		/**
+		 * Validate a coupon code over AJAX and apply it to the display.
+		 *
+		 * The submission re-validates the code server-side regardless; this
+		 * only keeps the displayed total honest without ever shipping the
+		 * code list to the page.
+		 */
+		handleCouponApply() {
+			const $button = $(this);
+			const $wrap = $button.closest('.fta-coupon');
+			const $form = $button.closest('.fta-form');
+			const $status = $button.closest('.fta-field').find('.fta-coupon-status');
+			const strings = (window.formturaFrontend && formturaFrontend.strings) || {};
+			const code = String($wrap.find('.fta-coupon-input').val() || '').trim();
+
+			if (!code) {
+				return;
+			}
+
+			$button.prop('disabled', true);
+
+			$.ajax({
+				url: formturaFrontend.ajaxUrl,
+				type: 'POST',
+				data: {
+					action: 'fta_validate_coupon',
+					nonce: formturaFrontend.nonce,
+					form_id: $form.data('form-id'),
+					field_id: $wrap.data('field-id'),
+					code,
+				},
+				success(response) {
+					if (response.success) {
+						$form.data('ftaCoupon', {
+							type: response.data.type,
+							value: parseFloat(response.data.value) || 0,
+						});
+						$status.text(strings.couponApplied || 'Coupon applied.');
+					} else {
+						$form.removeData('ftaCoupon');
+						$status.text((response.data && response.data.message) || strings.couponInvalid || 'This coupon code is not valid.');
+					}
+					FormturaFrontend.recalculateTotal($form);
+				},
+				error() {
+					$status.text(strings.couponInvalid || 'This coupon code is not valid.');
+				},
+				complete() {
+					$button.prop('disabled', false);
+				}
+			});
 		},
 
 		/**

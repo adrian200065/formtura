@@ -1495,6 +1495,73 @@ const GeneralTab = ({ field, onUpdate }) => {
       );
     }
 
+    // Coupon codes
+    if (field.type === 'coupon') {
+      const coupons = field.coupons || [];
+      const setCoupons = (next) => handleChange('coupons', next);
+
+      return (
+        <div className="formtura-form-group">
+          <label>
+            Coupon Codes <Tooltip text="Codes are validated on the server and are never shown to visitors." />
+          </label>
+
+          {coupons.map((coupon, index) => (
+            <div key={index} className="formtura-coupon-row">
+              <input
+                type="text"
+                placeholder="CODE"
+                value={coupon.code || ''}
+                onChange={(e) => {
+                  const next = [...coupons];
+                  next[index] = { ...next[index], code: e.target.value };
+                  setCoupons(next);
+                }}
+              />
+              <select
+                value={coupon.type || 'fixed'}
+                onChange={(e) => {
+                  const next = [...coupons];
+                  next[index] = { ...next[index], type: e.target.value };
+                  setCoupons(next);
+                }}
+              >
+                <option value="fixed">Fixed amount</option>
+                <option value="percent">Percent</option>
+              </select>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="Value"
+                className="formtura-price-input"
+                value={coupon.value || ''}
+                onChange={(e) => {
+                  const next = [...coupons];
+                  next[index] = { ...next[index], value: e.target.value };
+                  setCoupons(next);
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => setCoupons(coupons.filter((_, i) => i !== index))}
+              >
+                ×
+              </button>
+            </div>
+          ))}
+
+          <button
+            type="button"
+            className="formtura-btn formtura-btn-secondary"
+            onClick={() => setCoupons([...coupons, { code: '', type: 'fixed', value: '' }])}
+          >
+            Add Coupon
+          </button>
+        </div>
+      );
+    }
+
     // Default: no field-specific options
     return null;
   };

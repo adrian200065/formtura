@@ -202,6 +202,8 @@ const FormBuilder = ({ formId }) => {
         };
       case 'total':
         return { ...baseField, label: 'Total', enableSummary: false };
+      case 'coupon':
+        return { ...baseField, label: 'Coupon', coupons: [] };
       default:
         return baseField;
     }
@@ -236,6 +238,7 @@ const FormBuilder = ({ formId }) => {
       'payment-multiple': 'Multiple Items',
       'payment-dropdown': 'Dropdown Items',
       'total': 'Total',
+      'coupon': 'Coupon',
     };
     return labels[type] || 'Field';
   };

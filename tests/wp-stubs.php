@@ -372,3 +372,56 @@ if ( ! function_exists( 'wp_remote_retrieve_body' ) ) {
 		return isset( $response['body'] ) ? $response['body'] : '';
 	}
 }
+
+if ( ! class_exists( 'FTA_Test_Ajax_Response' ) ) {
+	/**
+	 * Thrown by the wp_send_json_* stubs below to stand in for wp_die()'s
+	 * request termination without killing the PHPUnit process, so an AJAX
+	 * handler that never returns after calling them (matching real WordPress
+	 * behaviour) can still be exercised and asserted on in a test.
+	 */
+	class FTA_Test_Ajax_Response extends \Exception {
+		/** @var bool */
+		public $success;
+
+		/** @var mixed */
+		public $data;
+
+		public function __construct( $success, $data ) {
+			parent::__construct( $success ? 'wp_send_json_success' : 'wp_send_json_error' );
+			$this->success = $success;
+			$this->data    = $data;
+		}
+	}
+}
+
+if ( ! function_exists( 'wp_send_json_success' ) ) {
+	function wp_send_json_success( $data = null ) {
+		throw new FTA_Test_Ajax_Response( true, $data );
+	}
+}
+
+if ( ! function_exists( 'wp_send_json_error' ) ) {
+	function wp_send_json_error( $data = null ) {
+		throw new FTA_Test_Ajax_Response( false, $data );
+	}
+}
+
+if ( ! function_exists( 'check_ajax_referer' ) ) {
+	/**
+	 * Tests set $GLOBALS['fta_test_ajax_referer_valid'] = false to simulate a
+	 * missing or incorrect nonce. WordPress halts the request in that case
+	 * (the default $stop = true dies); this stub throws instead, so a caller
+	 * that - correctly - never checks the return value still stops here
+	 * rather than falling through to code that assumes a checked request.
+	 */
+	function check_ajax_referer( $action = -1, $query_arg = false, $stop = true ) {
+		$valid = ! isset( $GLOBALS['fta_test_ajax_referer_valid'] ) || $GLOBALS['fta_test_ajax_referer_valid'];
+
+		if ( ! $valid && $stop ) {
+			throw new FTA_Test_Ajax_Response( false, [ 'message' => 'Nonce check failed.' ] );
+		}
+
+		return $valid ? 1 : false;
+	}
+}

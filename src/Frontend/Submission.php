@@ -38,6 +38,12 @@ class Submission {
 		// AJAX handler for form submission.
 		add_action( 'wp_ajax_fta_submit_form', [ $this, 'ajax_submit_form' ] );
 		add_action( 'wp_ajax_nopriv_fta_submit_form', [ $this, 'ajax_submit_form' ] );
+
+		// Coupon validation for display-side totals. The submission path
+		// re-validates independently; this endpoint only prevents the page
+		// from ever carrying the code list.
+		add_action( 'wp_ajax_fta_validate_coupon', [ $this, 'ajax_validate_coupon' ] );
+		add_action( 'wp_ajax_nopriv_fta_validate_coupon', [ $this, 'ajax_validate_coupon' ] );
 	}
 
 	/**
@@ -175,6 +181,44 @@ class Submission {
 			'redirect_url' => $redirect_url,
 			'entry_id'     => $entry_id,
 		] );
+	}
+
+	/**
+	 * AJAX: validate a coupon code for display-side totals.
+	 *
+	 * @since 1.0.4
+	 */
+	public function ajax_validate_coupon() {
+		check_ajax_referer( 'formtura_frontend', 'nonce' );
+
+		$form_id  = isset( $_POST['form_id'] ) ? absint( $_POST['form_id'] ) : 0;
+		$field_id = isset( $_POST['field_id'] ) ? sanitize_text_field( wp_unslash( $_POST['field_id'] ) ) : '';
+		$code     = isset( $_POST['code'] ) ? sanitize_text_field( wp_unslash( $_POST['code'] ) ) : '';
+
+		$form = $form_id ? fta_get_form( $form_id ) : null;
+
+		if ( ! $form || '' === $field_id || '' === $code ) {
+			wp_send_json_error( [
+				'message' => __( 'This coupon code is not valid.', FORMTURA_TEXTDOMAIN ),
+			] );
+		}
+
+		$coupon = null;
+
+		foreach ( $form['fields'] as $field ) {
+			if ( isset( $field['id'], $field['type'] ) && 'coupon' === $field['type'] && $field['id'] === $field_id ) {
+				$coupon = PaymentTotals::find_coupon( $field, $code );
+				break;
+			}
+		}
+
+		if ( null === $coupon ) {
+			wp_send_json_error( [
+				'message' => __( 'This coupon code is not valid.', FORMTURA_TEXTDOMAIN ),
+			] );
+		}
+
+		wp_send_json_success( $coupon );
 	}
 
 	/**

@@ -96,6 +96,7 @@ class FieldTemplateTest extends TestCase {
 			'payment-checkbox' => [ 'payment-checkbox', $payment_items ],
 			'payment-multiple' => [ 'payment-multiple', $payment_items ],
 			'payment-dropdown' => [ 'payment-dropdown', $payment_items ],
+			'coupon'        => [ 'coupon', [] ],
 		];
 	}
 
@@ -258,6 +259,15 @@ class FieldTemplateTest extends TestCase {
 		// ...but the posted value is only an inclusion marker. The server
 		// takes prices from the form definition, never from the request.
 		$this->assertStringContainsString( 'name="field_1699_abc" value="1"', $html );
+	}
+
+	public function test_coupon_codes_never_reach_the_page() {
+		$html = $this->render( $this->field( 'coupon', [
+			'coupons' => [ [ 'code' => 'SECRET50', 'type' => 'percent', 'value' => '50' ] ],
+		] ) );
+
+		$this->assertStringNotContainsString( 'SECRET50', $html );
+		$this->assertStringContainsString( 'fta-coupon-input', $html );
 	}
 
 	public function test_name_field_formats_render_expected_parts() {

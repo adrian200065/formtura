@@ -50,6 +50,20 @@ function renderPaymentForm() {
 					<option value="large" data-price="25.00" data-item-label="Large">Large - $25.00</option>
 				</select>
 			</div>
+			<div class="fta-field fta-field-payment fta-field-payment-multiple">
+				<fieldset class="fta-field-fieldset">
+					<div class="fta-field-choices">
+						<div class="fta-choice-item">
+							<input type="radio" id="field_material_0" name="field_material" class="fta-choice-input fta-payment-input" value="eco" data-price="8.00" data-item-label="Eco">
+							<label for="field_material_0" class="fta-choice-label">Eco <span class="fta-choice-price">$8.00</span></label>
+						</div>
+						<div class="fta-choice-item">
+							<input type="radio" id="field_material_1" name="field_material" class="fta-choice-input fta-payment-input" value="premium" data-price="18.00" data-item-label="Premium">
+							<label for="field_material_1" class="fta-choice-label">Premium <span class="fta-choice-price">$18.00</span></label>
+						</div>
+					</div>
+				</fieldset>
+			</div>
 			<div class="fta-field fta-field-total">
 				<table class="fta-order-summary"><tbody class="fta-order-summary-body"></tbody></table>
 				<div class="fta-total-display">
@@ -119,5 +133,51 @@ describe('payment totals display', () => {
 		expect(rows.length).toBe(2);
 		expect(text).toContain('Base fee');
 		expect(text).toContain('Gift wrap');
+	});
+
+	test('selecting a radio option adds its price and switching replaces it', async () => {
+		renderPaymentForm();
+		await loadFrontend();
+
+		jQuery('input[value="eco"]').prop('checked', true).trigger('change');
+		expect(document.querySelector('.fta-total-amount').textContent).toBe('$13.00');
+
+		// Switching options: a real click unchecks the previous radio in the
+		// group natively, but that grouping behavior isn't the thing under
+		// test here, so it's done explicitly to keep the assertion about
+		// selectedPaymentItems() rather than about jsdom's radio semantics.
+		jQuery('input[value="eco"]').prop('checked', false);
+		jQuery('input[value="premium"]').prop('checked', true).trigger('change');
+
+		expect(document.querySelector('.fta-total-amount').textContent).toBe('$23.00');
+	});
+
+	test('formturaRecalculateTotals recomputes totals without rebinding the delegated change handler', async () => {
+		renderPaymentForm();
+
+		const onSpy = jest.spyOn(jQuery.fn, 'on');
+
+		await loadFrontend();
+
+		const bindingsAfterLoad = onSpy.mock.calls.filter(
+			(call) => call[0] === 'change' && call[1] === '.fta-payment-input, .fta-payment-select'
+		).length;
+		expect(bindingsAfterLoad).toBe(1);
+
+		// Simulate markup inserted after page load (AJAX, a modal, a popup)
+		// calling the late-init hook, possibly more than once.
+		window.formturaRecalculateTotals();
+		window.formturaRecalculateTotals();
+		window.formturaRecalculateTotals();
+
+		const bindingsAfterHook = onSpy.mock.calls.filter(
+			(call) => call[0] === 'change' && call[1] === '.fta-payment-input, .fta-payment-select'
+		).length;
+		expect(bindingsAfterHook).toBe(1);
+
+		// And the hook still produces the correct total - it isn't a no-op.
+		expect(document.querySelector('.fta-total-amount').textContent).toBe('$5.00');
+
+		onSpy.mockRestore();
 	});
 });

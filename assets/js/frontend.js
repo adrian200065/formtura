@@ -313,6 +313,19 @@
 			});
 
 			// Initial state: single items count before any interaction.
+			FormturaFrontend.recalculateAllTotals();
+		},
+
+		/**
+		 * Recompute the total display for every form currently on the page.
+		 *
+		 * Separated from initPayments() so window.formturaRecalculateTotals()
+		 * can re-run the computation for markup inserted after page load
+		 * without re-binding the delegated change handler - that handler
+		 * lives on document and already covers any matching input added
+		 * later, so binding it again would fire it N times per change.
+		 */
+		recalculateAllTotals() {
 			$('.fta-form').each(function() {
 				const $form = $(this);
 				if ($form.find('.fta-field-total').length) {
@@ -1007,6 +1020,16 @@
 	// Let integrations initialize pads in markup added after page load.
 	window.formturaInitSignaturePads = function() {
 		FormturaFrontend.initSignaturePads();
+	};
+
+	// Let integrations recompute totals for markup added after page load.
+	// Unlike the two hooks above, there is no per-element ready-guard here:
+	// initializing a signature pad or reCAPTCHA widget twice is harmful
+	// (duplicate canvases, duplicate widgets), but recomputing a total is
+	// idempotent - it just overwrites the same text with the same value -
+	// so a guard would only add bookkeeping with nothing to protect against.
+	window.formturaRecalculateTotals = function() {
+		FormturaFrontend.recalculateAllTotals();
 	};
 
 })(jQuery);

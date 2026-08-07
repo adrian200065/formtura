@@ -2304,7 +2304,7 @@ Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 
 **Interfaces:**
 - Consumes: Task 8's markup contract (`.fta-payment-input[data-price]`, `.fta-payment-select` options with `data-price`, `data-item-label`)
-- Produces: `.fta-field-total` containing `.fta-total-amount` display, hidden `.fta-total-input`, optional `.fta-order-summary` table body `.fta-order-summary-body`. JS: totals recalc on any change inside a form; `formturaFrontend.currency = { symbol }`.
+- Produces: `.fta-field-total` containing `.fta-total-amount` display and an optional `.fta-order-summary` table body `.fta-order-summary-body`. The total posts NOTHING - it is display-only markup (user ruling, 2026-08-07: a posted-but-ignored hidden input is dead weight). JS: totals recalc on any change inside a form; `formturaFrontend.currency = { symbol }`.
 
 - [ ] **Step 1: Add the provider row (failing PHP test)**
 
@@ -2363,13 +2363,6 @@ $enable_summary = ! empty( $field['enableSummary'] );
 		<span class="fta-total-amount"><?php echo esc_html( fta_format_price( 0 ) ); ?></span>
 	</div>
 
-	<input
-		type="hidden"
-		id="<?php echo esc_attr( $field_input_id ); ?>"
-		name="<?php echo esc_attr( $field_name ); ?>"
-		class="fta-total-input"
-		value="0"
-	/>
 </div><!-- /.fta-field-total -->
 ```
 
@@ -2437,7 +2430,6 @@ function renderPaymentForm() {
 				<div class="fta-total-display">
 					<span class="fta-total-amount">$0.00</span>
 				</div>
-				<input type="hidden" name="field_total" class="fta-total-input" value="0">
 			</div>
 			<button type="submit" class="fta-submit-button">Submit</button>
 		</form>
@@ -2457,7 +2449,6 @@ describe('payment totals display', () => {
 		await loadFrontend();
 
 		expect(document.querySelector('.fta-total-amount').textContent).toBe('$5.00');
-		expect(document.querySelector('.fta-total-input').value).toBe('5.00');
 	});
 
 	test('checking items adds their prices', async () => {
@@ -2583,7 +2574,7 @@ Add methods to `FormturaFrontend`:
 		},
 
 		/**
-		 * Recompute and render a form's total, summary and hidden value.
+		 * Recompute and render a form's total display and summary.
 		 */
 		recalculateTotal($form) {
 			const $total = $form.find('.fta-field-total');
@@ -2604,7 +2595,6 @@ Add methods to `FormturaFrontend`:
 			amount = Math.max(0, Math.round(amount * 100) / 100);
 
 			$total.find('.fta-total-amount').text(FormturaFrontend.formatPrice(amount));
-			$total.find('.fta-total-input').val(amount.toFixed(2));
 
 			const $summary = $total.find('.fta-order-summary-body');
 			if ($summary.length) {
@@ -2686,8 +2676,8 @@ git add templates/fields/total.php assets/js/frontend.js assets/css/frontend.css
 git commit -m "Add the total field with live display-side recalculation
 
 Sums data-price over selected payment inputs, renders the optional order
-summary, and writes a hidden value the server deliberately ignores - the
-authoritative amount comes from PaymentTotals on submission.
+summary. The total posts nothing: the authoritative amount comes from
+PaymentTotals recomputing it server-side on submission.
 
 Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 ```
@@ -3364,7 +3354,6 @@ function renderForm() {
 			</div>
 			<div class="fta-field fta-field-total">
 				<div class="fta-total-display"><span class="fta-total-amount">$0.00</span></div>
-				<input type="hidden" name="field_total" class="fta-total-input" value="0">
 			</div>
 		</form>
 	`;

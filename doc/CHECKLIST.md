@@ -154,8 +154,8 @@ Legacy aliases kept for forms saved before 1.0.3: `checkboxes` → checkbox,
 - [ ] paypal, stripe, square, authorize-net
 - [ ] coupon, total (builder preview exists)
 
-> `readme.txt` currently advertises all of these as shipping features. It
-> should be trimmed to the 17 that work before any public release.
+> As of 1.0.3 `readme.txt` documents only the 17 types that render. Add each
+> type back to it as its template lands.
 
 ---
 
@@ -370,7 +370,7 @@ gitignored, so any deploy must run `npm run build`.
 - [ ] Accessibility audit (WCAG 2.1 AA)
 - [ ] Cross-browser testing
 - [x] Align `FORMTURA_VERSION` with `Installer::DB_VERSION` (both 1.0.3)
-- [ ] Trim `readme.txt` to the field types that actually render
+- [x] Trim `readme.txt` to the field types that actually render
 
 ### WordPress.org Submission
 - [ ] Plugin assets (banner, icon, screenshots)

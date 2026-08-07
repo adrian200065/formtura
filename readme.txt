@@ -18,12 +18,12 @@ Formtura is the modern, intuitive, and powerful form builder for WordPress. Crea
 
 * **Beautiful Drag & Drop Builder** - Intuitive interface with real-time preview
 * **Pre-built Templates** - Start quickly with professionally designed form templates
-* **Advanced Field Types** - From basic text fields to complex payment integrations
+* **Seventeen Field Types** - From single line text to file uploads, star ratings and sliders
+* **File Uploads** - Validated, safely stored, and optionally attached to your notification emails
 * **Built-in SMTP** - Ensure reliable email delivery with integrated SMTP configuration
 * **Entry Management** - View, search, and export form submissions
 * **Conditional Logic** - Show or hide fields based on user input
 * **Email Notifications** - Customizable email templates for form submissions
-* **Spam Protection** - Built-in CAPTCHA support
 * **Mobile Responsive** - Forms look great on all devices
 * **Translation Ready** - Fully internationalized and ready for translation
 
@@ -41,32 +41,14 @@ Formtura is the modern, intuitive, and powerful form builder for WordPress. Crea
 * Website / URL
 * HTML
 * Hidden Field
-* CAPTCHA
 
 = Advanced Fields =
 
-* Address
 * Date / Time
 * Password
 * File Upload
-* Camera
-* Layout
-* Repeater
-* Page Break
-* Section Divider
-* Rich Text
-* Content
-* Entry Preview
-* Signature
 * Star Rating
 * Slider
-
-= Pro Features =
-
-* Payment integrations (PayPal, Stripe, Square, Authorize.Net)
-* Marketing integrations (Mailchimp, ConvertKit, etc.)
-* Email logging
-* Priority support
 
 == Installation ==
 
@@ -110,6 +92,7 @@ Yes, you can export entries to CSV format from the Entries page.
 * Fixed email notifications failing to send
 * Renamed the choice fields so they match what they do: "Multiple Choice" accepts one answer, "Checkboxes" accepts several. Existing forms are updated automatically on upgrade
 * Fields with no frontend template no longer disappear from the page without warning
+* The documented field list now covers only the types that render on your site. Types that were listed but never worked have been removed until they ship
 
 = 1.0.0 =
 * Initial release

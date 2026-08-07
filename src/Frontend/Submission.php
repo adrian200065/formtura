@@ -169,7 +169,7 @@ class Submission {
 
 			// File fields arrive in $_FILES and are handled by Uploads, which
 			// runs its own required check.
-			if ( 'file-upload' === ( isset( $field['type'] ) ? $field['type'] : '' ) ) {
+			if ( Uploads::is_file_field( $field ) ) {
 				continue;
 			}
 
@@ -355,7 +355,7 @@ class Submission {
 
 			// File fields arrive in $_FILES and are handled by Uploads, which
 			// runs its own required check.
-			if ( 'file-upload' === ( isset( $field['type'] ) ? $field['type'] : '' ) ) {
+			if ( Uploads::is_file_field( $field ) ) {
 				continue;
 			}
 

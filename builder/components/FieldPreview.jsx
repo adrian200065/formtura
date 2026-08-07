@@ -578,6 +578,16 @@ const FieldPreview = ({ field }) => {
           </div>
         );
 
+      case 'camera':
+        return (
+          <div className="formtura-file-upload-preview">
+            <div className="formtura-file-upload-dropzone">
+              <div className="formtura-file-upload-text">Take a photo or choose an image</div>
+              <div className="formtura-file-upload-size">Images only</div>
+            </div>
+          </div>
+        );
+
       default:
         return (
           <input

@@ -180,6 +180,8 @@ const FormBuilder = ({ formId }) => {
           uploadText: 'Drop a file here or click to upload',
           compactUploadText: 'Choose File',
         };
+      case 'camera':
+        return { ...baseField, label: 'Camera' };
       default:
         return baseField;
     }
@@ -205,6 +207,7 @@ const FormBuilder = ({ formId }) => {
       'rich-text': 'Rich Text',
       'html': 'HTML',
       'file-upload': 'File Upload',
+      'camera': 'Camera',
       'website': 'Website',
       'hidden': 'Hidden Field',
     };

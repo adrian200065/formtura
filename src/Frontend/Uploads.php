@@ -44,6 +44,19 @@ class Uploads {
 	];
 
 	/**
+	 * Whether a field's value arrives in $_FILES and is handled here.
+	 *
+	 * @since 1.0.4
+	 * @param array $field Field configuration.
+	 * @return bool
+	 */
+	public static function is_file_field( $field ) {
+		$type = isset( $field['type'] ) ? $field['type'] : '';
+
+		return in_array( $type, [ 'file-upload', 'camera' ], true );
+	}
+
+	/**
 	 * Process every File Upload field on a form.
 	 *
 	 * @since 1.0.3
@@ -59,7 +72,7 @@ class Uploads {
 		}
 
 		foreach ( $form['fields'] as $field ) {
-			if ( ! isset( $field['type'] ) || 'file-upload' !== $field['type'] ) {
+			if ( ! self::is_file_field( $field ) ) {
 				continue;
 			}
 
@@ -328,6 +341,12 @@ class Uploads {
 	 * @return string[] Lowercased extensions.
 	 */
 	private function get_allowed_extensions( $field ) {
+		// Camera captures photos; the field's own type settings never widen
+		// that to arbitrary files.
+		if ( 'camera' === ( isset( $field['type'] ) ? $field['type'] : '' ) ) {
+			return [ 'jpg', 'jpeg', 'png', 'gif', 'webp' ];
+		}
+
 		$mode = isset( $field['allowedFileTypes'] ) ? $field['allowedFileTypes'] : 'specify';
 
 		if ( 'specify' !== $mode || empty( $field['specifiedTypes'] ) ) {

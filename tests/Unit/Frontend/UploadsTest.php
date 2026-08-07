@@ -281,6 +281,23 @@ class UploadsTest extends TestCase {
 		$this->assertTrue( $ok );
 	}
 
+	public function test_camera_counts_as_a_file_field() {
+		$this->assertTrue( Uploads::is_file_field( [ 'type' => 'camera' ] ) );
+		$this->assertTrue( Uploads::is_file_field( [ 'type' => 'file-upload' ] ) );
+		$this->assertFalse( Uploads::is_file_field( [ 'type' => 'text' ] ) );
+		$this->assertFalse( Uploads::is_file_field( [] ) );
+	}
+
+	public function test_camera_fields_only_allow_images_whatever_the_settings_say() {
+		$extensions = $this->invoke( 'get_allowed_extensions', [ [
+			'type'             => 'camera',
+			'allowedFileTypes' => 'specify',
+			'specifiedTypes'   => 'pdf, docx, exe',
+		] ] );
+
+		$this->assertSame( [ 'jpg', 'jpeg', 'png', 'gif', 'webp' ], $extensions );
+	}
+
 	public function test_email_attachments_only_include_flagged_fields() {
 		$existing = tempnam( sys_get_temp_dir(), 'fta' );
 

@@ -348,6 +348,38 @@ const fieldTypes = [
   },
 ];
 
+/**
+ * Palette types with no frontend template, and what is actually missing.
+ *
+ * These are draggable-looking but unbuildable: placed on a form they render
+ * nothing on the public site (see doc/CHECKLIST.md, "In the palette, no
+ * frontend template"). They are gated the same way the payment gateway types
+ * are - a ClickableField opening an info dialog rather than adding the field -
+ * but the copy deliberately points at no settings screen, because unlike the
+ * gateways there is no setting anywhere that would turn these on.
+ *
+ * One shared dialog rather than the gateways' one-boolean-per-type, since the
+ * only thing that varies is this copy.
+ */
+const unavailableFieldTypes = {
+  repeater: {
+    label: 'Repeater',
+    reason: 'A repeater needs to hold other fields, and the builder cannot place a field inside another field yet. Until it can, a repeater would have nothing to repeat.',
+  },
+  layout: {
+    label: 'Layout',
+    reason: 'Layout rows are part of the multi-page form subsystem, which Formtura does not have yet. To place fields side by side today, use the width classes under a field’s Advanced tab.',
+  },
+  'page-break': {
+    label: 'Page Break',
+    reason: 'A page break needs multi-page forms, which Formtura does not have yet. Every form is a single page for now, so there is nothing to break.',
+  },
+  'entry-preview': {
+    label: 'Entry Preview',
+    reason: 'An entry preview shows a visitor their answers before submitting, which needs the multi-page form subsystem Formtura does not have yet.',
+  },
+};
+
 const DraggableField = ({ type, label, icon: Icon, onAdd }) => {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: `library-${type}`,
@@ -407,6 +439,7 @@ const FieldLibrary = ({
   const [showPayPalDialog, setShowPayPalDialog] = React.useState(false); // PayPal info dialog
   const [showSquareDialog, setShowSquareDialog] = React.useState(false); // Square info dialog
   const [showAuthorizeNetDialog, setShowAuthorizeNetDialog] = React.useState(false); // Authorize.Net info dialog
+  const [unavailableType, setUnavailableType] = React.useState(null); // Palette type with no frontend template
 
   // Get the selected field data
   const field = fields?.find(f => f.id === selectedField);
@@ -570,6 +603,20 @@ const FieldLibrary = ({
                                 label={fieldItem.label}
                                 icon={fieldItem.icon}
                                 onClick={() => setShowAuthorizeNetDialog(true)}
+                              />
+                            );
+                          }
+                          // Types with no frontend template: placing one
+                          // would render nothing on the public site, so say
+                          // what is missing instead of adding the field.
+                          if (unavailableFieldTypes[fieldItem.type]) {
+                            return (
+                              <ClickableField
+                                key={fieldItem.type}
+                                type={fieldItem.type}
+                                label={fieldItem.label}
+                                icon={fieldItem.icon}
+                                onClick={() => setUnavailableType(fieldItem.type)}
                               />
                             );
                           }
@@ -761,6 +808,22 @@ const FieldLibrary = ({
         }
         buttonText="OK"
         onClose={() => setShowAuthorizeNetDialog(false)}
+      />
+
+      {/* No-template Info Dialog (repeater, layout, page-break, entry-preview) */}
+      <InfoDialog
+        isOpen={null !== unavailableType}
+        title="Not available yet"
+        message={
+          <>
+            <p className="formtura-dialog-lead">
+              The {unavailableFieldTypes[unavailableType]?.label} field is not available yet.
+            </p>
+            <p>{unavailableFieldTypes[unavailableType]?.reason}</p>
+          </>
+        }
+        buttonText="OK"
+        onClose={() => setUnavailableType(null)}
       />
     </aside>
   );

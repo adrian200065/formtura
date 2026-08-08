@@ -108,6 +108,49 @@ describe('FieldLibrary required toggle', () => {
   });
 });
 
+// The other half of the same rule: four Advanced palette types have no
+// frontend template at all (doc/CHECKLIST.md documents them as gaps), so an
+// author could place one and ship a form that renders nothing where that field
+// should be. They must be gated exactly like the gateway types above.
+describe('FieldLibrary field types with no frontend template', () => {
+  describe.each([
+    ['Repeater', /cannot place a field inside another field yet/],
+    ['Layout', /multi-page form subsystem/],
+    ['Page Break', /needs multi-page forms/],
+    ['Entry Preview', /multi-page form subsystem/],
+  ])('%s', (label, reason) => {
+    it('is not draggable onto the form canvas', () => {
+      renderPalette();
+
+      expect(screen.queryByRole('button', { name: `Add ${label} field` })).not.toBeInTheDocument();
+    });
+
+    it('opens an info dialog instead of adding the field', () => {
+      const { onFieldAdd } = renderPalette();
+
+      fireEvent.click(screen.getByText(label));
+
+      expect(onFieldAdd).not.toHaveBeenCalled();
+      expect(screen.getByText(`The ${label} field is not available yet.`)).toBeInTheDocument();
+      expect(screen.getByText(reason)).toBeInTheDocument();
+    });
+
+    // The gateway dialogs point at a settings tab because connecting an
+    // account there really does enable them. Nothing enables these four, so
+    // the copy must not send an author looking for a switch.
+    it('does not imply a setting would enable it', () => {
+      renderPalette();
+
+      fireEvent.click(screen.getByText(label));
+
+      const dialog = screen.getByRole('dialog');
+
+      expect(dialog.querySelector('a')).toBeNull();
+      expect(dialog.textContent).not.toMatch(/Settings/);
+    });
+  });
+});
+
 describe('FieldLibrary payment items editor', () => {
   describe.each(['payment-checkbox', 'payment-multiple', 'payment-dropdown'])(
     '%s',

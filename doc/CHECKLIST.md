@@ -147,12 +147,18 @@ Legacy aliases kept for forms saved before 1.0.3: `checkboxes` → checkbox,
 `date` → datetime.
 
 ### In the palette, no frontend template (8)
+
+None of these can be placed on a form: every one of the eight palette entries
+opens an info dialog saying what is missing, rather than adding a field that
+would render nothing on the public site.
+
 - [ ] repeater — blocked on builder nesting support: the builder saves
       `children: []` with no UI to fill it
 - [ ] page-break, entry-preview, layout — blocked on the multi-page
       subsystem, which does not exist
 - [ ] paypal, stripe, square, authorize-net — payment gateway integrations,
-      not templates; their palette entries already open info dialogs
+      not templates; their dialogs point at the payments settings tab, since
+      connecting an account there is what will enable them
 
 `captcha` is not on this list, and is not a gap: it is the 9th type that
 does not render, but protection is form-wide via the reCAPTCHA settings

@@ -220,6 +220,115 @@
 	margin-block-start: var(--fta-form-space-sm);
 }
 
+/* reCAPTCHA */
+.fta-field-recaptcha {
+	margin-block-start: var(--fta-form-space-lg);
+}
+
+/* The widget is a fixed-width iframe; let it shrink rather than overflow. */
+.fta-recaptcha {
+	max-width: 100%;
+	overflow: hidden;
+}
+
+/* Signature */
+.fta-signature-canvas {
+	width: 100%;
+	max-width: 100%;
+	border: 1px solid var(--fta-form-border);
+	border-radius: var(--fta-form-radius);
+	background: var(--fta-form-bg);
+	touch-action: none; /* the pad owns touch gestures */
+	cursor: crosshair;
+	display: block;
+}
+
+.fta-signature-clear {
+	margin-block-start: var(--fta-form-space-sm);
+	background: none;
+	border: none;
+	color: var(--fta-form-focus);
+	cursor: pointer;
+	padding: 0;
+	font-size: var(--fta-form-text-sm);
+}
+
+/* Payments */
+.fta-choice-price {
+	color: hsl(210, 9%, 46%);
+	margin-inline-start: 0.5em;
+}
+
+.fta-total-display {
+	display: flex;
+	justify-content: space-between;
+	font-weight: 600;
+	padding-block: var(--fta-form-space-sm);
+	border-block-start: 1px solid var(--fta-form-border);
+}
+
+.fta-order-summary {
+	width: 100%;
+	border-collapse: collapse;
+	margin-block-end: var(--fta-form-space-sm);
+}
+
+.fta-order-summary td,
+.fta-order-summary th {
+	text-align: start;
+	padding-block: 0.25em;
+}
+
+/* Coupon
+   The code input and its Apply control sit on one line. Apply borrows the
+   neutral surface the compact upload label already uses rather than the
+   submit button's accent, so it cannot be mistaken for the submit button. */
+.fta-coupon {
+	display: flex;
+	align-items: center;
+	gap: var(--fta-form-space-sm);
+}
+
+.fta-coupon-input {
+	flex: 1 1 auto;
+	/* Inputs have a default intrinsic width; without this the flex item
+	   refuses to shrink and the button is pushed out of a narrow form. */
+	min-inline-size: 0;
+}
+
+.fta-coupon-apply {
+	flex: 0 0 auto;
+	color: var(--fta-form-text);
+	background-color: hsl(220, 14%, 96%);
+	font-family: inherit;
+	font-size: var(--fta-form-text-sm);
+	padding-block: var(--fta-form-space-sm);
+	padding-inline: var(--fta-form-space-md);
+	border: 1px solid var(--fta-form-border);
+	border-radius: var(--fta-form-radius);
+	transition: background-color 150ms ease, border-color 150ms ease;
+	cursor: pointer;
+}
+
+.fta-coupon-apply:hover {
+	background-color: hsl(220, 14%, 92%);
+	border-color: var(--fta-form-focus);
+}
+
+/* frontend.js disables the button for the duration of the AJAX check. */
+.fta-coupon-apply:disabled {
+	opacity: .6;
+	cursor: not-allowed;
+}
+
+/* Empty until Apply reports back, so it must not reserve space before then. */
+.fta-coupon-status:not(:empty) {
+	color: var(--fta-form-text);
+	font-size: var(--fta-form-text-sm);
+	display: block;
+	margin-block-start: var(--fta-form-space-sm);
+}
+
 /* Submit Button */
 .fta-form-footer {
 	margin-block-start: var(--fta-form-space-xl);
@@ -304,6 +413,7 @@
 
 /* File Upload */
 .fta-file-upload {
+	position: relative;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -338,6 +448,13 @@
 	clip: rect(0, 0, 0, 0);
 	white-space: nowrap;
 	border: 0;
+}
+
+/* Ensure child elements don't block label click */
+.fta-file-upload-icon,
+.fta-file-upload-text,
+.fta-file-upload-info {
+	pointer-events: none;
 }
 
 .fta-file-upload-icon {
@@ -401,6 +518,7 @@
 
 /* Compact File Upload */
 .fta-file-upload-compact {
+	position: relative;
 	display: flex;
 	align-items: center;
 	gap: var(--fta-form-space-sm);
@@ -458,4 +576,203 @@
 		animation-iteration-count: 1 !important;
 		transition-duration: .01ms !important;
 	}
+}
+
+/* Fieldset Reset
+   Choice-based fields group their inputs in a fieldset for screen readers;
+   browsers ship opinionated defaults that must be cleared. */
+.fta-field-fieldset {
+	border: 0;
+	margin: 0;
+	padding: 0;
+	min-inline-size: 0;
+}
+
+.fta-field-fieldset > .fta-field-label {
+	display: block;
+	padding: 0;
+}
+
+/* Choice Layouts */
+.fta-choices-inline .fta-field-choices {
+	flex-direction: row;
+	flex-wrap: wrap;
+	column-gap: var(--fta-form-space-lg);
+}
+
+.fta-choices-two-columns .fta-field-choices,
+.fta-choices-three-columns .fta-field-choices {
+	display: grid;
+	column-gap: var(--fta-form-space-lg);
+}
+
+.fta-choices-two-columns .fta-field-choices {
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.fta-choices-three-columns .fta-field-choices {
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media (max-width: 600px) {
+	.fta-choices-two-columns .fta-field-choices,
+	.fta-choices-three-columns .fta-field-choices {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}
+
+/* Multi-select */
+.fta-field-select select[multiple] {
+	padding: var(--fta-form-space-sm);
+}
+
+/* Name Field */
+.fta-name-group {
+	display: grid;
+	gap: var(--fta-form-space-md);
+}
+
+.fta-name-group-2 {
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.fta-name-group-3 {
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media (max-width: 600px) {
+	.fta-name-group-2,
+	.fta-name-group-3 {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}
+
+.fta-name-sublabel {
+	display: block;
+	margin-block-start: calc(var(--fta-form-space-sm) / 2);
+	color: var(--fta-form-text);
+	font-size: var(--fta-form-text-sm);
+	opacity: .7;
+}
+
+/* Address Field
+   One grid row per row in the template: line 1 and line 2 full width, then
+   city/state and zip/country paired. Collapses to a single column at the same
+   width the name field's grid does, so two composite fields on one form never
+   disagree about when they stack. */
+.fta-address-row {
+	display: grid;
+	gap: var(--fta-form-space-md);
+}
+
+.fta-address-row + .fta-address-row {
+	margin-block-start: var(--fta-form-space-md);
+}
+
+.fta-address-row-2 {
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/* A long region or country name must not push the row wider than the form. */
+.fta-address-part {
+	min-inline-size: 0;
+}
+
+.fta-address-sublabel {
+	display: block;
+	margin-block-start: calc(var(--fta-form-space-sm) / 2);
+	color: var(--fta-form-text);
+	font-size: var(--fta-form-text-sm);
+	opacity: .7;
+}
+
+@media (max-width: 600px) {
+	.fta-address-row-2 {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}
+
+/* Section Divider
+   A heading plus a rule, deliberately quiet: themes style their own headings,
+   and this one only needs to read as a break between groups of fields. */
+.fta-section-title {
+	color: var(--fta-form-text);
+	font-size: var(--fta-form-text-lg);
+	font-weight: 600;
+	margin-block: 0 var(--fta-form-space-sm);
+}
+
+.fta-section-rule {
+	block-size: 0;
+	margin-block: var(--fta-form-space-md) 0;
+	border: 0;
+	border-block-start: 1px solid var(--fta-form-border);
+}
+
+/* Slider Field */
+.fta-slider-container {
+	display: flex;
+	align-items: center;
+	gap: var(--fta-form-space-md);
+}
+
+.fta-field-slider {
+	flex: 1 1 auto;
+	accent-color: var(--fta-form-focus);
+	inline-size: 100%;
+	cursor: pointer;
+}
+
+.fta-slider-value {
+	flex: 0 0 auto;
+	color: var(--fta-form-text);
+	font-size: var(--fta-form-text-sm);
+	white-space: nowrap;
+}
+
+/* Star Rating
+   Painted with a reversed flex row so plain CSS sibling selectors can
+   highlight every star up to the one hovered or checked. */
+.fta-rating-stars {
+	display: flex;
+	flex-direction: row-reverse;
+	justify-content: flex-end;
+	gap: .125rem;
+}
+
+.fta-rating-input {
+	position: absolute;
+	inline-size: 1px;
+	block-size: 1px;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+}
+
+.fta-rating-star {
+	color: var(--fta-form-border);
+	font-size: 1.75rem;
+	line-height: 1;
+	cursor: pointer;
+	transition: color .15s ease;
+}
+
+.fta-rating-input:checked ~ .fta-rating-star,
+.fta-rating-star:hover,
+.fta-rating-star:hover ~ .fta-rating-star {
+	color: hsl(45, 93%, 47%);
+}
+
+.fta-rating-input:focus-visible + .fta-rating-star {
+	outline: 2px solid var(--fta-form-focus);
+	outline-offset: 2px;
+}
+
+/* Administrator notice for a field type with no frontend template */
+.fta-field-missing {
+	border: 1px dashed var(--fta-form-error);
+	border-radius: var(--fta-form-radius);
+	padding: var(--fta-form-space-md);
+	color: var(--fta-form-error);
+	font-size: var(--fta-form-text-sm);
 }

@@ -1,282 +1,93 @@
-/* Toast Notifications */
 .formtura-toast-container {
   position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 10000;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  max-width: 400px;
+  inset-block-start: var(--space-4);
+  inset-inline-end: var(--space-4);
+  z-index: var(--layer-modal);
+  inline-size: min(24rem, calc(100% - var(--space-8)));
+  display: grid;
+  gap: var(--space-2);
+  pointer-events: none;
 }
 
 .formtura-toast {
-  display: flex;
+  color: var(--text-main);
+  background: var(--bg-card);
+  display: grid;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  background: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  border-left: 4px solid #3b82f6;
-  animation: slideIn 0.3s ease-out;
-  min-width: 300px;
-  max-width: 100%;
+  gap: var(--space-3);
+  padding-block: var(--space-3);
+  padding-inline: var(--space-4);
+  border: 1px solid var(--border-light);
+  border-inline-start: 0.25rem solid var(--focus);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  pointer-events: auto;
+  animation: formtura-toast-in var(--transition-base) both;
 }
 
-@keyframes slideIn {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
-.formtura-toast-icon {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.formtura-toast-message {
-  flex: 1;
-  font-size: 14px;
-  line-height: 1.5;
-  color: #1f2937;
-}
-
-.formtura-toast-close {
-  flex-shrink: 0;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #6b7280;
-  border-radius: 4px;
-  transition: background-color 0.2s;
-}
-
-.formtura-toast-close:hover {
-  background-color: #f3f4f6;
-  color: #1f2937;
-}
-
-.formtura-toast-close:focus {
-  outline: 2px solid #3b82f6;
-  outline-offset: 2px;
-}
-
-/* Toast Types */
 .formtura-toast-success {
-  border-left-color: #10b981;
-}
-
-.formtura-toast-success .formtura-toast-icon {
-  color: #10b981;
+  border-inline-start-color: var(--color-primary);
 }
 
 .formtura-toast-error {
-  border-left-color: #ef4444;
+  border-inline-start-color: var(--error);
+}
+
+.formtura-toast-warning,
+.formtura-toast-info {
+  border-inline-start-color: var(--focus);
+}
+
+.formtura-toast-success .formtura-toast-icon {
+  color: var(--color-primary-hover);
 }
 
 .formtura-toast-error .formtura-toast-icon {
-  color: #ef4444;
+  color: var(--error);
 }
 
-.formtura-toast-warning {
-  border-left-color: #f59e0b;
-}
-
-.formtura-toast-warning .formtura-toast-icon {
-  color: #f59e0b;
-}
-
-.formtura-toast-info {
-  border-left-color: #3b82f6;
-}
-
+.formtura-toast-warning .formtura-toast-icon,
 .formtura-toast-info .formtura-toast-icon {
-  color: #3b82f6;
+  color: var(--focus);
 }
 
-/* Responsive */
-@media (max-width: 640px) {
-  .formtura-toast-container {
-    left: 20px;
-    right: 20px;
-    max-width: none;
-  }
-
-  .formtura-toast {
-    min-width: auto;
-  }
+.formtura-toast-icon {
+  display: grid;
+  place-items: center;
 }
 
-/* Confirm Dialog */
-.formtura-confirm-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 100000;
-  animation: fadeIn 0.15s ease-out;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-.formtura-confirm-dialog {
-  background: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  padding: 24px;
-  max-width: 400px;
-  width: 90%;
-  text-align: center;
-  animation: scaleIn 0.2s ease-out;
-  border-top: 4px solid var(--fta-builder-primary, hsl(356, 91%, 56%));
-}
-
-@keyframes scaleIn {
-  from {
-    transform: scale(0.95);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-.formtura-confirm-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 16px;
-}
-
-.formtura-confirm-content {
-  margin-bottom: 24px;
-}
-
-.formtura-confirm-title {
-  font-size: 18px;
+.formtura-toast-message {
+  font-size: var(--text-sm);
   font-weight: 600;
-  color: #1f2937;
-  margin: 0 0 8px 0;
 }
 
-.formtura-confirm-message {
-  font-size: 14px;
-  color: #6b7280;
-  margin: 0;
-  line-height: 1.5;
-}
-
-.formtura-confirm-actions {
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-}
-
-.formtura-confirm-btn {
-  padding: 10px 24px;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 500;
+.formtura-toast-close {
+  color: var(--text-muted);
+  background: transparent;
+  inline-size: 2rem;
+  block-size: 2rem;
+  display: grid;
+  place-items: center;
+  padding: var(--space-0);
+  border: 0;
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: all 0.2s ease;
-  border: 1px solid transparent;
-  min-width: 100px;
 }
 
-.formtura-confirm-btn:focus {
-  outline: 2px solid var(--fta-builder-primary, hsl(356, 91%, 56%));
-  outline-offset: 2px;
+.formtura-toast-close:hover {
+  color: var(--text-main);
+  background: var(--surface-subtle);
 }
 
-.formtura-confirm-btn-primary {
-  background: var(--fta-builder-primary, hsl(356, 91%, 56%));
-  color: #ffffff;
-  border-color: var(--fta-builder-primary, hsl(356, 91%, 56%));
-}
-
-.formtura-confirm-btn-primary:hover {
-  background: var(--fta-builder-primary-hover, hsl(356, 91%, 46%));
-  border-color: var(--fta-builder-primary-hover, hsl(356, 91%, 46%));
-}
-
-.formtura-confirm-btn-secondary {
-  background: #ffffff;
-  color: #374151;
-  border-color: #d1d5db;
-}
-
-.formtura-confirm-btn-secondary:hover {
-  background: #f9fafb;
-  border-color: #9ca3af;
-}
-
-/* Responsive */
-@media (max-width: 480px) {
-  .formtura-confirm-dialog {
-    padding: 20px;
+@keyframes formtura-toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(1rem);
   }
 
-  .formtura-confirm-actions {
-    flex-direction: column;
+  to {
+    opacity: 1;
+    transform: translateX(0);
   }
-
-  .formtura-confirm-btn {
-    width: 100%;
-  }
-}
-
-/* Info Dialog - single button variant */
-.formtura-info-dialog .formtura-confirm-message {
-  text-align: center;
-}
-
-.formtura-info-dialog .formtura-confirm-message a {
-  color: var(--fta-builder-primary, hsl(356, 91%, 56%));
-  text-decoration: underline;
-  font-weight: 500;
-}
-
-.formtura-info-dialog .formtura-confirm-message a:hover {
-  color: var(--fta-builder-primary-hover, hsl(356, 91%, 46%));
-}
-
-/* Clickable field items (non-draggable) */
-.formtura-field-item-clickable {
-  cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease;
-}
-
-.formtura-field-item-clickable:hover {
-  background-color: var(--fta-builder-field-dark-blue, hsl(216, 46%, 35%));
-  color: #ffffff;
-}
-
-.formtura-field-item-clickable:hover .formtura-field-icon {
-  color: #ffffff;
-}
-
-.formtura-field-item-clickable:hover .formtura-field-label {
-  color: #ffffff;
 }

@@ -45,9 +45,10 @@
 - [x] Frontend.php - Frontend controller
 - [x] Submission.php - Form submission handler
 - [x] Notifications.php - Email notifications
+- [x] Uploads.php - File upload validation and storage
 
 ### Database Classes
-- [x] Installer.php - Database installer
+- [x] Installer.php - Database installer, upgrade routine and migrations
 - [x] Forms_DB.php - Forms CRUD
 - [x] Entries_DB.php - Entries CRUD
 
@@ -70,14 +71,16 @@
 
 ### Templates
 - [x] form-wrapper.php - Main form template
-- [x] fields/text.php - Text field template
-- [x] fields/email.php - Email field template
-- [x] fields/textarea.php - Textarea field template
 - [x] email/notification.php - Email template
+- [x] fields/ - 29 field templates plus 2 legacy aliases (see Field Type Coverage)
 
 ### Admin Views
 - [x] views/forms-list.php - Forms list page
 - [x] views/templates-library.php - Templates page
+- [x] views/entries-list.php - Entries page
+- [x] views/settings.php - Settings page
+- [x] views/smtp-settings.php - SMTP page
+- [x] views/form-builder.php - Builder mount point
 
 ### Translation
 - [x] languages/formtura.pot - Translation template
@@ -85,7 +88,7 @@
 ### Dependencies
 - [x] Composer autoloader configured
 - [x] Composer dependencies installed
-- [x] npm package.json created
+- [x] pnpm package.json created (migrated from npm)
 
 ---
 
@@ -101,19 +104,7 @@
 - [x] Implement save/load functionality
 - [ ] Add undo/redo functionality
 - [x] Create empty state component
-- [ ] Add form preview mode
-
-### Field Components
-- [x] Text field component
-- [x] Email field component
-- [x] Textarea field component
-- [x] Number field component
-- [x] Select field component
-- [x] Radio field component
-- [x] Checkbox field component
-- [x] Name field component
-- [ ] File upload component
-- [x] Date/time component
+- [x] Add form preview mode (FormPreview.jsx)
 
 ### Builder Features
 - [x] Field drag and drop
@@ -121,15 +112,65 @@
 - [x] Field duplication
 - [x] Field deletion
 - [x] Field settings panel
-- [ ] Conditional logic builder
+- [x] Conditional logic builder — UI, persistence and frontend evaluation
+      are wired end to end; not yet verified in a browser
 - [ ] Validation rules UI
 - [x] Form settings panel
-- [ ] Notification settings
+- [ ] Notification settings (only the per-field "attach to email" toggle exists)
 - [ ] Integration settings
 
 ---
 
-## ⏳ Phase 3: Advanced Features (PENDING)
+## 🟡 Field Type Coverage
+
+The builder palette offers **38 field types**. **29 render on the
+frontend**. Of the other 9: 8 are genuine gaps blocked on missing
+subsystems (a form using one renders nothing on the public site), and 1
+(`captcha`) needs no template - it is complete by design, see below.
+
+Since 1.0.3 a missing template is logged, and shown inline to administrators
+when `WP_DEBUG` is on, rather than failing silently.
+
+### Rendering end to end (29)
+- [x] text, textarea, name, email, select, radio, checkbox
+- [x] number, phone, website, html, hidden
+- [x] datetime, password, file-upload, rating, number-slider
+- [x] content, section-divider, rich-text, address, camera, signature
+- [x] payment-single, payment-checkbox, payment-multiple, payment-dropdown
+- [x] coupon, total
+
+Payment amounts (`payment-single`/`-checkbox`/`-multiple`/`-dropdown`,
+`coupon`, `total`) are **recorded with the entry**; no payment is collected,
+since no gateway integration exists yet.
+
+Legacy aliases kept for forms saved before 1.0.3: `checkboxes` → checkbox,
+`date` → datetime.
+
+### In the palette, no frontend template (8)
+
+None of these can be placed on a form: every one of the eight palette entries
+opens an info dialog saying what is missing, rather than adding a field that
+would render nothing on the public site.
+
+- [ ] repeater — blocked on builder nesting support: the builder saves
+      `children: []` with no UI to fill it
+- [ ] page-break, entry-preview, layout — blocked on the multi-page
+      subsystem, which does not exist
+- [ ] paypal, stripe, square, authorize-net — payment gateway integrations,
+      not templates; their dialogs point at the payments settings tab, since
+      connecting an account there is what will enable them
+
+`captcha` is not on this list, and is not a gap: it is the 9th type that
+does not render, but protection is form-wide via the reCAPTCHA settings
+(1.0.4), and its palette item opens an info dialog by design rather than
+needing a per-field template.
+
+> `readme.txt` documents the 29 types that render. Add each remaining type
+> to it as its template lands.
+
+---
+
+## ⏳ Phase 3: Advanced Features (IN PROGRESS)
 
 ### Form Features
 - [ ] Multi-page forms
@@ -138,10 +179,22 @@
 - [ ] Form scheduling
 - [ ] Entry limits
 - [ ] Geolocation
-- [ ] Calculations
-- [ ] Signature field
-- [ ] Rating field
+- [~] Calculations — number field emits `data-calculation` and frontend.js
+      evaluates it; no builder UI for formulas beyond a text input
+- [x] Signature field
+- [x] Rating field
 - [ ] Likert scale
+
+### File Uploads
+- [x] Upload field in the builder
+- [x] Frontend template (dropzone and compact styles)
+- [x] Server-side validation (size, extension, contents/extension match)
+- [x] Hard block list for executable and browser-executable types
+- [x] Storage under uploads/formtura with randomised names and .htaccess guard
+- [x] Attach uploads to email notifications
+- [ ] Delete stored files when an entry is deleted
+- [ ] Admin UI to download or remove a submitted file
+- [ ] `deleteOnReplace` and `autoResize` field options are saved but unused
 
 ### Payment Integration
 - [ ] PayPal integration
@@ -174,10 +227,10 @@
 ## ⏳ Phase 4: Pro Features (PENDING)
 
 ### Advanced Fields
-- [ ] Phone field with validation
+- [~] Phone field — renders as `tel`, but there is no server-side validation
 - [ ] Address field with autocomplete
-- [ ] Password field with strength meter
-- [ ] Hidden field
+- [~] Password field — renders, but no strength meter
+- [x] Hidden field
 - [ ] Camera/photo capture
 - [ ] Layout fields (columns, sections)
 - [ ] Repeater field
@@ -192,13 +245,13 @@
 - [ ] Form templates marketplace
 - [ ] Import/export forms
 - [ ] Form versioning
-- [ ] Form cloning
+- [x] Form cloning (ajax_duplicate_form)
 - [ ] Bulk actions
 
 ### Developer Features
 - [ ] REST API
 - [ ] Webhooks
-- [ ] Custom field types API
+- [ ] Custom field types API (`fta_field_types` filter exists)
 - [ ] Custom integrations API
 - [ ] Developer documentation
 - [ ] Code examples
@@ -215,19 +268,34 @@
 
 ## 🧪 Testing (ONGOING)
 
+The PHP suite did not run at all before 1.0.3: `tests/bootstrap.php` loaded the
+Composer autoloader before defining `ABSPATH`, and the `files` autoload of
+`Functions.php` hit its exit guard, ending the process silently with status 0.
+
+**Current: 103 PHP tests / 210 assertions, 46 JS tests. All passing.**
+
+```bash
+php vendor/bin/phpunit      # PHP
+npx jest                    # JavaScript
+npm run build               # Production bundle
+```
+
 ### Unit Tests
 - [ ] Core class tests
-- [ ] Database class tests
-- [ ] Sanitization tests
-- [ ] Validation tests
-- [ ] Integration tests
+- [~] Database class tests — field type migration covered (MigrationTest)
+- [x] Sanitization tests (SanitizeTest)
+- [~] Validation tests — upload validation covered (UploadsTest); field and
+      submission validation not yet
+- [x] Field template rendering (FieldTemplateTest, all 18 types)
 
 ### Integration Tests
-- [ ] Form submission tests
+- [ ] Form submission tests (needs a live WordPress)
 - [ ] Email notification tests
 - [ ] SMTP tests
 - [ ] Payment tests
 - [ ] API tests
+- [ ] `wp_handle_upload()` move-to-disk step (needs a live WordPress)
+- [ ] The `$wpdb` loop in `migrate_choice_field_types()` (needs a live WordPress)
 
 ### Browser Testing
 - [ ] Chrome
@@ -238,10 +306,108 @@
 
 ### WordPress Compatibility
 - [ ] WordPress 5.8+
-- [ ] PHP 7.4+
+- [ ] PHP 7.4+ (declared minimum)
 - [ ] PHP 8.0+
-- [ ] PHP 8.1+
+- [ ] PHP 8.1+ (developed against PHP 8.4)
 - [ ] Multisite compatibility
+
+---
+
+## 🔧 Recently Fixed (1.0.3)
+
+Bugs found while building out the field templates and upload handling. Each
+was load-bearing enough to keep a core feature from working at all.
+
+- **Submissions never reached the handler.** `Core::init_components()` built
+  the frontend only when `! is_admin()`, but `admin-ajax.php` sets
+  `is_admin()` to true, so `wp_ajax_fta_submit_form` was never registered on
+  the request that submits a form.
+- **Submissions saved nothing.** The builder never set a field `name` and the
+  sanitizer never persisted one, so validation and storage both looked up
+  `$submission['']`. Required validation was bypassed for every field and each
+  entry was stored under a single empty key. The field id is now the
+  submission key via `fta_get_field_name()`.
+- **`parse_smart_tags()` called `get_blogname()`**, which is not a WordPress
+  function — a fatal on every notification, masked by the above.
+- **Missing field templates failed silently**, rendering nothing at all.
+- **Choice field slugs disagreed across three sources.** `radio` is now
+  Multiple Choice (single answer) and `checkbox` is Checkboxes (multiple),
+  matching what `fta_get_field_types()` always declared. Saved forms are
+  migrated by `Installer::migrate_choice_field_types()`.
+- **`Installer::maybe_update()` was never called**, so there was no upgrade
+  path. Now runs on `plugins_loaded`.
+- Removed `FieldSettings.jsx` (1,003 lines, imported nowhere).
+
+### Migration caution
+
+`Installer::migrate_field_types()` is **not idempotent** — a migrated
+`checkbox` is indistinguishable from a legacy one, so a second pass would
+wrongly produce `radio`. Migrated form ids are recorded in the
+`fta_migrated_choice_types` option so an interrupted run resumes safely.
+**Back up the database before upgrading a site with existing forms.**
+
+---
+
+## 🔧 Recently Fixed (unreleased, after 1.0.3)
+
+Found while adding the 12 field types. Each kept something from working at
+all, and each was invisible to the tests that existed at the time.
+
+- **The builder's save path silently discarded field settings.**
+  `Form_Builder::sanitize_field_data()` is a strict key allowlist, and it had
+  no branch for `coupons`, `items`, `price`, `showPriceAfterLabels`,
+  `enableSummary`, `scheme` or `compactUploadText` — so every payment price,
+  coupon code and address scheme an author configured was thrown away on
+  save. The file-upload panel's seven settings (`maxFileSize`,
+  `allowedFileTypes`, `attachToEmail` and four more) had been discarded the
+  same way since 1.0.3. Nothing compared the builder's keys against the
+  sanitizer's, so each feature's own tests passed while the feature was dead.
+  Guarded now by a two-part test: `FormBuilderSanitizeTest` asserts the
+  sanitizer preserves each setting, and `builderFieldSettings.test.jsx`
+  asserts the builder actually produces it, both reading
+  `tests/fixtures/builder-field-settings.json`.
+- **The Content and HTML blocks rendered nothing.** Their editors wrote
+  `description` while their templates read `content`.
+- **A required Total field blocked every submission**, unclearably: `total`
+  renders no input, but was not in `is_presentational_field()`.
+- **reCAPTCHA rejected every submission once configured.** No token was ever
+  generated — v2 rendered no widget and v3 never called `execute()` — while
+  the server gated on the secret key alone.
+- **A rejected submission left files on disk** on three separate paths
+  (signature failure after uploads, a peer signature failure, and a failed
+  entry write).
+- **`authorize-net` was draggable with no template**, silently rendering
+  nothing; now gated behind an info dialog like its siblings.
+
+## 📌 Known follow-ups (not blocking)
+
+Triaged during the final review of the field-type cycle. None stops a
+feature working.
+
+- `Uploads::get_email_attachments()` matches the literal `'file-upload'`
+  type, so camera photos and signatures are never attached to notification
+  emails. Latent: the builder only offers `attachToEmail` for file uploads.
+- `camera`'s `compactUploadText` is read by its template but has no builder
+  control, so the trigger always reads "Take Photo".
+- The `_payment` entry array reaches `implode()` in
+  `views/entries-list.php`, warning in the admin preview.
+- 21 builder-only settings are still dropped by the save allowlist (the
+  repeater panel, `enableQuantity`, `autoResize`, rating's `unique` and
+  more). None is read by any renderer, so no feature is dead — but the
+  toggles silently revert on reload.
+- `items[]` prices are unrounded and the discount is not itemized, so the
+  breakdown need not sum to `amount`; and with several coupon fields the
+  last valid code silently wins. Both matter once a gateway exists.
+- On a form saved before the Content/HTML fix, clearing the block falls back
+  to the old `description` and cannot be cleared without deleting the field.
+  Fix: have those editors write `description: ''` alongside `content`.
+- A payment item inside a conditionally-hidden field still counts toward the
+  total. Hidden fields are hidden, not disabled, and the server agrees with
+  the display — plugin-wide behaviour, not specific to payments.
+- `minValue`/`maxValue`/`increment` use bare `floatval()` without the
+  `is_numeric()` guard the money fields now use.
+- `FormPreview.jsx` (the preview modal) renders a plain text input for 11 of
+  the 12 new types.
 
 ---
 
@@ -267,6 +433,9 @@
 
 ## 🚀 Deployment (PENDING)
 
+Build artifacts (`assets/js/builder.js`, `assets/css/builder.css`) are
+gitignored, so any deploy must run `npm run build`.
+
 ### Pre-launch
 - [ ] Security audit
 - [ ] Performance optimization
@@ -274,6 +443,8 @@
 - [ ] Translation strings review
 - [ ] Accessibility audit (WCAG 2.1 AA)
 - [ ] Cross-browser testing
+- [x] Align `FORMTURA_VERSION` with `Installer::DB_VERSION` (both 1.0.3)
+- [x] Trim `readme.txt` to the field types that actually render
 
 ### WordPress.org Submission
 - [ ] Plugin assets (banner, icon, screenshots)
@@ -293,15 +464,24 @@
 
 ## 📊 Progress Summary
 
-**Phase 1 (Scaffolding):** ✅ 100% Complete (20/20 tasks)  
-**Phase 2 (Builder UI):** ✅ 80% Complete (24/30 tasks)  
-**Phase 3 (Advanced):** ⏳ 0% Complete (0/40 tasks)  
-**Phase 4 (Pro):** ⏳ 0% Complete (0/25 tasks)  
+**Phase 1 (Scaffolding):** ✅ Complete
+**Phase 2 (Builder UI):** ✅ Complete — undo/redo, validation rules UI and
+notification/integration settings still open
+**Field type coverage:** 🔴 17 of 38 palette types render on the frontend
+**Phase 3 (Advanced):** ⏳ File uploads done; payments, marketing and
+analytics not started
+**Phase 4 (Pro):** ⏳ Not started
 
-**Overall Progress:** 38% (44/115 major tasks)
+### Suggested next steps
+1. Templates for the remaining palette types, or remove the ones that are not
+   close to shipping from the palette and `readme.txt`.
+2. Browser verification of conditional logic and calculations — both are wired
+   but have never been exercised against a real form.
+3. Delete stored upload files when their entry is deleted.
+4. Form submission integration tests against a live WordPress.
 
 ---
 
-**Last Updated:** November 4, 2025  
-**Current Version:** 1.0.0-beta  
-**Status:** React Form Builder Complete, Ready for Testing
+**Last Updated:** August 7, 2026
+**Plugin Version:** 1.0.3 (DB schema 1.0.3)
+**Status:** Builder complete; frontend rendering covers 17 of 38 field types

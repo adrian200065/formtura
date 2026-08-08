@@ -174,6 +174,43 @@ function fta_get_smtp_setting( $key = '', $default = null ) {
 }
 
 /**
+ * Get the reCAPTCHA configuration.
+ *
+ * Single source of truth for whether reCAPTCHA is active. Both halves of the
+ * flow have to agree: without a site key the browser cannot mint a token, and
+ * without a secret key the server cannot verify one. Enabling on either key
+ * alone leaves the form unsubmittable, so both are required.
+ *
+ * @since 1.0.4
+ * @return array {
+ *     @type bool   $enabled         Whether reCAPTCHA should be applied.
+ *     @type string $site_key        Public site key.
+ *     @type string $secret_key      Private secret key.
+ *     @type string $version         Either 'v2' or 'v3'.
+ *     @type string $action          Action name submitted with v3 tokens.
+ *     @type float  $score_threshold Minimum accepted v3 score, 0.0-1.0.
+ * }
+ */
+function fta_get_recaptcha_config() {
+	$site_key   = trim( (string) fta_get_setting( 'recaptcha_site_key', '' ) );
+	$secret_key = trim( (string) fta_get_setting( 'recaptcha_secret_key', '' ) );
+	$version    = 'v3' === fta_get_setting( 'recaptcha_version', 'v2' ) ? 'v3' : 'v2';
+
+	$threshold = fta_get_setting( 'recaptcha_score_threshold', 0.5 );
+	$threshold = is_numeric( $threshold ) ? (float) $threshold : 0.5;
+	$threshold = max( 0.0, min( 1.0, $threshold ) );
+
+	return [
+		'enabled'         => '' !== $site_key && '' !== $secret_key,
+		'site_key'        => $site_key,
+		'secret_key'      => $secret_key,
+		'version'         => $version,
+		'action'          => 'formtura_submit',
+		'score_threshold' => $threshold,
+	];
+}
+
+/**
  * Sanitize form field data.
  *
  * @since 1.0.0
@@ -250,6 +287,7 @@ function fta_render_form( $form_id, $args = [] ) {
  */
 function fta_get_field_types() {
 	return apply_filters( 'fta_field_types', [
+		// Standard Fields
 		'text' => [
 			'label'     => __( 'Single Line Text', FORMTURA_TEXTDOMAIN ),
 			'icon'      => 'text',
@@ -260,14 +298,14 @@ function fta_get_field_types() {
 			'icon'      => 'align-left',
 			'category'  => 'standard',
 		],
+		'name' => [
+			'label'     => __( 'Name', FORMTURA_TEXTDOMAIN ),
+			'icon'      => 'user',
+			'category'  => 'standard',
+		],
 		'email' => [
 			'label'     => __( 'Email', FORMTURA_TEXTDOMAIN ),
 			'icon'      => 'mail',
-			'category'  => 'standard',
-		],
-		'number' => [
-			'label'     => __( 'Number', FORMTURA_TEXTDOMAIN ),
-			'icon'      => 'hash',
 			'category'  => 'standard',
 		],
 		'select' => [
@@ -285,12 +323,391 @@ function fta_get_field_types() {
 			'icon'      => 'check-square',
 			'category'  => 'standard',
 		],
-		'name' => [
-			'label'     => __( 'Name', FORMTURA_TEXTDOMAIN ),
-			'icon'      => 'user',
+		'number' => [
+			'label'     => __( 'Number', FORMTURA_TEXTDOMAIN ),
+			'icon'      => 'hash',
 			'category'  => 'standard',
 		],
+		'phone' => [
+			'label'     => __( 'Phone', FORMTURA_TEXTDOMAIN ),
+			'icon'      => 'phone',
+			'category'  => 'standard',
+		],
+		'website' => [
+			'label'     => __( 'Website / URL', FORMTURA_TEXTDOMAIN ),
+			'icon'      => 'globe',
+			'category'  => 'standard',
+		],
+		'html' => [
+			'label'     => __( 'HTML', FORMTURA_TEXTDOMAIN ),
+			'icon'      => 'code',
+			'category'  => 'standard',
+		],
+		'hidden' => [
+			'label'     => __( 'Hidden Field', FORMTURA_TEXTDOMAIN ),
+			'icon'      => 'eye-off',
+			'category'  => 'standard',
+		],
+		'captcha' => [
+			'label'     => __( 'CAPTCHA', FORMTURA_TEXTDOMAIN ),
+			'icon'      => 'lock',
+			'category'  => 'standard',
+		],
+		// Advanced Fields
+		'address' => [
+			'label'     => __( 'Address', FORMTURA_TEXTDOMAIN ),
+			'icon'      => 'map-pin',
+			'category'  => 'advanced',
+		],
+		'datetime' => [
+			'label'     => __( 'Date / Time', FORMTURA_TEXTDOMAIN ),
+			'icon'      => 'calendar',
+			'category'  => 'advanced',
+		],
+		'password' => [
+			'label'     => __( 'Password', FORMTURA_TEXTDOMAIN ),
+			'icon'      => 'lock',
+			'category'  => 'advanced',
+		],
+		'file-upload' => [
+			'label'     => __( 'File Upload', FORMTURA_TEXTDOMAIN ),
+			'icon'      => 'upload',
+			'category'  => 'advanced',
+		],
+		'number-slider' => [
+			'label'     => __( 'Slider', FORMTURA_TEXTDOMAIN ),
+			'icon'      => 'trending-up',
+			'category'  => 'advanced',
+		],
+		'rating' => [
+			'label'     => __( 'Star Rating', FORMTURA_TEXTDOMAIN ),
+			'icon'      => 'star',
+			'category'  => 'advanced',
+		],
+		'repeater' => [
+			'label'     => __( 'Repeater', FORMTURA_TEXTDOMAIN ),
+			'icon'      => 'repeat',
+			'category'  => 'advanced',
+		],
+		'signature' => [
+			'label'     => __( 'Signature', FORMTURA_TEXTDOMAIN ),
+			'icon'      => 'pen-tool',
+			'category'  => 'advanced',
+		],
 	] );
+}
+
+/**
+ * Get the submission key for a field.
+ *
+ * This is the single source of truth for a field's `name` attribute. The React
+ * builder identifies fields by `id` only and never assigns a separate `name`,
+ * so the id doubles as the submission key. Templates and the submission handler
+ * must both go through this helper or submitted values will not line up with
+ * the saved field definitions.
+ *
+ * @since 1.0.3
+ * @param array $field Field configuration.
+ * @return string Field submission key.
+ */
+function fta_get_field_name( $field ) {
+	if ( ! empty( $field['name'] ) ) {
+		return (string) $field['name'];
+	}
+
+	return isset( $field['id'] ) ? (string) $field['id'] : '';
+}
+
+/**
+ * Get the DOM id used for a field's primary input.
+ *
+ * @since 1.0.3
+ * @param array  $field  Field configuration.
+ * @param string $suffix Optional suffix for fields rendering multiple inputs.
+ * @return string Input DOM id.
+ */
+function fta_get_field_input_id( $field, $suffix = '' ) {
+	$id = 'fta-field-' . fta_get_field_name( $field );
+
+	if ( '' !== $suffix ) {
+		$id .= '-' . $suffix;
+	}
+
+	return $id;
+}
+
+/**
+ * Normalize a single choice into a label/value/default triplet.
+ *
+ * Choices arrive either as objects from the builder's choice editor or as plain
+ * strings from the legacy `options` array.
+ *
+ * @since 1.0.3
+ * @param mixed $choice Raw choice.
+ * @return array Normalized choice.
+ */
+function fta_normalize_field_choice( $choice ) {
+	if ( is_array( $choice ) ) {
+		$label = isset( $choice['label'] ) ? $choice['label'] : '';
+		$value = isset( $choice['value'] ) && '' !== $choice['value'] ? $choice['value'] : $label;
+
+		return [
+			'label'     => (string) $label,
+			'value'     => (string) $value,
+			'isDefault' => ! empty( $choice['isDefault'] ),
+		];
+	}
+
+	return [
+		'label'     => (string) $choice,
+		'value'     => (string) $choice,
+		'isDefault' => false,
+	];
+}
+
+/**
+ * Resolve the choices for a choice-based field.
+ *
+ * Mirrors the builder preview: manual choices by default, or posts/terms when
+ * the field is populated dynamically. Randomization is applied last so it
+ * affects dynamic sources too.
+ *
+ * @since 1.0.3
+ * @param array $field Field configuration.
+ * @return array List of normalized choices.
+ */
+function fta_get_field_choices( $field ) {
+	$source  = isset( $field['dynamicChoices'] ) ? $field['dynamicChoices'] : '';
+	$choices = [];
+
+	if ( 'post_type' === $source && ! empty( $field['dynamicPostType'] ) ) {
+		$posts = get_posts( [
+			'post_type'      => sanitize_key( $field['dynamicPostType'] ),
+			'posts_per_page' => 100,
+			'post_status'    => 'publish',
+			'orderby'        => 'title',
+			'order'          => 'ASC',
+		] );
+
+		foreach ( $posts as $post ) {
+			$choices[] = [
+				'label'     => $post->post_title,
+				'value'     => (string) $post->ID,
+				'isDefault' => false,
+			];
+		}
+	} elseif ( 'taxonomy' === $source && ! empty( $field['dynamicTaxonomy'] ) ) {
+		$terms = get_terms( [
+			'taxonomy'   => sanitize_key( $field['dynamicTaxonomy'] ),
+			'hide_empty' => false,
+			'number'     => 100,
+		] );
+
+		if ( ! is_wp_error( $terms ) ) {
+			foreach ( $terms as $term ) {
+				$choices[] = [
+					'label'     => $term->name,
+					'value'     => (string) $term->term_id,
+					'isDefault' => false,
+				];
+			}
+		}
+	} else {
+		$raw = [];
+
+		if ( ! empty( $field['choices'] ) && is_array( $field['choices'] ) ) {
+			$raw = $field['choices'];
+		} elseif ( ! empty( $field['options'] ) && is_array( $field['options'] ) ) {
+			$raw = $field['options'];
+		}
+
+		$choices = array_map( 'fta_normalize_field_choice', $raw );
+	}
+
+	if ( ! empty( $field['randomizeChoices'] ) ) {
+		shuffle( $choices );
+	}
+
+	return $choices;
+}
+
+/**
+ * Get the symbol for the configured currency.
+ *
+ * @since 1.0.4
+ * @return string Currency symbol, or the currency code when no symbol is known.
+ */
+function fta_get_currency_symbol() {
+	$currency = (string) fta_get_setting( 'currency', 'USD' );
+
+	$symbols = apply_filters( 'fta_currency_symbols', [
+		'USD' => '$',
+		'EUR' => '€',
+		'GBP' => '£',
+		'AUD' => '$',
+		'CAD' => '$',
+		'JPY' => '¥',
+	] );
+
+	return isset( $symbols[ $currency ] ) ? $symbols[ $currency ] : $currency;
+}
+
+/**
+ * Format an amount in the configured currency.
+ *
+ * Display formatting only - payment math happens on unformatted floats.
+ *
+ * @since 1.0.4
+ * @param float|int|string $amount Amount to format.
+ * @return string Formatted price, e.g. "$10.00".
+ */
+function fta_format_price( $amount ) {
+	return fta_get_currency_symbol() . number_format( (float) $amount, 2 );
+}
+
+/**
+ * Get a payment field's items in a predictable shape.
+ *
+ * Items are the payment counterpart of choices: the builder saves
+ * { label, value, price, isDefault } and this helper guarantees that shape
+ * whatever is stored. Prices in the definition are the only prices the
+ * server trusts.
+ *
+ * @since 1.0.4
+ * @param array $field Field configuration.
+ * @return array[] Normalized items.
+ */
+function fta_get_field_items( $field ) {
+	$items      = isset( $field['items'] ) && is_array( $field['items'] ) ? $field['items'] : [];
+	$normalized = [];
+
+	foreach ( $items as $item ) {
+		if ( ! is_array( $item ) ) {
+			continue;
+		}
+
+		$label = isset( $item['label'] ) ? (string) $item['label'] : '';
+		$value = isset( $item['value'] ) && '' !== (string) $item['value'] ? (string) $item['value'] : $label;
+
+		if ( '' === $value ) {
+			continue;
+		}
+
+		$normalized[] = [
+			'label'     => $label,
+			'value'     => $value,
+			'price'     => isset( $item['price'] ) && is_numeric( $item['price'] ) ? (float) $item['price'] : 0.0,
+			'isDefault' => ! empty( $item['isDefault'] ),
+		];
+	}
+
+	return $normalized;
+}
+
+/**
+ * Build the CSS classes for a field wrapper.
+ *
+ * @since 1.0.3
+ * @param array  $field      Field configuration.
+ * @param string $base_class Type-specific wrapper class.
+ * @return string Space separated class list.
+ */
+function fta_get_field_wrapper_class( $field, $base_class = '' ) {
+	$classes = [ 'fta-field' ];
+
+	if ( $base_class ) {
+		$classes[] = $base_class;
+	}
+
+	if ( ! empty( $field['fieldSize'] ) ) {
+		$classes[] = 'fta-field-size-' . sanitize_html_class( $field['fieldSize'] );
+	}
+
+	if ( ! empty( $field['choiceLayout'] ) ) {
+		$classes[] = 'fta-choices-' . sanitize_html_class( $field['choiceLayout'] );
+	}
+
+	if ( ! empty( $field['cssClasses'] ) ) {
+		foreach ( preg_split( '/\s+/', $field['cssClasses'] ) as $custom_class ) {
+			if ( '' !== $custom_class ) {
+				$classes[] = sanitize_html_class( $custom_class );
+			}
+		}
+	}
+
+	return implode( ' ', array_unique( $classes ) );
+}
+
+/**
+ * Build the wrapper data attributes for a field.
+ *
+ * Emits the `data-conditional-logic` payload that assets/js/frontend.js reads
+ * when deciding whether to show or hide a field.
+ *
+ * @since 1.0.3
+ * @param array $field Field configuration.
+ * @return string Escaped attribute string, ready to echo inside a tag.
+ */
+function fta_get_field_wrapper_data( $field ) {
+	$attributes = sprintf( ' data-field-id="%s"', esc_attr( fta_get_field_name( $field ) ) );
+
+	// The builder writes `conditionalLogic`; older forms used `conditional_logic`.
+	$logic = null;
+
+	if ( ! empty( $field['conditionalLogic'] ) && is_array( $field['conditionalLogic'] ) ) {
+		$logic = $field['conditionalLogic'];
+	} elseif ( ! empty( $field['conditional_logic'] ) && is_array( $field['conditional_logic'] ) ) {
+		$logic = $field['conditional_logic'];
+	}
+
+	if ( $logic && ! empty( $logic['enabled'] ) ) {
+		$attributes .= sprintf(
+			' data-conditional-logic="%s"',
+			esc_attr( wp_json_encode( $logic ) )
+		);
+	}
+
+	return $attributes;
+}
+
+/**
+ * Render the label for a field.
+ *
+ * @since 1.0.3
+ * @param array  $field  Field configuration.
+ * @param string $for_id Optional id of the control the label points at.
+ */
+function fta_field_label( $field, $for_id = '' ) {
+	if ( ! empty( $field['hideLabel'] ) || empty( $field['label'] ) ) {
+		return;
+	}
+
+	$for_id   = '' !== $for_id ? $for_id : fta_get_field_input_id( $field );
+	$required = ! empty( $field['required'] ) ? ' required' : '';
+
+	printf(
+		'<label for="%1$s" class="fta-field-label%2$s">%3$s</label>',
+		esc_attr( $for_id ),
+		esc_attr( $required ),
+		esc_html( $field['label'] )
+	);
+}
+
+/**
+ * Render the description for a field.
+ *
+ * @since 1.0.3
+ * @param array $field Field configuration.
+ */
+function fta_field_description( $field ) {
+	if ( empty( $field['description'] ) ) {
+		return;
+	}
+
+	printf(
+		'<span class="fta-field-description">%s</span>',
+		esc_html( $field['description'] )
+	);
 }
 
 /**
@@ -319,6 +736,7 @@ function fta_log( $message, $level = 'info' ) {
  * @param string $slug Template slug.
  * @param string $name Optional. Template name.
  * @param array  $args Optional. Arguments to pass to template.
+ * @return bool True when a template was located and included.
  */
 function fta_get_template_part( $slug, $name = '', $args = [] ) {
 	$templates = [];
@@ -348,5 +766,28 @@ function fta_get_template_part( $slug, $name = '', $args = [] ) {
 	if ( $located ) {
 		extract( $args );
 		include $located;
+
+		return true;
 	}
+
+	return false;
+}
+
+/**
+ * Get a cache-busting version for a local plugin asset.
+ *
+ * Uses the file modification time when the asset exists so watched development
+ * builds are immediately visible. Falls back to the plugin version for packaged
+ * installs where the requested file is unavailable.
+ *
+ * @since 1.0.2
+ * @param string $relative_path Plugin-relative asset path.
+ * @return string Asset version.
+ */
+function fta_asset_version( $relative_path ) {
+	$asset_path = FORMTURA_PLUGIN_DIR . ltrim( $relative_path, '/' );
+
+	return file_exists( $asset_path )
+		? (string) filemtime( $asset_path )
+		: FORMTURA_VERSION;
 }

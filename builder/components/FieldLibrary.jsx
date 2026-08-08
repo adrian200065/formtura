@@ -40,27 +40,122 @@ import {
     Zap
 } from 'lucide-react';
 import React from 'react';
+import { createPortal } from 'react-dom';
 import InfoDialog from './InfoDialog';
 
 // Tooltip Component
 const Tooltip = ({ text, children }) => {
   const [isVisible, setIsVisible] = React.useState(false);
+  const [position, setPosition] = React.useState({
+    block: '0rem',
+    inline: '0rem',
+    placement: 'top',
+    ready: false,
+  });
+  const triggerRef = React.useRef(null);
   const tooltipRef = React.useRef(null);
+  const tooltipId = React.useId();
+
+  const updatePosition = React.useCallback(() => {
+    if (!triggerRef.current || !tooltipRef.current) {
+      return;
+    }
+
+    const triggerBounds = triggerRef.current.getBoundingClientRect();
+    const tooltipBounds = tooltipRef.current.getBoundingClientRect();
+    const rootFontSize = Number.parseFloat(
+      window.getComputedStyle(document.documentElement).fontSize
+    ) || 16;
+    const isRtl = window.getComputedStyle(document.documentElement).direction === 'rtl';
+    const viewportPadding = rootFontSize * 0.75;
+    const tooltipGap = rootFontSize * 0.5;
+    const fitsAbove = triggerBounds.top - tooltipBounds.height - tooltipGap >= viewportPadding;
+    const fitsBelow = triggerBounds.bottom + tooltipBounds.height + tooltipGap <= window.innerHeight - viewportPadding;
+    const placement = fitsAbove || !fitsBelow ? 'top' : 'bottom';
+    const unclampedBlock = placement === 'top'
+      ? triggerBounds.top - tooltipBounds.height - tooltipGap
+      : triggerBounds.bottom + tooltipGap;
+    const unclampedInline = triggerBounds.left + (triggerBounds.width / 2) - (tooltipBounds.width / 2);
+    const maxInline = window.innerWidth - tooltipBounds.width - viewportPadding;
+    const block = Math.max(
+      viewportPadding,
+      Math.min(unclampedBlock, window.innerHeight - tooltipBounds.height - viewportPadding)
+    );
+    const inline = Math.max(viewportPadding, Math.min(unclampedInline, maxInline));
+    const logicalInline = isRtl
+      ? window.innerWidth - inline - tooltipBounds.width
+      : inline;
+
+    setPosition({
+      block: `${block / rootFontSize}rem`,
+      inline: `${logicalInline / rootFontSize}rem`,
+      placement,
+      ready: true,
+    });
+  }, []);
+
+  React.useLayoutEffect(() => {
+    if (!isVisible) {
+      return undefined;
+    }
+
+    const animationFrame = window.requestAnimationFrame(updatePosition);
+    window.addEventListener('resize', updatePosition);
+    document.addEventListener('scroll', updatePosition, true);
+
+    return () => {
+      window.cancelAnimationFrame(animationFrame);
+      window.removeEventListener('resize', updatePosition);
+      document.removeEventListener('scroll', updatePosition, true);
+    };
+  }, [isVisible, updatePosition]);
 
   return (
     <span
       className="formtura-tooltip-wrapper"
-      onMouseEnter={() => setIsVisible(true)}
+      onMouseEnter={() => {
+        setPosition((current) => ({ ...current, ready: false }));
+        setIsVisible(true);
+      }}
       onMouseLeave={() => setIsVisible(false)}
-      onFocus={() => setIsVisible(true)}
+      onFocus={() => {
+        setPosition((current) => ({ ...current, ready: false }));
+        setIsVisible(true);
+      }}
       onBlur={() => setIsVisible(false)}
-      ref={tooltipRef}
+      onKeyDown={(event) => {
+        if (event.key === 'Escape') {
+          setIsVisible(false);
+        }
+      }}
+      ref={triggerRef}
     >
-      {children || <HelpCircle size={14} className="formtura-help-icon" tabIndex={0} aria-label="Help" />}
-      {isVisible && (
-        <span className="formtura-tooltip" role="tooltip">
+      {children || (
+        <button
+          type="button"
+          className="formtura-help-trigger"
+          aria-label="Help"
+          aria-describedby={isVisible ? tooltipId : undefined}
+        >
+          <HelpCircle className="formtura-help-icon" aria-hidden="true" />
+        </button>
+      )}
+      {isVisible && typeof document !== 'undefined' && createPortal(
+        <span
+          id={tooltipId}
+          ref={tooltipRef}
+          className="formtura-tooltip"
+          role="tooltip"
+          data-placement={position.placement}
+          data-ready={position.ready}
+          style={{
+            insetBlockStart: position.block,
+            insetInlineStart: position.inline,
+          }}
+        >
           {text}
-        </span>
+        </span>,
+        document.body
       )}
     </span>
   );
@@ -100,7 +195,7 @@ const smartTagsData = [
 ];
 
 // SmartTagsPopup Component
-const SmartTagsPopup = ({ isOpen, onClose, onSelect, position }) => {
+const SmartTagsPopup = ({ isOpen, onClose, onSelect }) => {
   const [searchTerm, setSearchTerm] = React.useState('');
   const popupRef = React.useRef(null);
 
@@ -134,12 +229,6 @@ const SmartTagsPopup = ({ isOpen, onClose, onSelect, position }) => {
     <div
       ref={popupRef}
       className="formtura-smart-tags-popup"
-      style={{
-        position: 'absolute',
-        top: position?.top || '100%',
-        right: position?.right || 0,
-        zIndex: 1000,
-      }}
     >
       <div className="formtura-smart-tags-header">
         <strong>Smart Tags</strong>
@@ -184,7 +273,7 @@ const SmartTagButton = ({ onSelect }) => {
   const buttonRef = React.useRef(null);
 
   return (
-    <div style={{ position: 'relative' }}>
+    <div className="formtura-popover-anchor">
       <button
         ref={buttonRef}
         type="button"
@@ -198,7 +287,6 @@ const SmartTagButton = ({ onSelect }) => {
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
         onSelect={onSelect}
-        position={{ top: '100%', right: 0 }}
       />
     </div>
   );
@@ -210,25 +298,25 @@ const fieldTypes = [
     fields: [
       { type: 'text', label: 'Single Line Text', icon: Type },
       { type: 'textarea', label: 'Paragraph Text', icon: MessageSquare },
-      { type: 'select', label: 'Dropdown', icon: ChevronDown },
-      { type: 'checkbox', label: 'Multiple Choice', icon: CheckSquare },
-      { type: 'checkboxes', label: 'Checkboxes', icon: CheckSquare },
-      { type: 'number', label: 'Numbers', icon: Hash },
       { type: 'name', label: 'Name', icon: User },
       { type: 'email', label: 'Email', icon: Mail },
-      { type: 'number-slider', label: 'Number Slider', icon: TrendingUp },
+      { type: 'select', label: 'Dropdown', icon: ChevronDown },
+      { type: 'radio', label: 'Multiple Choice', icon: Circle },
+      { type: 'checkbox', label: 'Checkboxes', icon: CheckSquare },
+      { type: 'number', label: 'Numbers', icon: Hash },
+      { type: 'phone', label: 'Phone', icon: Phone },
+      { type: 'website', label: 'Website / URL', icon: Globe },
+      { type: 'html', label: 'HTML', icon: Code },
+      { type: 'hidden', label: 'Hidden Field', icon: Eye },
       { type: 'captcha', label: 'CAPTCHA', icon: Lock },
     ],
   },
   {
-    category: 'Fancy Fields',
+    category: 'Advanced Fields',
     fields: [
-      { type: 'phone', label: 'Phone', icon: Phone },
       { type: 'address', label: 'Address', icon: MapPin },
       { type: 'datetime', label: 'Date / Time', icon: Calendar },
-      { type: 'website', label: 'Website / URL', icon: Globe },
       { type: 'password', label: 'Password', icon: Lock },
-      { type: 'hidden', label: 'Hidden Field', icon: Eye },
       { type: 'file-upload', label: 'File Upload', icon: Upload },
       { type: 'camera', label: 'Camera', icon: Camera },
       { type: 'layout', label: 'Layout', icon: Layout },
@@ -237,13 +325,10 @@ const fieldTypes = [
       { type: 'section-divider', label: 'Section Divider', icon: Minus },
       { type: 'rich-text', label: 'Rich Text', icon: FileText },
       { type: 'content', label: 'Content', icon: FileText },
-      { type: 'html', label: 'HTML', icon: Code },
       { type: 'entry-preview', label: 'Entry Preview', icon: Eye },
       { type: 'signature', label: 'Signature', icon: PenTool },
-      { type: 'custom-captcha', label: 'Custom Captcha', icon: Lock },
       { type: 'rating', label: 'Star Rating', icon: Star },
-      { type: 'likert-scale', label: 'Likert Scale', icon: TrendingUp },
-      { type: 'net-promoter', label: 'Net Promoter Score', icon: TrendingUp },
+      { type: 'number-slider', label: 'Slider', icon: TrendingUp },
     ],
   },
   {
@@ -263,47 +348,88 @@ const fieldTypes = [
   },
 ];
 
-const DraggableField = ({ type, label, icon: Icon }) => {
+/**
+ * Palette types with no frontend template, and what is actually missing.
+ *
+ * These are draggable-looking but unbuildable: placed on a form they render
+ * nothing on the public site (see doc/CHECKLIST.md, "In the palette, no
+ * frontend template"). They are gated the same way the payment gateway types
+ * are - a ClickableField opening an info dialog rather than adding the field -
+ * but the copy deliberately points at no settings screen, because unlike the
+ * gateways there is no setting anywhere that would turn these on.
+ *
+ * One shared dialog rather than the gateways' one-boolean-per-type, since the
+ * only thing that varies is this copy.
+ */
+const unavailableFieldTypes = {
+  repeater: {
+    label: 'Repeater',
+    reason: 'A repeater needs to hold other fields, and the builder cannot place a field inside another field yet. Until it can, a repeater would have nothing to repeat.',
+  },
+  layout: {
+    label: 'Layout',
+    reason: 'Layout rows are part of the multi-page form subsystem, which Formtura does not have yet. To place fields side by side today, use the width classes under a field’s Advanced tab.',
+  },
+  'page-break': {
+    label: 'Page Break',
+    reason: 'A page break needs multi-page forms, which Formtura does not have yet. Every form is a single page for now, so there is nothing to break.',
+  },
+  'entry-preview': {
+    label: 'Entry Preview',
+    reason: 'An entry preview shows a visitor their answers before submitting, which needs the multi-page form subsystem Formtura does not have yet.',
+  },
+};
+
+const DraggableField = ({ type, label, icon: Icon, onAdd }) => {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: `library-${type}`,
     data: { type },
   });
 
   return (
-    <div
+    <button
+      type="button"
       ref={setNodeRef}
       {...listeners}
       {...attributes}
       className={`formtura-field-item ${isDragging ? 'dragging' : ''}`}
+      aria-label={`Add ${label} field`}
+      onClick={() => onAdd(type)}
     >
-      <Icon className="formtura-field-icon" size={20} />
+      <span className="formtura-field-icon-wrap">
+        <Icon className="formtura-field-icon" aria-hidden="true" />
+      </span>
       <span className="formtura-field-label">{label}</span>
-    </div>
+      <GripVertical className="formtura-field-grip" aria-hidden="true" />
+    </button>
   );
 };
 
 // Non-draggable field that triggers a click action (for CAPTCHA, etc.)
 const ClickableField = ({ type, label, icon: Icon, onClick }) => {
   return (
-    <div
+    <button
+      type="button"
       className="formtura-field-item formtura-field-item-clickable"
       onClick={onClick}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          onClick();
-        }
-      }}
     >
-      <Icon className="formtura-field-icon" size={20} />
+      <span className="formtura-field-icon-wrap">
+        <Icon className="formtura-field-icon" aria-hidden="true" />
+      </span>
       <span className="formtura-field-label">{label}</span>
-    </div>
+      <ChevronRight className="formtura-field-grip" aria-hidden="true" />
+    </button>
   );
 };
 
-const FieldLibrary = ({ selectedField, fields, onFieldUpdate, isCollapsed, onToggleCollapse }) => {
+const FieldLibrary = ({
+  selectedField,
+  fields,
+  onFieldUpdate,
+  isCollapsed,
+  onToggleCollapse,
+  onFieldAdd,
+}) => {
   const [searchTerm, setSearchTerm] = React.useState('');
   const [activeTab, setActiveTab] = React.useState('add'); // 'add' or 'options'
   const [optionsTab, setOptionsTab] = React.useState('general'); // 'general', 'advanced', 'smart-logic'
@@ -312,6 +438,8 @@ const FieldLibrary = ({ selectedField, fields, onFieldUpdate, isCollapsed, onTog
   const [showStripeDialog, setShowStripeDialog] = React.useState(false); // Stripe info dialog
   const [showPayPalDialog, setShowPayPalDialog] = React.useState(false); // PayPal info dialog
   const [showSquareDialog, setShowSquareDialog] = React.useState(false); // Square info dialog
+  const [showAuthorizeNetDialog, setShowAuthorizeNetDialog] = React.useState(false); // Authorize.Net info dialog
+  const [unavailableType, setUnavailableType] = React.useState(null); // Palette type with no frontend template
 
   // Get the selected field data
   const field = fields?.find(f => f.id === selectedField);
@@ -339,12 +467,17 @@ const FieldLibrary = ({ selectedField, fields, onFieldUpdate, isCollapsed, onTog
   })).filter(group => group.fields.length > 0);
 
   return (
-    <div className={`formtura-sidebar ${isCollapsed ? 'collapsed' : ''}`}>
+    <aside
+      className={`formtura-sidebar ${isCollapsed ? 'collapsed' : ''}`}
+      aria-label="Builder component library"
+    >
       <button
         className="formtura-sidebar-collapse-btn"
         onClick={onToggleCollapse}
         type="button"
         title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+        aria-label={isCollapsed ? 'Expand component library' : 'Collapse component library'}
+        aria-expanded={!isCollapsed}
       >
         {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
       </button>
@@ -352,11 +485,16 @@ const FieldLibrary = ({ selectedField, fields, onFieldUpdate, isCollapsed, onTog
       {!isCollapsed && (
         <>
           <div className="formtura-sidebar-header">
+            <div className="formtura-sidebar-heading">
+              <p className="formtura-sidebar-kicker">Build</p>
+              <h2>{activeTab === 'add' ? 'Component library' : 'Field settings'}</h2>
+            </div>
             <div className="formtura-panel-toggle">
               <button
                 className={`formtura-panel-toggle-btn ${activeTab === 'add' ? 'active' : ''}`}
                 onClick={() => setActiveTab('add')}
                 type="button"
+                aria-pressed={activeTab === 'add'}
               >
                 <List size={16} />
                 Add Fields
@@ -366,6 +504,7 @@ const FieldLibrary = ({ selectedField, fields, onFieldUpdate, isCollapsed, onTog
                 onClick={() => setActiveTab('options')}
                 disabled={!field}
                 type="button"
+                aria-pressed={activeTab === 'options'}
               >
                 <Settings size={16} />
                 Field Options
@@ -376,8 +515,12 @@ const FieldLibrary = ({ selectedField, fields, onFieldUpdate, isCollapsed, onTog
           {activeTab === 'add' && (
             <>
               <div className="formtura-sidebar-search">
+                <label className="formtura-sr-only" htmlFor="formtura-field-search">
+                  Search available fields
+                </label>
                 <input
-                  type="text"
+                  id="formtura-field-search"
+                  type="search"
                   placeholder="Search fields..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -392,6 +535,7 @@ const FieldLibrary = ({ selectedField, fields, onFieldUpdate, isCollapsed, onTog
                       className="formtura-field-group-title"
                       onClick={() => toggleGroup(group.category)}
                       type="button"
+                      aria-expanded={!collapsedGroups[group.category]}
                     >
                       <span>{group.category}</span>
                       <ChevronDown
@@ -402,8 +546,8 @@ const FieldLibrary = ({ selectedField, fields, onFieldUpdate, isCollapsed, onTog
                     {!collapsedGroups[group.category] && (
                       <div className="formtura-field-grid">
                         {group.fields.map((fieldItem) => {
-                          // CAPTCHA fields show a popup instead of being draggable
-                          if (fieldItem.type === 'captcha' || fieldItem.type === 'custom-captcha') {
+                          // CAPTCHA field shows a popup instead of being draggable
+                          if (fieldItem.type === 'captcha') {
                             return (
                               <ClickableField
                                 key={fieldItem.type}
@@ -450,12 +594,39 @@ const FieldLibrary = ({ selectedField, fields, onFieldUpdate, isCollapsed, onTog
                               />
                             );
                           }
+                          // Authorize.Net field shows a popup for connection setup
+                          if (fieldItem.type === 'authorize-net') {
+                            return (
+                              <ClickableField
+                                key={fieldItem.type}
+                                type={fieldItem.type}
+                                label={fieldItem.label}
+                                icon={fieldItem.icon}
+                                onClick={() => setShowAuthorizeNetDialog(true)}
+                              />
+                            );
+                          }
+                          // Types with no frontend template: placing one
+                          // would render nothing on the public site, so say
+                          // what is missing instead of adding the field.
+                          if (unavailableFieldTypes[fieldItem.type]) {
+                            return (
+                              <ClickableField
+                                key={fieldItem.type}
+                                type={fieldItem.type}
+                                label={fieldItem.label}
+                                icon={fieldItem.icon}
+                                onClick={() => setUnavailableType(fieldItem.type)}
+                              />
+                            );
+                          }
                           return (
                             <DraggableField
                               key={fieldItem.type}
                               type={fieldItem.type}
                               label={fieldItem.label}
                               icon={fieldItem.icon}
+                              onAdd={onFieldAdd}
                             />
                           );
                         })}
@@ -529,7 +700,6 @@ const FieldLibrary = ({ selectedField, fields, onFieldUpdate, isCollapsed, onTog
             Please complete the CAPTCHA setup in your{' '}
             <a
               href={`${window.formturaBuilder?.adminUrl || '/wp-admin/'}admin.php?page=formtura-settings&tab=captcha`}
-              style={{ color: 'var(--fta-builder-primary)', textDecoration: 'underline' }}
             >
               Formtura Settings
             </a>
@@ -546,14 +716,13 @@ const FieldLibrary = ({ selectedField, fields, onFieldUpdate, isCollapsed, onTog
         title="Heads up!"
         message={
           <>
-            <p style={{ marginBottom: '12px' }}>
+            <p className="formtura-dialog-lead">
               Stripe account connection is required when using the Stripe Credit Card field.
             </p>
             <p>
               To proceed, please go to{' '}
               <a
                 href={`${window.formturaBuilder?.adminUrl || '/wp-admin/'}admin.php?page=formtura-settings&tab=payments`}
-                style={{ color: 'var(--fta-builder-primary)', textDecoration: 'none', fontWeight: '600' }}
               >
                 Formtura Settings » Payments » Stripe
               </a>
@@ -572,14 +741,13 @@ const FieldLibrary = ({ selectedField, fields, onFieldUpdate, isCollapsed, onTog
         title="Heads up!"
         message={
           <>
-            <p style={{ marginBottom: '12px' }}>
+            <p className="formtura-dialog-lead">
               PayPal account connection is required when using the PayPal Commerce field.
             </p>
             <p>
               To proceed, please go to{' '}
               <a
                 href={`${window.formturaBuilder?.adminUrl || '/wp-admin/'}admin.php?page=formtura-settings&tab=payments`}
-                style={{ color: 'var(--fta-builder-primary)', textDecoration: 'none', fontWeight: '600' }}
               >
                 Formtura Settings » Payments » PayPal
               </a>
@@ -598,14 +766,13 @@ const FieldLibrary = ({ selectedField, fields, onFieldUpdate, isCollapsed, onTog
         title="Heads up!"
         message={
           <>
-            <p style={{ marginBottom: '12px' }}>
+            <p className="formtura-dialog-lead">
               Square account connection is required when using the Square field.
             </p>
             <p>
               To proceed, please go to{' '}
               <a
                 href={`${window.formturaBuilder?.adminUrl || '/wp-admin/'}admin.php?page=formtura-settings&tab=payments`}
-                style={{ color: 'var(--fta-builder-primary)', textDecoration: 'none', fontWeight: '600' }}
               >
                 Formtura Settings » Payments » Square
               </a>
@@ -617,7 +784,48 @@ const FieldLibrary = ({ selectedField, fields, onFieldUpdate, isCollapsed, onTog
         buttonText="OK"
         onClose={() => setShowSquareDialog(false)}
       />
-    </div>
+
+      {/* Authorize.Net Info Dialog */}
+      <InfoDialog
+        isOpen={showAuthorizeNetDialog}
+        title="Heads up!"
+        message={
+          <>
+            <p className="formtura-dialog-lead">
+              Authorize.Net account connection is required when using the Authorize.Net field.
+            </p>
+            <p>
+              To proceed, please go to{' '}
+              <a
+                href={`${window.formturaBuilder?.adminUrl || '/wp-admin/'}admin.php?page=formtura-settings&tab=payments`}
+              >
+                Formtura Settings » Payments » Authorize.Net
+              </a>
+              {' '}and press{' '}
+              <strong>Connect with Authorize.Net</strong> button.
+            </p>
+          </>
+        }
+        buttonText="OK"
+        onClose={() => setShowAuthorizeNetDialog(false)}
+      />
+
+      {/* No-template Info Dialog (repeater, layout, page-break, entry-preview) */}
+      <InfoDialog
+        isOpen={null !== unavailableType}
+        title="Not available yet"
+        message={
+          <>
+            <p className="formtura-dialog-lead">
+              The {unavailableFieldTypes[unavailableType]?.label} field is not available yet.
+            </p>
+            <p>{unavailableFieldTypes[unavailableType]?.reason}</p>
+          </>
+        }
+        buttonText="OK"
+        onClose={() => setUnavailableType(null)}
+      />
+    </aside>
   );
 };
 
@@ -730,91 +938,54 @@ const WysiwygEditor = ({ value, onChange }) => {
     onChange(newValue);
   };
 
-  const tagButtonStyle = {
-    padding: '2px 8px',
-    border: '1px solid #c3c4c7',
-    background: '#f6f7f7',
-    borderRadius: '3px',
-    cursor: 'pointer',
-    fontSize: '12px',
-    color: '#2271b1',
-    fontFamily: 'inherit',
-  };
-
-  const tabStyle = (active) => ({
-    padding: '6px 12px',
-    border: 'none',
-    background: active ? '#fff' : 'transparent',
-    cursor: 'pointer',
-    fontSize: '13px',
-    fontWeight: active ? '600' : '400',
-    color: active ? '#1e1e1e' : '#646970',
-    borderRadius: '3px 3px 0 0',
-    marginLeft: '4px',
-  });
-
   return (
     <div className="formtura-wysiwyg-editor">
       {/* Toolbar Row */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'flex-end',
-        background: '#f0f0f1',
-        border: '1px solid #c3c4c7',
-        borderBottom: 'none',
-        borderRadius: '4px 4px 0 0',
-        padding: '0',
-      }}>
+      <div className="formtura-wysiwyg-toolbar">
         {/* Quick Tags for Code mode / Format buttons for Visual */}
-        <div style={{
-          display: 'flex',
-          gap: '2px',
-          padding: '8px',
-          flexWrap: 'wrap',
-        }}>
+        <div className="formtura-wysiwyg-actions">
           {mode === 'code' ? (
             <>
-              <button type="button" onClick={() => insertTag('b')} style={tagButtonStyle}>b</button>
-              <button type="button" onClick={() => insertTag('i')} style={tagButtonStyle}>i</button>
-              <button type="button" onClick={() => insertTag('link')} style={tagButtonStyle}>link</button>
-              <button type="button" onClick={() => insertTag('b-quote')} style={tagButtonStyle}>b-quote</button>
-              <button type="button" onClick={() => insertTag('del')} style={tagButtonStyle}>del</button>
-              <button type="button" onClick={() => insertTag('ins')} style={tagButtonStyle}>ins</button>
-              <button type="button" onClick={() => insertTag('img')} style={tagButtonStyle}>img</button>
-              <button type="button" onClick={() => insertTag('ul')} style={tagButtonStyle}>ul</button>
-              <button type="button" onClick={() => insertTag('ol')} style={tagButtonStyle}>ol</button>
-              <button type="button" onClick={() => insertTag('li')} style={tagButtonStyle}>li</button>
-              <button type="button" onClick={() => insertTag('code')} style={tagButtonStyle}>code</button>
-              <button type="button" onClick={() => insertTag('more')} style={tagButtonStyle}>more</button>
+              <button type="button" onClick={() => insertTag('b')}>b</button>
+              <button type="button" onClick={() => insertTag('i')}>i</button>
+              <button type="button" onClick={() => insertTag('link')}>link</button>
+              <button type="button" onClick={() => insertTag('b-quote')}>b-quote</button>
+              <button type="button" onClick={() => insertTag('del')}>del</button>
+              <button type="button" onClick={() => insertTag('ins')}>ins</button>
+              <button type="button" onClick={() => insertTag('img')}>img</button>
+              <button type="button" onClick={() => insertTag('ul')}>ul</button>
+              <button type="button" onClick={() => insertTag('ol')}>ol</button>
+              <button type="button" onClick={() => insertTag('li')}>li</button>
+              <button type="button" onClick={() => insertTag('code')}>code</button>
+              <button type="button" onClick={() => insertTag('more')}>more</button>
             </>
           ) : (
             <>
-              <button type="button" onClick={() => execCommand('bold')} style={tagButtonStyle} title="Bold">
+              <button type="button" onClick={() => execCommand('bold')} title="Bold">
                 <strong>B</strong>
               </button>
-              <button type="button" onClick={() => execCommand('italic')} style={tagButtonStyle} title="Italic">
+              <button type="button" onClick={() => execCommand('italic')} title="Italic">
                 <em>I</em>
               </button>
-              <button type="button" onClick={handleLink} style={tagButtonStyle} title="Insert Link">
+              <button type="button" onClick={handleLink} title="Insert Link">
                 link
               </button>
-              <button type="button" onClick={() => execCommand('formatBlock', 'blockquote')} style={tagButtonStyle} title="Blockquote">
+              <button type="button" onClick={() => execCommand('formatBlock', 'blockquote')} title="Blockquote">
                 b-quote
               </button>
-              <button type="button" onClick={() => execCommand('strikeThrough')} style={tagButtonStyle} title="Strikethrough">
+              <button type="button" onClick={() => execCommand('strikeThrough')} title="Strikethrough">
                 del
               </button>
-              <button type="button" onClick={() => execCommand('underline')} style={tagButtonStyle} title="Underline">
+              <button type="button" onClick={() => execCommand('underline')} title="Underline">
                 ins
               </button>
-              <button type="button" onClick={() => execCommand('insertUnorderedList')} style={tagButtonStyle} title="Bullet List">
+              <button type="button" onClick={() => execCommand('insertUnorderedList')} title="Bullet List">
                 ul
               </button>
-              <button type="button" onClick={() => execCommand('insertOrderedList')} style={tagButtonStyle} title="Numbered List">
+              <button type="button" onClick={() => execCommand('insertOrderedList')} title="Numbered List">
                 ol
               </button>
-              <button type="button" onClick={() => execCommand('removeFormat')} style={tagButtonStyle} title="Clear Formatting">
+              <button type="button" onClick={() => execCommand('removeFormat')} title="Clear Formatting">
                 close tags
               </button>
             </>
@@ -822,18 +993,18 @@ const WysiwygEditor = ({ value, onChange }) => {
         </div>
 
         {/* Visual / Code Tabs */}
-        <div style={{ display: 'flex', paddingRight: '4px' }}>
+        <div className="formtura-wysiwyg-tabs">
           <button
             type="button"
             onClick={() => setMode('visual')}
-            style={tabStyle(mode === 'visual')}
+            className={mode === 'visual' ? 'active' : ''}
           >
             Visual
           </button>
           <button
             type="button"
             onClick={() => setMode('code')}
-            style={tabStyle(mode === 'code')}
+            className={mode === 'code' ? 'active' : ''}
           >
             Code
           </button>
@@ -848,18 +1019,6 @@ const WysiwygEditor = ({ value, onChange }) => {
           onInput={handleInput}
           onBlur={handleInput}
           className="formtura-wysiwyg-content"
-          style={{
-            minBlockSize: '32rem',
-            maxBlockSize: '40rem',
-            overflowY: 'auto',
-            padding: '12px',
-            border: '1px solid #c3c4c7',
-            borderBlockStart: 'none',
-            borderRadius: '0 0 4px 4px',
-            outline: 'none',
-            background: '#fff',
-            lineHeight: '1.6',
-          }}
           dangerouslySetInnerHTML={{ __html: value || '' }}
         />
       ) : (
@@ -867,22 +1026,7 @@ const WysiwygEditor = ({ value, onChange }) => {
           id="formtura-code-editor"
           value={codeValue}
           onChange={handleCodeChange}
-          style={{
-            inlineSize: '100%',
-            minBlockSize: '32rem',
-            maxBlockSize: '40rem',
-            padding: '12px',
-            border: '1px solid #c3c4c7',
-            borderBlockStart: 'none',
-            borderRadius: '0 0 4px 4px',
-            outline: 'none',
-            background: '#fff',
-            fontFamily: 'Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace',
-            fontSize: '13px',
-            lineHeight: '1.5',
-            resize: 'vertical',
-            boxSizing: 'border-box',
-          }}
+          className="formtura-code-editor"
           placeholder="Enter HTML code here..."
         />
       )}
@@ -901,14 +1045,14 @@ const GeneralTab = ({ field, onUpdate }) => {
 
   // Initialize choices if not present
   React.useEffect(() => {
-    if ((field.type === 'select' || field.type === 'checkbox' || field.type === 'checkboxes') && !field.choices) {
+    if ((field.type === 'select' || field.type === 'radio' || field.type === 'checkbox' || field.type === 'checkboxes') && !field.choices) {
       handleChange('choices', [
         { label: 'First Choice', value: 'first-choice', isDefault: false },
         { label: 'Second Choice', value: 'second-choice', isDefault: false },
         { label: 'Third Choice', value: 'third-choice', isDefault: false }
       ]);
     }
-    if (field.type === 'payment-dropdown' && !field.items) {
+    if (['payment-dropdown', 'payment-checkbox', 'payment-multiple'].includes(field.type) && !field.items) {
       handleChange('items', [
         { label: 'First Item', value: 'first-item', price: '10.00', isDefault: false },
         { label: 'Second Item', value: 'second-item', price: '25.00', isDefault: false },
@@ -1003,33 +1147,30 @@ const GeneralTab = ({ field, onUpdate }) => {
                 type="button"
                 className="formtura-bulk-add-btn"
                 onClick={() => setShowBulkAdd(!showBulkAdd)}
-                style={{ float: 'right', fontSize: '12px', padding: '4px 8px' }}
               >
                 <Download size={12} /> Bulk Add
               </button>
             </label>
 
             {showBulkAdd && (
-              <div className="formtura-bulk-add-container" style={{ marginBottom: '12px' }}>
+              <div className="formtura-bulk-add-container">
                 <textarea
                   placeholder="Paste your list here (one item per line)&#10;Example:&#10;Alabama&#10;Alaska&#10;Arizona"
                   value={bulkText}
                   onChange={(e) => setBulkText(e.target.value)}
                   rows={6}
-                  style={{ width: '100%', marginBottom: '8px', padding: '8px' }}
                 />
                 <button
                   type="button"
                   onClick={handleBulkAdd}
-                  className="formtura-btn-primary"
-                  style={{ marginRight: '8px' }}
+                  className="formtura-btn formtura-btn-primary"
                 >
                   Add Choices
                 </button>
                 <button
                   type="button"
                   onClick={() => { setBulkText(''); setShowBulkAdd(false); }}
-                  className="formtura-btn-secondary"
+                  className="formtura-btn formtura-btn-secondary"
                 >
                   Cancel
                 </button>
@@ -1038,7 +1179,7 @@ const GeneralTab = ({ field, onUpdate }) => {
 
             <div className="formtura-choices-list">
               {(field.choices || []).map((choice, index) => (
-                <div key={index} className="formtura-choice-item" style={{ display: 'flex', gap: '8px', marginBottom: '8px', alignItems: 'center' }}>
+                <div key={index} className="formtura-choice-item">
                   <input
                     type="radio"
                     checked={choice.isDefault || false}
@@ -1049,15 +1190,15 @@ const GeneralTab = ({ field, onUpdate }) => {
                       }));
                       handleChange('choices', newChoices);
                     }}
-                    style={{ flexShrink: 0 }}
+                    className="formtura-choice-radio"
                   />
-                  <GripVertical size={16} style={{ color: '#999', cursor: 'move', flexShrink: 0 }} />
+                  <GripVertical className="formtura-choice-drag" aria-hidden="true" />
                   <input
                     type="text"
                     value={choice.label}
                     onChange={(e) => handleChoiceChange(index, 'label', e.target.value)}
                     placeholder="Choice label"
-                    style={{ flex: 1 }}
+                    className="formtura-choice-input"
                   />
                   <button
                     type="button"
@@ -1083,8 +1224,7 @@ const GeneralTab = ({ field, onUpdate }) => {
             <button
               type="button"
               onClick={generateChoices}
-              className="formtura-btn-secondary"
-              style={{ marginTop: '8px', fontSize: '13px' }}
+              className="formtura-btn formtura-btn-secondary formtura-generate-choices"
             >
               <Wand2 size={14} /> Generate Choices
             </button>
@@ -1093,8 +1233,8 @@ const GeneralTab = ({ field, onUpdate }) => {
       );
     }
 
-    // Multiple Choice field (checkbox - radio buttons)
-    if (field.type === 'checkbox') {
+    // Multiple Choice field (single answer, radio buttons)
+    if (field.type === 'radio') {
       return (
         <>
           <div className="formtura-form-group">
@@ -1104,33 +1244,30 @@ const GeneralTab = ({ field, onUpdate }) => {
                 type="button"
                 className="formtura-bulk-add-btn"
                 onClick={() => setShowBulkAdd(!showBulkAdd)}
-                style={{ float: 'right', fontSize: '12px', padding: '4px 8px' }}
               >
                 <Download size={12} /> Bulk Add
               </button>
             </label>
 
             {showBulkAdd && (
-              <div className="formtura-bulk-add-container" style={{ marginBottom: '12px' }}>
+              <div className="formtura-bulk-add-container">
                 <textarea
                   placeholder="Paste your list here (one item per line)"
                   value={bulkText}
                   onChange={(e) => setBulkText(e.target.value)}
                   rows={6}
-                  style={{ width: '100%', marginBottom: '8px', padding: '8px' }}
                 />
                 <button
                   type="button"
                   onClick={handleBulkAdd}
-                  className="formtura-btn-primary"
-                  style={{ marginRight: '8px' }}
+                  className="formtura-btn formtura-btn-primary"
                 >
                   Add Choices
                 </button>
                 <button
                   type="button"
                   onClick={() => { setBulkText(''); setShowBulkAdd(false); }}
-                  className="formtura-btn-secondary"
+                  className="formtura-btn formtura-btn-secondary"
                 >
                   Cancel
                 </button>
@@ -1139,7 +1276,7 @@ const GeneralTab = ({ field, onUpdate }) => {
 
             <div className="formtura-choices-list">
               {(field.choices || []).map((choice, index) => (
-                <div key={index} className="formtura-choice-item" style={{ display: 'flex', gap: '8px', marginBottom: '8px', alignItems: 'center' }}>
+                <div key={index} className="formtura-choice-item">
                   <input
                     type="radio"
                     checked={choice.isDefault || false}
@@ -1150,15 +1287,15 @@ const GeneralTab = ({ field, onUpdate }) => {
                       }));
                       handleChange('choices', newChoices);
                     }}
-                    style={{ flexShrink: 0 }}
+                    className="formtura-choice-radio"
                   />
-                  <GripVertical size={16} style={{ color: '#999', cursor: 'move', flexShrink: 0 }} />
+                  <GripVertical className="formtura-choice-drag" aria-hidden="true" />
                   <input
                     type="text"
                     value={choice.label}
                     onChange={(e) => handleChoiceChange(index, 'label', e.target.value)}
                     placeholder="Choice label"
-                    style={{ flex: 1 }}
+                    className="formtura-choice-input"
                   />
                   <button
                     type="button"
@@ -1184,8 +1321,7 @@ const GeneralTab = ({ field, onUpdate }) => {
             <button
               type="button"
               onClick={generateChoices}
-              className="formtura-btn-secondary"
-              style={{ marginTop: '8px', fontSize: '13px' }}
+              className="formtura-btn formtura-btn-secondary formtura-generate-choices"
             >
               <Wand2 size={14} /> Generate Choices
             </button>
@@ -1242,8 +1378,8 @@ const GeneralTab = ({ field, onUpdate }) => {
       );
     }
 
-    // Checkboxes field
-    if (field.type === 'checkboxes') {
+    // Checkboxes field (multiple answers). `checkboxes` is the pre-1.0.3 slug.
+    if (field.type === 'checkbox' || field.type === 'checkboxes') {
       return (
         <>
           <div className="formtura-form-group">
@@ -1253,33 +1389,30 @@ const GeneralTab = ({ field, onUpdate }) => {
                 type="button"
                 className="formtura-bulk-add-btn"
                 onClick={() => setShowBulkAdd(!showBulkAdd)}
-                style={{ float: 'right', fontSize: '12px', padding: '4px 8px' }}
               >
                 <Download size={12} /> Bulk Add
               </button>
             </label>
 
             {showBulkAdd && (
-              <div className="formtura-bulk-add-container" style={{ marginBottom: '12px' }}>
+              <div className="formtura-bulk-add-container">
                 <textarea
                   placeholder="Paste your list here (one item per line)"
                   value={bulkText}
                   onChange={(e) => setBulkText(e.target.value)}
                   rows={6}
-                  style={{ width: '100%', marginBottom: '8px', padding: '8px' }}
                 />
                 <button
                   type="button"
                   onClick={handleBulkAdd}
-                  className="formtura-btn-primary"
-                  style={{ marginRight: '8px' }}
+                  className="formtura-btn formtura-btn-primary"
                 >
                   Add Choices
                 </button>
                 <button
                   type="button"
                   onClick={() => { setBulkText(''); setShowBulkAdd(false); }}
-                  className="formtura-btn-secondary"
+                  className="formtura-btn formtura-btn-secondary"
                 >
                   Cancel
                 </button>
@@ -1288,20 +1421,20 @@ const GeneralTab = ({ field, onUpdate }) => {
 
             <div className="formtura-choices-list">
               {(field.choices || []).map((choice, index) => (
-                <div key={index} className="formtura-choice-item" style={{ display: 'flex', gap: '8px', marginBottom: '8px', alignItems: 'center' }}>
+                <div key={index} className="formtura-choice-item">
                   <input
                     type="checkbox"
                     checked={choice.isDefault || false}
                     onChange={(e) => handleChoiceChange(index, 'isDefault', e.target.checked)}
-                    style={{ flexShrink: 0 }}
+                    className="formtura-choice-radio"
                   />
-                  <GripVertical size={16} style={{ color: '#999', cursor: 'move', flexShrink: 0 }} />
+                  <GripVertical className="formtura-choice-drag" aria-hidden="true" />
                   <input
                     type="text"
                     value={choice.label}
                     onChange={(e) => handleChoiceChange(index, 'label', e.target.value)}
                     placeholder="Choice label"
-                    style={{ flex: 1 }}
+                    className="formtura-choice-input"
                   />
                   <button
                     type="button"
@@ -1327,8 +1460,7 @@ const GeneralTab = ({ field, onUpdate }) => {
             <button
               type="button"
               onClick={generateChoices}
-              className="formtura-btn-secondary"
-              style={{ marginTop: '8px', fontSize: '13px' }}
+              className="formtura-btn formtura-btn-secondary formtura-generate-choices"
             >
               <Wand2 size={14} /> Generate Choices
             </button>
@@ -1337,8 +1469,8 @@ const GeneralTab = ({ field, onUpdate }) => {
       );
     }
 
-    // Dropdown Items (payment-dropdown)
-    if (field.type === 'payment-dropdown') {
+    // Dropdown Items (payment-dropdown, payment-checkbox, payment-multiple)
+    if (['payment-dropdown', 'payment-checkbox', 'payment-multiple'].includes(field.type)) {
       return (
         <>
           <div className="formtura-form-group">
@@ -1348,26 +1480,35 @@ const GeneralTab = ({ field, onUpdate }) => {
 
             <div className="formtura-items-list">
               {(field.items || []).map((item, index) => (
-                <div key={index} className="formtura-item-row" style={{ display: 'flex', gap: '8px', marginBottom: '8px', alignItems: 'center' }}>
-                  <input
-                    type="radio"
-                    checked={item.isDefault || false}
-                    onChange={() => {
-                      const newItems = field.items.map((it, i) => ({
-                        ...it,
-                        isDefault: i === index
-                      }));
-                      handleChange('items', newItems);
-                    }}
-                    style={{ flexShrink: 0 }}
-                  />
-                  <GripVertical size={16} style={{ color: '#999', cursor: 'move', flexShrink: 0 }} />
+                <div key={index} className="formtura-item-row">
+                  {field.type === 'payment-checkbox' ? (
+                    <input
+                      type="checkbox"
+                      checked={item.isDefault || false}
+                      onChange={(e) => handleItemChange(index, 'isDefault', e.target.checked)}
+                      className="formtura-choice-radio"
+                    />
+                  ) : (
+                    <input
+                      type="radio"
+                      checked={item.isDefault || false}
+                      onChange={() => {
+                        const newItems = field.items.map((it, i) => ({
+                          ...it,
+                          isDefault: i === index
+                        }));
+                        handleChange('items', newItems);
+                      }}
+                      className="formtura-choice-radio"
+                    />
+                  )}
+                  <GripVertical className="formtura-choice-drag" aria-hidden="true" />
                   <input
                     type="text"
                     value={item.label}
                     onChange={(e) => handleItemChange(index, 'label', e.target.value)}
                     placeholder="Item name"
-                    style={{ flex: 1 }}
+                    className="formtura-choice-input"
                   />
                   <input
                     type="number"
@@ -1376,7 +1517,7 @@ const GeneralTab = ({ field, onUpdate }) => {
                     placeholder="0.00"
                     step="0.01"
                     min="0"
-                    style={{ width: '80px' }}
+                    className="formtura-price-input"
                   />
                   <button
                     type="button"
@@ -1405,8 +1546,8 @@ const GeneralTab = ({ field, onUpdate }) => {
               <label className="formtura-toggle">
                 <input
                   type="checkbox"
-                  checked={field.showPriceAfterLabel || false}
-                  onChange={(e) => handleChange('showPriceAfterLabel', e.target.checked)}
+                  checked={field.showPriceAfterLabels || false}
+                  onChange={(e) => handleChange('showPriceAfterLabels', e.target.checked)}
                 />
                 <span className="formtura-toggle-slider"></span>
               </label>
@@ -1432,6 +1573,93 @@ const GeneralTab = ({ field, onUpdate }) => {
             </div>
           </div>
         </>
+      );
+    }
+
+    // Single Item price
+    if (field.type === 'payment-single') {
+      return (
+        <div className="formtura-form-group">
+          <label htmlFor="field-price">
+            Item Price <Tooltip text="The amount this item adds to the order total." />
+          </label>
+          <input
+            id="field-price"
+            type="number"
+            min="0"
+            step="0.01"
+            className="formtura-price-input"
+            value={field.price || ''}
+            onChange={(e) => handleChange('price', e.target.value)}
+          />
+        </div>
+      );
+    }
+
+    // Coupon codes
+    if (field.type === 'coupon') {
+      const coupons = field.coupons || [];
+      const setCoupons = (next) => handleChange('coupons', next);
+
+      return (
+        <div className="formtura-form-group">
+          <label>
+            Coupon Codes <Tooltip text="Codes are validated on the server and are never shown to visitors." />
+          </label>
+
+          {coupons.map((coupon, index) => (
+            <div key={index} className="formtura-coupon-row">
+              <input
+                type="text"
+                placeholder="CODE"
+                value={coupon.code || ''}
+                onChange={(e) => {
+                  const next = [...coupons];
+                  next[index] = { ...next[index], code: e.target.value };
+                  setCoupons(next);
+                }}
+              />
+              <select
+                value={coupon.type || 'fixed'}
+                onChange={(e) => {
+                  const next = [...coupons];
+                  next[index] = { ...next[index], type: e.target.value };
+                  setCoupons(next);
+                }}
+              >
+                <option value="fixed">Fixed amount</option>
+                <option value="percent">Percent</option>
+              </select>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="Value"
+                className="formtura-price-input"
+                value={coupon.value || ''}
+                onChange={(e) => {
+                  const next = [...coupons];
+                  next[index] = { ...next[index], value: e.target.value };
+                  setCoupons(next);
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => setCoupons(coupons.filter((_, i) => i !== index))}
+              >
+                ×
+              </button>
+            </div>
+          ))}
+
+          <button
+            type="button"
+            className="formtura-btn formtura-btn-secondary"
+            onClick={() => setCoupons([...coupons, { code: '', type: 'fixed', value: '' }])}
+          >
+            Add Coupon
+          </button>
+        </div>
       );
     }
 
@@ -1467,20 +1695,11 @@ const GeneralTab = ({ field, onUpdate }) => {
             </summary>
             <div className="formtura-collapsible-content">
               {/* Warning notice */}
-              <div className="formtura-warning-notice" style={{
-                background: '#fef3c7',
-                border: '1px solid #f59e0b',
-                borderRadius: '6px',
-                padding: '12px',
-                marginBottom: '16px',
-                display: 'flex',
-                alignItems: 'flex-start',
-                gap: '8px',
-              }}>
-                <span style={{ fontSize: '16px' }}>⚠</span>
-                <span style={{ fontSize: '13px', color: '#92400e', lineHeight: '1.5' }}>
+              <div className="formtura-warning-notice">
+                <span className="formtura-warning-icon" aria-hidden="true">⚠</span>
+                <span>
                   Uploads are public. File access can be updated in{' '}
-                  <a href="#" style={{ color: '#1e73be', textDecoration: 'underline' }}>Form Permissions Settings</a>.{' '}
+                  <a href="#">Form Permissions Settings</a>.{' '}
                   <Tooltip text="Files uploaded with this field can be viewed by anyone with access to a link and could be indexed by search engines. If this is a concern, we recommend enabling file protection and turning off indexing." />
                 </span>
               </div>
@@ -1572,7 +1791,6 @@ const GeneralTab = ({ field, onUpdate }) => {
                   <select
                     value={field.specifiedTypes || 'jpg, jpeg, jpe, png, gif'}
                     onChange={(e) => handleChange('specifiedTypes', e.target.value)}
-                    style={{ marginTop: '8px' }}
                   >
                     <option value="jpg, jpeg, jpe, png, gif">jpg, jpeg, jpe, png, gif</option>
                     <option value="pdf">pdf</option>
@@ -1587,9 +1805,9 @@ const GeneralTab = ({ field, onUpdate }) => {
               {/* File size limits */}
               <div className="formtura-form-group">
                 <label>File size limits</label>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '8px' }}>
+                <div className="formtura-grid-2">
                   <div>
-                    <label style={{ fontSize: '13px', color: '#6b7280', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <label className="formtura-subfield-label">
                       Min file size (MB){' '}
                       <Tooltip text="Set the minimum file size limit for each file uploaded." />
                     </label>
@@ -1603,7 +1821,7 @@ const GeneralTab = ({ field, onUpdate }) => {
                     />
                   </div>
                   <div>
-                    <label style={{ fontSize: '13px', color: '#6b7280', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <label className="formtura-subfield-label">
                       Max file size (MB){' '}
                       <Tooltip text="Set the file size limit for each file uploaded. Your server settings allow a maximum of 256 MB." />
                     </label>
@@ -1679,18 +1897,58 @@ const GeneralTab = ({ field, onUpdate }) => {
         </div>
       )}
 
+      {/* Address Scheme Selector */}
+      {field.type === 'address' && (
+        <div className="formtura-form-group">
+          <label htmlFor="field-scheme">
+            Scheme <Tooltip text="US shows State and ZIP Code; International shows Province/Region and Postal Code." />
+          </label>
+          <select
+            id="field-scheme"
+            value={field.scheme || 'us'}
+            onChange={(e) => handleChange('scheme', e.target.value)}
+          >
+            <option value="us">United States</option>
+            <option value="international">International</option>
+          </select>
+        </div>
+      )}
+
       {/* Render field-specific options */}
       {renderFieldSpecificOptions()}
 
-      {/* Description - WYSIWYG for HTML fields, skip for rich-text (content already shown), textarea for others */}
+      {/*
+        Description - or, for the two presentational types, the block of
+        content they render instead of a description.
+
+        Both templates (templates/fields/html.php, content.php) read the
+        `content` key and ignore `description`, so these editors must write
+        `content`. They read `field.description` as a fallback so a field
+        saved before this binding was fixed still shows its text here, and
+        migrates to `content` on the next edit.
+
+        rich-text is skipped: it has its own Content editor above.
+      */}
       {field.type === 'html' ? (
         <div className="formtura-form-group">
           <label>
             Content <Tooltip text="Enter HTML content that will be displayed in the form. Use the toolbar to format text, add links, and create lists." />
           </label>
           <WysiwygEditor
-            value={field.description || ''}
-            onChange={(html) => handleChange('description', html)}
+            value={field.content || field.description || ''}
+            onChange={(html) => handleChange('content', html)}
+          />
+        </div>
+      ) : field.type === 'content' ? (
+        <div className="formtura-form-group">
+          <label htmlFor="field-content">
+            Content <Tooltip text="Enter the text or basic HTML this block displays on the form. It is not an input - visitors read it, they do not fill it in." />
+          </label>
+          <textarea
+            id="field-content"
+            value={field.content || field.description || ''}
+            onChange={(e) => handleChange('content', e.target.value)}
+            rows={6}
           />
         </div>
       ) : field.type !== 'rich-text' && (
@@ -1709,7 +1967,7 @@ const GeneralTab = ({ field, onUpdate }) => {
 
       {/* Rich Text Field - Field Size and Rows after Description area */}
       {field.type === 'rich-text' && (
-        <div className="formtura-form-group" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+        <div className="formtura-form-group formtura-grid-2">
           <div>
             <label htmlFor="field-size-richtext">
               Field Size <Tooltip text="Set the width unit for the field." />
@@ -1757,15 +2015,7 @@ const GeneralTab = ({ field, onUpdate }) => {
             </span>
           </div>
           {field.enableSummary && (
-            <p className="formtura-info-message" style={{
-              marginTop: '0.75rem',
-              padding: '0.75rem',
-              background: '#e8f4fc',
-              borderRadius: '4px',
-              color: '#1e73be',
-              fontSize: '13px',
-              lineHeight: '1.5',
-            }}>
+            <p className="formtura-info-message formtura-info-panel">
               Example data is shown in the form editor. Actual products and totals will be displayed when you preview or embed your form.
             </p>
           )}
@@ -1779,7 +2029,7 @@ const GeneralTab = ({ field, onUpdate }) => {
             <label>
               Value Range <Tooltip text="Define the minimum and maximum values for the slider." />
             </label>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+            <div className="formtura-grid-2">
               <div>
                 <input
                   type="number"
@@ -1871,8 +2121,14 @@ const GeneralTab = ({ field, onUpdate }) => {
         </>
       )}
 
-      {/* Required toggle - not shown for number-slider or repeater */}
-      {field.type !== 'number-slider' && field.type !== 'repeater' && (
+      {/*
+        Required toggle - not shown for number-slider, repeater, or total.
+        The total field renders no input the visitor can fill in, so marking
+        it required could only ever block the form. The server ignores the
+        flag as well (Submission::is_presentational_field()), since forms
+        saved while this toggle was offered may still carry required:true.
+      */}
+      {field.type !== 'number-slider' && field.type !== 'repeater' && field.type !== 'total' && (
         <div className="formtura-form-group">
           <div className="formtura-toggle-group">
             <label className="formtura-toggle">
@@ -1995,23 +2251,23 @@ const CSSLayoutClassesField = ({ field, onUpdate }) => {
           <div className="formtura-style-classes-section">
             <div className="formtura-style-classes-layouts">
               <div className="formtura-layout-row">
-                <button type="button" className="formtura-layout-btn" style={{width: '50%'}} onClick={() => handleStyleClassSelect('fta-one-half')}>1/2</button>
-                <button type="button" className="formtura-layout-btn" style={{width: '50%'}} onClick={() => handleStyleClassSelect('fta-one-half')}>1/2</button>
+                <button type="button" className="formtura-layout-btn fta-one-half" onClick={() => handleStyleClassSelect('fta-one-half')}>1/2</button>
+                <button type="button" className="formtura-layout-btn fta-one-half" onClick={() => handleStyleClassSelect('fta-one-half')}>1/2</button>
               </div>
               <div className="formtura-layout-row">
-                <button type="button" className="formtura-layout-btn" style={{width: '33.33%'}} onClick={() => handleStyleClassSelect('fta-one-third')}>1/3</button>
-                <button type="button" className="formtura-layout-btn" style={{width: '66.66%'}} onClick={() => handleStyleClassSelect('fta-two-thirds')}>2/3</button>
+                <button type="button" className="formtura-layout-btn fta-one-third" onClick={() => handleStyleClassSelect('fta-one-third')}>1/3</button>
+                <button type="button" className="formtura-layout-btn fta-two-thirds" onClick={() => handleStyleClassSelect('fta-two-thirds')}>2/3</button>
               </div>
               <div className="formtura-layout-row">
-                <button type="button" className="formtura-layout-btn" style={{width: '25%'}} onClick={() => handleStyleClassSelect('fta-one-fourth')}>1/4</button>
-                <button type="button" className="formtura-layout-btn" style={{width: '75%'}} onClick={() => handleStyleClassSelect('fta-three-fourths')}>3/4</button>
+                <button type="button" className="formtura-layout-btn fta-one-fourth" onClick={() => handleStyleClassSelect('fta-one-fourth')}>1/4</button>
+                <button type="button" className="formtura-layout-btn fta-three-fourths" onClick={() => handleStyleClassSelect('fta-three-fourths')}>3/4</button>
               </div>
               <div className="formtura-layout-row">
-                <button type="button" className="formtura-layout-btn" style={{width: '16.66%'}} onClick={() => handleStyleClassSelect('fta-one-sixth')}>1/6</button>
-                <button type="button" className="formtura-layout-btn" style={{width: '83.33%'}} onClick={() => handleStyleClassSelect('fta-five-sixths')}>5/6</button>
+                <button type="button" className="formtura-layout-btn fta-one-sixth" onClick={() => handleStyleClassSelect('fta-one-sixth')}>1/6</button>
+                <button type="button" className="formtura-layout-btn fta-five-sixths" onClick={() => handleStyleClassSelect('fta-five-sixths')}>5/6</button>
               </div>
               <div className="formtura-layout-row">
-                <button type="button" className="formtura-layout-btn" style={{width: '100%'}} onClick={() => handleStyleClassSelect('fta-full')}>100%</button>
+                <button type="button" className="formtura-layout-btn fta-full" onClick={() => handleStyleClassSelect('fta-full')}>100%</button>
               </div>
             </div>
           </div>
@@ -2323,7 +2579,7 @@ const AdvancedTab = ({ field, onUpdate }) => {
           </select>
         </div>
 
-        <div className="formtura-form-group" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+        <div className="formtura-form-group formtura-grid-2">
           <div>
             <label htmlFor="field-add-label">
               Add New Label <Tooltip text="Text for the add button." />
@@ -2350,7 +2606,7 @@ const AdvancedTab = ({ field, onUpdate }) => {
           </div>
         </div>
 
-        <div className="formtura-form-group" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+        <div className="formtura-form-group formtura-grid-2">
           <div>
             <label htmlFor="field-min-rows">
               Min Repeater Rows <Tooltip text="Minimum number of repeater rows." />
@@ -2976,7 +3232,7 @@ const AdvancedTab = ({ field, onUpdate }) => {
           <label>
             Year Range <Tooltip text="Use four digit years or +/- years to make it dynamic. For example, use -5 for the start of the year and +5 for the end of the year." />
           </label>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+          <div className="formtura-grid-2">
             <input
               id="year-range-start"
               type="text"
@@ -3066,6 +3322,30 @@ const AdvancedTab = ({ field, onUpdate }) => {
           </span>
         </div>
       </div>
+
+      {/*
+        Hide Sublabels - composite fields only. The name field has its own
+        Advanced branch above carrying the same toggle; address reaches this
+        default branch, and its template, sanitizer and createField() default
+        all honour hideSublabels, so the toggle has to be reachable here too.
+      */}
+      {field.type === 'address' && (
+        <div className="formtura-form-group">
+          <div className="formtura-toggle-group">
+            <label className="formtura-toggle">
+              <input
+                type="checkbox"
+                checked={field.hideSublabels || false}
+                onChange={(e) => handleChange('hideSublabels', e.target.checked)}
+              />
+              <span className="formtura-toggle-slider"></span>
+            </label>
+            <span className="formtura-toggle-label">
+              Hide Sublabels <Tooltip text="Check this option to hide the sublabels under each address input." />
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* Read-Only - Not shown for Total field */}
       {field.type !== 'total' && (

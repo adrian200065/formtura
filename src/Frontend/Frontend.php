@@ -49,8 +49,8 @@ class Frontend {
 	 * @since 1.0.0
 	 */
 	private function init_components() {
-		new Submission();
-		new Notifications();
+		// Submission and Notifications are constructed by Core so their AJAX
+		// hooks are registered on admin-ajax.php requests too.
 	}
 
 	/**
@@ -59,10 +59,12 @@ class Frontend {
 	 * @since 1.0.0
 	 */
 	public function enqueue_assets() {
-		// Only enqueue if there's a form on the page.
-		if ( ! $this->has_form_on_page() ) {
-			return;
-		}
+		// Always enqueue the assets - they use delegated events so it's safe
+		// even if no form is present. This fixes detection issues with
+		// shortcodes in widgets, page builders, etc.
+
+		$recaptcha = fta_get_recaptcha_config();
+		$load_js   = fta_get_setting( 'load_js', true );
 
 		// Enqueue frontend CSS.
 		if ( fta_get_setting( 'load_css', true ) ) {
@@ -70,17 +72,17 @@ class Frontend {
 				'formtura-frontend',
 				FORMTURA_PLUGIN_URL . 'assets/css/frontend.css',
 				[],
-				FORMTURA_VERSION
+				fta_asset_version( 'assets/css/frontend.css' )
 			);
 		}
 
 		// Enqueue frontend JS.
-		if ( fta_get_setting( 'load_js', true ) ) {
+		if ( $load_js ) {
 			wp_enqueue_script(
 				'formtura-frontend',
 				FORMTURA_PLUGIN_URL . 'assets/js/frontend.js',
 				[ 'jquery' ],
-				FORMTURA_VERSION,
+				fta_asset_version( 'assets/js/frontend.js' ),
 				true
 			);
 
@@ -89,28 +91,54 @@ class Frontend {
 				'formtura-frontend',
 				'formturaFrontend',
 				[
-					'ajaxUrl' => admin_url( 'admin-ajax.php' ),
-					'nonce'   => wp_create_nonce( 'formtura_frontend' ),
-					'strings' => [
-						'submitting' => __( 'Submitting...', FORMTURA_TEXTDOMAIN ),
-						'error'      => __( 'An error occurred. Please try again.', FORMTURA_TEXTDOMAIN ),
+					'ajaxUrl'   => admin_url( 'admin-ajax.php' ),
+					'nonce'     => wp_create_nonce( 'formtura_frontend' ),
+					'recaptcha' => $recaptcha['enabled']
+						? [
+							// Only the public half of the key pair goes to the browser.
+							'siteKey' => $recaptcha['site_key'],
+							'version' => $recaptcha['version'],
+							'action'  => $recaptcha['action'],
+						]
+						: null,
+					'currency'  => [
+						'symbol' => fta_get_currency_symbol(),
+					],
+					'strings'   => [
+						'submitting'       => __( 'Submitting...', FORMTURA_TEXTDOMAIN ),
+						'error'            => __( 'An error occurred. Please try again.', FORMTURA_TEXTDOMAIN ),
+						'recaptchaMissing' => __( 'Please confirm you are not a robot.', FORMTURA_TEXTDOMAIN ),
+						'recaptchaError'   => __( 'reCAPTCHA could not be loaded. Please reload the page and try again.', FORMTURA_TEXTDOMAIN ),
+						'signatureMissing' => __( 'Please add your signature.', FORMTURA_TEXTDOMAIN ),
+						'couponApplied'    => __( 'Coupon applied.', FORMTURA_TEXTDOMAIN ),
+						'couponInvalid'    => __( 'This coupon code is not valid.', FORMTURA_TEXTDOMAIN ),
 					],
 				]
 			);
 		}
 
-		// Enqueue reCAPTCHA if enabled.
-		$recaptcha_site_key = fta_get_setting( 'recaptcha_site_key', '' );
-		if ( ! empty( $recaptcha_site_key ) ) {
-			$recaptcha_version = fta_get_setting( 'recaptcha_version', 'v2' );
-			$recaptcha_url = $recaptcha_version === 'v3'
-				? "https://www.google.com/recaptcha/api.js?render={$recaptcha_site_key}"
-				: 'https://www.google.com/recaptcha/api.js';
+		// Enqueue reCAPTCHA if enabled. Google's API is only useful alongside our
+		// own script, which is what drives the widget and the token request.
+		if ( $recaptcha['enabled'] && $load_js ) {
+			// v3 mints tokens on demand from the site key. v2 renders widgets
+			// explicitly so each form's widget ID is known and can be reset
+			// after a submission consumes its token.
+			$recaptcha_url = 'v3' === $recaptcha['version']
+				? add_query_arg( 'render', $recaptcha['site_key'], 'https://www.google.com/recaptcha/api.js' )
+				: add_query_arg(
+					[
+						'render' => 'explicit',
+						'onload' => 'formturaRecaptchaOnload',
+					],
+					'https://www.google.com/recaptcha/api.js'
+				);
 
 			wp_enqueue_script(
 				'google-recaptcha',
 				$recaptcha_url,
-				[],
+				// Depends on our script so the onload callback is defined by the
+				// time Google's API runs it.
+				[ 'formtura-frontend' ],
 				null,
 				true
 			);

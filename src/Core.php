@@ -68,6 +68,10 @@ class Core {
 	 * @since 1.0.0
 	 */
 	private function __construct() {
+		// Runs on plugins_loaded, before init and before any AJAX action, so
+		// stored forms are migrated before anything can read or re-save them.
+		Database\Installer::maybe_update();
+
 		$this->init_hooks();
 		$this->init_components();
 	}
@@ -91,6 +95,13 @@ class Core {
 	 * @since 1.0.0
 	 */
 	private function init_components() {
+		// Submission handling registers wp_ajax_ hooks, which only fire on
+		// admin-ajax.php - where is_admin() is true. Registering it behind the
+		// frontend check below would mean the handler is never attached to the
+		// request that actually submits a form.
+		new Frontend\Submission();
+		new Frontend\Notifications();
+
 		// Initialize admin.
 		if ( is_admin() ) {
 			$this->admin = new Admin\Admin();

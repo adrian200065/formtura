@@ -19,16 +19,21 @@ const InfoDialog = ({
 }) => {
   const dialogRef = useRef(null);
   const buttonRef = useRef(null);
+  const previouslyFocusedRef = useRef(null);
 
   // Handle escape key
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape' && isOpen) {
         onClose();
+      } else if (e.key === 'Tab' && isOpen) {
+        e.preventDefault();
+        buttonRef.current?.focus();
       }
     };
 
     if (isOpen) {
+      previouslyFocusedRef.current = document.activeElement;
       document.addEventListener('keydown', handleKeyDown);
       // Focus the button when dialog opens
       setTimeout(() => {
@@ -38,6 +43,7 @@ const InfoDialog = ({
 
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
+      previouslyFocusedRef.current?.focus?.();
     };
   }, [isOpen, onClose]);
 
@@ -52,13 +58,13 @@ const InfoDialog = ({
       <div
         ref={dialogRef}
         className="formtura-confirm-dialog formtura-info-dialog"
-        role="alertdialog"
+        role="dialog"
         aria-modal="true"
         aria-labelledby="info-dialog-title"
         aria-describedby="info-dialog-message"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="formtura-confirm-icon" style={{ color: 'var(--fta-builder-primary)' }}>
+        <div className="formtura-confirm-icon">
           <AlertCircle size={48} strokeWidth={1.5} />
         </div>
 

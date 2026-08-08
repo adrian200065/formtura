@@ -13,8 +13,11 @@ export const validateField = (field) => {
     return { valid: false, message: 'Field label is required' };
   }
   
-  if (['select', 'radio', 'checkbox'].includes(field.type)) {
-    if (!field.options || field.options.length === 0) {
+  // `choices` is the current shape; `options` is the pre-1.0.3 string array.
+  if (['select', 'radio', 'checkbox', 'checkboxes'].includes(field.type)) {
+    const choices = field.choices || field.options;
+
+    if (!choices || choices.length === 0) {
       return { valid: false, message: 'At least one option is required' };
     }
   }

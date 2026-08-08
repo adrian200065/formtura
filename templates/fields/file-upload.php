@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 $field_id          = isset( $field['id'] ) ? $field['id'] : '';
-$field_name        = isset( $field['name'] ) ? $field['name'] : $field_id;
+$field_name        = fta_get_field_name( $field );
 $field_label       = isset( $field['label'] ) ? $field['label'] : '';
 $field_description = isset( $field['description'] ) ? $field['description'] : '';
 $field_required    = isset( $field['required'] ) ? $field['required'] : false;
@@ -80,7 +80,7 @@ $is_compact  = strpos( $css_classes, 'fta_compact' ) !== false;
 $max_size_display = ! empty( $max_file_size ) ? $max_file_size : '256';
 ?>
 
-<div class="fta-field fta-field-file-upload <?php echo esc_attr( $css_classes ); ?>">
+<div class="<?php echo esc_attr( fta_get_field_wrapper_class( $field, 'fta-field-file-upload' ) ); ?>"<?php echo fta_get_field_wrapper_data( $field ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 	<?php if ( $field_label ) : ?>
 		<label for="fta-field-<?php echo esc_attr( $field_name ); ?>" class="fta-field-label <?php echo $field_required ? 'required' : ''; ?>">
 			<?php echo esc_html( $field_label ); ?>

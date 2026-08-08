@@ -132,7 +132,7 @@ const FieldPreview = ({ field }) => {
               disabled
               aria-label={field.hideLabel ? field.label : undefined}
               aria-required={field.required}
-              style={{ minHeight: '80px' }}
+              className="formtura-select-multiple"
             >
               {dropdownChoices.map((choice, index) => (
                 <option key={index} value={choice.value || choice}>
@@ -161,8 +161,7 @@ const FieldPreview = ({ field }) => {
           </select>
         );
 
-      case 'radio':
-      case 'checkbox': {
+      case 'radio': {
         // Get choices based on dynamic choices setting
         const getRadioChoices = () => {
           if (field.dynamicChoices === 'post_type') {
@@ -235,13 +234,11 @@ const FieldPreview = ({ field }) => {
         };
 
         const layoutClass = getChoiceLayoutClass();
-        const groupClass = field.type === 'checkbox' ? 'formtura-checkbox-choices-group' : 'formtura-radio-group';
-        const itemClass = field.type === 'checkbox' ? 'formtura-checkbox-choice-item' : 'formtura-radio-item';
 
         return (
-          <div className={`${groupClass} ${layoutClass}`}>
+          <div className={`formtura-radio-group ${layoutClass}`}>
             {radioChoices.map((choice, index) => (
-              <div key={index} className={itemClass}>
+              <div key={index} className="formtura-radio-item">
                 <label>
                   <input
                     type="radio"
@@ -259,6 +256,8 @@ const FieldPreview = ({ field }) => {
         );
       }
 
+      // `checkboxes` is the pre-1.0.3 slug for this field.
+      case 'checkbox':
       case 'checkboxes': {
         // Get choices based on dynamic choices setting
         const getCheckboxChoices = () => {
@@ -440,7 +439,6 @@ const FieldPreview = ({ field }) => {
               value={defaultValue}
               step={field.increment || 1}
               readOnly
-              style={{ width: '100%' }}
             />
             <div className="formtura-slider-value">{displayText}</div>
           </div>
@@ -450,38 +448,34 @@ const FieldPreview = ({ field }) => {
         if (field.enableSummary) {
           // Show order summary table
           return (
-            <table className="formtura-order-summary" style={{
-              width: '100%',
-              borderCollapse: 'collapse',
-              fontSize: '14px',
-            }}>
+            <table className="formtura-order-summary">
               <thead>
-                <tr style={{ borderBottom: '1px solid #e5e7eb' }}>
-                  <th style={{ textAlign: 'left', padding: '8px 12px', fontWeight: '600' }}>Item</th>
-                  <th style={{ textAlign: 'right', padding: '8px 12px', fontWeight: '600', width: '80px' }}>Quantity</th>
-                  <th style={{ textAlign: 'right', padding: '8px 12px', fontWeight: '600', width: '80px' }}>Total</th>
+                <tr>
+                  <th scope="col">Item</th>
+                  <th scope="col">Quantity</th>
+                  <th scope="col">Total</th>
                 </tr>
               </thead>
               <tbody>
-                <tr style={{ borderBottom: '1px solid #f3f4f6' }}>
-                  <td style={{ padding: '8px 12px', color: '#6b7280' }}>Example Product 1</td>
-                  <td style={{ textAlign: 'right', padding: '8px 12px', color: '#6b7280' }}>3</td>
-                  <td style={{ textAlign: 'right', padding: '8px 12px', color: '#6b7280' }}>$30.00</td>
-                </tr>
-                <tr style={{ borderBottom: '1px solid #f3f4f6' }}>
-                  <td style={{ padding: '8px 12px', color: '#6b7280' }}>Example Product 2</td>
-                  <td style={{ textAlign: 'right', padding: '8px 12px', color: '#6b7280' }}>2</td>
-                  <td style={{ textAlign: 'right', padding: '8px 12px', color: '#6b7280' }}>$20.00</td>
-                </tr>
-                <tr style={{ borderBottom: '1px solid #f3f4f6' }}>
-                  <td style={{ padding: '8px 12px', color: '#6b7280' }}>Example Product 3</td>
-                  <td style={{ textAlign: 'right', padding: '8px 12px', color: '#6b7280' }}>1</td>
-                  <td style={{ textAlign: 'right', padding: '8px 12px', color: '#6b7280' }}>$10.00</td>
+                <tr>
+                  <td>Example Product 1</td>
+                  <td>3</td>
+                  <td>$30.00</td>
                 </tr>
                 <tr>
-                  <td style={{ padding: '8px 12px', fontWeight: '600' }}>Total</td>
-                  <td style={{ textAlign: 'right', padding: '8px 12px' }}></td>
-                  <td style={{ textAlign: 'right', padding: '8px 12px', fontWeight: '600' }}>$60.00</td>
+                  <td>Example Product 2</td>
+                  <td>2</td>
+                  <td>$20.00</td>
+                </tr>
+                <tr>
+                  <td>Example Product 3</td>
+                  <td>1</td>
+                  <td>$10.00</td>
+                </tr>
+                <tr className="formtura-order-summary-total">
+                  <th scope="row">Total</th>
+                  <td />
+                  <td>$60.00</td>
                 </tr>
               </tbody>
             </table>
@@ -489,11 +483,9 @@ const FieldPreview = ({ field }) => {
         }
         // Default total display (without summary)
         return (
-          <div className="formtura-total-display" style={{
-            fontSize: '16px',
-            color: '#374151',
-          }}>
-            $0.00
+          <div className="formtura-total-display">
+            <span>Total</span>
+            <span>$0.00</span>
           </div>
         );
 
@@ -560,35 +552,116 @@ const FieldPreview = ({ field }) => {
         );
 
       case 'rich-text':
+        // Renders as a plain textarea on the frontend, so the preview must
+        // not advertise an editor toolbar the visitor never gets.
         return (
-          <div className="formtura-richtext-preview">
-            <div className="formtura-richtext-toolbar">
-              <div className="formtura-richtext-buttons">
-                <button type="button" className="formtura-richtext-btn">b</button>
-                <button type="button" className="formtura-richtext-btn formtura-richtext-btn-italic">i</button>
-                <button type="button" className="formtura-richtext-btn formtura-richtext-btn-underline">link</button>
-                <button type="button" className="formtura-richtext-btn">b-quote</button>
-                <button type="button" className="formtura-richtext-btn">del</button>
-                <button type="button" className="formtura-richtext-btn">ins</button>
-                <button type="button" className="formtura-richtext-btn">img</button>
-                <button type="button" className="formtura-richtext-btn">ul</button>
-                <button type="button" className="formtura-richtext-btn">ol</button>
-                <button type="button" className="formtura-richtext-btn">li</button>
-                <button type="button" className="formtura-richtext-btn">code</button>
-                <button type="button" className="formtura-richtext-btn">more</button>
-                <button type="button" className="formtura-richtext-btn">close tags</button>
-              </div>
-              <div className="formtura-richtext-tabs">
-                <button type="button" className="formtura-richtext-tab formtura-richtext-tab-active">Visual</button>
-                <button type="button" className="formtura-richtext-tab">Code</button>
-              </div>
+          <textarea
+            rows={field.rows || 7}
+            placeholder={field.placeholder}
+            readOnly
+          />
+        );
+
+      case 'address':
+        return (
+          <div className="formtura-address-preview">
+            <input type="text" placeholder="Address Line 1" readOnly />
+            <input type="text" placeholder="Address Line 2" readOnly />
+            <div className="formtura-address-preview-row">
+              <input type="text" placeholder="City" readOnly />
+              <input type="text" placeholder={field.scheme === 'international' ? 'State / Province / Region' : 'State'} readOnly />
             </div>
-            <div
-              className="formtura-richtext-content"
-              style={{ minHeight: `${(field.rows || 7) * 1.5}rem` }}
-            ></div>
+            <div className="formtura-address-preview-row">
+              <input type="text" placeholder={field.scheme === 'international' ? 'Postal Code' : 'ZIP Code'} readOnly />
+              <input type="text" placeholder="Country" readOnly />
+            </div>
           </div>
         );
+
+      case 'camera':
+        return (
+          <div className="formtura-file-upload-preview">
+            <div className="formtura-file-upload-dropzone">
+              <div className="formtura-file-upload-text">Take a photo or choose an image</div>
+              <div className="formtura-file-upload-size">Images only</div>
+            </div>
+          </div>
+        );
+
+      case 'signature':
+        return (
+          <div className="formtura-signature-preview">
+            <div className="formtura-signature-preview-canvas">✕ Sign here</div>
+            <button type="button" onClick={(e) => e.stopPropagation()}>Clear</button>
+          </div>
+        );
+
+      case 'payment-single':
+        return (
+          <div className="formtura-total-display">
+            <span>{field.label || 'Single Item'}</span>
+            <span>${parseFloat(field.price || 0).toFixed(2)}</span>
+          </div>
+        );
+
+      case 'payment-checkbox':
+      case 'payment-multiple':
+        return (
+          <div className="formtura-choices-preview">
+            {(field.items || []).map((item, i) => (
+              <div key={i} className="formtura-choice-preview-item">
+                <input type={field.type === 'payment-checkbox' ? 'checkbox' : 'radio'} readOnly disabled />
+                <span>
+                  {item.label}
+                  {field.showPriceAfterLabels !== false && ` — $${parseFloat(item.price || 0).toFixed(2)}`}
+                </span>
+              </div>
+            ))}
+          </div>
+        );
+
+      case 'payment-dropdown':
+        return (
+          <select disabled>
+            {(field.items || []).map((item, i) => (
+              <option key={i}>
+                {item.label}
+                {field.showPriceAfterLabels !== false && ` — $${parseFloat(item.price || 0).toFixed(2)}`}
+              </option>
+            ))}
+          </select>
+        );
+
+      case 'coupon':
+        return (
+          <div className="formtura-coupon-preview">
+            <input type="text" placeholder={field.placeholder || 'Coupon code'} readOnly />
+            <button type="button" onClick={(e) => e.stopPropagation()}>Apply</button>
+          </div>
+        );
+
+      // Presentational blocks, not inputs: both render author-supplied markup
+      // from the same `content` key (templates/fields/content.php, html.php),
+      // so the canvas must show that copy rather than an empty text input.
+      case 'content':
+      case 'html': {
+        const blockContent = field.content || field.description || '';
+
+        return blockContent
+          ? (
+            <div
+              className="formtura-content-preview"
+              dangerouslySetInnerHTML={{ __html: blockContent }}
+            />
+          )
+          : <p className="formtura-content-preview-empty">No content yet</p>;
+      }
+
+      // The frontend renders the label as the section heading plus a rule
+      // (templates/fields/section-divider.php); the label is already printed
+      // by the wrapper below, so only the rule belongs here.
+      case 'section-divider':
+        return <hr className="formtura-section-divider-preview" />;
 
       default:
         return (
@@ -606,7 +679,7 @@ const FieldPreview = ({ field }) => {
       {!field.hideLabel && (
         <label id={fieldId} htmlFor={`${fieldId}-input`}>
           {field.label}
-          {field.required && <span style={{ color: 'red' }} aria-label="required"> *</span>}
+          {field.required && <span className="formtura-required" aria-label="required"> *</span>}
         </label>
       )}
       <div className={getFieldSizeClass()} aria-describedby={descriptionId}>

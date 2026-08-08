@@ -7,21 +7,36 @@ const FormCanvas = ({
   selectedField,
   onFieldSelect,
   onFieldDelete,
-  onFieldDuplicate
+  onFieldDuplicate,
+  formSettings = {},
 }) => {
   const { setNodeRef } = useDroppable({
     id: 'canvas-droppable',
   });
 
   return (
-    <div className="formtura-canvas" ref={setNodeRef}>
-      {fields.length === 0 ? (
-        <div className="formtura-canvas-empty">
+    <main
+      id="formtura-builder-canvas"
+      className="formtura-workspace"
+      aria-label="Form canvas"
+    >
+      <section className="formtura-canvas-card" aria-labelledby="formtura-form-title">
+        <header className="formtura-form-heading">
+          <p className="formtura-section-kicker">Live form</p>
+          <h2 id="formtura-form-title">
+            {formSettings.title || 'Untitled form'}
+          </h2>
+          {formSettings.description && <p>{formSettings.description}</p>}
+        </header>
+        <div className="formtura-canvas" ref={setNodeRef}>
+          {fields.length === 0 ? (
+            <div className="formtura-canvas-empty">
           <svg
             className="formtura-canvas-empty-icon"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
+            aria-hidden="true"
           >
             <path
               strokeLinecap="round"
@@ -32,7 +47,7 @@ const FormCanvas = ({
           </svg>
           <h3 className="formtura-canvas-empty-title">Start Building Your Form</h3>
           <p className="formtura-canvas-empty-text">
-            Drag and drop fields from the left sidebar to begin creating your form
+            Drag and drop fields from the left sidebar, or focus a field and press Enter.
           </p>
         </div>
       ) : (
@@ -52,7 +67,9 @@ const FormCanvas = ({
           ))}
         </SortableContext>
       )}
-    </div>
+        </div>
+      </section>
+    </main>
   );
 };
 

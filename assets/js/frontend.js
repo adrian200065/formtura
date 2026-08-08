@@ -22,6 +22,393 @@
 			this.bindEvents();
 			this.initConditionalLogic();
 			this.initCalculations();
+			this.initSliders();
+			this.renderRecaptchaWidgets();
+			this.initSignaturePads();
+			this.initPayments();
+		},
+
+		/**
+		 * reCAPTCHA configuration, or null when it is not set up.
+		 */
+		recaptchaConfig() {
+			return (window.formturaFrontend && formturaFrontend.recaptcha) || null;
+		},
+
+		/**
+		 * Render the v2 checkbox into every widget container on the page.
+		 *
+		 * Rendering explicitly (rather than letting api.js find .g-recaptcha
+		 * divs) is what gives us each widget's ID, which is needed to read its
+		 * token and to reset it once a submission has consumed it.
+		 */
+		renderRecaptchaWidgets() {
+			const config = FormturaFrontend.recaptchaConfig();
+
+			if (!config || config.version !== 'v2') {
+				return;
+			}
+
+			// Google's API may not have arrived yet; formturaRecaptchaOnload
+			// calls back into here when it does.
+			if (typeof window.grecaptcha === 'undefined' || !grecaptcha.render) {
+				return;
+			}
+
+			$('[data-fta-recaptcha]').each(function() {
+				const $container = $(this);
+
+				// Already rendered - re-rendering would throw.
+				if ($container.data('fta-widget-id') !== undefined) {
+					return;
+				}
+
+				try {
+					const widgetId = grecaptcha.render(this, {
+						sitekey: $container.data('sitekey') || config.siteKey
+					});
+
+					$container.data('fta-widget-id', widgetId);
+				} catch (e) {
+					console.error('Formtura: could not render reCAPTCHA', e);
+				}
+			});
+		},
+
+		/**
+		 * Resolve with the reCAPTCHA token for a form, or with null when
+		 * reCAPTCHA is not in play.
+		 *
+		 * Rejects with a user-facing message when a token cannot be obtained,
+		 * so the submission stops instead of being refused by the server.
+		 */
+		getRecaptchaToken($form) {
+			const config = FormturaFrontend.recaptchaConfig();
+
+			if (!config) {
+				return Promise.resolve(null);
+			}
+
+			const strings = (window.formturaFrontend && formturaFrontend.strings) || {};
+
+			if (typeof window.grecaptcha === 'undefined') {
+				return Promise.reject(new Error(strings.recaptchaError || 'reCAPTCHA could not be loaded.'));
+			}
+
+			if (config.version === 'v2') {
+				const $container = $form.find('[data-fta-recaptcha]').first();
+				const widgetId = $container.data('fta-widget-id');
+
+				if (widgetId === undefined) {
+					return Promise.reject(new Error(strings.recaptchaError || 'reCAPTCHA could not be loaded.'));
+				}
+
+				const token = grecaptcha.getResponse(widgetId);
+
+				// The visitor has not ticked the box yet.
+				if (!token) {
+					return Promise.reject(new Error(strings.recaptchaMissing || 'Please confirm you are not a robot.'));
+				}
+
+				return Promise.resolve(token);
+			}
+
+			// v3: mint a fresh token for this submission.
+			return new Promise((resolve, reject) => {
+				grecaptcha.ready(() => {
+					grecaptcha.execute(config.siteKey, { action: config.action })
+						.then(resolve)
+						.catch(() => {
+							reject(new Error(strings.recaptchaError || 'reCAPTCHA could not be loaded.'));
+						});
+				});
+			});
+		},
+
+		/**
+		 * Clear a consumed v2 token so the next submission gets a fresh one.
+		 */
+		resetRecaptcha($form) {
+			const config = FormturaFrontend.recaptchaConfig();
+
+			if (!config || config.version !== 'v2' || typeof window.grecaptcha === 'undefined') {
+				return;
+			}
+
+			const widgetId = $form.find('[data-fta-recaptcha]').first().data('fta-widget-id');
+
+			if (widgetId !== undefined) {
+				grecaptcha.reset(widgetId);
+			}
+		},
+
+		/**
+		 * Wire up every signature pad on the page.
+		 *
+		 * Canvas drawing cannot be delegated the way form events are, so
+		 * pads are initialized directly; window.formturaInitSignaturePads()
+		 * re-runs this for markup inserted after page load. Each pad's
+		 * clear function is stashed on the pad's jQuery data so the
+		 * submit-success path (clearSignatures) and the Clear button can
+		 * share one code path instead of duplicating canvas state that
+		 * otherwise only lives inside this closure.
+		 */
+		initSignaturePads() {
+			$('[data-fta-signature]').each(function() {
+				const $pad = $(this);
+
+				if ($pad.data('fta-signature-ready')) {
+					return;
+				}
+				$pad.data('fta-signature-ready', true);
+
+				const canvas = $pad.find('.fta-signature-canvas')[0];
+				const $value = $pad.find('.fta-signature-value');
+
+				if (!canvas || !canvas.getContext) {
+					return;
+				}
+
+				const ctx = canvas.getContext('2d');
+				let drawing = false;
+
+				const point = (e) => {
+					const rect = canvas.getBoundingClientRect();
+					// jsdom reports a zero-size rect; guard the scale factors.
+					const scaleX = rect.width ? canvas.width / rect.width : 1;
+					const scaleY = rect.height ? canvas.height / rect.height : 1;
+					return {
+						x: (e.clientX - rect.left) * scaleX,
+						y: (e.clientY - rect.top) * scaleY,
+					};
+				};
+
+				// Ends the current stroke. A cancelled stroke (OS touch-cancel,
+				// palm/stylus rejection, the window losing focus) still
+				// serializes whatever was drawn up to that point rather than
+				// discarding it - the alternative would leave the hidden input
+				// stale while the canvas shows an in-progress signature, the
+				// same disagreement this fix is closing on the success path.
+				const endStroke = () => {
+					if (!drawing) {
+						return;
+					}
+					drawing = false;
+					$value.val(canvas.toDataURL('image/png')).trigger('change');
+				};
+
+				const clear = () => {
+					drawing = false;
+					ctx.clearRect(0, 0, canvas.width, canvas.height);
+					$value.val('').trigger('change');
+				};
+
+				$pad.data('fta-signature-clear-fn', clear);
+
+				canvas.addEventListener('pointerdown', (e) => {
+					e.preventDefault();
+					drawing = true;
+					if (canvas.setPointerCapture && e.pointerId !== undefined) {
+						canvas.setPointerCapture(e.pointerId);
+					}
+					const p = point(e);
+					ctx.beginPath();
+					ctx.moveTo(p.x, p.y);
+				});
+
+				canvas.addEventListener('pointermove', (e) => {
+					if (!drawing) return;
+					const p = point(e);
+					ctx.lineTo(p.x, p.y);
+					ctx.stroke();
+				});
+
+				canvas.addEventListener('pointerup', endStroke);
+
+				// The browser's canonical "this pointer stopped generating
+				// events" signal - covers OS touch-cancel and palm/stylus
+				// rejection. setPointerCapture only guarantees pointerup
+				// still targets the canvas when released outside it; it does
+				// nothing for an interaction the OS aborts outright.
+				canvas.addEventListener('pointercancel', endStroke);
+
+				// A window losing focus mid-stroke (alt-tab, a native dialog)
+				// does not reliably fire pointercancel; without this, `drawing`
+				// would stay true and a later unrelated pointermove (e.g. the
+				// mouse re-entering the canvas with no button held) would
+				// silently resume drawing a spurious line.
+				window.addEventListener('blur', endStroke);
+
+				$pad.find('.fta-signature-clear').on('click', clear);
+			});
+		},
+
+		/**
+		 * Wipe every signature pad's canvas and hidden input together.
+		 *
+		 * form.reset() (called on a successful submission) clears the
+		 * hidden input but never touches the canvas pixels - without this,
+		 * the pad would still show a signature the value no longer has,
+		 * which the visitor reads as a bug when a second submission is
+		 * blocked as unsigned. Mirrors resetRecaptcha($form).
+		 */
+		clearSignatures($form) {
+			$form.find('[data-fta-signature]').each(function() {
+				const clear = $(this).data('fta-signature-clear-fn');
+
+				if (typeof clear === 'function') {
+					clear();
+				}
+			});
+		},
+
+		/**
+		 * Block submission when a required pad is empty.
+		 *
+		 * @return {boolean} True when all required pads are signed.
+		 */
+		validateSignatures($form) {
+			const strings = (window.formturaFrontend && formturaFrontend.strings) || {};
+			let valid = true;
+
+			$form.find('.fta-signature-value[data-required]').each(function() {
+				const $value = $(this);
+
+				if (!$value.val()) {
+					FormturaFrontend.addFieldError(
+						$value.closest('.fta-field'),
+						strings.signatureMissing || 'Please add your signature.'
+					);
+					valid = false;
+				}
+			});
+
+			return valid;
+		},
+
+		/**
+		 * Keep each slider's readout in step with its value.
+		 */
+		initSliders() {
+			$(document).on('input change', '.fta-field-slider', function() {
+				const $slider = $(this);
+				const template = $slider.data('value-display') || '{value}';
+
+				$slider
+					.closest('.fta-slider-container')
+					.find('.fta-slider-value')
+					.text(String(template).replace('{value}', $slider.val()));
+			});
+		},
+
+		/**
+		 * Keep every form's total display in step with its selections.
+		 *
+		 * Display-side convenience only: the server recomputes the amount
+		 * from the form definition on submission and ignores this value.
+		 */
+		initPayments() {
+			$(document).on('change', '.fta-payment-input, .fta-payment-select', function() {
+				FormturaFrontend.recalculateTotal($(this).closest('.fta-form'));
+			});
+
+			// Initial state: single items count before any interaction.
+			FormturaFrontend.recalculateAllTotals();
+		},
+
+		/**
+		 * Recompute the total display for every form currently on the page.
+		 *
+		 * Separated from initPayments() so window.formturaRecalculateTotals()
+		 * can re-run the computation for markup inserted after page load
+		 * without re-binding the delegated change handler - that handler
+		 * lives on document and already covers any matching input added
+		 * later, so binding it again would fire it N times per change.
+		 */
+		recalculateAllTotals() {
+			$('.fta-form').each(function() {
+				const $form = $(this);
+				if ($form.find('.fta-field-total').length) {
+					FormturaFrontend.recalculateTotal($form);
+				}
+			});
+		},
+
+		/**
+		 * Collect the currently selected payment items in a form.
+		 *
+		 * @return {Array<{label: string, price: number}>}
+		 */
+		selectedPaymentItems($form) {
+			const items = [];
+
+			$form.find('.fta-payment-input').each(function() {
+				const $input = $(this);
+				const type = ($input.attr('type') || '').toLowerCase();
+
+				if ((type === 'checkbox' || type === 'radio') && !$input.prop('checked')) {
+					return;
+				}
+
+				items.push({
+					label: $input.data('item-label') || '',
+					price: parseFloat($input.data('price')) || 0,
+				});
+			});
+
+			$form.find('.fta-payment-select').each(function() {
+				const $option = $(this).find('option:selected');
+				const price = parseFloat($option.data('price')) || 0;
+
+				if ($option.val()) {
+					items.push({ label: $option.data('item-label') || $option.text(), price });
+				}
+			});
+
+			return items;
+		},
+
+		/**
+		 * Format an amount with the localized currency symbol.
+		 */
+		formatPrice(amount) {
+			const symbol = (window.formturaFrontend && formturaFrontend.currency && formturaFrontend.currency.symbol) || '$';
+			return symbol + amount.toFixed(2);
+		},
+
+		/**
+		 * Recompute and render a form's total display and summary.
+		 */
+		recalculateTotal($form) {
+			const $total = $form.find('.fta-field-total');
+
+			if (!$total.length) {
+				return;
+			}
+
+			const items = FormturaFrontend.selectedPaymentItems($form);
+			let amount = items.reduce((sum, item) => sum + item.price, 0);
+
+			// A validated coupon (set by the coupon apply flow) discounts the
+			// displayed amount; the server re-validates independently.
+			const coupon = $form.data('ftaCoupon');
+			if (coupon) {
+				amount -= coupon.type === 'percent' ? (amount * coupon.value) / 100 : coupon.value;
+			}
+			amount = Math.max(0, Math.round(amount * 100) / 100);
+
+			$total.find('.fta-total-amount').text(FormturaFrontend.formatPrice(amount));
+
+			const $summary = $total.find('.fta-order-summary-body');
+			if ($summary.length) {
+				$summary.empty();
+				items.forEach(item => {
+					$('<tr>')
+						.append($('<td>').text(item.label))
+						.append($('<td>').text(FormturaFrontend.formatPrice(item.price)))
+						.appendTo($summary);
+				});
+			}
 		},
 
 		/**
@@ -37,6 +424,9 @@
 			// File upload - change event
 			$(document).on('change', '.fta-file-upload-input, .fta-file-upload-input-compact', this.handleFileUpload);
 
+			// File upload - click to trigger file input (fallback for label issues)
+			$(document).on('click', '.fta-file-upload', this.handleFileUploadClick);
+
 			// File upload - drag and drop events
 			$(document).on('dragover dragenter', '.fta-file-upload', this.handleDragOver);
 			$(document).on('dragleave dragend', '.fta-file-upload', this.handleDragLeave);
@@ -44,6 +434,70 @@
 
 			// Character counter
 			$(document).on('input', '[data-char-limit]', this.updateCharCounter);
+
+			// Coupon apply
+			$(document).on('click', '.fta-coupon-apply', this.handleCouponApply);
+		},
+
+		/**
+		 * Validate a coupon code over AJAX and apply it to the display.
+		 *
+		 * The submission re-validates the code server-side regardless; this
+		 * only keeps the displayed total honest without ever shipping the
+		 * code list to the page.
+		 */
+		handleCouponApply() {
+			const $button = $(this);
+			const $wrap = $button.closest('.fta-coupon');
+			const $form = $button.closest('.fta-form');
+			const $status = $button.closest('.fta-field').find('.fta-coupon-status');
+			const strings = (window.formturaFrontend && formturaFrontend.strings) || {};
+			const code = String($wrap.find('.fta-coupon-input').val() || '').trim();
+
+			if (!code) {
+				return;
+			}
+
+			$button.prop('disabled', true);
+
+			$.ajax({
+				url: formturaFrontend.ajaxUrl,
+				type: 'POST',
+				data: {
+					action: 'fta_validate_coupon',
+					nonce: formturaFrontend.nonce,
+					form_id: $form.data('form-id'),
+					field_id: $wrap.data('field-id'),
+					code,
+				},
+				success(response) {
+					if (response.success) {
+						$form.data('ftaCoupon', {
+							type: response.data.type,
+							value: parseFloat(response.data.value) || 0,
+						});
+						$status.text(strings.couponApplied || 'Coupon applied.');
+					} else {
+						$form.removeData('ftaCoupon');
+						$status.text((response.data && response.data.message) || strings.couponInvalid || 'This coupon code is not valid.');
+					}
+					FormturaFrontend.recalculateTotal($form);
+				},
+				error() {
+					// A transport/network failure (including a stale nonce on
+					// cached HTML, which check_ajax_referer() 403s) is not the
+					// same thing as a wrong code - telling the visitor their
+					// code is invalid here would be false. Also clear any
+					// previously-applied discount so the status message and
+					// the displayed total never disagree.
+					$form.removeData('ftaCoupon');
+					$status.text(strings.error || 'An error occurred. Please try again.');
+					FormturaFrontend.recalculateTotal($form);
+				},
+				complete() {
+					$button.prop('disabled', false);
+				}
+			});
 		},
 
 		/**
@@ -73,14 +527,41 @@
 				return;
 			}
 
+			if (!FormturaFrontend.validateSignatures($form)) {
+				FormturaFrontend.showError($form, 'Please correct the errors below.');
+				return;
+			}
+
 			// Disable submit button and show loading state
 			$submitButton.prop('disabled', true).addClass('loading');
 
+			// The token has to be in hand before the request goes out, so the
+			// submission waits on it.
+			FormturaFrontend.getRecaptchaToken($form)
+				.then(token => {
+					FormturaFrontend.sendSubmission($form, formId, $submitButton, token);
+				})
+				.catch(error => {
+					FormturaFrontend.showError($form, error.message);
+					$submitButton.prop('disabled', false).removeClass('loading');
+				});
+		},
+
+		/**
+		 * Post a validated form, with its reCAPTCHA token when there is one.
+		 */
+		sendSubmission($form, formId, $submitButton, recaptchaToken) {
 			// Prepare form data
 			const formData = new FormData($form[0]);
 			formData.append('action', 'fta_submit_form');
 			formData.append('form_id', formId);
 			formData.append('nonce', formturaFrontend.nonce);
+
+			if (recaptchaToken) {
+				// set(), not append(): the v2 widget already put its textarea in
+				// the form, and only one value should reach the server.
+				formData.set('g-recaptcha-response', recaptchaToken);
+			}
 
 			// Submit via AJAX
 			$.ajax({
@@ -94,6 +575,15 @@
 						FormturaFrontend.showSuccess($form, response.data.message);
 						$form[0].reset();
 
+						// form.reset() does not clear the widget, and the token
+						// is single-use, so a second submission needs a new one.
+						FormturaFrontend.resetRecaptcha($form);
+
+						// form.reset() clears the hidden input but leaves any
+						// drawn strokes on the canvas - wipe both together so
+						// they can never disagree on a second submission.
+						FormturaFrontend.clearSignatures($form);
+
 						// Trigger custom event
 						$(document).trigger('formtura:submit:success', [formId, response.data]);
 
@@ -105,6 +595,11 @@
 						}
 					} else {
 						FormturaFrontend.showError($form, response.data.message);
+
+						// A rejected token is spent either way.
+						if (response.data.recaptcha) {
+							FormturaFrontend.resetRecaptcha($form);
+						}
 
 						// Show field-specific errors
 						if (response.data.errors) {
@@ -234,6 +729,32 @@
 		},
 
 		/**
+		 * Handle file upload click event (fallback for label issues).
+		 */
+		handleFileUploadClick(e) {
+			// Don't trigger if clicking directly on the input
+			if ($(e.target).is('input[type="file"]')) {
+				return;
+			}
+
+			const $uploadArea = $(this);
+
+			let $input = $uploadArea.find('.fta-file-upload-input');
+
+			if (!$input.length) {
+				$input = $uploadArea.find('.fta-file-upload-input-compact');
+			}
+			if (!$input.length) {
+				$input = $uploadArea.find('input[type="file"]');
+			}
+
+			if ($input.length) {
+				// Programmatically trigger the file input click
+				$input[0].click();
+			}
+		},
+
+		/**
 		 * Handle file upload change event.
 		 */
 		handleFileUpload(e) {
@@ -274,10 +795,19 @@
 			const $uploadArea = $(this);
 			$uploadArea.removeClass('fta-file-upload-dragover');
 
-			const $input = $uploadArea.find('.fta-file-upload-input');
+			// Find the file input - could be either class
+			let $input = $uploadArea.find('.fta-file-upload-input');
+			if (!$input.length) {
+				$input = $uploadArea.find('.fta-file-upload-input-compact');
+			}
+			// Also check if the input is a direct child of the upload area
+			if (!$input.length) {
+				$input = $uploadArea.find('input[type="file"]');
+			}
+
 			const files = e.originalEvent.dataTransfer.files;
 
-			if (files.length > 0) {
+			if (files.length > 0 && $input.length > 0) {
 				// Create a new DataTransfer to assign files to the input
 				const dataTransfer = new DataTransfer();
 				const allowMultiple = $input.prop('multiple');
@@ -291,6 +821,10 @@
 				}
 
 				$input[0].files = dataTransfer.files;
+
+				// Trigger change event to ensure handlers are called
+				$input.trigger('change');
+
 				FormturaFrontend.updateFileUploadUI($input, dataTransfer.files);
 				FormturaFrontend.validateFileUpload($input, dataTransfer.files);
 			}
@@ -533,5 +1067,33 @@
 	$(document).ready(() => {
 		FormturaFrontend.init();
 	});
+
+	// Called by Google's api.js once it has loaded (v2, explicit rendering).
+	// The API script depends on this file, so this is defined before it runs.
+	window.formturaRecaptchaOnload = function() {
+		$(document).ready(() => {
+			FormturaFrontend.renderRecaptchaWidgets();
+		});
+	};
+
+	// Let integrations render widgets in markup added after page load.
+	window.formturaRenderRecaptcha = function() {
+		FormturaFrontend.renderRecaptchaWidgets();
+	};
+
+	// Let integrations initialize pads in markup added after page load.
+	window.formturaInitSignaturePads = function() {
+		FormturaFrontend.initSignaturePads();
+	};
+
+	// Let integrations recompute totals for markup added after page load.
+	// Unlike the two hooks above, there is no per-element ready-guard here:
+	// initializing a signature pad or reCAPTCHA widget twice is harmful
+	// (duplicate canvases, duplicate widgets), but recomputing a total is
+	// idempotent - it just overwrites the same text with the same value -
+	// so a guard would only add bookkeeping with nothing to protect against.
+	window.formturaRecalculateTotals = function() {
+		FormturaFrontend.recalculateAllTotals();
+	};
 
 })(jQuery);

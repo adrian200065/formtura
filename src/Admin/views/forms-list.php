@@ -18,7 +18,11 @@ $forms = fta_get_forms();
 
 <div class="wrap fta-admin-page">
 	<div class="fta-admin-header">
-		<h1><?php esc_html_e( 'All Forms', FORMTURA_TEXTDOMAIN ); ?></h1>
+		<div class="fta-admin-heading">
+			<p class="fta-admin-eyebrow"><?php esc_html_e( 'Formtura', FORMTURA_TEXTDOMAIN ); ?></p>
+			<h1><?php esc_html_e( 'Forms', FORMTURA_TEXTDOMAIN ); ?></h1>
+			<p class="fta-admin-subtitle"><?php esc_html_e( 'Build, publish, and review every form from one workspace.', FORMTURA_TEXTDOMAIN ); ?></p>
+		</div>
 		<a href="<?php echo esc_url( admin_url( 'admin.php?page=formtura-new' ) ); ?>" class="fta-button fta-button-primary">
 			<?php esc_html_e( 'Add New Form', FORMTURA_TEXTDOMAIN ); ?>
 		</a>
@@ -28,7 +32,7 @@ $forms = fta_get_forms();
 		<div class="fta-card">
 			<div class="fta-empty-state">
 				<h2><?php esc_html_e( 'No forms yet', FORMTURA_TEXTDOMAIN ); ?></h2>
-				<p><?php esc_html_e( 'Create your first form to get started!', FORMTURA_TEXTDOMAIN ); ?></p>
+				<p><?php esc_html_e( 'Create a form to start collecting responses.', FORMTURA_TEXTDOMAIN ); ?></p>
 				<a href="<?php echo esc_url( admin_url( 'admin.php?page=formtura-new' ) ); ?>" class="fta-button fta-button-primary">
 					<?php esc_html_e( 'Create Your First Form', FORMTURA_TEXTDOMAIN ); ?>
 				</a>
@@ -36,20 +40,21 @@ $forms = fta_get_forms();
 		</div><!-- .fta-card -->
 	<?php else : ?>
 		<div class="fta-card">
+			<div class="fta-table-shell">
 			<table class="wp-list-table widefat fixed striped">
 				<thead>
 					<tr>
-						<th><?php esc_html_e( 'Title', FORMTURA_TEXTDOMAIN ); ?></th>
-						<th><?php esc_html_e( 'Entries', FORMTURA_TEXTDOMAIN ); ?></th>
-						<th><?php esc_html_e( 'Status', FORMTURA_TEXTDOMAIN ); ?></th>
-						<th><?php esc_html_e( 'Created', FORMTURA_TEXTDOMAIN ); ?></th>
-						<th><?php esc_html_e( 'Actions', FORMTURA_TEXTDOMAIN ); ?></th>
+						<th scope="col"><?php esc_html_e( 'Title', FORMTURA_TEXTDOMAIN ); ?></th>
+						<th scope="col"><?php esc_html_e( 'Entries', FORMTURA_TEXTDOMAIN ); ?></th>
+						<th scope="col"><?php esc_html_e( 'Status', FORMTURA_TEXTDOMAIN ); ?></th>
+						<th scope="col"><?php esc_html_e( 'Created', FORMTURA_TEXTDOMAIN ); ?></th>
+						<th scope="col"><?php esc_html_e( 'Actions', FORMTURA_TEXTDOMAIN ); ?></th>
 					</tr>
 				</thead>
 				<tbody>
 					<?php foreach ( $forms as $form ) : ?>
 						<tr>
-							<td>
+							<td class="fta-table-primary">
 								<strong>
 									<a href="<?php echo esc_url( admin_url( 'admin.php?page=formtura-builder&form_id=' . $form['id'] ) ); ?>">
 										<?php echo esc_html( $form['title'] ); ?>
@@ -70,20 +75,23 @@ $forms = fta_get_forms();
 							</td>
 							<td><?php echo esc_html( date_i18n( get_option( 'date_format' ), strtotime( $form['created_at'] ) ) ); ?></td>
 							<td>
-								<a href="<?php echo esc_url( admin_url( 'admin.php?page=formtura-builder&form_id=' . $form['id'] ) ); ?>">
-									<?php esc_html_e( 'Edit', FORMTURA_TEXTDOMAIN ); ?>
-								</a> |
-								<a href="<?php echo esc_url( admin_url( 'admin.php?page=formtura-entries&form_id=' . $form['id'] ) ); ?>">
-									<?php esc_html_e( 'Entries', FORMTURA_TEXTDOMAIN ); ?>
-								</a> |
-								<a href="#" class="fta-delete-form" data-form-id="<?php echo esc_attr( $form['id'] ); ?>">
-									<?php esc_html_e( 'Delete', FORMTURA_TEXTDOMAIN ); ?>
-								</a>
+								<div class="fta-table-actions">
+									<a href="<?php echo esc_url( admin_url( 'admin.php?page=formtura-builder&form_id=' . $form['id'] ) ); ?>">
+										<?php esc_html_e( 'Edit', FORMTURA_TEXTDOMAIN ); ?>
+									</a>
+									<a href="<?php echo esc_url( admin_url( 'admin.php?page=formtura-entries&form_id=' . $form['id'] ) ); ?>">
+										<?php esc_html_e( 'Entries', FORMTURA_TEXTDOMAIN ); ?>
+									</a>
+									<button type="button" class="fta-link-button fta-link-button-danger fta-delete-form" data-form-id="<?php echo esc_attr( $form['id'] ); ?>">
+										<?php esc_html_e( 'Delete', FORMTURA_TEXTDOMAIN ); ?>
+									</button>
+								</div>
 							</td>
 						</tr>
 					<?php endforeach; ?>
 				</tbody>
 			</table>
+			</div>
 		</div><!-- .fta-card -->
 	<?php endif; ?>
 </div><!-- .fta-admin-page -->

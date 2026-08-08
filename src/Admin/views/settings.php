@@ -16,7 +16,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <div class="wrap fta-admin-page">
 	<div class="fta-admin-header">
-		<h1><?php esc_html_e( 'Settings', FORMTURA_TEXTDOMAIN ); ?></h1>
+		<div class="fta-admin-heading">
+			<p class="fta-admin-eyebrow"><?php esc_html_e( 'Configuration', FORMTURA_TEXTDOMAIN ); ?></p>
+			<h1><?php esc_html_e( 'Settings', FORMTURA_TEXTDOMAIN ); ?></h1>
+			<p class="fta-admin-subtitle"><?php esc_html_e( 'Manage form security, delivery defaults, and plugin behavior.', FORMTURA_TEXTDOMAIN ); ?></p>
+		</div>
 	</div><!-- .fta-admin-header -->
 
 	<div class="fta-card">
@@ -25,34 +29,74 @@ if ( ! defined( 'ABSPATH' ) ) {
 			
 			<table class="form-table">
 				<tbody>
+					<?php $recaptcha_version = isset( $settings['recaptcha_version'] ) && 'v3' === $settings['recaptcha_version'] ? 'v3' : 'v2'; ?>
+
+					<tr>
+						<th scope="row">
+							<label for="fta-recaptcha-version"><?php esc_html_e( 'reCAPTCHA Version', FORMTURA_TEXTDOMAIN ); ?></label>
+						</th>
+						<td>
+							<select id="fta-recaptcha-version" name="settings[recaptcha_version]">
+								<option value="v2" <?php selected( $recaptcha_version, 'v2' ); ?>>
+									<?php esc_html_e( 'v2 - "I\'m not a robot" checkbox', FORMTURA_TEXTDOMAIN ); ?>
+								</option>
+								<option value="v3" <?php selected( $recaptcha_version, 'v3' ); ?>>
+									<?php esc_html_e( 'v3 - invisible score based', FORMTURA_TEXTDOMAIN ); ?>
+								</option>
+							</select>
+							<p class="description">
+								<?php esc_html_e( 'Keys are issued per version. A v2 key will not work with v3, or the other way around.', FORMTURA_TEXTDOMAIN ); ?>
+							</p>
+						</td>
+					</tr>
+
 					<tr>
 						<th scope="row">
 							<label for="fta-recaptcha-site-key"><?php esc_html_e( 'reCAPTCHA Site Key', FORMTURA_TEXTDOMAIN ); ?></label>
 						</th>
 						<td>
-							<input type="text" 
-								id="fta-recaptcha-site-key" 
-								name="settings[recaptcha_site_key]" 
-								value="<?php echo esc_attr( isset( $settings['recaptcha_site_key'] ) ? $settings['recaptcha_site_key'] : '' ); ?>" 
+							<input type="text"
+								id="fta-recaptcha-site-key"
+								name="settings[recaptcha_site_key]"
+								value="<?php echo esc_attr( isset( $settings['recaptcha_site_key'] ) ? $settings['recaptcha_site_key'] : '' ); ?>"
 								class="regular-text">
 							<p class="description">
-								<?php esc_html_e( 'Enter your Google reCAPTCHA v3 site key.', FORMTURA_TEXTDOMAIN ); ?>
+								<?php esc_html_e( 'Your Google reCAPTCHA site key, for the version selected above.', FORMTURA_TEXTDOMAIN ); ?>
 							</p>
 						</td>
 					</tr>
-					
+
 					<tr>
 						<th scope="row">
 							<label for="fta-recaptcha-secret-key"><?php esc_html_e( 'reCAPTCHA Secret Key', FORMTURA_TEXTDOMAIN ); ?></label>
 						</th>
 						<td>
-							<input type="password" 
-								id="fta-recaptcha-secret-key" 
-								name="settings[recaptcha_secret_key]" 
-								value="<?php echo esc_attr( isset( $settings['recaptcha_secret_key'] ) ? $settings['recaptcha_secret_key'] : '' ); ?>" 
+							<input type="password"
+								id="fta-recaptcha-secret-key"
+								name="settings[recaptcha_secret_key]"
+								value="<?php echo esc_attr( isset( $settings['recaptcha_secret_key'] ) ? $settings['recaptcha_secret_key'] : '' ); ?>"
 								class="regular-text">
 							<p class="description">
-								<?php esc_html_e( 'Enter your Google reCAPTCHA v3 secret key.', FORMTURA_TEXTDOMAIN ); ?>
+								<?php esc_html_e( 'Your matching secret key. reCAPTCHA is only applied to forms once both keys are saved.', FORMTURA_TEXTDOMAIN ); ?>
+							</p>
+						</td>
+					</tr>
+
+					<tr>
+						<th scope="row">
+							<label for="fta-recaptcha-score-threshold"><?php esc_html_e( 'reCAPTCHA v3 Score Threshold', FORMTURA_TEXTDOMAIN ); ?></label>
+						</th>
+						<td>
+							<input type="number"
+								id="fta-recaptcha-score-threshold"
+								name="settings[recaptcha_score_threshold]"
+								value="<?php echo esc_attr( isset( $settings['recaptcha_score_threshold'] ) ? $settings['recaptcha_score_threshold'] : 0.5 ); ?>"
+								step="0.1"
+								min="0"
+								max="1"
+								class="small-text">
+							<p class="description">
+								<?php esc_html_e( 'Submissions scoring below this are rejected. 1.0 is very likely human, 0.0 very likely a bot. Google suggests 0.5. Ignored for v2.', FORMTURA_TEXTDOMAIN ); ?>
 							</p>
 						</td>
 					</tr>
@@ -132,7 +176,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<?php wp_nonce_field( 'formtura_admin', 'formtura_nonce' ); ?>
 			
 			<p class="submit">
-				<button type="submit" class="button button-primary fta-save-settings">
+				<button type="submit" class="fta-button fta-button-primary fta-save-settings">
 					<?php esc_html_e( 'Save Settings', FORMTURA_TEXTDOMAIN ); ?>
 				</button>
 			</p>
@@ -165,13 +209,13 @@ jQuery(document).ready(function($) {
 			},
 			success: function(response) {
 				if (response.success) {
-					alert('<?php esc_html_e( 'Settings saved successfully!', FORMTURA_TEXTDOMAIN ); ?>');
+					window.FormturaAdmin.showNotice('<?php esc_html_e( 'Settings saved successfully.', FORMTURA_TEXTDOMAIN ); ?>', 'success');
 				} else {
-					alert(response.data.message || '<?php esc_html_e( 'Failed to save settings.', FORMTURA_TEXTDOMAIN ); ?>');
+					window.FormturaAdmin.showNotice(response.data.message || '<?php esc_html_e( 'Failed to save settings.', FORMTURA_TEXTDOMAIN ); ?>', 'error');
 				}
 			},
 			error: function() {
-				alert('<?php esc_html_e( 'An error occurred while saving settings.', FORMTURA_TEXTDOMAIN ); ?>');
+				window.FormturaAdmin.showNotice('<?php esc_html_e( 'An error occurred while saving settings.', FORMTURA_TEXTDOMAIN ); ?>', 'error');
 			},
 			complete: function() {
 				$button.prop('disabled', false).text(buttonText);

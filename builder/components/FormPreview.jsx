@@ -172,16 +172,20 @@ const StarRatingPreview = ({ field }) => {
         const starValue = index + 1;
         const isFilled = starValue <= (hoverRating || selectedRating);
         return (
-          <span
+          <button
+            type="button"
             key={index}
             className={`formtura-star ${isFilled ? 'formtura-star-filled' : 'formtura-star-empty'}`}
             onMouseEnter={() => setHoverRating(starValue)}
             onMouseLeave={() => setHoverRating(0)}
+            onFocus={() => setHoverRating(starValue)}
+            onBlur={() => setHoverRating(0)}
             onClick={() => setSelectedRating(starValue)}
-            style={{ cursor: 'pointer' }}
+            aria-label={`Rate ${starValue} out of ${maxStars}`}
+            aria-pressed={selectedRating === starValue}
           >
             ★
-          </span>
+          </button>
         );
       })}
     </div>
@@ -229,9 +233,48 @@ const RepeaterPreview = ({ field }) => {
 };
 
 const FormPreview = ({ fields, formSettings, onClose }) => {
+  const modalRef = useRef(null);
+  const closeButtonRef = useRef(null);
+
+  useEffect(() => {
+    const previouslyFocused = document.activeElement;
+    closeButtonRef.current?.focus();
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        onClose();
+        return;
+      }
+
+      if (event.key !== 'Tab') return;
+
+      const focusable = modalRef.current?.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      if (!focusable?.length) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      previouslyFocused?.focus?.();
+    };
+  }, [onClose]);
+
   const renderField = (field) => {
     const fieldClasses = `formtura-preview-field ${field.cssClasses || ''}`;
-    const fieldSizeClass = field.fieldSize ? `field-size-${field.fieldSize}` : '';
+    const fieldSizeClass = field.fieldSize ? `formtura-field-size-${field.fieldSize}` : '';
 
     const renderInput = () => {
       switch (field.type) {
@@ -295,8 +338,7 @@ const FormPreview = ({ fields, formSettings, onClose }) => {
                 multiple
                 size={Math.min(selectChoices.length, 5)}
                 required={field.required}
-                className={fieldSizeClass}
-                style={{ minHeight: '80px' }}
+                className={`${fieldSizeClass} formtura-select-multiple`}
               >
                 {selectChoices.map((choice, index) => (
                   <option key={index} value={choice.value || choice}>
@@ -318,8 +360,7 @@ const FormPreview = ({ fields, formSettings, onClose }) => {
             </select>
           );
 
-        case 'radio':
-        case 'checkbox': {
+        case 'radio': {
           // Get choice layout class
           const getRadioLayoutClass = () => {
             switch(field.choiceLayout) {
@@ -355,12 +396,11 @@ const FormPreview = ({ fields, formSettings, onClose }) => {
           }
 
           const radioLayoutClass = getRadioLayoutClass();
-          const radioGroupClass = field.type === 'checkbox' ? 'formtura-preview-checkbox-group' : 'formtura-preview-radio-group';
 
           return (
-            <div className={`${radioGroupClass} ${radioLayoutClass}`}>
+            <div className={`formtura-preview-radio-group ${radioLayoutClass}`}>
               {radioChoices.map((choice, index) => (
-                <label key={index} className={field.type === 'checkbox' ? 'formtura-preview-checkbox' : 'formtura-preview-radio'}>
+                <label key={index} className="formtura-preview-radio">
                   <input
                     type="radio"
                     name={field.id}
@@ -375,6 +415,8 @@ const FormPreview = ({ fields, formSettings, onClose }) => {
           );
         }
 
+        // `checkboxes` is the pre-1.0.3 slug for this field.
+        case 'checkbox':
         case 'checkboxes': {
           // Get choice layout class
           const getCheckboxesLayoutClass = () => {
@@ -515,7 +557,6 @@ const FormPreview = ({ fields, formSettings, onClose }) => {
                 defaultValue={defaultValue}
                 step={field.increment || 1}
                 className={fieldSizeClass}
-                style={{ width: '100%' }}
                 disabled={field.readOnly}
               />
               <div className="formtura-slider-value">{displayText}</div>
@@ -529,36 +570,16 @@ const FormPreview = ({ fields, formSettings, onClose }) => {
           return <RepeaterPreview field={field} />;
 
         case 'rich-text':
+          // Renders as a plain textarea on the frontend, so the preview must
+          // not advertise an editor toolbar the visitor never gets.
           return (
-            <div className="formtura-richtext-editor-preview">
-              <div className="formtura-richtext-toolbar-preview">
-                <div className="formtura-richtext-buttons-preview">
-                  <button type="button">b</button>
-                  <button type="button"><em>i</em></button>
-                  <button type="button"><u>link</u></button>
-                  <button type="button">b-quote</button>
-                  <button type="button">del</button>
-                  <button type="button">ins</button>
-                  <button type="button">img</button>
-                  <button type="button">ul</button>
-                  <button type="button">ol</button>
-                  <button type="button">li</button>
-                  <button type="button">code</button>
-                  <button type="button">more</button>
-                  <button type="button">close tags</button>
-                </div>
-                <div className="formtura-richtext-tabs-preview">
-                  <button type="button" className="active">Visual</button>
-                  <button type="button">Code</button>
-                </div>
-              </div>
-              <div
-                className="formtura-richtext-content-preview"
-                contentEditable
-                style={{ minHeight: `${(field.rows || 7) * 1.5}rem` }}
-                dangerouslySetInnerHTML={{ __html: field.content || '' }}
-              ></div>
-            </div>
+            <textarea
+              placeholder={field.placeholder}
+              rows={field.rows || 7}
+              required={field.required}
+              readOnly={field.readOnly}
+              className={fieldSizeClass}
+            />
           );
 
         case 'file-upload':
@@ -582,10 +603,14 @@ const FormPreview = ({ fields, formSettings, onClose }) => {
           );
 
         case 'html':
+          // `content` first, matching templates/fields/html.php: that is the
+          // key the builder's editor writes and the only key the frontend
+          // reads. `description` remains a fallback for fields saved before
+          // the editor was bound to `content`, but must no longer win over it.
           return (
             <div
               className="formtura-html-content"
-              dangerouslySetInnerHTML={{ __html: field.description || field.content || '' }}
+              dangerouslySetInnerHTML={{ __html: field.content || field.description || '' }}
             />
           );
 
@@ -686,11 +711,19 @@ const FormPreview = ({ fields, formSettings, onClose }) => {
   };
 
   return (
-    <div className="formtura-preview-overlay" onClick={onClose}>
-      <div className="formtura-preview-modal" onClick={(e) => e.stopPropagation()}>
+    <div className="formtura-preview-overlay" onClick={onClose} role="presentation">
+      <div
+        ref={modalRef}
+        className="formtura-preview-modal"
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="formtura-preview-title"
+      >
         <div className="formtura-preview-header">
-          <h2>Form Preview</h2>
+          <h2 id="formtura-preview-title">Form preview</h2>
           <button
+            ref={closeButtonRef}
             type="button"
             className="formtura-preview-close"
             onClick={onClose}

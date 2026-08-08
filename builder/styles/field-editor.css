@@ -1,0 +1,860 @@
+.formtura-dropped-field {
+  background: var(--bg-card);
+  position: relative;
+  padding: var(--space-4);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.formtura-dropped-field:hover {
+  border-color: var(--text-muted);
+}
+
+.formtura-dropped-field:focus-visible {
+  outline: 0.125rem solid var(--focus);
+  outline-offset: 0.125rem;
+}
+
+.formtura-dropped-field.selected {
+  background: var(--surface-selected);
+  border: 2px solid var(--focus);
+  box-shadow: 0 0 0 0.2rem var(--focus-soft);
+}
+
+.formtura-dropped-field.dragging {
+  opacity: 0.55;
+  box-shadow: var(--shadow-md);
+}
+
+.formtura-field-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-block-end: var(--space-4);
+}
+
+.formtura-field-type,
+.formtura-field-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.formtura-field-type > span {
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.formtura-drag-handle {
+  color: var(--text-muted);
+  background: transparent;
+  inline-size: 2rem;
+  block-size: 2rem;
+  display: grid;
+  place-items: center;
+  padding: var(--space-0);
+  border: 0;
+  border-radius: var(--radius-sm);
+  cursor: grab;
+}
+
+.formtura-drag-handle:hover {
+  color: var(--text-main);
+  background: var(--surface-subtle);
+}
+
+.formtura-drag-handle:active {
+  cursor: grabbing;
+}
+
+.formtura-drag-handle svg {
+  inline-size: 1rem;
+  block-size: 1rem;
+}
+
+.formtura-field-action-btn {
+  color: var(--text-muted);
+}
+
+.formtura-field-delete-btn:hover {
+  color: var(--error);
+  background: var(--surface-danger);
+}
+
+.formtura-field-preview {
+  min-inline-size: 0;
+}
+
+.formtura-field-options,
+.formtura-settings,
+.formtura-settings-content {
+  min-inline-size: 0;
+}
+
+.formtura-settings-header {
+  margin-block-end: var(--space-4);
+}
+
+.formtura-field-id,
+.formtura-field-description,
+.formtura-preview-sublabel {
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  font-weight: 500;
+}
+
+.formtura-badge {
+  color: var(--color-brand-dark);
+  background: var(--color-primary);
+  display: inline-flex;
+  padding-block: var(--space-1);
+  padding-inline: var(--space-2);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
+  font-weight: 750;
+  line-height: 1;
+}
+
+.formtura-btn-link {
+  color: var(--color-primary);
+  background: transparent;
+  padding: var(--space-0);
+  border: 0;
+  font-weight: 650;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  cursor: pointer;
+}
+
+.formtura-field-preview > label,
+.formtura-preview-label {
+  color: var(--text-main);
+  display: block;
+  margin-block-end: var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: 680;
+}
+
+.formtura-field-preview :where(input:not([type="checkbox"], [type="radio"], [type="range"]), select, textarea),
+.formtura-datetime-input {
+  color: var(--text-main);
+  background: var(--bg-card);
+  inline-size: 100%;
+  min-block-size: 2.75rem;
+  padding-block: var(--space-2);
+  padding-inline: var(--space-3);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  box-shadow: none;
+}
+
+.formtura-field-preview :where(input, select, textarea):focus-visible {
+  border-color: var(--focus);
+  box-shadow: 0 0 0 0.2rem var(--focus-soft);
+}
+
+.formtura-field-preview :where(input, select, textarea)::placeholder {
+  color: var(--text-muted);
+  opacity: 0.78;
+}
+
+.formtura-field-preview textarea {
+  min-block-size: 7rem;
+  resize: vertical;
+}
+
+.formtura-select-multiple {
+  min-block-size: 6rem;
+}
+
+.formtura-field-preview :where(input, select, textarea):disabled,
+.formtura-field-preview :where(input, select, textarea):read-only {
+  opacity: 1;
+}
+
+.formtura-required,
+.formtura-preview-required {
+  color: var(--error);
+}
+
+.formtura-field-size-small {
+  max-inline-size: 18rem;
+}
+
+.formtura-field-size-medium {
+  max-inline-size: 32rem;
+}
+
+.formtura-field-size-large {
+  max-inline-size: none;
+}
+
+.formtura-name-field-row,
+.formtura-name-field-group,
+.formtura-preview-name-group {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.formtura-name-field-item,
+.formtura-preview-name-item {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.formtura-checkbox-choices-group,
+.formtura-radio-group,
+.formtura-checkboxes-group,
+.formtura-preview-radio-group,
+.formtura-preview-checkbox-group,
+.formtura-preview-checkboxes-group {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.formtura-checkbox-choice-item label,
+.formtura-radio-item label,
+.formtura-checkbox-item label,
+.formtura-radio-inline,
+.formtura-preview-radio,
+.formtura-preview-checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+
+.formtura-field-preview :where(input[type="checkbox"], input[type="radio"]),
+.formtura-preview-field :where(input[type="checkbox"], input[type="radio"]) {
+  accent-color: var(--color-primary);
+  inline-size: 1rem;
+  block-size: 1rem;
+  flex: 0 0 auto;
+  margin-block-start: 0.15em;
+}
+
+.formtura-choices-two-columns,
+.formtura-choices-three-columns,
+.formtura-choices-inline {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.formtura-choices-one-column {
+  grid-template-columns: 1fr;
+}
+
+.formtura-slider-container {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.formtura-slider-container input[type="range"] {
+  accent-color: var(--color-primary);
+  inline-size: 100%;
+}
+
+.formtura-slider-value {
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.formtura-file-upload-preview,
+.formtura-file-upload-dropzone,
+.formtura-repeater-dropzone {
+  color: var(--text-muted);
+  background: var(--surface-subtle);
+  min-block-size: 8rem;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: var(--space-2);
+  padding: var(--space-5);
+  border: 2px dashed var(--border-light);
+  border-radius: var(--radius-md);
+  text-align: center;
+}
+
+.formtura-file-upload-icon {
+  color: var(--color-primary);
+  inline-size: 2rem;
+  block-size: 2rem;
+}
+
+.formtura-file-upload-text,
+.formtura-repeater-dropzone-text {
+  color: var(--text-main);
+  font-size: var(--text-sm);
+  font-weight: 650;
+}
+
+.formtura-file-upload-size {
+  font-size: var(--text-xs);
+}
+
+.formtura-repeater-preview,
+.formtura-repeater-container,
+.formtura-repeater-row,
+.formtura-repeater-row-content {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.formtura-repeater-row {
+  background: var(--surface-subtle);
+  padding: var(--space-3);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+}
+
+.formtura-repeater-controls {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.formtura-repeater-add-btn,
+.formtura-repeater-remove-btn {
+  min-block-size: 2.5rem;
+  padding-block: var(--space-2);
+  padding-inline: var(--space-3);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.formtura-repeater-add-btn {
+  color: var(--color-brand-dark);
+  background: var(--color-primary);
+}
+
+.formtura-repeater-remove-btn {
+  color: var(--error);
+  background: var(--surface-danger);
+}
+
+.formtura-repeater-row-placeholder,
+.formtura-style-class-value {
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+}
+
+.formtura-repeater-btn-icon {
+  font-size: var(--text-base);
+  line-height: 1;
+}
+
+.formtura-style-class-value {
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+}
+
+.formtura-richtext-editor-preview,
+.formtura-wysiwyg-editor {
+  background: var(--bg-card);
+  overflow: hidden;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+}
+
+.formtura-richtext-toolbar-preview,
+.formtura-wysiwyg-toolbar {
+  background: var(--surface-subtle);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border-block-end: 1px solid var(--border-light);
+}
+
+.formtura-wysiwyg-actions,
+.formtura-wysiwyg-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.formtura-wysiwyg-actions button,
+.formtura-wysiwyg-tabs button {
+  color: var(--text-muted);
+  background: transparent;
+  min-block-size: 2rem;
+  padding-inline: var(--space-2);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
+  cursor: pointer;
+}
+
+.formtura-wysiwyg-actions button:hover,
+.formtura-wysiwyg-tabs button:hover,
+.formtura-wysiwyg-tabs button.active {
+  color: var(--text-main);
+  background: var(--bg-card);
+  border-color: var(--border-light);
+}
+
+.formtura-code-editor,
+.formtura-wysiwyg-content {
+  color: var(--text-main);
+  background: var(--bg-card);
+  inline-size: 100%;
+  min-block-size: 20rem;
+  max-block-size: 32rem;
+  overflow-y: auto;
+  padding: var(--space-3);
+  border: 0;
+  border-radius: 0;
+  outline: none;
+  resize: vertical;
+}
+
+.formtura-code-editor {
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-size: var(--text-xs);
+}
+
+.formtura-richtext-buttons-preview,
+.formtura-richtext-tabs-preview {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.formtura-richtext-content-preview,
+.formtura-wysiwyg-content {
+  min-block-size: 9rem;
+  padding: var(--space-4);
+}
+
+.formtura-textarea {
+  min-block-size: 7rem;
+  resize: vertical;
+}
+
+.formtura-html-content {
+  color: var(--text-on-dark);
+  background: var(--color-brand-midnight);
+  min-block-size: 6rem;
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-size: var(--text-xs);
+}
+
+.formtura-order-summary {
+  inline-size: 100%;
+  border-collapse: collapse;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  font-size: var(--text-sm);
+}
+
+.formtura-order-summary :where(th, td) {
+  padding-block: var(--space-2);
+  padding-inline: var(--space-3);
+  border-block-end: 1px solid var(--border-light);
+  text-align: start;
+}
+
+.formtura-order-summary :where(th, td):not(:first-child) {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+
+.formtura-order-summary tbody td {
+  color: var(--text-muted);
+}
+
+.formtura-order-summary-total :where(th, td) {
+  color: var(--text-main);
+  font-weight: 700;
+}
+
+.formtura-total-display {
+  color: var(--text-main);
+  background: var(--color-primary-light);
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  font-weight: 700;
+}
+
+.formtura-settings-group,
+.formtura-collapsible-section,
+.formtura-style-classes-section {
+  padding-block: var(--space-4);
+  border-block-end: 1px solid var(--surface-dark-hover);
+}
+
+.formtura-settings-group-title,
+.formtura-field-options-title {
+  margin-block-end: var(--space-3);
+  font-size: var(--text-sm);
+  font-weight: 700;
+}
+
+.formtura-collapsible-header,
+.formtura-style-classes-header {
+  color: var(--text-on-dark);
+  background: transparent;
+  inline-size: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-0);
+  border: 0;
+  font-weight: 650;
+  text-align: start;
+  cursor: pointer;
+}
+
+.formtura-collapsible-icon {
+  flex: 0 0 auto;
+  transition: transform var(--transition-fast);
+}
+
+.formtura-collapsible-content,
+.formtura-style-classes-list,
+.formtura-style-classes-layouts {
+  display: grid;
+  gap: var(--space-3);
+  padding-block-start: var(--space-4);
+}
+
+.formtura-choice-item,
+.formtura-item-row,
+.formtura-layout-row,
+.formtura-choices-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.formtura-choice-radio {
+  flex: 0 0 auto;
+}
+
+.formtura-form-group-col,
+.formtura-name-field-col,
+.formtura-range-col {
+  min-inline-size: 0;
+  display: grid;
+  gap: var(--space-1);
+}
+
+.formtura-radio-inline-group {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.formtura-ellipsis-btn {
+  color: var(--text-muted);
+  background: transparent;
+  inline-size: 2.25rem;
+  block-size: 2.25rem;
+  display: grid;
+  place-items: center;
+  padding: var(--space-0);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+
+.formtura-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.formtura-subfield-label {
+  color: var(--text-on-dark-muted);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--text-xs);
+}
+
+.formtura-price-input {
+  max-inline-size: 6rem;
+}
+
+.formtura-warning-icon {
+  font-size: var(--text-base);
+}
+
+.formtura-warning-notice a {
+  color: var(--text-main);
+  font-weight: 650;
+}
+
+.formtura-info-panel {
+  color: var(--text-main);
+  background: var(--surface-selected);
+  margin-block-start: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--focus-soft);
+  border-radius: var(--radius-sm);
+}
+
+.formtura-choice-input {
+  flex: 1;
+}
+
+.formtura-choice-drag {
+  color: var(--text-muted);
+  cursor: grab;
+}
+
+.formtura-choices-list,
+.formtura-items-list,
+.formtura-logic-rules {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.formtura-bulk-add-container,
+.formtura-warning-notice {
+  display: grid;
+  gap: var(--space-2);
+  margin-block-end: var(--space-3);
+}
+
+.formtura-warning-notice {
+  color: var(--text-main);
+  background: var(--surface-danger);
+  padding: var(--space-3);
+  border: 1px solid var(--error-soft);
+  border-radius: var(--radius-md);
+  font-size: var(--text-xs);
+}
+
+.formtura-toggle-group {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.formtura-toggle {
+  position: relative;
+  inline-size: 2.75rem;
+  block-size: 1.5rem;
+  flex: 0 0 auto;
+}
+
+.formtura-toggle input {
+  position: absolute;
+  opacity: 0;
+}
+
+.formtura-toggle-slider {
+  background: var(--text-muted);
+  position: absolute;
+  inset: var(--space-0);
+  border-radius: 1rem;
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.formtura-toggle-slider::before {
+  content: "";
+  background: var(--bg-card);
+  position: absolute;
+  inset-block-start: var(--space-1);
+  inset-inline-start: var(--space-1);
+  inline-size: 1rem;
+  block-size: 1rem;
+  border-radius: 50%;
+  transition: transform var(--transition-fast);
+}
+
+.formtura-toggle input:checked + .formtura-toggle-slider {
+  background: var(--color-primary);
+}
+
+.formtura-toggle input:checked + .formtura-toggle-slider::before {
+  transform: translateX(1.25rem);
+}
+
+.formtura-layout-grid,
+.formtura-layout-selector {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.formtura-layout-row {
+  align-items: stretch;
+}
+
+.formtura-layout-row > * {
+  min-inline-size: 0;
+}
+
+.fta-one-half {
+  flex: 1 1 50%;
+}
+
+.fta-one-third {
+  flex: 1 1 33.333%;
+}
+
+.fta-two-thirds {
+  flex: 2 1 66.667%;
+}
+
+.fta-one-fourth {
+  flex: 1 1 25%;
+}
+
+.fta-three-fourths {
+  flex: 3 1 75%;
+}
+
+.fta-one-sixth {
+  flex: 1 1 16.667%;
+}
+
+.fta-five-sixths {
+  flex: 5 1 83.333%;
+}
+
+.fta-full {
+  flex: 1 1 100%;
+}
+
+.formtura-layout-btn,
+.formtura-layout-option,
+.formtura-style-class-item {
+  color: var(--text-main);
+  background: var(--bg-card);
+  min-block-size: 2.5rem;
+  padding: var(--space-2);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.formtura-layout-btn:hover,
+.formtura-layout-option:hover,
+.formtura-style-class-item:hover {
+  border-color: var(--focus);
+}
+
+.formtura-star-rating {
+  color: var(--border-light);
+  display: flex;
+  gap: var(--space-1);
+}
+
+.formtura-star {
+  color: inherit;
+  background: transparent;
+  inline-size: 1.5rem;
+  block-size: 1.5rem;
+  display: grid;
+  place-items: center;
+  padding: var(--space-0);
+  border: 0;
+  font-size: 1.25rem;
+  cursor: pointer;
+}
+
+.formtura-star-filled,
+.formtura-star-rating-interactive .formtura-star:hover {
+  color: var(--color-primary);
+}
+
+.formtura-star-empty {
+  color: var(--border-light);
+}
+
+.formtura-datetime-preview {
+  position: relative;
+}
+
+.formtura-calendar-preview {
+  background: var(--bg-card);
+  position: absolute;
+  inset-block-start: calc(100% + var(--space-2));
+  inset-inline-start: var(--space-0);
+  z-index: var(--layer-popover);
+  inline-size: min(20rem, 100%);
+  padding: var(--space-3);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+}
+
+.formtura-calendar-header,
+.formtura-calendar-weekdays,
+.formtura-calendar-days {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: var(--space-1);
+}
+
+.formtura-calendar-header {
+  grid-template-columns: auto 1fr 1fr auto;
+  margin-block-end: var(--space-3);
+}
+
+.formtura-calendar-weekdays {
+  color: var(--text-muted);
+  margin-block-end: var(--space-1);
+  font-size: var(--text-xs);
+  text-align: center;
+}
+
+.formtura-calendar-day,
+.formtura-calendar-nav {
+  min-block-size: 2rem;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.formtura-calendar-day:hover,
+.formtura-calendar-today {
+  background: var(--surface-subtle);
+}
+
+.formtura-calendar-selected {
+  color: var(--color-brand-dark);
+  background: var(--color-primary);
+}
+
+@media (min-width: 40em) {
+  .formtura-name-field-row,
+  .formtura-name-field-group,
+  .formtura-preview-name-group {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .formtura-preview-name-group-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .formtura-choices-three-columns {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

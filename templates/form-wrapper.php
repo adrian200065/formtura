@@ -22,6 +22,7 @@ $form_description = isset( $form['description'] ) ? $form['description'] : '';
 $form_fields = isset( $form['fields'] ) ? $form['fields'] : [];
 $form_settings = isset( $form['settings'] ) ? $form['settings'] : [];
 $submit_text = isset( $form_settings['submit_button_text'] ) ? $form_settings['submit_button_text'] : __( 'Submit', FORMTURA_TEXTDOMAIN );
+$recaptcha = fta_get_recaptcha_config();
 ?>
 
 <div class="fta-form-container" id="fta-form-<?php echo esc_attr( $form_id ); ?>">
@@ -46,11 +47,42 @@ $submit_text = isset( $form_settings['submit_button_text'] ) ? $form_settings['s
 					$field_type = isset( $field['type'] ) ? $field['type'] : 'text';
 
 					// Load field template.
-					fta_get_template_part( 'fields/' . $field_type, '', [ 'field' => $field ] );
+					$rendered = fta_get_template_part( 'fields/' . $field_type, '', [ 'field' => $field ] );
+
+					// A field type offered by the builder but missing a template
+					// would otherwise vanish from the page without a trace.
+					if ( ! $rendered ) {
+						fta_log(
+							sprintf( 'No frontend template for field type "%s" (form %d).', $field_type, $form_id ),
+							'warning'
+						);
+
+						if ( defined( 'WP_DEBUG' ) && WP_DEBUG && current_user_can( 'manage_options' ) ) {
+							printf(
+								'<div class="fta-field fta-field-missing"><strong>%s</strong></div>',
+								esc_html( sprintf(
+									/* translators: %s: field type slug */
+									__( 'Formtura: no frontend template for field type "%s". This notice is only visible to administrators with WP_DEBUG enabled.', FORMTURA_TEXTDOMAIN ),
+									$field_type
+								) )
+							);
+						}
+					}
 				}
 			}
 			?>
 		</div><!-- /.fta-form-body -->
+
+		<?php if ( $recaptcha['enabled'] && 'v2' === $recaptcha['version'] ) : ?>
+			<?php // Google's API renders the checkbox into this container, and the
+			// token lands in a textarea inside it - inside the form, so the
+			// submission picks it up with the rest of the fields. ?>
+			<div class="fta-field fta-field-recaptcha">
+				<div class="fta-recaptcha"
+					data-fta-recaptcha
+					data-sitekey="<?php echo esc_attr( $recaptcha['site_key'] ); ?>"></div>
+			</div><!-- /.fta-field-recaptcha -->
+		<?php endif; ?>
 
 		<div class="fta-form-footer">
 			<button type="submit" class="fta-submit-button">

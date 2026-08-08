@@ -291,6 +291,13 @@ class Form_Builder {
 			$sanitized['type'] = sanitize_key( $field['type'] );
 		}
 
+		// Sanitize field name (submission key). The builder does not set one
+		// today, in which case the field id is used instead - see
+		// fta_get_field_name().
+		if ( isset( $field['name'] ) ) {
+			$sanitized['name'] = sanitize_text_field( $field['name'] );
+		}
+
 		// Sanitize label.
 		if ( isset( $field['label'] ) ) {
 			$sanitized['label'] = sanitize_text_field( $field['label'] );
@@ -435,7 +442,11 @@ class Form_Builder {
 			$sanitized['maxValue'] = floatval( $field['maxValue'] );
 		}
 		if ( isset( $field['defaultValue'] ) ) {
-			$sanitized['defaultValue'] = floatval( $field['defaultValue'] );
+			// Numeric fields (slider) need a float; hidden and text fields
+			// store their default verbatim.
+			$sanitized['defaultValue'] = is_numeric( $field['defaultValue'] )
+				? floatval( $field['defaultValue'] )
+				: sanitize_text_field( $field['defaultValue'] );
 		}
 		if ( isset( $field['increment'] ) ) {
 			$sanitized['increment'] = floatval( $field['increment'] );
@@ -455,6 +466,27 @@ class Form_Builder {
 			$sanitized['calculationFormula'] = sanitize_text_field( $field['calculationFormula'] );
 		}
 
+		// Sanitize rich content (HTML and Rich Text fields).
+		if ( isset( $field['content'] ) ) {
+			$sanitized['content'] = wp_kses_post( $field['content'] );
+		}
+
+		// Sanitize maximum rating (Star Rating field).
+		if ( isset( $field['maxRating'] ) ) {
+			$sanitized['maxRating'] = max( 1, absint( $field['maxRating'] ) );
+		}
+
+		// Sanitize date/time field options.
+		if ( isset( $field['dateTimeFormat'] ) ) {
+			$sanitized['dateTimeFormat'] = sanitize_text_field( $field['dateTimeFormat'] );
+		}
+		if ( isset( $field['yearRangeStart'] ) ) {
+			$sanitized['yearRangeStart'] = sanitize_text_field( $field['yearRangeStart'] );
+		}
+		if ( isset( $field['yearRangeEnd'] ) ) {
+			$sanitized['yearRangeEnd'] = sanitize_text_field( $field['yearRangeEnd'] );
+		}
+
 		// Sanitize conditional logic (new format).
 		if ( isset( $field['conditionalLogic'] ) && is_array( $field['conditionalLogic'] ) ) {
 			$sanitized['conditionalLogic'] = $field['conditionalLogic'];
@@ -468,6 +500,88 @@ class Form_Builder {
 		// Sanitize conditional logic.
 		if ( isset( $field['conditional_logic'] ) && is_array( $field['conditional_logic'] ) ) {
 			$sanitized['conditional_logic'] = $field['conditional_logic'];
+		}
+
+		// Sanitize payment items (for payment-checkbox, payment-multiple,
+		// payment-dropdown). Mirrors how choices above is sanitized. Non-array
+		// entries are dropped rather than coerced, and array_values() re-keys
+		// the result sequentially so a dropped middle entry still round-trips
+		// through wp_json_encode() as a JSON array, not an object with a gap.
+		if ( isset( $field['items'] ) && is_array( $field['items'] ) ) {
+			$sanitized['items'] = array_values( array_map( function( $item ) {
+				return [
+					'label'     => isset( $item['label'] ) ? sanitize_text_field( $item['label'] ) : '',
+					'value'     => isset( $item['value'] ) ? sanitize_text_field( $item['value'] ) : '',
+					'price'     => isset( $item['price'] ) && is_numeric( $item['price'] ) ? floatval( $item['price'] ) : 0.0,
+					'isDefault' => isset( $item['isDefault'] ) ? (bool) $item['isDefault'] : false,
+				];
+			}, array_filter( $field['items'], 'is_array' ) ) );
+		}
+
+		// Sanitize single item price (for payment-single).
+		if ( isset( $field['price'] ) ) {
+			$sanitized['price'] = is_numeric( $field['price'] ) ? floatval( $field['price'] ) : 0.0;
+		}
+
+		// Sanitize show-price-after-labels (for payment-checkbox,
+		// payment-multiple, payment-dropdown).
+		if ( isset( $field['showPriceAfterLabels'] ) ) {
+			$sanitized['showPriceAfterLabels'] = (bool) $field['showPriceAfterLabels'];
+		}
+
+		// Sanitize enable summary (for total field).
+		if ( isset( $field['enableSummary'] ) ) {
+			$sanitized['enableSummary'] = (bool) $field['enableSummary'];
+		}
+
+		// Sanitize coupon codes (for coupon field). Value is not clamped here
+		// - PaymentTotals::find_coupon() already clamps value >= 0 and percent
+		// <= 100, and duplicating that would create two places to keep in
+		// step. As with items above, non-array entries are dropped and the
+		// result is re-keyed so the gap survives wp_json_encode() as an array.
+		if ( isset( $field['coupons'] ) && is_array( $field['coupons'] ) ) {
+			$sanitized['coupons'] = array_values( array_map( function( $coupon ) {
+				return [
+					'code'  => isset( $coupon['code'] ) ? sanitize_text_field( $coupon['code'] ) : '',
+					'type'  => isset( $coupon['type'] ) && 'percent' === $coupon['type'] ? 'percent' : 'fixed',
+					'value' => isset( $coupon['value'] ) && is_numeric( $coupon['value'] ) ? floatval( $coupon['value'] ) : 0.0,
+				];
+			}, array_filter( $field['coupons'], 'is_array' ) ) );
+		}
+
+		// Sanitize address scheme.
+		if ( isset( $field['scheme'] ) ) {
+			$sanitized['scheme'] = in_array( $field['scheme'], [ 'us', 'international' ], true ) ? $field['scheme'] : 'us';
+		}
+
+		// Sanitize file upload options.
+		if ( isset( $field['allowMultiple'] ) ) {
+			$sanitized['allowMultiple'] = (bool) $field['allowMultiple'];
+		}
+		if ( isset( $field['attachToEmail'] ) ) {
+			$sanitized['attachToEmail'] = (bool) $field['attachToEmail'];
+		}
+		if ( isset( $field['allowedFileTypes'] ) ) {
+			// Only values the builder itself emits (FieldLibrary.jsx): "all"
+			// or "specify". Anything else falls back to the safer default.
+			$sanitized['allowedFileTypes'] = in_array( $field['allowedFileTypes'], [ 'all', 'specify' ], true )
+				? $field['allowedFileTypes']
+				: 'specify';
+		}
+		if ( isset( $field['specifiedTypes'] ) ) {
+			$sanitized['specifiedTypes'] = sanitize_text_field( $field['specifiedTypes'] );
+		}
+		if ( isset( $field['minFileSize'] ) ) {
+			$sanitized['minFileSize'] = is_numeric( $field['minFileSize'] ) ? floatval( $field['minFileSize'] ) : '';
+		}
+		if ( isset( $field['maxFileSize'] ) ) {
+			$sanitized['maxFileSize'] = is_numeric( $field['maxFileSize'] ) ? floatval( $field['maxFileSize'] ) : '';
+		}
+		if ( isset( $field['uploadText'] ) ) {
+			$sanitized['uploadText'] = sanitize_text_field( $field['uploadText'] );
+		}
+		if ( isset( $field['compactUploadText'] ) ) {
+			$sanitized['compactUploadText'] = sanitize_text_field( $field['compactUploadText'] );
 		}
 
 		return $sanitized;

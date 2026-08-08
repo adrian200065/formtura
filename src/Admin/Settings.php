@@ -125,6 +125,12 @@ class Settings {
 			$sanitized['recaptcha_version'] = in_array( $settings['recaptcha_version'], [ 'v2', 'v3' ], true ) ? $settings['recaptcha_version'] : 'v2';
 		}
 
+		if ( isset( $settings['recaptcha_score_threshold'] ) ) {
+			$threshold = is_numeric( $settings['recaptcha_score_threshold'] ) ? (float) $settings['recaptcha_score_threshold'] : 0.5;
+
+			$sanitized['recaptcha_score_threshold'] = max( 0.0, min( 1.0, $threshold ) );
+		}
+
 		// Currency settings.
 		if ( isset( $settings['currency'] ) ) {
 			$sanitized['currency'] = sanitize_text_field( $settings['currency'] );
@@ -146,15 +152,16 @@ class Settings {
 	 */
 	public function get_defaults() {
 		return [
-			'license_key'            => '',
-			'load_css'               => true,
-			'load_js'                => true,
-			'debug_mode'             => false,
-			'recaptcha_site_key'     => '',
-			'recaptcha_secret_key'   => '',
-			'recaptcha_version'      => 'v2',
-			'currency'               => 'USD',
-			'keep_data_on_uninstall' => false,
+			'license_key'               => '',
+			'load_css'                  => true,
+			'load_js'                   => true,
+			'debug_mode'                => false,
+			'recaptcha_site_key'        => '',
+			'recaptcha_secret_key'      => '',
+			'recaptcha_version'         => 'v2',
+			'recaptcha_score_threshold' => 0.5,
+			'currency'                  => 'USD',
+			'keep_data_on_uninstall'    => false,
 		];
 	}
 }

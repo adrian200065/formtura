@@ -1,12 +1,18 @@
 {
   "name": "formtura",
-  "version": "1.0.0",
+  "version": "1.0.3",
   "description": "A modern, intuitive, and powerful form builder for WordPress",
   "main": "assets/js/builder.js",
+  "packageManager": "pnpm@10.29.3",
+  "engines": {
+    "node": ">=18",
+    "pnpm": ">=9"
+  },
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "watch": "vite build --watch",
+    "dev": "vite build --watch --mode development",
+    "dev:server": "vite --mode development",
+    "build": "vite build --mode production",
+    "watch": "vite build --watch --mode development",
     "preview": "vite preview",
     "lint": "eslint src --ext .js,.jsx,.ts,.tsx",
     "lint:fix": "eslint src --ext .js,.jsx,.ts,.tsx --fix",
@@ -34,6 +40,7 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
+    "jquery": "^3.7.1",
     "vite": "^5.0.8"
   },
   "dependencies": {

@@ -4,7 +4,7 @@ Tags: form, form builder, contact form, drag and drop, forms
 Requires at least: 5.8
 Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.0.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -18,12 +18,12 @@ Formtura is the modern, intuitive, and powerful form builder for WordPress. Crea
 
 * **Beautiful Drag & Drop Builder** - Intuitive interface with real-time preview
 * **Pre-built Templates** - Start quickly with professionally designed form templates
-* **Advanced Field Types** - From basic text fields to complex payment integrations
+* **Twenty-Nine Field Types** - From single line text to file uploads, signatures and priced payment items
+* **File Uploads** - Validated, safely stored, and optionally attached to your notification emails
 * **Built-in SMTP** - Ensure reliable email delivery with integrated SMTP configuration
 * **Entry Management** - View, search, and export form submissions
 * **Conditional Logic** - Show or hide fields based on user input
 * **Email Notifications** - Customizable email templates for form submissions
-* **Spam Protection** - Built-in CAPTCHA support
 * **Mobile Responsive** - Forms look great on all devices
 * **Translation Ready** - Fully internationalized and ready for translation
 
@@ -31,22 +31,46 @@ Formtura is the modern, intuitive, and powerful form builder for WordPress. Crea
 
 * Single Line Text
 * Paragraph Text
+* Name
+* Email
 * Dropdown
 * Multiple Choice
 * Checkboxes
 * Numbers
-* Name
-* Email
-* Number Slider
-* CAPTCHA
+* Phone
+* Website / URL
+* HTML
+* Hidden Field
 
-= Pro Features =
+= Advanced Fields =
 
-* Advanced field types (Phone, Address, Date/Time, File Upload, Signature, etc.)
-* Payment integrations (PayPal, Stripe, Square, Authorize.Net)
-* Marketing integrations (Mailchimp, ConvertKit, etc.)
-* Email logging
-* Priority support
+* Date / Time
+* Password
+* File Upload
+* Star Rating
+* Slider
+* Address
+* Camera
+* Signature
+
+= Presentation Fields =
+
+* Content
+* Section Divider
+* Rich Text
+
+= Payment Fields =
+
+* Single Item
+* Checkbox Items
+* Multiple Items
+* Dropdown Items
+* Coupon
+* Total
+
+Payment fields record the amount with the form entry so you can see what
+was ordered. They do not collect payment - Formtura has no payment
+gateway integration yet, so no card is charged and no money moves.
 
 == Installation ==
 
@@ -83,6 +107,15 @@ Yes, you can export entries to CSV format from the Entries page.
 
 == Changelog ==
 
+= 1.0.3 =
+* Added frontend rendering for 14 more field types, including Dropdown, Multiple Choice, Checkboxes, Name, Date, Star Rating and Slider
+* Added server-side file upload handling: size and file type validation, protected storage, and the option to attach uploads to notification emails
+* Fixed form submissions not being saved. Submitted values are now stored against the correct field
+* Fixed email notifications failing to send
+* Renamed the choice fields so they match what they do: "Multiple Choice" accepts one answer, "Checkboxes" accepts several. Existing forms are updated automatically on upgrade
+* Fields with no frontend template no longer disappear from the page without warning
+* The documented field list now covers only the types that render on your site. Types that were listed but never worked have been removed until they ship
+
 = 1.0.0 =
 * Initial release
 * Drag-and-drop form builder
@@ -94,6 +127,9 @@ Yes, you can export entries to CSV format from the Entries page.
 * CAPTCHA support
 
 == Upgrade Notice ==
+
+= 1.0.3 =
+Fixes form submissions not being saved and notification emails not sending. This upgrade rewrites the choice fields in your saved forms, so please back up your database first.
 
 = 1.0.0 =
 Initial release of Formtura - the modern form builder for WordPress.

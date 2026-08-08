@@ -3,7 +3,7 @@
  * Plugin Name: Formtura
  * Plugin URI: https://formtura.com
  * Description: A modern, intuitive, and powerful form builder for WordPress with a beautiful drag-and-drop interface.
- * Version: 1.0.2
+ * Version: 1.0.3
  * Author: Formtura Team
  * Author URI: https://formtura.com
  * Text Domain: formtura
@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define plugin constants.
-define( 'FORMTURA_VERSION', '1.0.2' );
+define( 'FORMTURA_VERSION', '1.0.3' );
 define( 'FORMTURA_PLUGIN_FILE', __FILE__ );
 define( 'FORMTURA_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'FORMTURA_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
@@ -33,6 +33,13 @@ define( 'FORMTURA_TEXTDOMAIN', 'formtura' );
 if ( file_exists( FORMTURA_PLUGIN_DIR . 'vendor/autoload.php' ) ) {
 	require_once FORMTURA_PLUGIN_DIR . 'vendor/autoload.php';
 }
+
+// Load global helper functions.
+//
+// Deliberately required here rather than through Composer's `files` autoload:
+// Functions.php exits when ABSPATH is undefined, which would abort any process
+// that loads the autoloader outside WordPress - PHPUnit included.
+require_once FORMTURA_PLUGIN_DIR . 'src/Functions.php';
 
 /**
  * Initialize the plugin.

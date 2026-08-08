@@ -25,7 +25,7 @@ class Installer {
 	 *
 	 * @var string
 	 */
-	const DB_VERSION = '1.0.3';
+	const DB_VERSION = '1.0.4';
 
 	/**
 	 * Run activation tasks.

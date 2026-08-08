@@ -4,7 +4,7 @@ Tags: form, form builder, contact form, drag and drop, forms
 Requires at least: 5.8
 Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 1.0.3
+Stable tag: 1.0.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -107,6 +107,22 @@ Yes, you can export entries to CSV format from the Entries page.
 
 == Changelog ==
 
+= 1.0.4 =
+* Added twelve field types to the frontend: Content, Section Divider, Rich Text, Address, Camera, Signature, Single Item, Checkbox Items, Multiple Items, Dropdown Items, Coupon and Total. Twenty-nine of the builder's field types now render on your site
+* Added payment fields that record what was ordered with the entry, including per-item prices, a running total, an optional order summary and coupon codes. No payment is collected - Formtura has no gateway integration yet, so no card is charged
+* Fixed reCAPTCHA rejecting every submission. No token was ever generated, so saving a secret key silently broke every form on the site. v2 and v3 both work now, and v3 checks the score and action
+* Added a reCAPTCHA version selector to Settings. Without it the version was reset on every save, so v3 keys could never be used
+* Fixed the form builder silently discarding field settings when you saved. Payment prices, coupon codes, the address format and every file upload setting - size limits, allowed file types, attach-to-email - were thrown away, so those panels had no effect on the published form. File upload settings had been affected since 1.0.3
+* Fixed the Content and HTML blocks rendering nothing. The builder saved your text under one key while the frontend read another
+* Fixed a Total field marked Required blocking every submission, with an error the visitor had no way to clear
+* Fixed uploaded files being left behind on the server when a submission was rejected
+* Fixed the Camera field being impossible to open when its label was hidden
+* Fixed the signature pad keeping a drawing on screen after a successful submission, and continuing to draw after an interrupted stroke
+* Payment amounts are now calculated on the server from the form itself, so a tampered page cannot change what is recorded
+* Signatures are stored as image files in the same protected location as file uploads, and are recorded with the entry
+* The Rich Text field ships as a plain text area, and the builder no longer shows formatting buttons it does not provide
+* The payment gateway fields, along with Layout, Repeater, Page Break and Entry Preview, can no longer be dropped onto a form, where they previously rendered nothing. They now explain that they are not available yet
+
 = 1.0.3 =
 * Added frontend rendering for 14 more field types, including Dropdown, Multiple Choice, Checkboxes, Name, Date, Star Rating and Slider
 * Added server-side file upload handling: size and file type validation, protected storage, and the option to attach uploads to notification emails
@@ -127,6 +143,13 @@ Yes, you can export entries to CSV format from the Entries page.
 * CAPTCHA support
 
 == Upgrade Notice ==
+
+= 1.0.4 =
+Two fixes change how existing forms behave. Any form using reCAPTCHA was
+rejecting every submission and will start working again. File upload
+settings, which were previously discarded when you saved, now take effect -
+so check the size limits and allowed file types on your upload fields match
+what you intended. If you saved reCAPTCHA v3 keys, choose v3 in Settings.
 
 = 1.0.3 =
 Fixes form submissions not being saved and notification emails not sending. This upgrade rewrites the choice fields in your saved forms, so please back up your database first.

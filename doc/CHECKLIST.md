@@ -443,7 +443,7 @@ gitignored, so any deploy must run `npm run build`.
 - [ ] Translation strings review
 - [ ] Accessibility audit (WCAG 2.1 AA)
 - [ ] Cross-browser testing
-- [x] Align `FORMTURA_VERSION` with `Installer::DB_VERSION` (both 1.0.3)
+- [x] Align `FORMTURA_VERSION` with `Installer::DB_VERSION` (both 1.0.4)
 - [x] Trim `readme.txt` to the field types that actually render
 
 ### WordPress.org Submission
@@ -483,5 +483,5 @@ analytics not started
 ---
 
 **Last Updated:** August 7, 2026
-**Plugin Version:** 1.0.3 (DB schema 1.0.3)
+**Plugin Version:** 1.0.4 (DB schema 1.0.4)
 **Status:** Builder complete; frontend rendering covers 17 of 38 field types

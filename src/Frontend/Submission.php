@@ -161,6 +161,14 @@ class Submission {
 		] );
 
 		if ( ! $entry_id ) {
+			// The files above are already on disk, and the entry that would
+			// have referenced them does not exist - so nothing will ever read
+			// or delete them. Without this, every failed entry write (a full
+			// disk, a locked table) leaves a permanent orphan behind, which is
+			// the same leak already closed for uploads-then-signature failures
+			// in process_signatures() and for a rejected payment recompute.
+			Uploads::cleanup( $files );
+
 			wp_send_json_error( [
 				'message' => __( 'Failed to save form submission. Please try again.', FORMTURA_TEXTDOMAIN ),
 			] );

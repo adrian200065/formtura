@@ -165,6 +165,15 @@ const FormBuilder = ({ formId }) => {
           label: 'HTML',
           content: '',
         };
+      // Presentational block of author-supplied copy. Its text lives under
+      // `content` - the key templates/fields/content.php reads - not under
+      // `description`, which that template ignores entirely.
+      case 'content':
+        return {
+          ...baseField,
+          label: 'Content',
+          content: '',
+        };
       case 'file-upload':
         return {
           ...baseField,
@@ -228,6 +237,8 @@ const FormBuilder = ({ formId }) => {
       'datetime': 'Date',
       'rich-text': 'Rich Text',
       'html': 'HTML',
+      'content': 'Content',
+      'section-divider': 'Section Divider',
       'file-upload': 'File Upload',
       'camera': 'Camera',
       'website': 'Website',

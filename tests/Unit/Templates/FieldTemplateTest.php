@@ -357,6 +357,50 @@ class FieldTemplateTest extends TestCase {
 		$this->assertSame( '', trim( $html ) );
 	}
 
+	/**
+	 * Both presentational types render from `content`, the key the builder's
+	 * editors write. A field saved before those editors were bound to it has
+	 * its text under `description`, and must still render rather than
+	 * disappearing - the same fallback, applied identically to both types.
+	 *
+	 * @dataProvider presentationalTypeProvider
+	 * @param string $type Field type.
+	 */
+	public function test_presentational_field_falls_back_to_a_pre_fix_description( $type ) {
+		$html = $this->render( $this->field( $type, [
+			'description' => 'Saved before the builder wrote content.',
+		] ) );
+
+		$this->assertStringContainsString( 'Saved before the builder wrote content.', $html );
+	}
+
+	/**
+	 * ...and `content` wins when both are present, so a field edited after
+	 * the fix shows the new copy rather than the stale description.
+	 *
+	 * @dataProvider presentationalTypeProvider
+	 * @param string $type Field type.
+	 */
+	public function test_presentational_field_prefers_content_over_description( $type ) {
+		$html = $this->render( $this->field( $type, [
+			'content'     => 'Current copy.',
+			'description' => 'Stale copy.',
+		] ) );
+
+		$this->assertStringContainsString( 'Current copy.', $html );
+		$this->assertStringNotContainsString( 'Stale copy.', $html );
+	}
+
+	/**
+	 * @return array[]
+	 */
+	public function presentationalTypeProvider() {
+		return [
+			'content' => [ 'content' ],
+			'html'    => [ 'html' ],
+		];
+	}
+
 	public function test_section_divider_renders_heading_and_rule() {
 		$html = $this->render( $this->field( 'section-divider', [
 			'label'       => 'Shipping Details',

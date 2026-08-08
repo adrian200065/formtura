@@ -603,10 +603,14 @@ const FormPreview = ({ fields, formSettings, onClose }) => {
           );
 
         case 'html':
+          // `content` first, matching templates/fields/html.php: that is the
+          // key the builder's editor writes and the only key the frontend
+          // reads. `description` remains a fallback for fields saved before
+          // the editor was bound to `content`, but must no longer win over it.
           return (
             <div
               className="formtura-html-content"
-              dangerouslySetInnerHTML={{ __html: field.description || field.content || '' }}
+              dangerouslySetInnerHTML={{ __html: field.content || field.description || '' }}
             />
           );
 

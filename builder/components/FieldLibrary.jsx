@@ -1854,15 +1854,38 @@ const GeneralTab = ({ field, onUpdate }) => {
       {/* Render field-specific options */}
       {renderFieldSpecificOptions()}
 
-      {/* Description - WYSIWYG for HTML fields, skip for rich-text (content already shown), textarea for others */}
+      {/*
+        Description - or, for the two presentational types, the block of
+        content they render instead of a description.
+
+        Both templates (templates/fields/html.php, content.php) read the
+        `content` key and ignore `description`, so these editors must write
+        `content`. They read `field.description` as a fallback so a field
+        saved before this binding was fixed still shows its text here, and
+        migrates to `content` on the next edit.
+
+        rich-text is skipped: it has its own Content editor above.
+      */}
       {field.type === 'html' ? (
         <div className="formtura-form-group">
           <label>
             Content <Tooltip text="Enter HTML content that will be displayed in the form. Use the toolbar to format text, add links, and create lists." />
           </label>
           <WysiwygEditor
-            value={field.description || ''}
-            onChange={(html) => handleChange('description', html)}
+            value={field.content || field.description || ''}
+            onChange={(html) => handleChange('content', html)}
+          />
+        </div>
+      ) : field.type === 'content' ? (
+        <div className="formtura-form-group">
+          <label htmlFor="field-content">
+            Content <Tooltip text="Enter the text or basic HTML this block displays on the form. It is not an input - visitors read it, they do not fill it in." />
+          </label>
+          <textarea
+            id="field-content"
+            value={field.content || field.description || ''}
+            onChange={(e) => handleChange('content', e.target.value)}
+            rows={6}
           />
         </div>
       ) : field.type !== 'rich-text' && (
@@ -3230,6 +3253,30 @@ const AdvancedTab = ({ field, onUpdate }) => {
           </span>
         </div>
       </div>
+
+      {/*
+        Hide Sublabels - composite fields only. The name field has its own
+        Advanced branch above carrying the same toggle; address reaches this
+        default branch, and its template, sanitizer and createField() default
+        all honour hideSublabels, so the toggle has to be reachable here too.
+      */}
+      {field.type === 'address' && (
+        <div className="formtura-form-group">
+          <div className="formtura-toggle-group">
+            <label className="formtura-toggle">
+              <input
+                type="checkbox"
+                checked={field.hideSublabels || false}
+                onChange={(e) => handleChange('hideSublabels', e.target.checked)}
+              />
+              <span className="formtura-toggle-slider"></span>
+            </label>
+            <span className="formtura-toggle-label">
+              Hide Sublabels <Tooltip text="Check this option to hide the sublabels under each address input." />
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* Read-Only - Not shown for Total field */}
       {field.type !== 'total' && (

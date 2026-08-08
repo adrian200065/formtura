@@ -17,7 +17,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$content = isset( $field['content'] ) ? $field['content'] : '';
+// The builder writes this block's text under `content` (FieldLibrary.jsx).
+// `description` is read as a fallback so a field saved before that binding
+// was fixed - when the only editor bound to this type wrote `description` -
+// still renders instead of silently disappearing. html.php does the same.
+$content = isset( $field['content'] ) ? (string) $field['content'] : '';
+
+if ( '' === trim( $content ) && isset( $field['description'] ) ) {
+	$content = (string) $field['description'];
+}
 
 if ( '' === trim( $content ) ) {
 	return;

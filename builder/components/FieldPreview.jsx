@@ -640,6 +640,29 @@ const FieldPreview = ({ field }) => {
           </div>
         );
 
+      // Presentational blocks, not inputs: both render author-supplied markup
+      // from the same `content` key (templates/fields/content.php, html.php),
+      // so the canvas must show that copy rather than an empty text input.
+      case 'content':
+      case 'html': {
+        const blockContent = field.content || field.description || '';
+
+        return blockContent
+          ? (
+            <div
+              className="formtura-content-preview"
+              dangerouslySetInnerHTML={{ __html: blockContent }}
+            />
+          )
+          : <p className="formtura-content-preview-empty">No content yet</p>;
+      }
+
+      // The frontend renders the label as the section heading plus a rule
+      // (templates/fields/section-divider.php); the label is already printed
+      // by the wrapper below, so only the rule belongs here.
+      case 'section-divider':
+        return <hr className="formtura-section-divider-preview" />;
+
       default:
         return (
           <input

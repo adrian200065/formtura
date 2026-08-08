@@ -348,6 +348,69 @@ wrongly produce `radio`. Migrated form ids are recorded in the
 
 ---
 
+## 🔧 Recently Fixed (unreleased, after 1.0.3)
+
+Found while adding the 12 field types. Each kept something from working at
+all, and each was invisible to the tests that existed at the time.
+
+- **The builder's save path silently discarded field settings.**
+  `Form_Builder::sanitize_field_data()` is a strict key allowlist, and it had
+  no branch for `coupons`, `items`, `price`, `showPriceAfterLabels`,
+  `enableSummary`, `scheme` or `compactUploadText` — so every payment price,
+  coupon code and address scheme an author configured was thrown away on
+  save. The file-upload panel's seven settings (`maxFileSize`,
+  `allowedFileTypes`, `attachToEmail` and four more) had been discarded the
+  same way since 1.0.3. Nothing compared the builder's keys against the
+  sanitizer's, so each feature's own tests passed while the feature was dead.
+  Guarded now by a two-part test: `FormBuilderSanitizeTest` asserts the
+  sanitizer preserves each setting, and `builderFieldSettings.test.jsx`
+  asserts the builder actually produces it, both reading
+  `tests/fixtures/builder-field-settings.json`.
+- **The Content and HTML blocks rendered nothing.** Their editors wrote
+  `description` while their templates read `content`.
+- **A required Total field blocked every submission**, unclearably: `total`
+  renders no input, but was not in `is_presentational_field()`.
+- **reCAPTCHA rejected every submission once configured.** No token was ever
+  generated — v2 rendered no widget and v3 never called `execute()` — while
+  the server gated on the secret key alone.
+- **A rejected submission left files on disk** on three separate paths
+  (signature failure after uploads, a peer signature failure, and a failed
+  entry write).
+- **`authorize-net` was draggable with no template**, silently rendering
+  nothing; now gated behind an info dialog like its siblings.
+
+## 📌 Known follow-ups (not blocking)
+
+Triaged during the final review of the field-type cycle. None stops a
+feature working.
+
+- `Uploads::get_email_attachments()` matches the literal `'file-upload'`
+  type, so camera photos and signatures are never attached to notification
+  emails. Latent: the builder only offers `attachToEmail` for file uploads.
+- `camera`'s `compactUploadText` is read by its template but has no builder
+  control, so the trigger always reads "Take Photo".
+- The `_payment` entry array reaches `implode()` in
+  `views/entries-list.php`, warning in the admin preview.
+- 21 builder-only settings are still dropped by the save allowlist (the
+  repeater panel, `enableQuantity`, `autoResize`, rating's `unique` and
+  more). None is read by any renderer, so no feature is dead — but the
+  toggles silently revert on reload.
+- `items[]` prices are unrounded and the discount is not itemized, so the
+  breakdown need not sum to `amount`; and with several coupon fields the
+  last valid code silently wins. Both matter once a gateway exists.
+- On a form saved before the Content/HTML fix, clearing the block falls back
+  to the old `description` and cannot be cleared without deleting the field.
+  Fix: have those editors write `description: ''` alongside `content`.
+- A payment item inside a conditionally-hidden field still counts toward the
+  total. Hidden fields are hidden, not disabled, and the server agrees with
+  the display — plugin-wide behaviour, not specific to payments.
+- `minValue`/`maxValue`/`increment` use bare `floatval()` without the
+  `is_numeric()` guard the money fields now use.
+- `FormPreview.jsx` (the preview modal) renders a plain text input for 11 of
+  the 12 new types.
+
+---
+
 ## 📝 Documentation (ONGOING)
 
 ### User Documentation

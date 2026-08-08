@@ -69,6 +69,28 @@ describe('FieldLibrary payment gateway fields', () => {
   });
 });
 
+// hideSublabels is defaulted by createField(), sanitized by the save path and
+// read by templates/fields/address.php - but its only toggle used to live
+// inside the Advanced tab's `field.type === 'name'` branch, which an address
+// field never reaches, leaving the setting unreachable for the field type that
+// most needs it.
+describe.each(['name', 'address'])('FieldLibrary %s field sublabels', (type) => {
+  it('offers a reachable Hide Sublabels toggle', () => {
+    const field = { id: 'field_1', type, label: 'Where do you live?' };
+    const { onFieldUpdate } = renderWithField(field);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Advanced' }));
+    fireEvent.click(
+      screen
+        .getByText(/Hide Sublabels/)
+        .closest('.formtura-toggle-group')
+        .querySelector('input[type="checkbox"]')
+    );
+
+    expect(onFieldUpdate).toHaveBeenCalledWith('field_1', { hideSublabels: true });
+  });
+});
+
 describe('FieldLibrary payment items editor', () => {
   describe.each(['payment-checkbox', 'payment-multiple', 'payment-dropdown'])(
     '%s',

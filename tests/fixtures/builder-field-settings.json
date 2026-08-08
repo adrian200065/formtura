@@ -1,0 +1,82 @@
+{
+  "readme": "Every setting the builder can actually save, per field type added in the 12-task missing-field-types cycle. Two tests share this file so neither can drift on its own: builder/components/__tests__/builderFieldSettings.test.jsx asserts the builder really produces each key for that type (createField() defaults plus every control in the field's options panel), and tests/Unit/Admin/FormBuilderSanitizeTest.php asserts Form_Builder::sanitize_field_data() preserves each one with the right PHP type. A key listed here that the builder cannot produce fails the JS side; a key the save path drops fails the PHP side. `posted` is the raw value the builder POSTs, `expected` the sanitized value; the JS side reads only the key names.",
+  "types": {
+    "content": {
+      "content": {
+        "posted": "<p>Hello <strong>world</strong></p>",
+        "expected": "<p>Hello <strong>world</strong></p>"
+      }
+    },
+    "section-divider": {
+      "label": { "posted": "Section Two", "expected": "Section Two" },
+      "description": { "posted": "Fill in the rest below.", "expected": "Fill in the rest below." }
+    },
+    "rich-text": {
+      "rows": { "posted": "10", "expected": 10 },
+      "content": { "posted": "<p>Draft copy</p>", "expected": "<p>Draft copy</p>" }
+    },
+    "address": {
+      "scheme": { "posted": "international", "expected": "international" },
+      "hideSublabels": { "posted": true, "expected": true }
+    },
+    "camera": {
+      "label": { "posted": "Photo of the damage", "expected": "Photo of the damage" },
+      "required": { "posted": true, "expected": true }
+    },
+    "signature": {
+      "label": { "posted": "Your signature", "expected": "Your signature" },
+      "required": { "posted": true, "expected": true }
+    },
+    "payment-single": {
+      "price": { "posted": "42.50", "expected": 42.5 }
+    },
+    "payment-checkbox": {
+      "items": {
+        "posted": [
+          { "label": "Small", "value": "small", "price": "10.00", "isDefault": false },
+          { "label": "Large", "value": "large", "price": "25.00", "isDefault": true }
+        ],
+        "expected": [
+          { "label": "Small", "value": "small", "price": 10.0, "isDefault": false },
+          { "label": "Large", "value": "large", "price": 25.0, "isDefault": true }
+        ]
+      },
+      "showPriceAfterLabels": { "posted": true, "expected": true }
+    },
+    "payment-multiple": {
+      "items": {
+        "posted": [
+          { "label": "Basic", "value": "basic", "price": "15.00", "isDefault": true }
+        ],
+        "expected": [
+          { "label": "Basic", "value": "basic", "price": 15.0, "isDefault": true }
+        ]
+      },
+      "showPriceAfterLabels": { "posted": false, "expected": false }
+    },
+    "payment-dropdown": {
+      "items": {
+        "posted": [
+          { "label": "Standard", "value": "standard", "price": "5.00", "isDefault": false }
+        ],
+        "expected": [
+          { "label": "Standard", "value": "standard", "price": 5.0, "isDefault": false }
+        ]
+      },
+      "showPriceAfterLabels": { "posted": true, "expected": true }
+    },
+    "coupon": {
+      "coupons": {
+        "posted": [
+          { "code": "SAVE10", "type": "percent", "value": "10" }
+        ],
+        "expected": [
+          { "code": "SAVE10", "type": "percent", "value": 10.0 }
+        ]
+      }
+    },
+    "total": {
+      "enableSummary": { "posted": true, "expected": true }
+    }
+  }
+}

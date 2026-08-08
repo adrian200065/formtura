@@ -295,176 +295,97 @@ class FormBuilderSanitizeTest extends TestCase {
 	 * This cycle's actual defect was never a wrong value - it was a setting
 	 * with no branch in sanitize_field_data() at all, so it vanished on save
 	 * while every other test for that field type kept passing. This test
-	 * builds one full field per new field type (Tasks 1-11), carrying every
-	 * setting its template or server code actually reads, runs it through
-	 * the real sanitizer, and asserts each setting survives with the right
-	 * PHP type. If a future change drops a branch, the failure message names
-	 * the field type and the missing/mangled key directly.
+	 * builds one full field per new field type, runs it through the real
+	 * sanitizer, and asserts each setting survives with the right PHP type. If
+	 * a future change drops a branch, the failure message names the field type
+	 * and the missing/mangled key directly.
 	 *
-	 * `section-divider` and `signature` carry no settings beyond the generic
-	 * label/required/description branches, which are exercised elsewhere in
-	 * this file and throughout the suite - they are included here anyway so
-	 * the guard covers all 12 types the brief lists, not 10.
+	 * The field shapes come from tests/fixtures/builder-field-settings.json
+	 * rather than being written out here, because a guard is only worth
+	 * something if it tests shapes the builder can really produce. The version
+	 * this replaced hand-wrote a `content` key for the content field that no
+	 * builder control ever set: the guard passed while the field rendered
+	 * nothing on the frontend, and it also asserted a `compactUploadText`
+	 * setting for camera that the builder has no editor for at all.
+	 *
+	 * The other half of the guard lives in
+	 * builder/components/__tests__/builderFieldSettings.test.jsx, which reads
+	 * the same fixture and asserts createField() plus the field's options panel
+	 * really produce every key in it. PHP cannot execute the React panel and
+	 * Jest cannot run this sanitizer, so the fixture is what ties the two
+	 * halves together - do not add a key here without adding it there.
 	 */
 	public function test_every_new_field_type_full_settings_survive_sanitize_field_data() {
-		$cases = [
-			'content'          => [
-				'field'    => [
-					'type'    => 'content',
-					'content' => '<p>Hello <strong>world</strong></p>',
-				],
-				'expected' => [
-					'content' => '<p>Hello <strong>world</strong></p>',
-				],
-			],
-			'section-divider'  => [
-				'field'    => [
-					'type'        => 'section-divider',
-					'label'       => 'Section Two',
-					'description' => 'Fill in the rest below.',
-				],
-				'expected' => [
-					'label'       => 'Section Two',
-					'description' => 'Fill in the rest below.',
-				],
-			],
-			'rich-text'        => [
-				'field'    => [
-					'type'    => 'rich-text',
-					'rows'    => '10',
-					'content' => '<p>Draft copy</p>',
-				],
-				'expected' => [
-					'rows'    => 10,
-					'content' => '<p>Draft copy</p>',
-				],
-			],
-			'address'          => [
-				'field'    => [
-					'type'          => 'address',
-					'scheme'        => 'international',
-					'hideSublabels' => true,
-				],
-				'expected' => [
-					'scheme'        => 'international',
-					'hideSublabels' => true,
-				],
-			],
-			'camera'           => [
-				'field'    => [
-					'type'              => 'camera',
-					'compactUploadText' => 'Snap a Photo',
-				],
-				'expected' => [
-					'compactUploadText' => 'Snap a Photo',
-				],
-			],
-			'signature'        => [
-				'field'    => [
-					'type'     => 'signature',
-					'label'    => 'Your signature',
-					'required' => true,
-				],
-				'expected' => [
-					'label'    => 'Your signature',
-					'required' => true,
-				],
-			],
-			'payment-single'   => [
-				'field'    => [
-					'type'  => 'payment-single',
-					'price' => '42.50',
-				],
-				'expected' => [
-					'price' => 42.5,
-				],
-			],
-			'payment-checkbox' => [
-				'field'    => [
-					'type'                  => 'payment-checkbox',
-					'items'                 => [
-						[ 'label' => 'Small', 'value' => 'small', 'price' => '10.00', 'isDefault' => false ],
-						[ 'label' => 'Large', 'value' => 'large', 'price' => '25.00', 'isDefault' => true ],
-					],
-					'showPriceAfterLabels'  => true,
-				],
-				'expected' => [
-					'items'                => [
-						[ 'label' => 'Small', 'value' => 'small', 'price' => 10.0, 'isDefault' => false ],
-						[ 'label' => 'Large', 'value' => 'large', 'price' => 25.0, 'isDefault' => true ],
-					],
-					'showPriceAfterLabels' => true,
-				],
-			],
-			'payment-multiple' => [
-				'field'    => [
-					'type'                 => 'payment-multiple',
-					'items'                => [
-						[ 'label' => 'Basic', 'value' => 'basic', 'price' => '15.00', 'isDefault' => true ],
-					],
-					'showPriceAfterLabels' => false,
-				],
-				'expected' => [
-					'items'                => [
-						[ 'label' => 'Basic', 'value' => 'basic', 'price' => 15.0, 'isDefault' => true ],
-					],
-					'showPriceAfterLabels' => false,
-				],
-			],
-			'payment-dropdown' => [
-				'field'    => [
-					'type'                 => 'payment-dropdown',
-					'items'                => [
-						[ 'label' => 'Standard', 'value' => 'standard', 'price' => '5.00', 'isDefault' => false ],
-					],
-					'showPriceAfterLabels' => true,
-				],
-				'expected' => [
-					'items'                => [
-						[ 'label' => 'Standard', 'value' => 'standard', 'price' => 5.0, 'isDefault' => false ],
-					],
-					'showPriceAfterLabels' => true,
-				],
-			],
-			'coupon'           => [
-				'field'    => [
-					'type'    => 'coupon',
-					'coupons' => [
-						[ 'code' => 'SAVE10', 'type' => 'percent', 'value' => '10' ],
-					],
-				],
-				'expected' => [
-					'coupons' => [
-						[ 'code' => 'SAVE10', 'type' => 'percent', 'value' => 10.0 ],
-					],
-				],
-			],
-			'total'            => [
-				'field'    => [
-					'type'          => 'total',
-					'enableSummary' => true,
-				],
-				'expected' => [
-					'enableSummary' => true,
-				],
-			],
-		];
+		$cases = $this->builderFieldSettings();
 
-		foreach ( $cases as $type => $case ) {
-			$result = $this->sanitize( $case['field'] );
+		foreach ( $cases as $type => $settings ) {
+			$field = [ 'type' => $type ];
 
-			foreach ( $case['expected'] as $key => $expected_value ) {
+			foreach ( $settings as $key => $values ) {
+				$field[ $key ] = $values['posted'];
+			}
+
+			$result = $this->sanitize( $field );
+
+			foreach ( $settings as $key => $values ) {
 				$this->assertArrayHasKey(
 					$key,
 					$result,
 					"[$type] sanitize_field_data() dropped the '$key' setting entirely - add a branch for it in Form_Builder::sanitize_field_data()."
 				);
 				$this->assertSame(
-					$expected_value,
+					$values['expected'],
 					$result[ $key ],
 					"[$type] sanitize_field_data() returned the wrong value/type for '$key'."
 				);
 			}
 		}
+	}
+
+	/**
+	 * The 12 field types the fixture must describe.
+	 *
+	 * Asserted explicitly so neither half of the guard can quietly shrink to a
+	 * subset of the cycle's field types - the Jest half asserts the same list.
+	 */
+	public function test_the_shared_fixture_covers_every_new_field_type() {
+		$types = array_keys( $this->builderFieldSettings() );
+		sort( $types );
+
+		$this->assertSame(
+			[
+				'address',
+				'camera',
+				'content',
+				'coupon',
+				'payment-checkbox',
+				'payment-dropdown',
+				'payment-multiple',
+				'payment-single',
+				'rich-text',
+				'section-divider',
+				'signature',
+				'total',
+			],
+			$types
+		);
+	}
+
+	/**
+	 * The settings the builder can save, per field type.
+	 *
+	 * @return array<string, array<string, array{posted: mixed, expected: mixed}>>
+	 */
+	private function builderFieldSettings() {
+		$path = dirname( __DIR__, 2 ) . '/fixtures/builder-field-settings.json';
+
+		$this->assertFileExists( $path );
+
+		$fixture = json_decode( (string) file_get_contents( $path ), true );
+
+		$this->assertIsArray( $fixture );
+		$this->assertArrayHasKey( 'types', $fixture );
+
+		return $fixture['types'];
 	}
 }

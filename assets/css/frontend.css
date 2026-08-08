@@ -279,6 +279,56 @@
 	padding-block: 0.25em;
 }
 
+/* Coupon
+   The code input and its Apply control sit on one line. Apply borrows the
+   neutral surface the compact upload label already uses rather than the
+   submit button's accent, so it cannot be mistaken for the submit button. */
+.fta-coupon {
+	display: flex;
+	align-items: center;
+	gap: var(--fta-form-space-sm);
+}
+
+.fta-coupon-input {
+	flex: 1 1 auto;
+	/* Inputs have a default intrinsic width; without this the flex item
+	   refuses to shrink and the button is pushed out of a narrow form. */
+	min-inline-size: 0;
+}
+
+.fta-coupon-apply {
+	flex: 0 0 auto;
+	color: var(--fta-form-text);
+	background-color: hsl(220, 14%, 96%);
+	font-family: inherit;
+	font-size: var(--fta-form-text-sm);
+	padding-block: var(--fta-form-space-sm);
+	padding-inline: var(--fta-form-space-md);
+	border: 1px solid var(--fta-form-border);
+	border-radius: var(--fta-form-radius);
+	transition: background-color 150ms ease, border-color 150ms ease;
+	cursor: pointer;
+}
+
+.fta-coupon-apply:hover {
+	background-color: hsl(220, 14%, 92%);
+	border-color: var(--fta-form-focus);
+}
+
+/* frontend.js disables the button for the duration of the AJAX check. */
+.fta-coupon-apply:disabled {
+	opacity: .6;
+	cursor: not-allowed;
+}
+
+/* Empty until Apply reports back, so it must not reserve space before then. */
+.fta-coupon-status:not(:empty) {
+	color: var(--fta-form-text);
+	font-size: var(--fta-form-text-sm);
+	display: block;
+	margin-block-start: var(--fta-form-space-sm);
+}
+
 /* Submit Button */
 .fta-form-footer {
 	margin-block-start: var(--fta-form-space-xl);
@@ -603,6 +653,60 @@
 	color: var(--fta-form-text);
 	font-size: var(--fta-form-text-sm);
 	opacity: .7;
+}
+
+/* Address Field
+   One grid row per row in the template: line 1 and line 2 full width, then
+   city/state and zip/country paired. Collapses to a single column at the same
+   width the name field's grid does, so two composite fields on one form never
+   disagree about when they stack. */
+.fta-address-row {
+	display: grid;
+	gap: var(--fta-form-space-md);
+}
+
+.fta-address-row + .fta-address-row {
+	margin-block-start: var(--fta-form-space-md);
+}
+
+.fta-address-row-2 {
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/* A long region or country name must not push the row wider than the form. */
+.fta-address-part {
+	min-inline-size: 0;
+}
+
+.fta-address-sublabel {
+	display: block;
+	margin-block-start: calc(var(--fta-form-space-sm) / 2);
+	color: var(--fta-form-text);
+	font-size: var(--fta-form-text-sm);
+	opacity: .7;
+}
+
+@media (max-width: 600px) {
+	.fta-address-row-2 {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}
+
+/* Section Divider
+   A heading plus a rule, deliberately quiet: themes style their own headings,
+   and this one only needs to read as a break between groups of fields. */
+.fta-section-title {
+	color: var(--fta-form-text);
+	font-size: var(--fta-form-text-lg);
+	font-weight: 600;
+	margin-block: 0 var(--fta-form-space-sm);
+}
+
+.fta-section-rule {
+	block-size: 0;
+	margin-block: var(--fta-form-space-md) 0;
+	border: 0;
+	border-block-start: 1px solid var(--fta-form-border);
 }
 
 /* Slider Field */

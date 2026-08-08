@@ -18,11 +18,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 $enable_summary = ! empty( $field['enableSummary'] );
+$label          = isset( $field['label'] ) ? $field['label'] : '';
+$hide_label     = ! empty( $field['hideLabel'] );
 ?>
 
 <div class="<?php echo esc_attr( fta_get_field_wrapper_class( $field, 'fta-field-total' ) ); ?>"<?php echo fta_get_field_wrapper_data( $field ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
-	<?php // No for-target: this field has no input to label. ?>
-	<?php fta_field_label( $field ); ?>
+	<?php
+	// No for-target: this field has no input to label, so the heading is a
+	// plain <span> rather than fta_field_label(), which always emits a
+	// for="..." pointing at an element that does not exist here.
+	?>
+	<?php if ( '' !== $label && ! $hide_label ) : ?>
+		<span class="fta-field-label"><?php echo esc_html( $label ); ?></span>
+	<?php endif; ?>
 
 	<?php if ( $enable_summary ) : ?>
 		<table class="fta-order-summary">

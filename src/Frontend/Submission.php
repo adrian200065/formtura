@@ -533,7 +533,22 @@ class Submission {
 
 		return in_array(
 			$type,
-			[ 'html', 'content', 'page-break', 'section-divider', 'entry-preview', 'layout' ],
+			[
+				'html',
+				'content',
+				'page-break',
+				'section-divider',
+				'entry-preview',
+				'layout',
+				// The total field renders no input at all (see
+				// templates/fields/total.php): its amount is recomputed from
+				// the form definition by PaymentTotals. A saved form carrying
+				// required:true on one - which the builder used to offer, and
+				// older forms may still hold - would otherwise fail its
+				// required check on every attempt, with the error attached to
+				// a field the visitor has no way to fill in.
+				'total',
+			],
 			true
 		);
 	}
@@ -564,13 +579,19 @@ class Submission {
 			// signatures arrive as data URLs handled by Signature — the raw
 			// data URL must never be stored as sanitized text. A payment
 			// form's running total is display-only and is never posted by
-			// current markup, but the skip is kept as defence-in-depth
-			// against a stale saved form or hand-written template that does
-			// post one - the client's claimed total must never land in
-			// entry data regardless.
+			// current markup (and is_presentational_field() already skips it),
+			// but the skip is kept as defence-in-depth against a stale saved
+			// form or hand-written template that does post one - the client's
+			// claimed total must never land in entry data regardless.
+			//
+			// payment-single posts value="1" as an inclusion marker, not an
+			// answer: PaymentTotals reads its price from the form definition
+			// and records the line item under the entry's _payment key. Stored
+			// as a field answer it would make entry views display "1" as the
+			// visitor's response for that item.
 			$skip_type = isset( $field['type'] ) ? $field['type'] : '';
 
-			if ( Uploads::is_file_field( $field ) || in_array( $skip_type, [ 'signature', 'total' ], true ) ) {
+			if ( Uploads::is_file_field( $field ) || in_array( $skip_type, [ 'signature', 'total', 'payment-single' ], true ) ) {
 				continue;
 			}
 

@@ -2058,8 +2058,14 @@ const GeneralTab = ({ field, onUpdate }) => {
         </>
       )}
 
-      {/* Required toggle - not shown for number-slider or repeater */}
-      {field.type !== 'number-slider' && field.type !== 'repeater' && (
+      {/*
+        Required toggle - not shown for number-slider, repeater, or total.
+        The total field renders no input the visitor can fill in, so marking
+        it required could only ever block the form. The server ignores the
+        flag as well (Submission::is_presentational_field()), since forms
+        saved while this toggle was offered may still carry required:true.
+      */}
+      {field.type !== 'number-slider' && field.type !== 'repeater' && field.type !== 'total' && (
         <div className="formtura-form-group">
           <div className="formtura-toggle-group">
             <label className="formtura-toggle">

@@ -91,6 +91,23 @@ describe.each(['name', 'address'])('FieldLibrary %s field sublabels', (type) => 
   });
 });
 
+// The total field renders no input on the frontend, so a Required flag on it
+// could only ever block the form with an error the visitor cannot clear. The
+// builder must not offer the toggle at all.
+describe('FieldLibrary required toggle', () => {
+  it('is offered for an ordinary field', () => {
+    renderWithField({ id: 'field_1', type: 'text', label: 'Name' });
+
+    expect(screen.getByText(/^Required/)).toBeInTheDocument();
+  });
+
+  it.each(['total', 'number-slider', 'repeater'])('is not offered for %s', (type) => {
+    renderWithField({ id: 'field_1', type, label: 'Total' });
+
+    expect(screen.queryByText(/^Required/)).not.toBeInTheDocument();
+  });
+});
+
 describe('FieldLibrary payment items editor', () => {
   describe.each(['payment-checkbox', 'payment-multiple', 'payment-dropdown'])(
     '%s',

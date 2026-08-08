@@ -423,6 +423,24 @@ class FieldTemplateTest extends TestCase {
 		$this->assertStringNotContainsString( '<input', $html );
 	}
 
+	/**
+	 * The template's own comment says "no for-target: this field has no input
+	 * to label", so it must not emit a for="..." attribute pointing at an
+	 * element that does not exist.
+	 */
+	public function test_total_label_has_no_for_target() {
+		$html = $this->render( $this->field( 'total' ) );
+
+		$this->assertStringContainsString( 'Test Label', $html );
+		$this->assertStringNotContainsString( 'for=', $html );
+	}
+
+	public function test_total_label_can_still_be_hidden() {
+		$html = $this->render( $this->field( 'total', [ 'hideLabel' => true ] ) );
+
+		$this->assertStringNotContainsString( 'Test Label', $html );
+	}
+
 	public function test_total_renders_the_summary_table_only_when_enabled() {
 		$without = $this->render( $this->field( 'total' ) );
 		$with    = $this->render( $this->field( 'total', [ 'enableSummary' => true ] ) );

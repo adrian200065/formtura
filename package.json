@@ -18,7 +18,9 @@
     "lint:fix": "eslint src --ext .js,.jsx,.ts,.tsx --fix",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "release": "bash scripts/build-release.sh",
+    "release:verify": "bash scripts/verify-release.sh"
   },
   "keywords": [
     "wordpress",

@@ -2,6 +2,7 @@
 /node_modules
 /vendor
 /HTML
+/.worktrees
 
 # Build files
 /assets/js/builder.js

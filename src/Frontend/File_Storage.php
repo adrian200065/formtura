@@ -387,6 +387,193 @@ class File_Storage {
 	}
 
 	/**
+	 * Move pre-1.0.5 files out of the public uploads tree into the vault.
+	 *
+	 * Files already in the public tree are exactly the ones this release
+	 * exists to protect, so the upgrade has to move them. Year/month structure
+	 * is preserved, which is what lets the legacy resolver map an old record to
+	 * its new home without rewriting any metadata.
+	 *
+	 * @since 1.0.5
+	 * @return bool True when every file was moved (or there was nothing to do).
+	 */
+	public function migrate_legacy_files() {
+		$legacy_root = $this->get_legacy_root();
+
+		if ( false === $legacy_root || ! is_dir( $legacy_root ) ) {
+			return true;
+		}
+
+		// Guard files first: on Apache and IIS this narrows the window during
+		// which the directory is both readable and still populated.
+		Uploads::protect_upload_dir( $legacy_root );
+
+		$success = $this->migrate_directory( $legacy_root, $legacy_root );
+
+		$this->prune_empty_directories( $legacy_root );
+
+		return $success;
+	}
+
+	/**
+	 * Recursively move one legacy directory's files.
+	 *
+	 * @since 1.0.5
+	 * @param string $dir         Directory being walked.
+	 * @param string $legacy_root Root the relative path is measured from.
+	 * @return bool
+	 */
+	private function migrate_directory( $dir, $legacy_root ) {
+		$items = scandir( $dir );
+
+		if ( false === $items ) {
+			$this->log( 'could not read legacy directory ' . $dir );
+
+			return false;
+		}
+
+		$success = true;
+
+		foreach ( $items as $item ) {
+			if ( '.' === $item || '..' === $item ) {
+				continue;
+			}
+
+			$path = $dir . '/' . $item;
+
+			// Never follow a symlink out of the tree being migrated.
+			if ( is_link( $path ) ) {
+				continue;
+			}
+
+			if ( is_dir( $path ) ) {
+				if ( ! $this->migrate_directory( $path, $legacy_root ) ) {
+					$success = false;
+				}
+
+				continue;
+			}
+
+			// Plugin-written protection, not user data.
+			if ( in_array( $item, [ '.htaccess', 'index.php', 'web.config' ], true ) ) {
+				continue;
+			}
+
+			if ( ! $this->migrate_file( $path, $legacy_root ) ) {
+				$success = false;
+			}
+		}
+
+		return $success;
+	}
+
+	/**
+	 * Move one legacy file into the vault.
+	 *
+	 * @since 1.0.5
+	 * @param string $source      Absolute legacy path.
+	 * @param string $legacy_root Root the relative path is measured from.
+	 * @return bool
+	 */
+	private function migrate_file( $source, $legacy_root ) {
+		$relative    = substr( wp_normalize_path( $source ), strlen( $legacy_root ) + 1 );
+		$destination = $this->get_site_root() . '/' . $relative;
+
+		// Never clobber a file already in the vault; the vault copy is by
+		// definition the newer one.
+		if ( file_exists( $destination ) ) {
+			return true;
+		}
+
+		if ( ! wp_mkdir_p( dirname( $destination ) ) ) {
+			$this->log( 'could not create vault directory for ' . $relative );
+
+			return false;
+		}
+
+		// A rename within one filesystem is atomic and needs no verification.
+		if ( @rename( $source, $destination ) ) { // phpcs:ignore WordPress.PHP.NoSilencedErrors
+			@chmod( $destination, 0600 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+
+			return true;
+		}
+
+		// Across filesystems rename() fails, so fall back to copy - and only
+		// remove the source once the destination is verified to match.
+		if ( ! @copy( $source, $destination ) ) { // phpcs:ignore WordPress.PHP.NoSilencedErrors
+			$this->log( 'could not copy legacy file ' . $relative );
+
+			return false;
+		}
+
+		if ( filesize( $destination ) !== filesize( $source ) ) {
+			// A short copy: discard it rather than leave a corrupt file that
+			// the source would then be deleted in favour of.
+			@unlink( $destination ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+			$this->log( 'size mismatch copying legacy file ' . $relative );
+
+			return false;
+		}
+
+		@chmod( $destination, 0600 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+
+		if ( ! @unlink( $source ) ) { // phpcs:ignore WordPress.PHP.NoSilencedErrors
+			// The file is safely in the vault; failing to remove the public
+			// copy still leaves it exposed, so this is a failure worth retrying.
+			$this->log( 'could not remove migrated legacy file ' . $relative );
+
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Remove directories left empty by a migration.
+	 *
+	 * @since 1.0.5
+	 * @param string $dir Directory to prune.
+	 * @return bool True when $dir itself was removed.
+	 */
+	private function prune_empty_directories( $dir ) {
+		if ( ! is_dir( $dir ) || is_link( $dir ) ) {
+			return false;
+		}
+
+		$items = scandir( $dir );
+
+		if ( false === $items ) {
+			return false;
+		}
+
+		$remaining = 0;
+
+		foreach ( $items as $item ) {
+			if ( '.' === $item || '..' === $item ) {
+				continue;
+			}
+
+			$path = $dir . '/' . $item;
+
+			if ( is_dir( $path ) && ! is_link( $path ) ) {
+				if ( ! $this->prune_empty_directories( $path ) ) {
+					$remaining++;
+				}
+
+				continue;
+			}
+
+			$remaining++;
+		}
+
+		if ( 0 === $remaining ) {
+			return @rmdir( $dir ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+		}
+
+		return false;
+	}
+
+	/**
 	 * Remove this site's entire vault directory.
 	 *
 	 * Called only from an explicitly destructive uninstall.

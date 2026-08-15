@@ -32,10 +32,19 @@ class Forms_DB {
 	 *
 	 * @since 1.0.0
 	 */
-	public function __construct() {
+	public function __construct( $storage = null ) {
 		global $wpdb;
 		$this->table_name = $wpdb->prefix . 'fta_forms';
+
+		$this->storage = $storage instanceof \Formtura\Frontend\File_Storage ? $storage : null;
 	}
+
+	/**
+	 * Private storage service, passed through to entry deletion.
+	 *
+	 * @var \Formtura\Frontend\File_Storage|null
+	 */
+	private $storage;
 
 	/**
 	 * Get a form by ID.
@@ -189,9 +198,15 @@ class Forms_DB {
 	public function delete( $form_id ) {
 		global $wpdb;
 
-		// Delete associated entries.
-		$entries_db = new Entries_DB();
-		$entries_db->delete_by_form( $form_id );
+		// Delete associated entries first, and stop if that fails: deleting
+		// the form anyway would strand those entries under a form that no
+		// longer exists, leaving their files unreachable by any cleanup path
+		// that starts from a form.
+		$entries_db = new Entries_DB( $this->storage );
+
+		if ( ! $entries_db->delete_by_form( $form_id ) ) {
+			return false;
+		}
 
 		// Delete form.
 		$result = $wpdb->delete(

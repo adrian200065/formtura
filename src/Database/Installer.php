@@ -25,7 +25,7 @@ class Installer {
 	 *
 	 * @var string
 	 */
-	const DB_VERSION = '1.0.4';
+	const DB_VERSION = '1.0.5';
 
 	/**
 	 * Run activation tasks.
@@ -40,11 +40,14 @@ class Installer {
 		self::protect_upload_dir();
 
 		// A fresh install has no legacy forms to rewrite.
-		if ( ! $is_new_install ) {
-			self::run_migrations();
-		}
+		$migrated = $is_new_install ? true : self::run_migrations();
 
-		self::update_db_version();
+		// The version advances only on a complete migration, so a failed run
+		// is retried on the next activation or update check rather than being
+		// skipped forever with files left in the public tree.
+		if ( $migrated ) {
+			self::update_db_version();
+		}
 	}
 
 	/**
@@ -185,8 +188,10 @@ class Installer {
 
 		self::create_tables();
 		self::protect_upload_dir();
-		self::run_migrations();
-		self::update_db_version();
+
+		if ( self::run_migrations() ) {
+			self::update_db_version();
+		}
 	}
 
 	/**
@@ -212,11 +217,44 @@ class Installer {
 	 * @since 1.0.3
 	 */
 	private static function run_migrations() {
-		$from = get_option( 'fta_db_version', '0' );
+		$from    = get_option( 'fta_db_version', '0' );
+		$success = true;
 
 		if ( version_compare( $from, '1.0.3', '<' ) ) {
 			self::migrate_choice_field_types();
 		}
+
+		if ( version_compare( $from, '1.0.5', '<' ) ) {
+			$success = self::migrate_private_files() && $success;
+		}
+
+		return $success;
+	}
+
+	/**
+	 * Move pre-1.0.5 uploads out of the public tree into the private vault.
+	 *
+	 * Returns false on failure so the caller leaves the stored database
+	 * version alone and the move is retried, rather than advancing past files
+	 * that are still publicly readable.
+	 *
+	 * @since 1.0.5
+	 * @return bool
+	 */
+	private static function migrate_private_files() {
+		$storage = new \Formtura\Frontend\File_Storage();
+
+		if ( $storage->migrate_legacy_files() ) {
+			delete_option( 'fta_private_migration_failed' );
+
+			return true;
+		}
+
+		// Surfaced to administrators, because the files involved are exactly
+		// the ones that are still exposed until this completes.
+		update_option( 'fta_private_migration_failed', true );
+
+		return false;
 	}
 
 	/**

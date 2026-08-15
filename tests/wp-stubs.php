@@ -9,6 +9,20 @@
  * @package Formtura
  */
 
+// wpdb output-format constants. Entries_DB passes these to $wpdb methods, so
+// they must exist before any database class is exercised.
+if ( ! defined( 'OBJECT' ) ) {
+	define( 'OBJECT', 'OBJECT' );
+}
+
+if ( ! defined( 'ARRAY_A' ) ) {
+	define( 'ARRAY_A', 'ARRAY_A' );
+}
+
+if ( ! defined( 'ARRAY_N' ) ) {
+	define( 'ARRAY_N', 'ARRAY_N' );
+}
+
 if ( ! class_exists( 'WP_Error' ) ) {
 	/**
 	 * Minimal stand-in for WordPress's WP_Error.
@@ -264,6 +278,30 @@ if ( ! function_exists( 'current_user_can' ) ) {
 	}
 }
 
+if ( ! function_exists( 'maybe_serialize' ) ) {
+	function maybe_serialize( $data ) {
+		return ( is_array( $data ) || is_object( $data ) ) ? serialize( $data ) : $data;
+	}
+}
+
+if ( ! function_exists( 'maybe_unserialize' ) ) {
+	function maybe_unserialize( $data ) {
+		if ( ! is_string( $data ) ) {
+			return $data;
+		}
+
+		$trimmed = trim( $data );
+
+		if ( '' === $trimmed ) {
+			return $data;
+		}
+
+		$result = @unserialize( $trimmed ); // phpcs:ignore
+
+		return ( false === $result && 'b:0;' !== $trimmed ) ? $data : $result;
+	}
+}
+
 if ( ! function_exists( 'get_site_url' ) ) {
 	function get_site_url( $blog_id = null, $path = '', $scheme = null ) {
 		return 'https://example.com' . $path;
@@ -342,8 +380,13 @@ if ( ! function_exists( 'wp_check_filetype_and_ext' ) ) {
 }
 
 if ( ! function_exists( 'wp_mkdir_p' ) ) {
+	/**
+	 * Mirrors real WordPress: returns false on failure rather than emitting a
+	 * warning. Without the suppression, code that correctly handles a false
+	 * return still blows up under PHPUnit's warning-to-exception conversion.
+	 */
 	function wp_mkdir_p( $target ) {
-		return is_dir( $target ) || mkdir( $target, 0777, true );
+		return is_dir( $target ) || @mkdir( $target, 0777, true ); // phpcs:ignore
 	}
 }
 

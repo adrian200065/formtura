@@ -304,6 +304,26 @@ class Admin {
 			</div>
 			<?php
 		}
+
+		// An incomplete file migration means uploads are still sitting in the
+		// public uploads directory, readable by anyone who knows the URL. That
+		// is the exact exposure the private vault exists to close, so it is
+		// worth an error rather than a dismissible nudge.
+		if ( get_option( 'fta_private_migration_failed' ) ) {
+			?>
+			<div class="notice notice-error">
+				<p>
+					<?php
+					printf(
+						/* translators: %s: constant name */
+						esc_html__( 'Formtura could not move previously uploaded files out of the public uploads directory, so those files remain publicly readable. Check that the private storage directory is writable, or define %s to a writable directory outside the web root, then deactivate and reactivate the plugin to retry.', FORMTURA_TEXTDOMAIN ),
+						'<code>FORMTURA_PRIVATE_UPLOAD_DIR</code>'
+					);
+					?>
+				</p>
+			</div>
+			<?php
+		}
 	}
 
 	/**

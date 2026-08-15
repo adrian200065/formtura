@@ -13,6 +13,7 @@
 
 namespace Formtura\Tests\Unit;
 
+use Formtura\Frontend\File_Storage;
 use Formtura\Tests\TestCase;
 use Formtura\Uninstall;
 
@@ -116,5 +117,80 @@ class UninstallTest extends TestCase {
 		Uninstall::run();
 
 		$this->assertContains( 'fta_keep_data_on_uninstall', $GLOBALS['fta_test_deleted_options'] );
+	}
+
+	/**
+	 * Build an isolated vault holding one file, plus a sibling directory that
+	 * uninstall must never touch.
+	 *
+	 * @return array{storage:File_Storage, file:string, sibling:string, root:string}
+	 */
+	private function seedFiles() {
+		$root    = sys_get_temp_dir() . '/formtura-vault-' . uniqid( '', true );
+		$storage = new File_Storage( $root );
+
+		$dir = $storage->prepare_directory();
+		file_put_contents( $dir . '/kept.png', 'x' );
+
+		// A directory beside the vault stands in for everything else on the
+		// filesystem: uninstall must remove only what this plugin owns.
+		$sibling = $root . '-sibling';
+		mkdir( $sibling, 0700, true );
+		file_put_contents( $sibling . '/other.txt', 'not ours' );
+
+		return [
+			'storage' => $storage,
+			'file'    => $dir . '/kept.png',
+			'sibling' => $sibling,
+			'root'    => $root,
+		];
+	}
+
+	private function cleanupFiles( array $seed ) {
+		foreach ( [ $seed['root'], $seed['sibling'] ] as $dir ) {
+			if ( ! is_dir( $dir ) ) {
+				continue;
+			}
+
+			$items = new \RecursiveIteratorIterator(
+				new \RecursiveDirectoryIterator( $dir, \FilesystemIterator::SKIP_DOTS ),
+				\RecursiveIteratorIterator::CHILD_FIRST
+			);
+
+			foreach ( $items as $item ) {
+				$item->isDir() ? rmdir( $item->getPathname() ) : unlink( $item->getPathname() );
+			}
+
+			rmdir( $dir );
+		}
+	}
+
+	public function test_retained_uninstall_preserves_every_file() {
+		$seed = $this->seedFiles();
+
+		$GLOBALS['fta_test_options']['fta_settings'] = [ 'delete_data_on_uninstall' => false ];
+
+		Uninstall::run( $seed['storage'] );
+
+		$this->assertFileExists( $seed['file'] );
+
+		$this->cleanupFiles( $seed );
+	}
+
+	public function test_destructive_uninstall_removes_only_formtura_directories() {
+		$seed = $this->seedFiles();
+
+		$GLOBALS['fta_test_options']['fta_settings'] = [ 'delete_data_on_uninstall' => true ];
+
+		Uninstall::run( $seed['storage'] );
+
+		$this->assertFileDoesNotExist( $seed['file'] );
+		$this->assertDirectoryDoesNotExist( $seed['storage']->get_site_root() );
+
+		// The sibling is untouched.
+		$this->assertDirectoryExists( $seed['sibling'] );
+		$this->assertFileExists( $seed['sibling'] . '/other.txt' );
+
+		$this->cleanupFiles( $seed );
 	}
 }

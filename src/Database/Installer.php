@@ -216,7 +216,7 @@ class Installer {
 	 *
 	 * @since 1.0.3
 	 */
-	private static function run_migrations() {
+	private static function run_migrations( $storage = null ) {
 		$from    = get_option( 'fta_db_version', '0' );
 		$success = true;
 
@@ -225,7 +225,7 @@ class Installer {
 		}
 
 		if ( version_compare( $from, '1.0.5', '<' ) ) {
-			$success = self::migrate_private_files() && $success;
+			$success = self::migrate_private_files( $storage ) && $success;
 		}
 
 		return $success;
@@ -239,10 +239,14 @@ class Installer {
 	 * that are still publicly readable.
 	 *
 	 * @since 1.0.5
+	 * @param \Formtura\Frontend\File_Storage|null $storage Optional service,
+	 *        injected by tests to control the migration outcome.
 	 * @return bool
 	 */
-	private static function migrate_private_files() {
-		$storage = new \Formtura\Frontend\File_Storage();
+	private static function migrate_private_files( $storage = null ) {
+		if ( ! $storage instanceof \Formtura\Frontend\File_Storage ) {
+			$storage = new \Formtura\Frontend\File_Storage();
+		}
 
 		if ( $storage->migrate_legacy_files() ) {
 			delete_option( 'fta_private_migration_failed' );

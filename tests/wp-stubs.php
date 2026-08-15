@@ -224,7 +224,14 @@ if ( ! function_exists( 'get_option' ) ) {
 }
 
 if ( ! function_exists( 'update_option' ) ) {
+	/**
+	 * Writes into $GLOBALS['fta_test_options'] so a later get_option() sees the
+	 * value, as it would in WordPress. A no-op stub silently breaks any test
+	 * asserting on state a code path just recorded.
+	 */
 	function update_option( $option, $value, $autoload = null ) {
+		$GLOBALS['fta_test_options'][ $option ] = $value;
+
 		return true;
 	}
 }

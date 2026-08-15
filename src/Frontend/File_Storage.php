@@ -34,6 +34,11 @@ class File_Storage {
 	const LEGACY_DIR = 'formtura';
 
 	/**
+	 * Option recording that the vault could not be written to.
+	 */
+	const STORAGE_ERROR_OPTION = 'fta_private_storage_error';
+
+	/**
 	 * Absolute path to the vault root, without a trailing slash.
 	 *
 	 * @var string
@@ -127,7 +132,7 @@ class File_Storage {
 		$dir = $this->get_site_root() . '/' . gmdate( 'Y/m' );
 
 		if ( ! wp_mkdir_p( $dir ) ) {
-			return false;
+			return $this->record_unavailable();
 		}
 
 		// Best effort: hosts that ignore the mode still get a directory outside
@@ -135,10 +140,44 @@ class File_Storage {
 		@chmod( $dir, 0700 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
 
 		if ( ! is_writable( $dir ) ) {
-			return false;
+			return $this->record_unavailable();
 		}
 
+		$this->clear_unavailable();
+
 		return $dir;
+	}
+
+	/**
+	 * Record that the vault could not be written to.
+	 *
+	 * Storage fails closed, so without this an administrator would only see
+	 * visitors reporting failed submissions, with nothing anywhere explaining
+	 * that the cause is an unwritable directory.
+	 *
+	 * @since 1.0.5
+	 * @return false Always, so callers can `return $this->record_unavailable();`
+	 */
+	private function record_unavailable() {
+		if ( function_exists( 'update_option' ) ) {
+			update_option( self::STORAGE_ERROR_OPTION, $this->get_site_root() );
+		}
+
+		$this->log( 'private storage is not writable: ' . $this->get_site_root() );
+
+		return false;
+	}
+
+	/**
+	 * Clear a previously recorded storage failure.
+	 *
+	 * @since 1.0.5
+	 * @return void
+	 */
+	private function clear_unavailable() {
+		if ( function_exists( 'get_option' ) && get_option( self::STORAGE_ERROR_OPTION ) ) {
+			delete_option( self::STORAGE_ERROR_OPTION );
+		}
 	}
 
 	/**

@@ -305,6 +305,25 @@ class Admin {
 			<?php
 		}
 
+		// Storage fails closed, so an unwritable vault means file uploads and
+		// signatures are being rejected outright. Without this the only symptom
+		// is visitors reporting failed submissions.
+		if ( get_option( \Formtura\Frontend\File_Storage::STORAGE_ERROR_OPTION ) ) {
+			?>
+			<div class="notice notice-error">
+				<p>
+					<?php
+					printf(
+						/* translators: %s: constant name */
+						esc_html__( 'Formtura private storage is not writable, so file uploads and signatures are being rejected. Make the private storage directory writable, or define %s in wp-config.php to a writable directory outside the web root.', FORMTURA_TEXTDOMAIN ),
+						'<code>FORMTURA_PRIVATE_UPLOAD_DIR</code>'
+					);
+					?>
+				</p>
+			</div>
+			<?php
+		}
+
 		// An incomplete file migration means uploads are still sitting in the
 		// public uploads directory, readable by anyone who knows the URL. That
 		// is the exact exposure the private vault exists to close, so it is

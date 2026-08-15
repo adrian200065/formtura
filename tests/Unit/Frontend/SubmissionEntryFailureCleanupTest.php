@@ -68,6 +68,7 @@ namespace Formtura\Frontend {
 
 namespace Formtura\Tests\Unit\Frontend {
 
+	use Formtura\Frontend\File_Storage;
 	use Formtura\Frontend\Submission;
 	use Formtura\Tests\TestCase;
 
@@ -80,10 +81,22 @@ namespace Formtura\Tests\Unit\Frontend {
 		 */
 		private $submission;
 
+		/**
+		 * @var File_Storage
+		 */
+		private $storage;
+
+		/**
+		 * @var string
+		 */
+		private $vaultRoot;
+
 		protected function setUp(): void {
 			parent::setUp();
 
-			$this->submission                        = new Submission();
+			$this->vaultRoot                         = sys_get_temp_dir() . '/formtura-vault-' . uniqid( '', true );
+			$this->storage                           = new File_Storage( $this->vaultRoot );
+			$this->submission                        = new Submission( $this->storage );
 			$_POST                                   = [];
 			$_SERVER['REMOTE_ADDR']                  = '203.0.113.9';
 			$GLOBALS['fta_test_ajax_forms']          = [];
@@ -104,6 +117,7 @@ namespace Formtura\Tests\Unit\Frontend {
 			);
 
 			$this->removeUploadTree();
+			$this->removeTree( $this->vaultRoot );
 
 			parent::tearDown();
 		}
@@ -123,9 +137,42 @@ namespace Formtura\Tests\Unit\Frontend {
 		 * @return string[]
 		 */
 		private function storedFiles() {
-			$files = glob( $this->uploadDir() . '/*.png' );
+			if ( ! is_dir( $this->vaultRoot ) ) {
+				return [];
+			}
 
-			return false === $files ? [] : $files;
+			$found = [];
+			$items = new \RecursiveIteratorIterator(
+				new \RecursiveDirectoryIterator( $this->vaultRoot, \FilesystemIterator::SKIP_DOTS )
+			);
+
+			foreach ( $items as $item ) {
+				if ( $item->isFile() && 'png' === $item->getExtension() ) {
+					$found[] = $item->getPathname();
+				}
+			}
+
+			return $found;
+		}
+
+		/**
+		 * Recursively delete a directory tree.
+		 */
+		private function removeTree( $dir ) {
+			if ( ! is_dir( $dir ) ) {
+				return;
+			}
+
+			$items = new \RecursiveIteratorIterator(
+				new \RecursiveDirectoryIterator( $dir, \FilesystemIterator::SKIP_DOTS ),
+				\RecursiveIteratorIterator::CHILD_FIRST
+			);
+
+			foreach ( $items as $item ) {
+				$item->isDir() ? rmdir( $item->getPathname() ) : unlink( $item->getPathname() );
+			}
+
+			rmdir( $dir );
 		}
 
 		/**

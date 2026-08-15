@@ -21,11 +21,23 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Submission {
 
 	/**
+	 * Private storage service shared by the file-producing steps.
+	 *
+	 * @var File_Storage
+	 */
+	private $storage;
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 1.0.0
+	 * @param File_Storage|null $storage Optional storage service. Injected by
+	 *                                   tests so the whole file pipeline reads
+	 *                                   and writes one temporary vault.
 	 */
-	public function __construct() {
+	public function __construct( $storage = null ) {
+		$this->storage = $storage instanceof File_Storage ? $storage : new File_Storage();
+
 		$this->init_hooks();
 	}
 
@@ -167,7 +179,7 @@ class Submission {
 			// disk, a locked table) leaves a permanent orphan behind, which is
 			// the same leak already closed for uploads-then-signature failures
 			// in process_signatures() and for a rejected payment recompute.
-			Uploads::cleanup( $files );
+			( new Uploads( $this->storage ) )->cleanup( $files );
 
 			wp_send_json_error( [
 				'message' => __( 'Failed to save form submission. Please try again.', FORMTURA_TEXTDOMAIN ),
@@ -322,7 +334,7 @@ class Submission {
 	 * @return array|\WP_Error Map of field name => file records, or WP_Error.
 	 */
 	private function process_files( $form ) {
-		$uploads = ( new Uploads() )->process_form_uploads( $form );
+		$uploads = ( new Uploads( $this->storage ) )->process_form_uploads( $form );
 
 		if ( is_wp_error( $uploads ) ) {
 			return $uploads;
@@ -346,10 +358,10 @@ class Submission {
 	 * @return array|\WP_Error Map of field name => file records, or WP_Error.
 	 */
 	private function process_signatures( $form, $uploads ) {
-		$signatures = ( new Signature() )->process_form_signatures( $form );
+		$signatures = ( new Signature( $this->storage ) )->process_form_signatures( $form );
 
 		if ( is_wp_error( $signatures ) ) {
-			Uploads::cleanup( $uploads );
+			( new Uploads( $this->storage ) )->cleanup( $uploads );
 
 			return $signatures;
 		}

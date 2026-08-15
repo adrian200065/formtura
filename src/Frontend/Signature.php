@@ -29,6 +29,25 @@ class Signature {
 	const MAX_BYTES = 1048576;
 
 	/**
+	 * Private storage service.
+	 *
+	 * @var File_Storage
+	 */
+	private $storage;
+
+	/**
+	 * Constructor.
+	 *
+	 * @since 1.0.5
+	 * @param File_Storage|null $storage Optional storage service. Injected by
+	 *                                   tests so they write to a temporary
+	 *                                   vault instead of the real one.
+	 */
+	public function __construct( $storage = null ) {
+		$this->storage = $storage instanceof File_Storage ? $storage : new File_Storage();
+	}
+
+	/**
 	 * Process every signature field on a form.
 	 *
 	 * Mirrors Uploads::process_form_uploads(): returns a map of field name
@@ -114,8 +133,8 @@ class Signature {
 			}
 
 			// A list with one record, matching the uploads shape, so entry
-			// display (which reads records generically by their 'name' and
-			// 'url' keys) works unchanged. Email attachment does not:
+			// display and download link generation treat signatures and
+			// uploads identically. Email attachment does not:
 			// Uploads::get_email_attachments() filters on the literal
 			// 'file-upload' type, so signatures are not attached to
 			// notification emails today.
@@ -125,7 +144,7 @@ class Signature {
 		if ( ! empty( $errors ) ) {
 			// A later field's write failed after an earlier one succeeded;
 			// do not leave that earlier file behind.
-			Uploads::cleanup( $results );
+			$this->storage->delete_records( $results );
 
 			return new \WP_Error(
 				'signature_failed',
@@ -191,19 +210,15 @@ class Signature {
 	 * @return array|\WP_Error File record matching the uploads shape.
 	 */
 	private function store_png( $binary ) {
-		$uploads = wp_upload_dir();
+		$failed = new \WP_Error( 'signature_store_failed', __( 'The signature could not be saved. Please try again.', FORMTURA_TEXTDOMAIN ) );
 
-		if ( ! empty( $uploads['error'] ) ) {
-			return new \WP_Error( 'signature_store_failed', __( 'The signature could not be saved. Please try again.', FORMTURA_TEXTDOMAIN ) );
-		}
+		// Fails closed: with no writable private vault there is nowhere safe to
+		// put a signature, and falling back to a public directory is exactly
+		// the behaviour this replaces.
+		$dir = $this->storage->prepare_directory();
 
-		$dir = $uploads['basedir'] . '/' . Uploads::UPLOAD_DIR . $uploads['subdir'];
-		$url = $uploads['baseurl'] . '/' . Uploads::UPLOAD_DIR . $uploads['subdir'];
-
-		Uploads::protect_upload_dir( $uploads['basedir'] . '/' . Uploads::UPLOAD_DIR );
-
-		if ( ! wp_mkdir_p( $dir ) ) {
-			return new \WP_Error( 'signature_store_failed', __( 'The signature could not be saved. Please try again.', FORMTURA_TEXTDOMAIN ) );
+		if ( false === $dir ) {
+			return $failed;
 		}
 
 		// Random filename, matching the uploads convention, so stored
@@ -212,15 +227,19 @@ class Signature {
 		$path     = $dir . '/' . $filename;
 
 		if ( false === file_put_contents( $path, $binary ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions
-			return new \WP_Error( 'signature_store_failed', __( 'The signature could not be saved. Please try again.', FORMTURA_TEXTDOMAIN ) );
+			return $failed;
 		}
 
-		return [
-			'name' => 'signature.png',
-			'file' => $path,
-			'url'  => $url . '/' . $filename,
-			'type' => 'image/png',
-			'size' => strlen( $binary ),
-		];
+		@chmod( $path, 0600 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+
+		$record = $this->storage->create_record( 'signature.png', $path, 'image/png', strlen( $binary ) );
+
+		if ( false === $record ) {
+			wp_delete_file( $path );
+
+			return $failed;
+		}
+
+		return $record;
 	}
 }

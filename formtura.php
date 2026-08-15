@@ -3,7 +3,7 @@
  * Plugin Name: Formtura
  * Plugin URI: https://formtura.com
  * Description: A modern, intuitive, and powerful form builder for WordPress with a beautiful drag-and-drop interface.
- * Version: 1.0.4
+ * Version: 1.0.5
  * Author: Formtura Team
  * Author URI: https://formtura.com
  * Text Domain: formtura
@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define plugin constants.
-define( 'FORMTURA_VERSION', '1.0.4' );
+define( 'FORMTURA_VERSION', '1.0.5' );
 define( 'FORMTURA_PLUGIN_FILE', __FILE__ );
 define( 'FORMTURA_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'FORMTURA_PLUGIN_URL', plugin_dir_url( __FILE__ ) );

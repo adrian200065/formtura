@@ -60,7 +60,7 @@ class Notifications {
 				continue;
 			}
 
-			$this->send_notification( $notification, $form, $entry_data );
+			$this->send_notification( $notification, $form, $entry_data, $entry_id );
 		}
 	}
 
@@ -71,30 +71,31 @@ class Notifications {
 	 * @param array $notification Notification settings.
 	 * @param array $form Form data.
 	 * @param array $entry_data Entry data.
+	 * @param int   $entry_id Entry ID, needed to build file download links.
 	 */
-	private function send_notification( $notification, $form, $entry_data ) {
+	private function send_notification( $notification, $form, $entry_data, $entry_id = 0 ) {
 		// Parse recipient email(s).
-		$to = $this->parse_smart_tags( $notification['to'], $entry_data );
+		$to = $this->parse_smart_tags( $notification['to'], $entry_data, $entry_id );
 		$to = array_map( 'trim', explode( ',', $to ) );
 
 		// Parse subject.
-		$subject = $this->parse_smart_tags( $notification['subject'], $entry_data );
+		$subject = $this->parse_smart_tags( $notification['subject'], $entry_data, $entry_id );
 
 		// Parse message.
-		$message = $this->parse_smart_tags( $notification['message'], $entry_data );
+		$message = $this->parse_smart_tags( $notification['message'], $entry_data, $entry_id );
 
 		// Set headers.
 		$headers = [ 'Content-Type: text/html; charset=UTF-8' ];
 
 		// Add reply-to if specified.
 		if ( ! empty( $notification['reply_to'] ) ) {
-			$reply_to = $this->parse_smart_tags( $notification['reply_to'], $entry_data );
+			$reply_to = $this->parse_smart_tags( $notification['reply_to'], $entry_data, $entry_id );
 			$headers[] = 'Reply-To: ' . $reply_to;
 		}
 
 		// Add CC if specified.
 		if ( ! empty( $notification['cc'] ) ) {
-			$cc = $this->parse_smart_tags( $notification['cc'], $entry_data );
+			$cc = $this->parse_smart_tags( $notification['cc'], $entry_data, $entry_id );
 			$cc_emails = array_map( 'trim', explode( ',', $cc ) );
 			foreach ( $cc_emails as $cc_email ) {
 				$headers[] = 'Cc: ' . $cc_email;
@@ -103,7 +104,7 @@ class Notifications {
 
 		// Add BCC if specified.
 		if ( ! empty( $notification['bcc'] ) ) {
-			$bcc = $this->parse_smart_tags( $notification['bcc'], $entry_data );
+			$bcc = $this->parse_smart_tags( $notification['bcc'], $entry_data, $entry_id );
 			$bcc_emails = array_map( 'trim', explode( ',', $bcc ) );
 			foreach ( $bcc_emails as $bcc_email ) {
 				$headers[] = 'Bcc: ' . $bcc_email;
@@ -138,14 +139,15 @@ class Notifications {
 	 * @since 1.0.0
 	 * @param string $text Text with smart tags.
 	 * @param array  $entry_data Entry data.
+	 * @param int    $entry_id Entry ID, needed to build file download links.
 	 * @return string Parsed text.
 	 */
-	private function parse_smart_tags( $text, $entry_data ) {
+	private function parse_smart_tags( $text, $entry_data, $entry_id = 0 ) {
 		// Replace field values.
 		foreach ( $entry_data as $field_name => $field_value ) {
 			$text = str_replace(
 				'{' . $field_name . '}',
-				$this->format_value( $field_value ),
+				$this->format_value( $field_value, $entry_id, $field_name ),
 				$text
 			);
 		}
@@ -168,30 +170,35 @@ class Notifications {
 	 * which can be concatenated directly.
 	 *
 	 * @since 1.0.3
-	 * @param mixed $value Stored field value.
+	 * @param mixed  $value Stored field value.
+	 * @param int    $entry_id Entry ID, needed to build file download links.
+	 * @param string $field_name Field the value belongs to.
 	 * @return string Human readable value.
 	 */
-	private function format_value( $value ) {
+	private function format_value( $value, $entry_id = 0, $field_name = '' ) {
 		if ( ! is_array( $value ) ) {
 			return (string) $value;
 		}
 
 		$parts = [];
 
-		foreach ( $value as $item ) {
+		foreach ( $value as $index => $item ) {
 			if ( is_array( $item ) ) {
-				// A file record: show its original name, linked when possible.
-				if ( isset( $item['name'] ) && isset( $item['url'] ) ) {
+				// A file record renders as a link to the authenticated
+				// download controller. The record's own location is never
+				// used: a legacy record still carries the public uploads URL
+				// that this change exists to stop handing out.
+				if ( File_Storage::is_file_record( $item ) ) {
 					$parts[] = sprintf(
 						'<a href="%s">%s</a>',
-						esc_url( $item['url'] ),
-						esc_html( $item['name'] )
+						esc_url( File_Download::url( $entry_id, $field_name, (int) $index ) ),
+						esc_html( isset( $item['name'] ) ? $item['name'] : basename( (string) $index ) )
 					);
 
 					continue;
 				}
 
-				$parts[] = $this->format_value( $item );
+				$parts[] = $this->format_value( $item, $entry_id, $field_name );
 
 				continue;
 			}

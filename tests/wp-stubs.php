@@ -256,7 +256,31 @@ if ( ! function_exists( 'current_time' ) ) {
 
 if ( ! function_exists( 'current_user_can' ) ) {
 	function current_user_can( $capability ) {
-		return false;
+		// Defaults to false so capability checks are exercised as denials
+		// unless a test explicitly grants them.
+		return isset( $GLOBALS['fta_test_current_user_can'] )
+			? (bool) $GLOBALS['fta_test_current_user_can']
+			: false;
+	}
+}
+
+if ( ! function_exists( 'get_site_url' ) ) {
+	function get_site_url( $blog_id = null, $path = '', $scheme = null ) {
+		return 'https://example.com' . $path;
+	}
+}
+
+if ( ! function_exists( 'date_i18n' ) ) {
+	function date_i18n( $format, $timestamp = false, $gmt = false ) {
+		return gmdate( $format, false === $timestamp ? time() : $timestamp );
+	}
+}
+
+if ( ! function_exists( 'is_user_logged_in' ) ) {
+	function is_user_logged_in() {
+		return isset( $GLOBALS['fta_test_logged_in'] )
+			? (bool) $GLOBALS['fta_test_logged_in']
+			: ! empty( $GLOBALS['fta_test_current_user_can'] );
 	}
 }
 
@@ -385,6 +409,12 @@ if ( ! function_exists( 'wp_unslash' ) ) {
 
 if ( ! function_exists( 'add_action' ) ) {
 	function add_action( $hook, $callback, $priority = 10, $accepted_args = 1 ) {
+		// Recorded so tests can assert which hooks a component registers - in
+		// particular that no *_nopriv_* route exists for privileged actions.
+		if ( isset( $GLOBALS['fta_test_actions'] ) && is_array( $GLOBALS['fta_test_actions'] ) ) {
+			$GLOBALS['fta_test_actions'][] = [ $hook, $callback, $priority, $accepted_args ];
+		}
+
 		return true;
 	}
 }
@@ -466,6 +496,70 @@ if ( ! function_exists( 'check_ajax_referer' ) ) {
 		}
 
 		return $valid ? 1 : false;
+	}
+}
+
+if ( ! class_exists( 'FTA_Test_Wp_Die' ) ) {
+	/**
+	 * Stands in for wp_die(), which halts the request in WordPress. Throwing
+	 * lets a test assert that a request was refused, and - more importantly -
+	 * means a controller that fails to stop after an authorization failure
+	 * cannot silently fall through to the code that streams the file.
+	 */
+	class FTA_Test_Wp_Die extends \Exception {
+
+		public $response_code;
+
+		public function __construct( $message = '', $response_code = 0 ) {
+			parent::__construct( (string) $message );
+
+			$this->response_code = $response_code;
+		}
+	}
+}
+
+if ( ! function_exists( 'wp_die' ) ) {
+	function wp_die( $message = '', $title = '', $args = [] ) {
+		$code = 0;
+
+		if ( is_array( $args ) && isset( $args['response'] ) ) {
+			$code = (int) $args['response'];
+		} elseif ( is_int( $title ) ) {
+			$code = $title;
+		}
+
+		throw new FTA_Test_Wp_Die( is_string( $message ) ? $message : '', $code );
+	}
+}
+
+if ( ! function_exists( 'admin_url' ) ) {
+	function admin_url( $path = '', $scheme = 'admin' ) {
+		return 'https://example.com/wp-admin/' . ltrim( (string) $path, '/' );
+	}
+}
+
+if ( ! function_exists( 'add_query_arg' ) ) {
+	function add_query_arg( $args, $url = '' ) {
+		if ( ! is_array( $args ) ) {
+			$args = [ $args => $url ];
+			$url  = func_num_args() > 2 ? func_get_arg( 2 ) : '';
+		}
+
+		$separator = false === strpos( (string) $url, '?' ) ? '?' : '&';
+
+		return $url . $separator . http_build_query( $args, '', '&' );
+	}
+}
+
+if ( ! function_exists( 'nocache_headers' ) ) {
+	function nocache_headers() {
+		$GLOBALS['fta_test_nocache_headers'] = true;
+	}
+}
+
+if ( ! function_exists( 'status_header' ) ) {
+	function status_header( $code, $description = '' ) {
+		$GLOBALS['fta_test_status_header'] = (int) $code;
 	}
 }
 

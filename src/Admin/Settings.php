@@ -137,9 +137,11 @@ class Settings {
 		}
 
 		// Uninstall settings.
-		if ( isset( $settings['keep_data_on_uninstall'] ) ) {
-			$sanitized['keep_data_on_uninstall'] = (bool) $settings['keep_data_on_uninstall'];
-		}
+		//
+		// Assigned unconditionally: an unchecked checkbox is absent from the
+		// request, so a guarded assignment would leave a previously saved
+		// `true` in place and make opting back out impossible.
+		$sanitized['delete_data_on_uninstall'] = ! empty( $settings['delete_data_on_uninstall'] );
 
 		return $sanitized;
 	}
@@ -161,7 +163,7 @@ class Settings {
 			'recaptcha_version'         => 'v2',
 			'recaptcha_score_threshold' => 0.5,
 			'currency'                  => 'USD',
-			'keep_data_on_uninstall'    => false,
+			'delete_data_on_uninstall'  => false,
 		];
 	}
 }

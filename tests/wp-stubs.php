@@ -463,3 +463,68 @@ if ( ! function_exists( 'check_ajax_referer' ) ) {
 		return $valid ? 1 : false;
 	}
 }
+
+if ( ! function_exists( 'delete_option' ) ) {
+	/**
+	 * Records every deleted option name in $GLOBALS['fta_test_deleted_options']
+	 * so uninstall tests can assert on exactly what a run removed - and, just as
+	 * importantly, assert that a retaining run removed nothing.
+	 */
+	function delete_option( $option ) {
+		$GLOBALS['fta_test_deleted_options'][] = $option;
+		unset( $GLOBALS['fta_test_options'][ $option ] );
+
+		return true;
+	}
+}
+
+if ( ! function_exists( 'add_option' ) ) {
+	function add_option( $option, $value = '', $deprecated = '', $autoload = null ) {
+		$GLOBALS['fta_test_options'][ $option ] = $value;
+
+		return true;
+	}
+}
+
+if ( ! function_exists( 'wp_cache_flush' ) ) {
+	function wp_cache_flush() {
+		$GLOBALS['fta_test_cache_flushed'] = true;
+
+		return true;
+	}
+}
+
+if ( ! function_exists( 'get_current_blog_id' ) ) {
+	function get_current_blog_id() {
+		return isset( $GLOBALS['fta_test_blog_id'] ) ? (int) $GLOBALS['fta_test_blog_id'] : 1;
+	}
+}
+
+if ( ! function_exists( 'wp_normalize_path' ) ) {
+	/**
+	 * Mirrors WordPress: backslashes to forward slashes, runs of slashes
+	 * collapsed, and a Windows drive letter upper-cased.
+	 */
+	function wp_normalize_path( $path ) {
+		$path = str_replace( '\\', '/', $path );
+		$path = preg_replace( '|(?<=.)/+|', '/', $path );
+
+		if ( ':' === substr( $path, 1, 1 ) ) {
+			$path = ucfirst( $path );
+		}
+
+		return $path;
+	}
+}
+
+if ( ! function_exists( 'trailingslashit' ) ) {
+	function trailingslashit( $value ) {
+		return rtrim( $value, '/\\' ) . '/';
+	}
+}
+
+if ( ! function_exists( 'untrailingslashit' ) ) {
+	function untrailingslashit( $value ) {
+		return rtrim( $value, '/\\' );
+	}
+}

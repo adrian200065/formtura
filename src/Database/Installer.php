@@ -128,7 +128,7 @@ class Installer {
 				'recaptcha_version'         => 'v2',
 				'recaptcha_score_threshold' => 0.5,
 				'currency'                  => 'USD',
-				'keep_data_on_uninstall'    => false,
+				'delete_data_on_uninstall'  => false,
 			];
 
 			add_option( 'fta_settings', $default_settings );

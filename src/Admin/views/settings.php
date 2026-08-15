@@ -111,7 +111,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 									id="fta-delete-data" 
 									name="settings[delete_data_on_uninstall]" 
 									value="1" 
-									<?php checked( isset( $settings['delete_data_on_uninstall'] ) ? $settings['delete_data_on_uninstall'] : false, 1 ); ?>>
+									<?php checked( ! empty( $settings['delete_data_on_uninstall'] ) ); ?>>
 								<?php esc_html_e( 'Delete all plugin data when uninstalling', FORMTURA_TEXTDOMAIN ); ?>
 							</label>
 							<p class="description">

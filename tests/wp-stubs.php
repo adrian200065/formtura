@@ -331,7 +331,12 @@ if ( ! function_exists( 'wp_delete_file' ) ) {
 
 if ( ! function_exists( 'wp_upload_dir' ) ) {
 	function wp_upload_dir( $time = null, $create_dir = true, $refresh_cache = false ) {
-		$base = sys_get_temp_dir() . '/formtura-tests-uploads';
+		// Tests that need an isolated legacy upload tree seed
+		// $GLOBALS['fta_test_upload_basedir']; everything else keeps the shared
+		// default.
+		$base = isset( $GLOBALS['fta_test_upload_basedir'] )
+			? $GLOBALS['fta_test_upload_basedir']
+			: sys_get_temp_dir() . '/formtura-tests-uploads';
 
 		return [
 			'path'    => $base,

@@ -11,6 +11,7 @@
 
 namespace Formtura\Tests\Unit\Frontend;
 
+use Formtura\Frontend\File_Storage;
 use Formtura\Frontend\Submission;
 use Formtura\Tests\TestCase;
 
@@ -21,17 +22,65 @@ class SubmissionFileCleanupTest extends TestCase {
 	 */
 	private $submission;
 
+	/**
+	 * @var File_Storage
+	 */
+	private $storage;
+
+	/**
+	 * @var string
+	 */
+	private $vaultRoot;
+
 	protected function setUp(): void {
 		parent::setUp();
 
-		$this->submission = new Submission();
-		$_POST             = [];
+		$this->vaultRoot  = sys_get_temp_dir() . '/formtura-vault-' . uniqid( '', true );
+		$this->storage    = new File_Storage( $this->vaultRoot );
+		$this->submission = new Submission( $this->storage );
+		$_POST            = [];
 	}
 
 	protected function tearDown(): void {
 		$_POST = [];
 
+		$this->removeTree( $this->vaultRoot );
+
 		parent::tearDown();
+	}
+
+	private function removeTree( $dir ) {
+		if ( ! is_dir( $dir ) ) {
+			return;
+		}
+
+		$items = new \RecursiveIteratorIterator(
+			new \RecursiveDirectoryIterator( $dir, \FilesystemIterator::SKIP_DOTS ),
+			\RecursiveIteratorIterator::CHILD_FIRST
+		);
+
+		foreach ( $items as $item ) {
+			$item->isDir() ? rmdir( $item->getPathname() ) : unlink( $item->getPathname() );
+		}
+
+		rmdir( $dir );
+	}
+
+	/**
+	 * Write a file into the isolated vault and return its stored record.
+	 *
+	 * Records must be real vault records: cleanup resolves through the storage
+	 * gate, which by design refuses to delete anything outside the vault.
+	 *
+	 * @return array
+	 */
+	private function storeInVault( $name = 'resume.pdf' ) {
+		$dir = $this->storage->prepare_directory();
+		$abs = $dir . '/' . uniqid( 'u', true ) . '.pdf';
+
+		file_put_contents( $abs, 'contents' );
+
+		return $this->storage->create_record( $name, $abs, 'application/pdf', 8 );
 	}
 
 	/**
@@ -54,14 +103,12 @@ class SubmissionFileCleanupTest extends TestCase {
 	 * request, not just avoid writing its own file.
 	 */
 	public function test_signature_failure_deletes_already_stored_upload_files() {
-		$uploaded_file = tempnam( sys_get_temp_dir(), 'fta-upload' );
+		$record        = $this->storeInVault();
+		$uploaded_file = $this->storage->resolve( $record );
+
 		$this->assertFileExists( $uploaded_file );
 
-		$uploads = [
-			'field_resume' => [
-				[ 'name' => 'resume.pdf', 'file' => $uploaded_file, 'url' => '', 'type' => 'application/pdf', 'size' => 10 ],
-			],
-		];
+		$uploads = [ 'field_resume' => [ $record ] ];
 
 		$form = [
 			'fields' => [
@@ -83,13 +130,10 @@ class SubmissionFileCleanupTest extends TestCase {
 	 * untouched and be merged alongside the signature's own record.
 	 */
 	public function test_successful_signatures_are_merged_with_uploads_untouched() {
-		$uploaded_file = tempnam( sys_get_temp_dir(), 'fta-upload' );
+		$record        = $this->storeInVault();
+		$uploaded_file = $this->storage->resolve( $record );
 
-		$uploads = [
-			'field_resume' => [
-				[ 'name' => 'resume.pdf', 'file' => $uploaded_file, 'url' => '', 'type' => 'application/pdf', 'size' => 10 ],
-			],
-		];
+		$uploads = [ 'field_resume' => [ $record ] ];
 
 		// No signature fields on this form, so process_form_signatures()
 		// returns an empty map and the uploads pass through unchanged.
@@ -104,7 +148,5 @@ class SubmissionFileCleanupTest extends TestCase {
 		$this->assertIsArray( $result );
 		$this->assertSame( $uploads, $result );
 		$this->assertFileExists( $uploaded_file );
-
-		unlink( $uploaded_file );
 	}
 }

@@ -62,6 +62,12 @@ A powerful, modern WordPress form builder plugin with a drag-and-drop interface,
 
 ## 🚀 Installation
 
+> **A source archive is not an installable plugin.** A ZIP produced by
+> `git archive`, or by GitHub's "Download ZIP", contains no `vendor/` and no
+> compiled builder assets, so activating it fails. Either follow the source
+> checkout steps below, or build a real package with
+> `scripts/build-release.sh` (see [Releases](#-releases)).
+
 ### From GitHub
 
 1. **Clone the repository:**
@@ -99,6 +105,48 @@ npm run dev
 ```
 
 This starts Vite dev server with HMR (Hot Module Replacement).
+
+## 🔐 File storage
+
+Uploaded files and signatures are stored **outside the WordPress document
+root**, in a private vault. They are never reachable by URL, and the previous
+location (`wp-content/uploads/formtura`, guarded only by an `.htaccess` file
+that nginx and IIS ignore) is migrated automatically on upgrade.
+
+By default the vault sits beside `ABSPATH`, named with a hash of the
+WordPress path so that several installations under one parent directory
+cannot collide. When that parent is not writable — common on managed hosts —
+point it somewhere else in `wp-config.php`:
+
+```php
+define( 'FORMTURA_PRIVATE_UPLOAD_DIR', '/var/private/formtura' );
+```
+
+The directory must be **writable and outside the web root**. If the vault
+cannot be written, file-producing submissions fail rather than falling back
+to a public directory, and an administrator notice explains why.
+
+Files are downloaded through an authenticated route that requires a
+logged-in user with `manage_options`. Links in notification emails point at
+that route, so forwarding a notification does not forward access to the file.
+A field's **attach to email** option still attaches the file directly and
+remains the one deliberate exception to link-only delivery.
+
+## 📦 Releases
+
+`scripts/build-release.sh` is the only supported way to produce an
+installable package:
+
+```bash
+scripts/build-release.sh          # writes dist/formtura-<version>.zip
+scripts/verify-release.sh <zip>   # asserts a package is complete
+```
+
+The build runs in an isolated temporary workspace, installs production
+dependencies and compiles assets from committed manifests, then copies only
+runtime files using `.distignore`. It refuses to emit a ZIP that is missing
+`vendor/autoload.php` or the compiled builder assets, or that carries
+development-only content. CI runs the same script on every pull request.
 
 ## 📖 Usage
 

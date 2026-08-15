@@ -9,6 +9,9 @@
 /assets/js/builder.js.map
 /assets/css/builder.css
 
+# Release output
+/dist
+
 # IDE
 .vscode
 .idea

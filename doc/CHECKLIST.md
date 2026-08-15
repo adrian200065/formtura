@@ -472,16 +472,44 @@ notification/integration settings still open
 analytics not started
 **Phase 4 (Pro):** ⏳ Not started
 
+### Production blockers
+
+- [x] **Uninstall data retention.** `delete_data_on_uninstall` inside
+  `fta_settings` is the single canonical setting, defaults to false, and is
+  written unconditionally so an unchecked box can turn deletion back off.
+- [x] **Installable release package.** `scripts/build-release.sh` builds in an
+  isolated workspace; `scripts/verify-release.sh` defines what a valid package
+  is and runs inside the build. A missing autoloader now shows an admin notice
+  instead of fataling.
+- [x] **Private file storage.** Uploads and signatures live outside the
+  document root, downloads require `manage_options`, legacy files migrate on
+  upgrade, and files are cleaned up across the entry/form/uninstall lifecycle.
+
 ### Suggested next steps
 1. Templates for the remaining palette types, or remove the ones that are not
    close to shipping from the palette and `readme.txt`.
 2. Browser verification of conditional logic and calculations — both are wired
    but have never been exercised against a real form.
-3. Delete stored upload files when their entry is deleted.
-4. Form submission integration tests against a live WordPress.
+3. Entries admin still renders file fields via `implode()`, which shows
+   "Array" for uploads and offers no download link. It should use
+   `File_Download::url()`.
+4. Form submission integration tests against a live WordPress, including the
+   legacy file migration against a real uploads tree.
+5. Network-wide uninstall on multisite: cleanup currently covers the current
+   site's tables and vault only.
+
+### Operational notes
+
+- Files are stored in a private vault outside the document root. Override its
+  location with `FORMTURA_PRIVATE_UPLOAD_DIR` when the parent of `ABSPATH` is
+  not writable. Storage fails closed — there is no public fallback.
+- File links require a logged-in administrator with `manage_options`.
+  `attachToEmail` remains the one deliberate exception.
+- Build releases only with `scripts/build-release.sh`. Source archives are
+  development checkouts, not installable packages.
 
 ---
 
-**Last Updated:** August 7, 2026
-**Plugin Version:** 1.0.4 (DB schema 1.0.4)
+**Last Updated:** August 15, 2026
+**Plugin Version:** 1.0.5 (DB schema 1.0.5)
 **Status:** Builder complete; frontend rendering covers 17 of 38 field types

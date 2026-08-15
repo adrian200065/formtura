@@ -9,6 +9,20 @@
  * @package Formtura
  */
 
+// wpdb output-format constants. Entries_DB passes these to $wpdb methods, so
+// they must exist before any database class is exercised.
+if ( ! defined( 'OBJECT' ) ) {
+	define( 'OBJECT', 'OBJECT' );
+}
+
+if ( ! defined( 'ARRAY_A' ) ) {
+	define( 'ARRAY_A', 'ARRAY_A' );
+}
+
+if ( ! defined( 'ARRAY_N' ) ) {
+	define( 'ARRAY_N', 'ARRAY_N' );
+}
+
 if ( ! class_exists( 'WP_Error' ) ) {
 	/**
 	 * Minimal stand-in for WordPress's WP_Error.
@@ -210,7 +224,14 @@ if ( ! function_exists( 'get_option' ) ) {
 }
 
 if ( ! function_exists( 'update_option' ) ) {
+	/**
+	 * Writes into $GLOBALS['fta_test_options'] so a later get_option() sees the
+	 * value, as it would in WordPress. A no-op stub silently breaks any test
+	 * asserting on state a code path just recorded.
+	 */
 	function update_option( $option, $value, $autoload = null ) {
+		$GLOBALS['fta_test_options'][ $option ] = $value;
+
 		return true;
 	}
 }
@@ -256,7 +277,55 @@ if ( ! function_exists( 'current_time' ) ) {
 
 if ( ! function_exists( 'current_user_can' ) ) {
 	function current_user_can( $capability ) {
-		return false;
+		// Defaults to false so capability checks are exercised as denials
+		// unless a test explicitly grants them.
+		return isset( $GLOBALS['fta_test_current_user_can'] )
+			? (bool) $GLOBALS['fta_test_current_user_can']
+			: false;
+	}
+}
+
+if ( ! function_exists( 'maybe_serialize' ) ) {
+	function maybe_serialize( $data ) {
+		return ( is_array( $data ) || is_object( $data ) ) ? serialize( $data ) : $data;
+	}
+}
+
+if ( ! function_exists( 'maybe_unserialize' ) ) {
+	function maybe_unserialize( $data ) {
+		if ( ! is_string( $data ) ) {
+			return $data;
+		}
+
+		$trimmed = trim( $data );
+
+		if ( '' === $trimmed ) {
+			return $data;
+		}
+
+		$result = @unserialize( $trimmed ); // phpcs:ignore
+
+		return ( false === $result && 'b:0;' !== $trimmed ) ? $data : $result;
+	}
+}
+
+if ( ! function_exists( 'get_site_url' ) ) {
+	function get_site_url( $blog_id = null, $path = '', $scheme = null ) {
+		return 'https://example.com' . $path;
+	}
+}
+
+if ( ! function_exists( 'date_i18n' ) ) {
+	function date_i18n( $format, $timestamp = false, $gmt = false ) {
+		return gmdate( $format, false === $timestamp ? time() : $timestamp );
+	}
+}
+
+if ( ! function_exists( 'is_user_logged_in' ) ) {
+	function is_user_logged_in() {
+		return isset( $GLOBALS['fta_test_logged_in'] )
+			? (bool) $GLOBALS['fta_test_logged_in']
+			: ! empty( $GLOBALS['fta_test_current_user_can'] );
 	}
 }
 
@@ -318,8 +387,13 @@ if ( ! function_exists( 'wp_check_filetype_and_ext' ) ) {
 }
 
 if ( ! function_exists( 'wp_mkdir_p' ) ) {
+	/**
+	 * Mirrors real WordPress: returns false on failure rather than emitting a
+	 * warning. Without the suppression, code that correctly handles a false
+	 * return still blows up under PHPUnit's warning-to-exception conversion.
+	 */
 	function wp_mkdir_p( $target ) {
-		return is_dir( $target ) || mkdir( $target, 0777, true );
+		return is_dir( $target ) || @mkdir( $target, 0777, true ); // phpcs:ignore
 	}
 }
 
@@ -331,7 +405,12 @@ if ( ! function_exists( 'wp_delete_file' ) ) {
 
 if ( ! function_exists( 'wp_upload_dir' ) ) {
 	function wp_upload_dir( $time = null, $create_dir = true, $refresh_cache = false ) {
-		$base = sys_get_temp_dir() . '/formtura-tests-uploads';
+		// Tests that need an isolated legacy upload tree seed
+		// $GLOBALS['fta_test_upload_basedir']; everything else keeps the shared
+		// default.
+		$base = isset( $GLOBALS['fta_test_upload_basedir'] )
+			? $GLOBALS['fta_test_upload_basedir']
+			: sys_get_temp_dir() . '/formtura-tests-uploads';
 
 		return [
 			'path'    => $base,
@@ -380,6 +459,12 @@ if ( ! function_exists( 'wp_unslash' ) ) {
 
 if ( ! function_exists( 'add_action' ) ) {
 	function add_action( $hook, $callback, $priority = 10, $accepted_args = 1 ) {
+		// Recorded so tests can assert which hooks a component registers - in
+		// particular that no *_nopriv_* route exists for privileged actions.
+		if ( isset( $GLOBALS['fta_test_actions'] ) && is_array( $GLOBALS['fta_test_actions'] ) ) {
+			$GLOBALS['fta_test_actions'][] = [ $hook, $callback, $priority, $accepted_args ];
+		}
+
 		return true;
 	}
 }
@@ -461,5 +546,134 @@ if ( ! function_exists( 'check_ajax_referer' ) ) {
 		}
 
 		return $valid ? 1 : false;
+	}
+}
+
+if ( ! class_exists( 'FTA_Test_Wp_Die' ) ) {
+	/**
+	 * Stands in for wp_die(), which halts the request in WordPress. Throwing
+	 * lets a test assert that a request was refused, and - more importantly -
+	 * means a controller that fails to stop after an authorization failure
+	 * cannot silently fall through to the code that streams the file.
+	 */
+	class FTA_Test_Wp_Die extends \Exception {
+
+		public $response_code;
+
+		public function __construct( $message = '', $response_code = 0 ) {
+			parent::__construct( (string) $message );
+
+			$this->response_code = $response_code;
+		}
+	}
+}
+
+if ( ! function_exists( 'wp_die' ) ) {
+	function wp_die( $message = '', $title = '', $args = [] ) {
+		$code = 0;
+
+		if ( is_array( $args ) && isset( $args['response'] ) ) {
+			$code = (int) $args['response'];
+		} elseif ( is_int( $title ) ) {
+			$code = $title;
+		}
+
+		throw new FTA_Test_Wp_Die( is_string( $message ) ? $message : '', $code );
+	}
+}
+
+if ( ! function_exists( 'admin_url' ) ) {
+	function admin_url( $path = '', $scheme = 'admin' ) {
+		return 'https://example.com/wp-admin/' . ltrim( (string) $path, '/' );
+	}
+}
+
+if ( ! function_exists( 'add_query_arg' ) ) {
+	function add_query_arg( $args, $url = '' ) {
+		if ( ! is_array( $args ) ) {
+			$args = [ $args => $url ];
+			$url  = func_num_args() > 2 ? func_get_arg( 2 ) : '';
+		}
+
+		$separator = false === strpos( (string) $url, '?' ) ? '?' : '&';
+
+		return $url . $separator . http_build_query( $args, '', '&' );
+	}
+}
+
+if ( ! function_exists( 'nocache_headers' ) ) {
+	function nocache_headers() {
+		$GLOBALS['fta_test_nocache_headers'] = true;
+	}
+}
+
+if ( ! function_exists( 'status_header' ) ) {
+	function status_header( $code, $description = '' ) {
+		$GLOBALS['fta_test_status_header'] = (int) $code;
+	}
+}
+
+if ( ! function_exists( 'delete_option' ) ) {
+	/**
+	 * Records every deleted option name in $GLOBALS['fta_test_deleted_options']
+	 * so uninstall tests can assert on exactly what a run removed - and, just as
+	 * importantly, assert that a retaining run removed nothing.
+	 */
+	function delete_option( $option ) {
+		$GLOBALS['fta_test_deleted_options'][] = $option;
+		unset( $GLOBALS['fta_test_options'][ $option ] );
+
+		return true;
+	}
+}
+
+if ( ! function_exists( 'add_option' ) ) {
+	function add_option( $option, $value = '', $deprecated = '', $autoload = null ) {
+		$GLOBALS['fta_test_options'][ $option ] = $value;
+
+		return true;
+	}
+}
+
+if ( ! function_exists( 'wp_cache_flush' ) ) {
+	function wp_cache_flush() {
+		$GLOBALS['fta_test_cache_flushed'] = true;
+
+		return true;
+	}
+}
+
+if ( ! function_exists( 'get_current_blog_id' ) ) {
+	function get_current_blog_id() {
+		return isset( $GLOBALS['fta_test_blog_id'] ) ? (int) $GLOBALS['fta_test_blog_id'] : 1;
+	}
+}
+
+if ( ! function_exists( 'wp_normalize_path' ) ) {
+	/**
+	 * Mirrors WordPress: backslashes to forward slashes, runs of slashes
+	 * collapsed, and a Windows drive letter upper-cased.
+	 */
+	function wp_normalize_path( $path ) {
+		$path = str_replace( '\\', '/', $path );
+		$path = preg_replace( '|(?<=.)/+|', '/', $path );
+
+		if ( ':' === substr( $path, 1, 1 ) ) {
+			$path = ucfirst( $path );
+		}
+
+		return $path;
+	}
+}
+
+if ( ! function_exists( 'trailingslashit' ) ) {
+	function trailingslashit( $value ) {
+		return rtrim( $value, '/\\' ) . '/';
+	}
+}
+
+if ( ! function_exists( 'untrailingslashit' ) ) {
+	function untrailingslashit( $value ) {
+		return rtrim( $value, '/\\' );
 	}
 }

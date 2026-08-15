@@ -35,14 +35,40 @@ class Entries_DB {
 	private $meta_table_name;
 
 	/**
+	 * Private storage service, used to clean up an entry's files.
+	 *
+	 * @var \Formtura\Frontend\File_Storage|null
+	 */
+	private $storage;
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 1.0.0
+	 * @param \Formtura\Frontend\File_Storage|null $storage Optional storage
+	 *        service. Injected by tests so deletion works against a temporary
+	 *        vault.
 	 */
-	public function __construct() {
+	public function __construct( $storage = null ) {
 		global $wpdb;
 		$this->table_name = $wpdb->prefix . 'fta_entries';
 		$this->meta_table_name = $wpdb->prefix . 'fta_entry_meta';
+
+		$this->storage = $storage instanceof \Formtura\Frontend\File_Storage ? $storage : null;
+	}
+
+	/**
+	 * The storage service, created on demand.
+	 *
+	 * @since 1.0.5
+	 * @return \Formtura\Frontend\File_Storage
+	 */
+	private function storage() {
+		if ( null === $this->storage ) {
+			$this->storage = new \Formtura\Frontend\File_Storage();
+		}
+
+		return $this->storage;
 	}
 
 	/**
@@ -215,6 +241,10 @@ class Entries_DB {
 	public function delete( $entry_id ) {
 		global $wpdb;
 
+		// Captured before the rows go: once the meta is deleted there is no
+		// way left to discover which files this entry owned.
+		$entry = $this->get( $entry_id );
+
 		// Delete entry meta.
 		$wpdb->delete(
 			$this->meta_table_name,
@@ -227,7 +257,17 @@ class Entries_DB {
 			[ 'id' => $entry_id ]
 		);
 
-		return $result !== false;
+		if ( false === $result ) {
+			// The rows are still there, so the files must be too - otherwise
+			// the entry would keep displaying files that no longer exist.
+			return false;
+		}
+
+		if ( ! empty( $entry['data'] ) ) {
+			$this->storage()->delete_records( $entry['data'] );
+		}
+
+		return true;
 	}
 
 	/**
@@ -249,6 +289,17 @@ class Entries_DB {
 			return true;
 		}
 
+		// Captured before the rows go, for the same reason as delete().
+		$captured = [];
+
+		foreach ( $entry_ids as $entry_id ) {
+			$entry = $this->get( $entry_id );
+
+			if ( ! empty( $entry['data'] ) ) {
+				$captured[] = $entry['data'];
+			}
+		}
+
 		// Delete entry meta.
 		$placeholders = implode( ',', array_fill( 0, count( $entry_ids ), '%d' ) );
 		$wpdb->query(
@@ -261,7 +312,15 @@ class Entries_DB {
 			[ 'form_id' => $form_id ]
 		);
 
-		return $result !== false;
+		if ( false === $result ) {
+			return false;
+		}
+
+		foreach ( $captured as $data ) {
+			$this->storage()->delete_records( $data );
+		}
+
+		return true;
 	}
 
 	/**

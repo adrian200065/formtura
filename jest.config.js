@@ -17,6 +17,15 @@ module.exports = {
     '**/__tests__/**/*.[jt]s?(x)',
     '**/?(*.)+(spec|test).[jt]s?(x)'
   ],
+  // Git worktrees under .worktrees/ are full checkouts of this same repo, so
+  // without this every test file is discovered twice - once here and once in
+  // each worktree, running a stale copy of the code alongside the real one.
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    '/vendor/',
+    '/.worktrees/',
+    '/dist/',
+  ],
   collectCoverageFrom: [
     'builder/**/*.{js,jsx}',
     '!builder/main.jsx',

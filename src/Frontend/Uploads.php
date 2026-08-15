@@ -21,9 +21,47 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Uploads {
 
 	/**
-	 * Directory name created inside wp-content/uploads.
+	 * Directory name the plugin used inside wp-content/uploads.
+	 *
+	 * Retained for the legacy tree only: new files go to the private vault.
 	 */
 	const UPLOAD_DIR = 'formtura';
+
+	/**
+	 * Private storage service.
+	 *
+	 * @var File_Storage
+	 */
+	private $storage;
+
+	/**
+	 * Directory new files are being written to during a single store() call.
+	 *
+	 * @var string
+	 */
+	private $current_dir = '';
+
+	/**
+	 * Constructor.
+	 *
+	 * @since 1.0.5
+	 * @param File_Storage|null $storage Optional storage service. Injected by
+	 *                                   tests so they write to a temporary
+	 *                                   vault instead of the real one.
+	 */
+	public function __construct( $storage = null ) {
+		$this->storage = $storage instanceof File_Storage ? $storage : new File_Storage();
+	}
+
+	/**
+	 * The storage service backing this instance.
+	 *
+	 * @since 1.0.5
+	 * @return File_Storage
+	 */
+	protected function storage() {
+		return $this->storage;
+	}
 
 	/**
 	 * Extensions that are never accepted, whatever the form allows.
@@ -64,8 +102,9 @@ class Uploads {
 	 * @return array|\WP_Error Map of field name => file records, or WP_Error.
 	 */
 	public function process_form_uploads( $form ) {
-		$results = [];
-		$errors  = [];
+		$results  = [];
+		$errors   = [];
+		$orphaned = [];
 
 		if ( empty( $form['fields'] ) || ! is_array( $form['fields'] ) ) {
 			return $results;
@@ -114,14 +153,26 @@ class Uploads {
 				$stored[] = $result;
 			}
 
-			if ( ! isset( $errors[ $field_name ] ) && ! empty( $stored ) ) {
+			if ( isset( $errors[ $field_name ] ) ) {
+				// Files stored before this field failed are orphaned too, and
+				// are not in $results because the field never completed. Keep
+				// them separately so cleanup below can still reach them.
+				if ( ! empty( $stored ) ) {
+					$orphaned[] = $stored;
+				}
+
+				continue;
+			}
+
+			if ( ! empty( $stored ) ) {
 				$results[ $field_name ] = $stored;
 			}
 		}
 
 		if ( ! empty( $errors ) ) {
 			// Files already moved in this request are orphaned; remove them.
-			self::cleanup( $results );
+			$this->cleanup( $results );
+			$this->cleanup( $orphaned );
 
 			return new \WP_Error(
 				'upload_failed',
@@ -179,7 +230,7 @@ class Uploads {
 	 * @param array $field Field configuration.
 	 * @return array|\WP_Error File record or error.
 	 */
-	private function handle_single_file( $file, $field ) {
+	protected function handle_single_file( $file, $field ) {
 		$error = $this->check_php_upload_error( $file );
 
 		if ( is_wp_error( $error ) ) {
@@ -378,6 +429,20 @@ class Uploads {
 			require_once ABSPATH . 'wp-admin/includes/file.php';
 		}
 
+		// Fails closed: with no writable private vault there is nowhere safe to
+		// put an upload, and falling back to a public directory is exactly the
+		// behaviour this replaces.
+		$dir = $this->storage->prepare_directory();
+
+		if ( false === $dir ) {
+			return new \WP_Error(
+				'upload_store_failed',
+				__( 'The file could not be saved. Please contact the site administrator.', FORMTURA_TEXTDOMAIN )
+			);
+		}
+
+		$this->current_dir = $dir;
+
 		// Filenames are randomised so stored files cannot be enumerated by
 		// guessing the visitor's original name.
 		$original  = $file['name'];
@@ -394,34 +459,52 @@ class Uploads {
 
 		remove_filter( 'upload_dir', $filter );
 
+		$this->current_dir = '';
+
 		if ( isset( $moved['error'] ) ) {
 			return new \WP_Error( 'upload_move_failed', $moved['error'] );
 		}
 
-		return [
-			'name' => sanitize_file_name( $original ),
-			'file' => $moved['file'],
-			'url'  => $moved['url'],
-			'type' => $moved['type'],
-			'size' => (int) $file['size'],
-		];
+		@chmod( $moved['file'], 0600 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+
+		// $moved['url'] is deliberately discarded: it points into the public
+		// uploads tree, which is no longer where the file lives.
+		$record = $this->storage->create_record( $original, $moved['file'], $moved['type'], (int) $file['size'] );
+
+		if ( false === $record ) {
+			wp_delete_file( $moved['file'] );
+
+			return new \WP_Error(
+				'upload_store_failed',
+				__( 'The file could not be saved. Please contact the site administrator.', FORMTURA_TEXTDOMAIN )
+			);
+		}
+
+		return $record;
 	}
 
 	/**
-	 * Point uploads at wp-content/uploads/formtura/<year>/<month>.
+	 * Point wp_handle_upload() at the private vault for the current store().
+	 *
+	 * The URL fields are blanked rather than rewritten: there is no public URL
+	 * for a vault file, and leaving a plausible-looking one here would let it
+	 * reach entry metadata.
 	 *
 	 * @since 1.0.3
 	 * @param array $dirs Upload directory parts.
 	 * @return array Filtered parts.
 	 */
 	public function filter_upload_dir( $dirs ) {
-		$subdir = '/' . self::UPLOAD_DIR . $dirs['subdir'];
+		if ( '' === $this->current_dir ) {
+			return $dirs;
+		}
 
-		$dirs['path']   = $dirs['basedir'] . $subdir;
-		$dirs['url']    = $dirs['baseurl'] . $subdir;
-		$dirs['subdir'] = $subdir;
-
-		self::protect_upload_dir( $dirs['basedir'] . '/' . self::UPLOAD_DIR );
+		$dirs['basedir'] = $this->storage->get_site_root();
+		$dirs['path']    = $this->current_dir;
+		$dirs['subdir']  = '';
+		$dirs['baseurl'] = '';
+		$dirs['url']     = '';
+		$dirs['error']   = false;
 
 		return $dirs;
 	}
@@ -474,30 +557,27 @@ class Uploads {
 	 * @since 1.0.3
 	 * @param array $results Map of field name => file records.
 	 */
-	public static function cleanup( $results ) {
-		foreach ( $results as $files ) {
-			foreach ( $files as $file ) {
-				if ( ! empty( $file['file'] ) && file_exists( $file['file'] ) ) {
-					wp_delete_file( $file['file'] );
-				}
-			}
-		}
+	public function cleanup( $results ) {
+		$this->storage->delete_records( $results );
 	}
 
 	/**
 	 * Collect absolute paths for files that should ride along with an email.
 	 *
 	 * @since 1.0.3
-	 * @param array $form       Form data.
-	 * @param array $entry_data Saved entry data.
+	 * @param array             $form       Form data.
+	 * @param array             $entry_data Saved entry data.
+	 * @param File_Storage|null $storage    Optional storage service.
 	 * @return string[] Absolute file paths.
 	 */
-	public static function get_email_attachments( $form, $entry_data ) {
+	public static function get_email_attachments( $form, $entry_data, $storage = null ) {
 		$attachments = [];
 
 		if ( empty( $form['fields'] ) || ! is_array( $form['fields'] ) ) {
 			return $attachments;
 		}
+
+		$storage = $storage instanceof File_Storage ? $storage : new File_Storage();
 
 		foreach ( $form['fields'] as $field ) {
 			if ( ! isset( $field['type'] ) || 'file-upload' !== $field['type'] ) {
@@ -515,8 +595,12 @@ class Uploads {
 			}
 
 			foreach ( $entry_data[ $field_name ] as $file ) {
-				if ( ! empty( $file['file'] ) && file_exists( $file['file'] ) ) {
-					$attachments[] = $file['file'];
+				// Resolved through the storage gate, so a record cannot name
+				// an arbitrary server file and have it mailed out.
+				$path = $storage->resolve( $file );
+
+				if ( false !== $path ) {
+					$attachments[] = $path;
 				}
 			}
 		}

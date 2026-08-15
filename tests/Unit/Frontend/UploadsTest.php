@@ -11,6 +11,7 @@
 
 namespace Formtura\Tests\Unit\Frontend;
 
+use Formtura\Frontend\File_Storage;
 use Formtura\Frontend\Uploads;
 use Formtura\Tests\TestCase;
 
@@ -21,17 +22,63 @@ class UploadsTest extends TestCase {
 	 */
 	private $uploads;
 
+	/**
+	 * @var File_Storage
+	 */
+	private $storage;
+
+	/**
+	 * @var string
+	 */
+	private $vaultRoot;
+
 	protected function setUp(): void {
 		parent::setUp();
 
-		$this->uploads = new Uploads();
-		$_FILES        = [];
+		$this->vaultRoot = sys_get_temp_dir() . '/formtura-vault-' . uniqid( '', true );
+		$this->storage   = new File_Storage( $this->vaultRoot );
+		$this->uploads   = new Uploads( $this->storage );
+		$_FILES          = [];
 	}
 
 	protected function tearDown(): void {
 		$_FILES = [];
 
+		$this->removeTree( $this->vaultRoot );
+
 		parent::tearDown();
+	}
+
+	private function removeTree( $dir ) {
+		if ( ! is_dir( $dir ) ) {
+			return;
+		}
+
+		$items = new \RecursiveIteratorIterator(
+			new \RecursiveDirectoryIterator( $dir, \FilesystemIterator::SKIP_DOTS ),
+			\RecursiveIteratorIterator::CHILD_FIRST
+		);
+
+		foreach ( $items as $item ) {
+			$item->isDir() ? rmdir( $item->getPathname() ) : unlink( $item->getPathname() );
+		}
+
+		rmdir( $dir );
+	}
+
+	/**
+	 * Write a file into the isolated vault and return its stored record.
+	 *
+	 * @param string $name Visitor-visible filename.
+	 * @return array Stored record.
+	 */
+	private function storeInVault( $name = 'a.jpg' ) {
+		$dir = $this->storage->prepare_directory();
+		$abs = $dir . '/' . uniqid( 'f', true ) . '.jpg';
+
+		file_put_contents( $abs, 'contents' );
+
+		return $this->storage->create_record( $name, $abs, 'image/jpeg', 8 );
 	}
 
 	/**
@@ -298,8 +345,13 @@ class UploadsTest extends TestCase {
 		$this->assertSame( [ 'jpg', 'jpeg', 'png', 'gif', 'webp' ], $extensions );
 	}
 
+	/**
+	 * attachToEmail is the one explicit bypass of link-only delivery, so it
+	 * must still resolve a private file to a real absolute path.
+	 */
 	public function test_email_attachments_only_include_flagged_fields() {
-		$existing = tempnam( sys_get_temp_dir(), 'fta' );
+		$kept    = $this->storeInVault( 'a.jpg' );
+		$skipped = $this->storeInVault( 'b.jpg' );
 
 		$form = [
 			'fields' => [
@@ -309,15 +361,13 @@ class UploadsTest extends TestCase {
 		];
 
 		$entry = [
-			'f1' => [ [ 'name' => 'a.jpg', 'file' => $existing, 'url' => '' ] ],
-			'f2' => [ [ 'name' => 'b.jpg', 'file' => $existing, 'url' => '' ] ],
+			'f1' => [ $kept ],
+			'f2' => [ $skipped ],
 		];
 
-		$attachments = Uploads::get_email_attachments( $form, $entry );
+		$attachments = Uploads::get_email_attachments( $form, $entry, $this->storage );
 
-		$this->assertSame( [ $existing ], $attachments );
-
-		unlink( $existing );
+		$this->assertSame( [ $this->storage->resolve( $kept ) ], $attachments );
 	}
 
 	public function test_email_attachments_skip_missing_files() {
@@ -325,9 +375,24 @@ class UploadsTest extends TestCase {
 			'fields' => [ [ 'id' => 'f1', 'type' => 'file-upload', 'attachToEmail' => true ] ],
 		];
 
-		$entry = [ 'f1' => [ [ 'name' => 'a.jpg', 'file' => '/does/not/exist.jpg' ] ] ];
+		$entry = [ 'f1' => [ [ 'name' => 'a.jpg', 'path' => '2026/08/absent.jpg' ] ] ];
 
-		$this->assertSame( [], Uploads::get_email_attachments( $form, $entry ) );
+		$this->assertSame( [], Uploads::get_email_attachments( $form, $entry, $this->storage ) );
+	}
+
+	/**
+	 * An attachment record must not be able to name an arbitrary file on the
+	 * server and have it mailed out.
+	 */
+	public function test_email_attachments_reject_paths_outside_the_vault() {
+		$outside = tempnam( sys_get_temp_dir(), 'fta' );
+
+		$form  = [ 'fields' => [ [ 'id' => 'f1', 'type' => 'file-upload', 'attachToEmail' => true ] ] ];
+		$entry = [ 'f1' => [ [ 'name' => 'a.jpg', 'path' => '../../../../..' . $outside ] ] ];
+
+		$this->assertSame( [], Uploads::get_email_attachments( $form, $entry, $this->storage ) );
+
+		unlink( $outside );
 	}
 
 	/**
@@ -336,19 +401,74 @@ class UploadsTest extends TestCase {
 	 * fails - a rejected submission must never leave files behind.
 	 */
 	public function test_cleanup_deletes_stored_files() {
-		$file = tempnam( sys_get_temp_dir(), 'fta' );
-		$this->assertFileExists( $file );
+		$record = $this->storeInVault();
+		$path   = $this->storage->resolve( $record );
 
-		Uploads::cleanup( [ 'f1' => [ [ 'file' => $file ] ] ] );
+		$this->assertFileExists( $path );
 
-		$this->assertFileDoesNotExist( $file );
+		$this->uploads->cleanup( [ 'f1' => [ $record ] ] );
+
+		$this->assertFileDoesNotExist( $path );
 	}
 
 	public function test_cleanup_ignores_records_with_no_file_on_disk() {
 		// Must not error when a record's file was never created, or was
 		// already removed by an earlier cleanup call.
-		Uploads::cleanup( [ 'f1' => [ [ 'file' => '/does/not/exist.png' ] ] ] );
+		$this->uploads->cleanup( [ 'f1' => [ [ 'path' => '2026/08/gone.png' ] ] ] );
 
 		$this->addToAssertionCount( 1 );
+	}
+
+	/**
+	 * The leak this pins: when a later file in the same multi-file field
+	 * failed, the loop broke out and discarded $stored, so the files it had
+	 * already moved were never added to $results and cleanup() never saw
+	 * them. They stayed on disk with no entry referencing them.
+	 *
+	 * Driven through the real process_form_uploads() loop, with only the
+	 * per-file store step replaced: the first file stores successfully, the
+	 * second fails.
+	 */
+	public function test_partial_multi_file_failure_removes_earlier_files() {
+		$uploads = new class( $this->storage ) extends Uploads {
+			public $storedPath;
+			private $calls = 0;
+
+			protected function handle_single_file( $file, $field ) {
+				$this->calls++;
+
+				if ( $this->calls > 1 ) {
+					return new \WP_Error( 'upload_too_large', 'Second file rejected.' );
+				}
+
+				$dir = $this->storage()->prepare_directory();
+				$abs = $dir . '/' . uniqid( 'p', true ) . '.jpg';
+				file_put_contents( $abs, 'first' );
+				$this->storedPath = $abs;
+
+				return $this->storage()->create_record( 'first.jpg', $abs, 'image/jpeg', 5 );
+			}
+		};
+
+		$_FILES['f1'] = [
+			'name'     => [ 'first.jpg', 'second.jpg' ],
+			'type'     => [ 'image/jpeg', 'image/jpeg' ],
+			'tmp_name' => [ '/tmp/a', '/tmp/b' ],
+			'error'    => [ UPLOAD_ERR_OK, UPLOAD_ERR_OK ],
+			'size'     => [ 5, 5 ],
+		];
+
+		$form = [
+			'fields' => [ [ 'id' => 'f1', 'type' => 'file-upload', 'allowMultiple' => true ] ],
+		];
+
+		$result = $uploads->process_form_uploads( $form );
+
+		$this->assertInstanceOf( \WP_Error::class, $result );
+		$this->assertNotNull( $uploads->storedPath );
+		$this->assertFileDoesNotExist(
+			$uploads->storedPath,
+			'A file stored before a later file in the same field failed must not survive the rejected submission.'
+		);
 	}
 }

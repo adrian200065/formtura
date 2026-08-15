@@ -102,6 +102,11 @@ class Core {
 		new Frontend\Submission();
 		new Frontend\Notifications();
 
+		// The only browser route to a stored file. Registered unconditionally
+		// because admin-post.php runs with is_admin() true, and the handler
+		// must be attached to that request.
+		( new Frontend\File_Download() )->register();
+
 		// Initialize admin.
 		if ( is_admin() ) {
 			$this->admin = new Admin\Admin();

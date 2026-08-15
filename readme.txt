@@ -4,7 +4,7 @@ Tags: form, form builder, contact form, drag and drop, forms
 Requires at least: 5.8
 Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 1.0.4
+Stable tag: 1.0.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -107,6 +107,16 @@ Yes, you can export entries to CSV format from the Entries page.
 
 == Changelog ==
 
+= 1.0.5 =
+* Uploaded files and signatures are now stored outside the public web root, and are no longer reachable by URL. Previously they lived in wp-content/uploads/formtura, protected only by an .htaccess file - which nginx and IIS ignore, leaving every uploaded file readable by anyone who knew or guessed its address
+* Existing files are moved into the new private location automatically when the plugin updates. If the move cannot complete, the plugin says so and retries on the next update rather than reporting success
+* File links in notification emails now point at an administrator-only download, so forwarding a notification no longer forwards access to the file. Files explicitly set to "attach to email" still attach as before
+* Fixed the plugin deleting all of your forms, entries and settings on uninstall regardless of the "Delete Data on Uninstall" setting. That checkbox never saved, so the setting was always read as off and every uninstall was destructive. Data is now kept unless you explicitly opt in
+* Fixed uploaded files being left behind when one file in a multi-file upload field was rejected. Files accepted before the rejection stayed on the server with no entry referencing them
+* Deleting an entry or a form now deletes the files it owned, instead of leaving them on the server forever
+* Fixed a form being deleted even when its entries could not be, which left those entries stranded
+* Release packages are now built with a script that includes dependencies and compiled assets. A ZIP downloaded from the source repository was never installable and would fatal on activation
+
 = 1.0.4 =
 * Added twelve field types to the frontend: Content, Section Divider, Rich Text, Address, Camera, Signature, Single Item, Checkbox Items, Multiple Items, Dropdown Items, Coupon and Total. Twenty-nine of the builder's field types now render on your site
 * Added payment fields that record what was ordered with the entry, including per-item prices, a running total, an optional order summary and coupon codes. No payment is collected - Formtura has no gateway integration yet, so no card is charged
@@ -143,6 +153,18 @@ Yes, you can export entries to CSV format from the Entries page.
 * CAPTCHA support
 
 == Upgrade Notice ==
+
+= 1.0.5 =
+This upgrade moves every uploaded file and signature out of your public
+uploads directory into a private directory outside the web root, because
+their old location was readable by anyone who knew the URL on nginx and IIS.
+Back up wp-content/uploads/formtura first. Any direct links you have shared
+to those files will stop working; file links in notifications now require a
+logged-in administrator. If your host cannot write beside the WordPress
+directory, define FORMTURA_PRIVATE_UPLOAD_DIR in wp-config.php to a writable
+directory outside the web root before updating - the plugin will tell you if
+the move did not complete. Uninstall also no longer deletes your data unless
+you have ticked "Delete Data on Uninstall", which previously never saved.
 
 = 1.0.4 =
 Two fixes change how existing forms behave. Any form using reCAPTCHA was

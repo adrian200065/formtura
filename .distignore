@@ -1,0 +1,66 @@
+# Paths excluded from the distributed release package.
+#
+# Consumed by scripts/build-release.sh as rsync --exclude-from patterns, so
+# these are rsync patterns: a leading slash anchors to the package root, and a
+# trailing slash matches directories only.
+#
+# This is an exclusion list rather than an inclusion list so that a newly added
+# runtime directory ships by default. scripts/verify-release.sh is the backstop
+# that fails the build if anything below slips through.
+
+# Version control and CI
+/.git/
+/.gitattributes
+/.gitignore
+/.github/
+/.distignore
+
+# Agent and editor tooling
+/.agents/
+/.claude/
+/.codex/
+/.superpowers/
+/.vscode/
+/.idea/
+/.worktrees/
+
+# Build sources and toolchain
+/builder/
+/node_modules/
+/package.json
+/pnpm-lock.yaml
+/vite.config.js
+/assets/css/builder-src.css
+/assets/js/*.map
+
+# Composer manifests (vendor/ itself ships; these do not)
+/composer.json
+/composer.lock
+
+# Tests
+/tests/
+/jest.config.js
+/jest.setup.js
+/phpunit.xml
+/phpunit.xml.dist
+/.phpunit.result.cache
+/coverage/
+
+# Developer documentation (readme.txt and README.md ship)
+/doc/
+/docs/
+/HTML/
+/GITHUB_SETUP.md
+/IMPROVEMENTS.md
+/TESTING.md
+
+# Release tooling and output
+/scripts/
+/dist/
+
+# Environment and local noise
+/.env
+/.env.local
+/*.log
+/.DS_Store
+/Thumbs.db

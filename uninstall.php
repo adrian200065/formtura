@@ -2,7 +2,8 @@
 /**
  * Uninstall Formtura
  *
- * Handles cleanup when the plugin is deleted.
+ * Thin bootstrap. All cleanup logic lives in Formtura\Uninstall so that it is
+ * testable; this file only loads the autoloader and delegates.
  *
  * @package Formtura
  * @since 1.0.0
@@ -13,51 +14,19 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
 }
 
-/**
- * Remove plugin data on uninstall.
- *
- * This function will only run if the user has chosen to remove all data
- * in the plugin settings.
- */
-function fta_uninstall() {
-	global $wpdb;
+$fta_autoloader = __DIR__ . '/vendor/autoload.php';
 
-	// Check if user wants to keep data.
-	$keep_data = get_option( 'fta_keep_data_on_uninstall', false );
-
-	if ( $keep_data ) {
-		return;
-	}
-
-	// Drop custom tables.
-	$tables = [
-		$wpdb->prefix . 'fta_forms',
-		$wpdb->prefix . 'fta_entries',
-		$wpdb->prefix . 'fta_entry_meta',
-	];
-
-	foreach ( $tables as $table ) {
-		$wpdb->query( "DROP TABLE IF EXISTS {$table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-	}
-
-	// Remove plugin options.
-	$options = [
-		'fta_version',
-		'fta_settings',
-		'fta_smtp_settings',
-		'fta_captcha_settings',
-		'fta_integrations',
-		'fta_payment_settings',
-		'fta_keep_data_on_uninstall',
-		'fta_db_version',
-	];
-
-	foreach ( $options as $option ) {
-		delete_option( $option );
-	}
-
-	// Clear any cached data.
-	wp_cache_flush();
+// Without the autoloader there is no way to run the guarded routine. Doing
+// nothing is the correct outcome: retaining data is always recoverable,
+// deleting it is not.
+if ( ! file_exists( $fta_autoloader ) ) {
+	return;
 }
 
-fta_uninstall();
+require_once $fta_autoloader;
+
+if ( ! class_exists( \Formtura\Uninstall::class ) ) {
+	return;
+}
+
+\Formtura\Uninstall::run();

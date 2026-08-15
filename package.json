@@ -1,6 +1,6 @@
 {
   "name": "formtura",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "A modern, intuitive, and powerful form builder for WordPress",
   "main": "assets/js/builder.js",
   "packageManager": "pnpm@10.29.3",
@@ -18,7 +18,9 @@
     "lint:fix": "eslint src --ext .js,.jsx,.ts,.tsx --fix",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "release": "bash scripts/build-release.sh",
+    "release:verify": "bash scripts/verify-release.sh"
   },
   "keywords": [
     "wordpress",

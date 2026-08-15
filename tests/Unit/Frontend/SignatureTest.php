@@ -10,6 +10,7 @@
 
 namespace Formtura\Tests\Unit\Frontend;
 
+use Formtura\Frontend\File_Storage;
 use Formtura\Frontend\Signature;
 use Formtura\Tests\TestCase;
 
@@ -17,15 +18,77 @@ class SignatureTest extends TestCase {
 
 	const PNG_BASE64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
 
+	/**
+	 * @var File_Storage
+	 */
+	private $storage;
+
+	/**
+	 * @var string
+	 */
+	private $vaultRoot;
+
 	protected function setUp(): void {
 		parent::setUp();
 		$_POST = [];
+
+		$this->vaultRoot = sys_get_temp_dir() . '/formtura-vault-' . uniqid( '', true );
+		$this->storage   = new File_Storage( $this->vaultRoot );
 	}
 
 	protected function tearDown(): void {
 		$_POST = [];
 		$this->removeUploadTree();
+		$this->removeTree( $this->vaultRoot );
 		parent::tearDown();
+	}
+
+	/**
+	 * A Signature writing into this test's isolated vault.
+	 */
+	private function signature() {
+		return new Signature( $this->storage );
+	}
+
+	private function removeTree( $dir ) {
+		if ( ! is_dir( $dir ) ) {
+			return;
+		}
+
+		$items = new \RecursiveIteratorIterator(
+			new \RecursiveDirectoryIterator( $dir, \FilesystemIterator::SKIP_DOTS ),
+			\RecursiveIteratorIterator::CHILD_FIRST
+		);
+
+		foreach ( $items as $item ) {
+			$item->isDir() ? rmdir( $item->getPathname() ) : unlink( $item->getPathname() );
+		}
+
+		rmdir( $dir );
+	}
+
+	/**
+	 * Every .png anywhere inside the isolated vault.
+	 *
+	 * @return string[]
+	 */
+	private function vaultPngs() {
+		if ( ! is_dir( $this->vaultRoot ) ) {
+			return [];
+		}
+
+		$found = [];
+		$items = new \RecursiveIteratorIterator(
+			new \RecursiveDirectoryIterator( $this->vaultRoot, \FilesystemIterator::SKIP_DOTS )
+		);
+
+		foreach ( $items as $item ) {
+			if ( $item->isFile() && 'png' === $item->getExtension() ) {
+				$found[] = $item->getPathname();
+			}
+		}
+
+		return $found;
 	}
 
 	private function dataUrl() {
@@ -178,7 +241,7 @@ class SignatureTest extends TestCase {
 	public function test_missing_required_signature_is_a_field_error() {
 		$form = [ 'fields' => [ [ 'id' => 'field_sig', 'type' => 'signature', 'label' => 'Sign here', 'required' => true ] ] ];
 
-		$result = ( new Signature() )->process_form_signatures( $form );
+		$result = $this->signature()->process_form_signatures( $form );
 
 		$this->assertInstanceOf( \WP_Error::class, $result );
 		$errors = $result->get_error_data();
@@ -188,7 +251,7 @@ class SignatureTest extends TestCase {
 	public function test_missing_optional_signature_is_skipped() {
 		$form = [ 'fields' => [ [ 'id' => 'field_sig', 'type' => 'signature', 'label' => 'Sign here', 'required' => false ] ] ];
 
-		$this->assertSame( [], ( new Signature() )->process_form_signatures( $form ) );
+		$this->assertSame( [], $this->signature()->process_form_signatures( $form ) );
 	}
 
 	/**
@@ -201,17 +264,17 @@ class SignatureTest extends TestCase {
 		$_POST['field_sig'] = [ 'unexpected' ];
 		$form = [ 'fields' => [ [ 'id' => 'field_sig', 'type' => 'signature', 'label' => 'Sign here', 'required' => true ] ] ];
 
-		$result = ( new Signature() )->process_form_signatures( $form );
+		$result = $this->signature()->process_form_signatures( $form );
 
 		$this->assertInstanceOf( \WP_Error::class, $result );
 		$this->assertArrayHasKey( 'field_sig', $result->get_error_data() );
 	}
 
-	public function test_valid_signature_is_stored_as_a_file_record() {
+	public function test_valid_signature_is_stored_as_a_private_record() {
 		$_POST['field_sig'] = $this->dataUrl();
 		$form = [ 'fields' => [ [ 'id' => 'field_sig', 'type' => 'signature', 'label' => 'Sign here' ] ] ];
 
-		$result = ( new Signature() )->process_form_signatures( $form );
+		$result = $this->signature()->process_form_signatures( $form );
 
 		$this->assertIsArray( $result );
 		$this->assertArrayHasKey( 'field_sig', $result );
@@ -219,13 +282,34 @@ class SignatureTest extends TestCase {
 		$record = $result['field_sig'][0];
 		$this->assertSame( 'signature.png', $record['name'] );
 		$this->assertSame( 'image/png', $record['type'] );
-		$this->assertArrayHasKey( 'url', $record );
-		$this->assertNotEmpty( $record['url'] );
 		$this->assertSame( strlen( $this->realPngBinary() ), $record['size'] );
-		$this->assertFileExists( $record['file'] );
-		$this->assertStringEndsWith( '.png', $record['file'] );
 
-		unlink( $record['file'] );
+		// A stored record must expose no public or absolute location.
+		$this->assertArrayHasKey( 'path', $record );
+		$this->assertArrayNotHasKey( 'url', $record );
+		$this->assertArrayNotHasKey( 'file', $record );
+		$this->assertStringStartsNotWith( '/', $record['path'] );
+		$this->assertStringEndsWith( '.png', $record['path'] );
+
+		// The record must resolve back to a real file inside the vault.
+		$resolved = $this->storage->resolve( $record );
+		$this->assertNotFalse( $resolved );
+		$this->assertFileExists( $resolved );
+		$this->assertStringStartsWith( $this->storage->get_site_root(), $resolved );
+	}
+
+	/**
+	 * Signatures must never land in the public uploads tree again.
+	 */
+	public function test_signature_is_not_written_to_the_public_upload_directory() {
+		$_POST['field_sig'] = $this->dataUrl();
+		$form = [ 'fields' => [ [ 'id' => 'field_sig', 'type' => 'signature', 'label' => 'Sign here' ] ] ];
+
+		$this->signature()->process_form_signatures( $form );
+
+		$public = is_dir( $this->uploadDir() ) ? glob( $this->uploadDir() . '/**/*.png' ) : [];
+
+		$this->assertSame( [], $public );
 	}
 
 	/**
@@ -245,12 +329,10 @@ class SignatureTest extends TestCase {
 			],
 		];
 
-		$result = ( new Signature() )->process_form_signatures( $form );
+		$result = $this->signature()->process_form_signatures( $form );
 
 		$this->assertInstanceOf( \WP_Error::class, $result );
 
-		$written = is_dir( $this->uploadDir() ) ? glob( $this->uploadDir() . '/*.png' ) : [];
-
-		$this->assertSame( [], $written, "The first field's file must not be written when a later field fails." );
+		$this->assertSame( [], $this->vaultPngs(), "The first field's file must not be written when a later field fails." );
 	}
 }

@@ -461,6 +461,84 @@ class Entries_DB {
 	}
 
 	/**
+	 * Entry IDs belonging to a WordPress user.
+	 *
+	 * Used by the Privacy API integration to find entries submitted by a
+	 * logged-in requester.
+	 *
+	 * @since 1.0.6
+	 * @param int $user_id WordPress user ID.
+	 * @return int[] Entry IDs.
+	 */
+	public function get_ids_by_user( $user_id ) {
+		global $wpdb;
+
+		return array_map(
+			'intval',
+			$wpdb->get_col(
+				$wpdb->prepare( "SELECT id FROM {$this->table_name} WHERE user_id = %d", $user_id )
+			)
+		);
+	}
+
+	/**
+	 * Entry IDs, scoped to one form, whose meta value under any of the given
+	 * keys case-insensitively matches a value.
+	 *
+	 * Used by the Privacy API integration to find guest entries by an
+	 * email-type field's answer. Scoped to a single form so a field name
+	 * reused across forms cannot cross-match another form's entries.
+	 *
+	 * @since 1.0.6
+	 * @param int      $form_id   Form ID.
+	 * @param string[] $meta_keys Meta keys (field names) to check.
+	 * @param string   $value     Value to match, case-insensitively.
+	 * @return int[] Entry IDs.
+	 */
+	public function get_ids_by_meta_match( $form_id, array $meta_keys, $value ) {
+		global $wpdb;
+
+		if ( empty( $meta_keys ) ) {
+			return [];
+		}
+
+		$placeholders = implode( ',', array_fill( 0, count( $meta_keys ), '%s' ) );
+
+		$args = [ $form_id ];
+		$args = array_merge( $args, $meta_keys );
+		$args[] = $value;
+
+		$query = $wpdb->prepare(
+			"SELECT DISTINCT m.entry_id FROM {$this->meta_table_name} m
+			INNER JOIN {$this->table_name} e ON e.id = m.entry_id
+			WHERE e.form_id = %d AND m.meta_key IN ({$placeholders}) AND LOWER(m.meta_value) = LOWER(%s)",
+			...$args
+		);
+
+		return array_map( 'intval', $wpdb->get_col( $query ) );
+	}
+
+	/**
+	 * Entry IDs older than a cutoff, across every form.
+	 *
+	 * Used by the automatic retention purge.
+	 *
+	 * @since 1.0.6
+	 * @param string $cutoff MySQL datetime string.
+	 * @return int[] Entry IDs.
+	 */
+	public function get_ids_older_than( $cutoff ) {
+		global $wpdb;
+
+		return array_map(
+			'intval',
+			$wpdb->get_col(
+				$wpdb->prepare( "SELECT id FROM {$this->table_name} WHERE created_at < %s", $cutoff )
+			)
+		);
+	}
+
+	/**
 	 * Get entry meta.
 	 *
 	 * @since 1.0.0

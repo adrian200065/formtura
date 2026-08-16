@@ -178,6 +178,42 @@ class PrivacyTest extends TestCase {
 		$this->assertTrue( $page2['done'] );
 	}
 
+	public function test_matching_entry_ids_returns_a_stable_ascending_order_regardless_of_source_order() {
+		$GLOBALS['fta_test_users']['owner@example.com'] = new \WP_User( 5, 'owner@example.com' );
+
+		$forms = [
+			[ 'id' => 2, 'fields' => [ [ 'type' => 'email', 'name' => 'contact_email' ] ] ],
+		];
+
+		$entries = $this->makeEntries();
+		// The WP-user match and the email-field match return IDs that, if
+		// simply concatenated with no sort, would come back out of ascending
+		// order - this is exactly the interleaving that a missing ORDER BY
+		// (or a DISTINCT query plan change) could produce between two paged
+		// calls to export_data().
+		$entries->byUser[5]                       = [ 50, 10 ];
+		$entries->byMeta['2|owner@example.com']    = [ 30, 5, 40 ];
+		foreach ( [ 5, 10, 30, 40, 50 ] as $id ) {
+			$entries->store[ $id ] = [
+				'id'         => $id,
+				'form_id'    => 2,
+				'created_at' => '2026-01-01 00:00:00',
+				'ip_address' => '1.2.3.4',
+				'user_agent' => 'UA',
+				'data'       => [],
+			];
+		}
+
+		$privacy = new Privacy( $entries, $this->makeForms( $forms ) );
+
+		$reflection = new \ReflectionMethod( Privacy::class, 'matching_entry_ids' );
+		$reflection->setAccessible( true );
+
+		$ids = $reflection->invoke( $privacy, 'owner@example.com' );
+
+		$this->assertSame( [ 5, 10, 30, 40, 50 ], $ids );
+	}
+
 	public function test_constructor_registers_the_wp_privacy_hooks() {
 		$GLOBALS['fta_test_actions'] = [];
 		$GLOBALS['fta_test_filters'] = [];

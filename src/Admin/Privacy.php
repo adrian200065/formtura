@@ -175,7 +175,17 @@ class Privacy {
 			);
 		}
 
-		return array_values( array_unique( $ids ) );
+		$ids = array_values( array_unique( $ids ) );
+
+		// None of the sources above guarantee a stable order (no ORDER BY on
+		// the user-match query, a DISTINCT join for the meta-match query, and
+		// a created_at DESC form loop with no tiebreaker) - export_data() and
+		// erase_data() call this fresh on every page, so an unsorted list can
+		// silently skip or repeat entries across pages if the order shifts
+		// between calls.
+		sort( $ids );
+
+		return $ids;
 	}
 
 	/**

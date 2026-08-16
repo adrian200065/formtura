@@ -329,6 +329,14 @@ if ( ! function_exists( 'is_user_logged_in' ) ) {
 	}
 }
 
+if ( ! function_exists( 'get_current_user_id' ) ) {
+	function get_current_user_id() {
+		return isset( $GLOBALS['fta_test_current_user_id'] )
+			? (int) $GLOBALS['fta_test_current_user_id']
+			: 0;
+	}
+}
+
 if ( ! function_exists( 'get_posts' ) ) {
 	function get_posts( $args = [] ) {
 		return [];
@@ -444,6 +452,16 @@ if ( ! function_exists( 'wp_nonce_field' ) ) {
 		}
 
 		return $field;
+	}
+}
+
+if ( ! function_exists( 'wp_parse_args' ) ) {
+	function wp_parse_args( $args, $defaults = [] ) {
+		if ( is_object( $args ) ) {
+			$args = get_object_vars( $args );
+		}
+
+		return is_array( $args ) ? array_merge( $defaults, $args ) : $defaults;
 	}
 }
 

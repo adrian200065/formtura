@@ -151,6 +151,12 @@ class Entries_DB {
 	/**
 	 * Create a new entry.
 	 *
+	 * All or nothing: the entry row and every one of its meta rows are written
+	 * inside one transaction, and a failure anywhere returns false. A partial
+	 * write reported as success is worse than an outright failure - the caller
+	 * sends notifications, keeps the visitor's uploads, and shows a "thank
+	 * you" for an entry whose answers are missing.
+	 *
 	 * @since 1.0.0
 	 * @param array $data Entry data.
 	 * @return int|false Entry ID on success, false on failure.
@@ -182,22 +188,57 @@ class Entries_DB {
 			'created_at' => current_time( 'mysql' ),
 		];
 
+		$wpdb->query( 'START TRANSACTION' );
+
 		$result = $wpdb->insert( $this->table_name, $insert_data );
 
 		if ( ! $result ) {
+			$wpdb->query( 'ROLLBACK' );
+
 			return false;
 		}
 
-		$entry_id = $wpdb->insert_id;
+		$entry_id = (int) $wpdb->insert_id;
 
 		// Save entry meta.
-		$this->save_entry_meta( $entry_id, $entry_data );
+		if ( ! $this->save_entry_meta( $entry_id, $entry_data ) ) {
+			$wpdb->query( 'ROLLBACK' );
+			$this->discard_rows( $entry_id );
+
+			return false;
+		}
+
+		$wpdb->query( 'COMMIT' );
 
 		return $entry_id;
 	}
 
 	/**
+	 * Remove an entry's rows after a rolled-back write.
+	 *
+	 * ROLLBACK above already undoes the work on InnoDB, which is the WordPress
+	 * default. On a site whose tables were created as MyISAM - an older host,
+	 * an imported database - the rollback silently does nothing, so the same
+	 * cleanup is issued explicitly. Deleting rows that a working rollback
+	 * already removed is harmless; leaving an entry row with no field data
+	 * behind is not.
+	 *
+	 * @since 1.0.6
+	 * @param int $entry_id Entry ID.
+	 */
+	private function discard_rows( $entry_id ) {
+		global $wpdb;
+
+		$wpdb->delete( $this->meta_table_name, [ 'entry_id' => $entry_id ] );
+		$wpdb->delete( $this->table_name, [ 'id' => $entry_id ] );
+	}
+
+	/**
 	 * Update an entry.
+	 *
+	 * Transactional for the same reason as create(): the entries row and the
+	 * meta rows describe one entry, and half of an update is not a state any
+	 * caller can make sense of.
 	 *
 	 * @since 1.0.0
 	 * @param int   $entry_id Entry ID.
@@ -213,22 +254,41 @@ class Entries_DB {
 			$update_data['is_read'] = (int) $data['is_read'];
 		}
 
-		if ( empty( $update_data ) ) {
+		$has_meta = isset( $data['data'] ) && is_array( $data['data'] );
+
+		// Only bail when there is genuinely nothing to write. Testing
+		// $update_data alone used to reject an update that carried field data
+		// and no column change, returning false without saving the meta.
+		if ( empty( $update_data ) && ! $has_meta ) {
 			return false;
 		}
 
-		$result = $wpdb->update(
-			$this->table_name,
-			$update_data,
-			[ 'id' => $entry_id ]
-		);
+		$wpdb->query( 'START TRANSACTION' );
 
-		// Update entry meta if provided.
-		if ( isset( $data['data'] ) ) {
-			$this->save_entry_meta( $entry_id, $data['data'] );
+		if ( ! empty( $update_data ) ) {
+			$result = $wpdb->update(
+				$this->table_name,
+				$update_data,
+				[ 'id' => $entry_id ]
+			);
+
+			if ( false === $result ) {
+				$wpdb->query( 'ROLLBACK' );
+
+				return false;
+			}
 		}
 
-		return $result !== false;
+		// Update entry meta if provided.
+		if ( $has_meta && ! $this->save_entry_meta( $entry_id, $data['data'] ) ) {
+			$wpdb->query( 'ROLLBACK' );
+
+			return false;
+		}
+
+		$wpdb->query( 'COMMIT' );
+
+		return true;
 	}
 
 	/**
@@ -370,22 +430,32 @@ class Entries_DB {
 	/**
 	 * Save entry meta.
 	 *
+	 * Every write is checked and the first failure stops the run. The caller
+	 * is inside a transaction and turns a false here into a rollback, so
+	 * carrying on after a failed insert would only widen the damage.
+	 *
 	 * @since 1.0.0
 	 * @param int   $entry_id Entry ID.
 	 * @param array $data Meta data.
+	 * @return bool True when every row was written, false otherwise.
 	 */
 	private function save_entry_meta( $entry_id, $data ) {
 		global $wpdb;
 
-		// Delete existing meta.
-		$wpdb->delete(
+		// Delete existing meta. A failure here matters: the old answers would
+		// otherwise survive alongside the new ones.
+		$deleted = $wpdb->delete(
 			$this->meta_table_name,
 			[ 'entry_id' => $entry_id ]
 		);
 
+		if ( false === $deleted ) {
+			return false;
+		}
+
 		// Insert new meta.
 		foreach ( $data as $key => $value ) {
-			$wpdb->insert(
+			$inserted = $wpdb->insert(
 				$this->meta_table_name,
 				[
 					'entry_id'   => $entry_id,
@@ -393,7 +463,13 @@ class Entries_DB {
 					'meta_value' => maybe_serialize( $value ),
 				]
 			);
+
+			if ( ! $inserted ) {
+				return false;
+			}
 		}
+
+		return true;
 	}
 
 	/**

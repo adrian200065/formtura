@@ -122,6 +122,25 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 					<tr>
 						<th scope="row">
+							<label for="fta-entry-retention-days"><?php esc_html_e( 'Automatically Delete Entries After', FORMTURA_TEXTDOMAIN ); ?></label>
+						</th>
+						<td>
+							<input type="number"
+								id="fta-entry-retention-days"
+								name="settings[entry_retention_days]"
+								value="<?php echo esc_attr( isset( $settings['entry_retention_days'] ) ? $settings['entry_retention_days'] : 0 ); ?>"
+								step="1"
+								min="0"
+								class="small-text">
+							<?php esc_html_e( 'days', FORMTURA_TEXTDOMAIN ); ?>
+							<p class="description">
+								<?php esc_html_e( 'Entries older than this are deleted automatically, across all forms. Set to 0 to disable automatic deletion.', FORMTURA_TEXTDOMAIN ); ?>
+							</p>
+						</td>
+					</tr>
+
+					<tr>
+						<th scope="row">
 							<label for="fta-disable-css"><?php esc_html_e( 'Disable Default CSS', FORMTURA_TEXTDOMAIN ); ?></label>
 						</th>
 						<td>

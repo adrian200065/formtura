@@ -19,7 +19,7 @@ use Formtura\Tests\TestCase;
 class PrivacyTest extends TestCase {
 
 	protected function tearDown(): void {
-		unset( $GLOBALS['fta_test_users'], $GLOBALS['fta_test_options'], $GLOBALS['fta_test_actions'], $GLOBALS['fta_test_filters'] );
+		unset( $GLOBALS['fta_test_users'], $GLOBALS['fta_test_options'], $GLOBALS['fta_test_actions'], $GLOBALS['fta_test_filters'], $GLOBALS['fta_test_gmt_offset'] );
 
 		parent::tearDown();
 	}
@@ -336,6 +336,38 @@ class PrivacyTest extends TestCase {
 		$this->assertLessThanOrEqual( $after - ( 30 * DAY_IN_SECONDS ) + 2, $cutoff );
 	}
 
+	/**
+	 * Regression test for the fix that made purge_old_entries() compute its
+	 * cutoff from current_time( 'timestamp' ) (WordPress site-local time)
+	 * rather than plain time() (UTC), to match how Entries_DB::create()
+	 * writes created_at via current_time( 'mysql' ).
+	 *
+	 * The test environment's current_time() stub previously made
+	 * current_time( 'timestamp' ) and time() produce identical values in
+	 * every test, so a prior version of this test could not distinguish the
+	 * fix from the bug it fixed. Setting fta_test_gmt_offset simulates a
+	 * non-UTC WordPress site: current_time( 'timestamp' ) then diverges from
+	 * time() by the offset, and the assertion below only holds if the code
+	 * under test actually uses current_time().
+	 */
+	public function test_purge_uses_site_local_time_for_the_cutoff_not_utc() {
+		$GLOBALS['fta_test_options']['fta_settings'] = [ 'entry_retention_days' => 30 ];
+		$GLOBALS['fta_test_gmt_offset']              = 5 * HOUR_IN_SECONDS;
+
+		$entries = $this->makeEntries();
+		$entries->olderThan = [ 301 ];
+
+		$before = time() + ( 5 * HOUR_IN_SECONDS );
+		( new Privacy( $entries, $this->makeForms( [] ) ) )->purge_old_entries();
+		$after  = time() + ( 5 * HOUR_IN_SECONDS );
+
+		$this->assertSame( [ 301 ], $entries->deleted );
+
+		$cutoff = strtotime( $entries->olderThanCalls[0] . ' UTC' );
+		$this->assertGreaterThanOrEqual( $before - ( 30 * DAY_IN_SECONDS ) - 2, $cutoff );
+		$this->assertLessThanOrEqual( $after - ( 30 * DAY_IN_SECONDS ) + 2, $cutoff );
+	}
+
 	public function test_constructor_registers_the_wp_privacy_hooks() {
 		$GLOBALS['fta_test_actions'] = [];
 		$GLOBALS['fta_test_filters'] = [];
@@ -348,5 +380,10 @@ class PrivacyTest extends TestCase {
 		$this->assertContains( 'wp_privacy_personal_data_exporters', $filterHooks );
 		$this->assertContains( 'wp_privacy_personal_data_erasers', $filterHooks );
 		$this->assertContains( 'fta_purge_old_entries_event', $actionHooks );
+		// Scheduling the purge cron event on 'init' (rather than relying only
+		// on the activation hook in formtura.php) is what makes the event get
+		// scheduled for a site that upgraded to this version in place -
+		// WordPress does not re-run activation hooks on a plugin update.
+		$this->assertContains( 'init', $actionHooks );
 	}
 }

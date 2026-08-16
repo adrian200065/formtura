@@ -70,6 +70,22 @@ class Privacy {
 		add_filter( 'wp_privacy_personal_data_exporters', [ $this, 'register_exporter' ] );
 		add_filter( 'wp_privacy_personal_data_erasers', [ $this, 'register_eraser' ] );
 		add_action( 'fta_purge_old_entries_event', [ $this, 'purge_old_entries' ] );
+		add_action( 'init', [ $this, 'maybe_schedule_purge' ] );
+	}
+
+	/**
+	 * Ensure the retention purge cron event is scheduled, even on a site that
+	 * upgraded to this version in place rather than freshly activating it -
+	 * WordPress does not re-run activation hooks on a plugin update, so the
+	 * activation-hook scheduling in formtura.php alone would leave the event
+	 * permanently unscheduled for every upgrading site.
+	 *
+	 * @since 1.0.6
+	 */
+	public function maybe_schedule_purge() {
+		if ( ! wp_next_scheduled( 'fta_purge_old_entries_event' ) ) {
+			wp_schedule_event( time(), 'daily', 'fta_purge_old_entries_event' );
+		}
 	}
 
 	/**

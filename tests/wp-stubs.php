@@ -27,6 +27,10 @@ if ( ! defined( 'DAY_IN_SECONDS' ) ) {
 	define( 'DAY_IN_SECONDS', 86400 );
 }
 
+if ( ! defined( 'HOUR_IN_SECONDS' ) ) {
+	define( 'HOUR_IN_SECONDS', 3600 );
+}
+
 if ( ! class_exists( 'WP_Error' ) ) {
 	/**
 	 * Minimal stand-in for WordPress's WP_Error.
@@ -315,13 +319,17 @@ if ( ! function_exists( 'apply_filters' ) ) {
 
 if ( ! function_exists( 'current_time' ) ) {
 	function current_time( $type, $gmt = 0 ) {
+		$offset = isset( $GLOBALS['fta_test_gmt_offset'] ) ? (int) $GLOBALS['fta_test_gmt_offset'] : 0;
+
 		if ( 'Y' === $type ) {
 			return gmdate( 'Y' );
 		}
+
 		if ( 'timestamp' === $type ) {
-			return time();
+			return $gmt ? time() : time() + $offset;
 		}
-		return gmdate( 'Y-m-d H:i:s' );
+
+		return gmdate( 'Y-m-d H:i:s', $gmt ? time() : time() + $offset );
 	}
 }
 

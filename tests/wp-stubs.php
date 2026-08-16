@@ -315,7 +315,13 @@ if ( ! function_exists( 'apply_filters' ) ) {
 
 if ( ! function_exists( 'current_time' ) ) {
 	function current_time( $type, $gmt = 0 ) {
-		return 'Y' === $type ? gmdate( 'Y' ) : gmdate( 'Y-m-d H:i:s' );
+		if ( 'Y' === $type ) {
+			return gmdate( 'Y' );
+		}
+		if ( 'timestamp' === $type ) {
+			return time();
+		}
+		return gmdate( 'Y-m-d H:i:s' );
 	}
 }
 

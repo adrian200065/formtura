@@ -339,7 +339,7 @@ class Privacy {
 			return;
 		}
 
-		$cutoff = gmdate( 'Y-m-d H:i:s', time() - ( $days * DAY_IN_SECONDS ) );
+		$cutoff = gmdate( 'Y-m-d H:i:s', current_time( 'timestamp' ) - ( $days * DAY_IN_SECONDS ) );
 
 		foreach ( $this->entries()->get_ids_older_than( $cutoff ) as $entry_id ) {
 			$this->entries()->delete( $entry_id );

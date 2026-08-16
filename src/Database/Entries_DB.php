@@ -117,13 +117,26 @@ class Entries_DB {
 			'per_page' => 20,
 		];
 
-		$args = wp_parse_args( $args, $defaults );
+		$requested = is_array( $args ) ? $args : [];
+		$args      = wp_parse_args( $args, $defaults );
 
-		// Calculate offset from page if provided.
-		if ( $args['page'] > 1 ) {
-			$args['offset'] = ( $args['page'] - 1 ) * $args['per_page'];
-			$args['limit'] = $args['per_page'];
+		// Page size and offset come from page/per_page when the caller uses
+		// them, and from limit/offset otherwise. The old rule only applied
+		// per_page once page was past 1, so a first-page request for any size
+		// silently came back capped at the 20-row default.
+		$limit = isset( $requested['per_page'] )
+			? absint( $requested['per_page'] )
+			: absint( $args['limit'] );
+
+		// A zero page size would become `LIMIT 0` - no rows at all, which is
+		// never what a caller asking for a page meant.
+		if ( $limit < 1 ) {
+			$limit = absint( $defaults['per_page'] );
 		}
+
+		$offset = isset( $requested['page'] )
+			? ( max( 1, absint( $requested['page'] ) ) - 1 ) * $limit
+			: absint( $args['offset'] );
 
 		$where = $wpdb->prepare( 'form_id = %d', $form_id );
 
@@ -131,9 +144,14 @@ class Entries_DB {
 			$where .= $wpdb->prepare( ' AND is_read = %d', (int) $args['is_read'] );
 		}
 
+		// Returns false for anything that is not a plain column list, which
+		// would otherwise be interpolated as an empty ORDER BY and break the
+		// query outright.
 		$orderby = sanitize_sql_orderby( "{$args['orderby']} {$args['order']}" );
-		$limit = absint( $args['limit'] );
-		$offset = absint( $args['offset'] );
+
+		if ( false === $orderby ) {
+			$orderby = "{$defaults['orderby']} {$defaults['order']}";
+		}
 
 		$query = "SELECT * FROM {$this->table_name} WHERE {$where} ORDER BY {$orderby} LIMIT {$limit} OFFSET {$offset}";
 

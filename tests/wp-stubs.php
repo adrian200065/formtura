@@ -154,6 +154,26 @@ if ( ! function_exists( 'sanitize_key' ) ) {
 	}
 }
 
+if ( ! function_exists( 'sanitize_sql_orderby' ) ) {
+	/**
+	 * Mirrors core's contract: an ORDER BY fragment of column names with
+	 * optional ASC/DESC, or false when the fragment is anything else.
+	 */
+	function sanitize_sql_orderby( $orderby ) {
+		if ( preg_match( '/^\s*(([a-z0-9_]+|`[a-z0-9_]+`)(\s+(ASC|DESC))?\s*,?\s*)+$/i', (string) $orderby ) ) {
+			return $orderby;
+		}
+
+		return false;
+	}
+}
+
+if ( ! function_exists( 'number_format_i18n' ) ) {
+	function number_format_i18n( $number, $decimals = 0 ) {
+		return number_format( (float) $number, (int) $decimals );
+	}
+}
+
 if ( ! function_exists( 'sanitize_html_class' ) ) {
 	function sanitize_html_class( $class ) {
 		return preg_replace( '/[^A-Za-z0-9_-]/', '', (string) $class );

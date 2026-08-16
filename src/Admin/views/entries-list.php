@@ -8,19 +8,74 @@
  * @since 1.0.0
  */
 
+use Formtura\Admin\Entry_Values;
+use Formtura\Frontend\File_Download;
+
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+// How many answers a row previews before the detail panel is the way to see
+// the rest.
+$preview_limit = 3;
+$per_page      = 20;
+
 // Get entries if form is selected.
-$entries = [];
-$form = null;
+$entries      = [];
+$form         = null;
+$labels       = [];
+$total        = 0;
+$total_pages  = 1;
+$current_page = 1;
+
 if ( $selected_form_id ) {
-	$entries_db = new \Formtura\Database\Entries_DB();
-	$entries = $entries_db->get_by_form( $selected_form_id );
+	$entries_db   = new \Formtura\Database\Entries_DB();
+	$current_page = isset( $_GET['paged'] ) ? max( 1, absint( $_GET['paged'] ) ) : 1; // phpcs:ignore WordPress.Security.NonceVerification
+	$total        = $entries_db->get_count( $selected_form_id );
+	$total_pages  = max( 1, (int) ceil( $total / $per_page ) );
+	$current_page = min( $current_page, $total_pages );
+
+	$entries = $entries_db->get_by_form(
+		$selected_form_id,
+		[
+			'page'     => $current_page,
+			'per_page' => $per_page,
+		]
+	);
+
 	$form = fta_get_form( $selected_form_id );
+
+	// Field names are `field_<timestamp>_<suffix>`; the form definition is the
+	// only place their human labels exist.
+	$labels = Entry_Values::labels( $form );
 }
+
+/**
+ * Flatten one entry's stored data into label/value pairs.
+ *
+ * Values are not flat - lists, address parts, file records, a computed
+ * payment order - so each is rendered through Entry_Values rather than
+ * concatenated here.
+ *
+ * @param array $entry_data Stored entry data.
+ * @param array $labels     Field name => label map.
+ * @return array[]
+ */
+$fta_entry_pairs = static function ( array $entry_data, array $labels ) {
+	$pairs = [];
+
+	foreach ( $entry_data as $key => $value ) {
+		$pairs[] = [
+			'key'   => (string) $key,
+			'label' => Entry_Values::label( $key, $labels ),
+			'text'  => Entry_Values::text_for( $key, $value ),
+			'files' => Entry_Values::file_records( $value ),
+		];
+	}
+
+	return $pairs;
+};
 ?>
 
 <div class="wrap fta-admin-page">
@@ -82,48 +137,78 @@ if ( $selected_form_id ) {
 						<tbody>
 							<?php foreach ( $entries as $entry ) : ?>
 								<?php
-								$entry_data = maybe_unserialize( $entry['entry_data'] );
+								// Entries_DB returns the unserialized answers
+								// under 'data'. Reading 'entry_data' - a key it
+								// has never produced - left every preview blank.
+								$entry_data   = isset( $entry['data'] ) && is_array( $entry['data'] ) ? $entry['data'] : [];
+								$pairs        = $fta_entry_pairs( $entry_data, $labels );
 								$status_class = $entry['is_read'] ? 'read' : 'unread';
 								?>
-								<tr class="fta-entry-row fta-entry-<?php echo esc_attr( $status_class ); ?>">
+								<tr class="fta-entry-row fta-entry-<?php echo esc_attr( $status_class ); ?>" data-entry-id="<?php echo esc_attr( $entry['id'] ); ?>">
 									<td><?php echo esc_html( $entry['id'] ); ?></td>
 									<td>
-										<?php if ( is_array( $entry_data ) ) : ?>
-											<div class="fta-entry-preview">
-												<?php
-												$preview_count = 0;
-												foreach ( $entry_data as $key => $value ) :
-													if ( $preview_count >= 3 ) break;
-													?>
-													<div class="fta-entry-field">
-														<strong><?php echo esc_html( ucfirst( str_replace( '_', ' ', $key ) ) ); ?>:</strong>
-														<?php echo esc_html( is_array( $value ) ? implode( ', ', $value ) : $value ); ?>
-													</div>
-													<?php
-													$preview_count++;
-												endforeach;
-												?>
-												<?php if ( count( $entry_data ) > 3 ) : ?>
-													<a href="#" class="fta-view-entry" data-entry-id="<?php echo esc_attr( $entry['id'] ); ?>">
-														<?php esc_html_e( 'View all fields...', FORMTURA_TEXTDOMAIN ); ?>
-													</a>
-												<?php endif; ?>
-											</div>
-										<?php endif; ?>
+										<div class="fta-entry-preview">
+											<?php foreach ( array_slice( $pairs, 0, $preview_limit ) as $pair ) : ?>
+												<div class="fta-entry-field">
+													<strong><?php echo esc_html( $pair['label'] ); ?>:</strong>
+													<?php echo esc_html( $pair['text'] ); ?>
+												</div>
+											<?php endforeach; ?>
+
+											<?php if ( count( $pairs ) > $preview_limit ) : ?>
+												<a href="#" class="fta-view-entry" data-entry-id="<?php echo esc_attr( $entry['id'] ); ?>">
+													<?php esc_html_e( 'View all fields...', FORMTURA_TEXTDOMAIN ); ?>
+												</a>
+											<?php endif; ?>
+										</div>
+
+										<?php
+										// Rendered with the row rather than fetched
+										// on demand: the values are already loaded,
+										// and escaping them here keeps the detail
+										// view off a JSON round trip that would have
+										// to re-escape everything client side.
+										?>
+										<div class="fta-entry-details" id="fta-entry-details-<?php echo esc_attr( $entry['id'] ); ?>" hidden>
+											<?php if ( empty( $pairs ) ) : ?>
+												<p class="fta-entry-empty"><?php esc_html_e( 'This entry has no stored field data.', FORMTURA_TEXTDOMAIN ); ?></p>
+											<?php endif; ?>
+
+											<?php foreach ( $pairs as $pair ) : ?>
+												<div class="fta-entry-field">
+													<strong><?php echo esc_html( $pair['label'] ); ?>:</strong>
+													<?php if ( ! empty( $pair['files'] ) ) : ?>
+														<span class="fta-entry-files">
+															<?php foreach ( $pair['files'] as $index => $record ) : ?>
+																<?php
+																// The record's stored path is a private
+																// vault location; the download controller
+																// is the only route to the bytes, and it
+																// checks manage_options on every request.
+																?>
+																<a href="<?php echo esc_url( File_Download::url( $entry['id'], $pair['key'], (int) $index ) ); ?>">
+																	<?php echo esc_html( isset( $record['name'] ) ? $record['name'] : __( 'Download', FORMTURA_TEXTDOMAIN ) ); ?>
+																</a>
+															<?php endforeach; ?>
+														</span>
+													<?php else : ?>
+														<?php echo esc_html( $pair['text'] ); ?>
+													<?php endif; ?>
+												</div>
+											<?php endforeach; ?>
+										</div>
 									</td>
 									<td>
 										<span class="fta-status fta-status-<?php echo esc_attr( $status_class ); ?>">
-											<?php echo esc_html( $entry['is_read'] ? 'Read' : 'Unread' ); ?>
+											<?php echo esc_html( $entry['is_read'] ? __( 'Read', FORMTURA_TEXTDOMAIN ) : __( 'Unread', FORMTURA_TEXTDOMAIN ) ); ?>
 										</span>
 									</td>
 									<td><?php echo esc_html( date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), strtotime( $entry['created_at'] ) ) ); ?></td>
 									<td>
 										<div class="fta-table-actions">
-										<?php if ( ! $entry['is_read'] ) : ?>
-											<a href="#" class="fta-mark-read" data-entry-id="<?php echo esc_attr( $entry['id'] ); ?>">
-												<?php esc_html_e( 'Mark as Read', FORMTURA_TEXTDOMAIN ); ?>
-											</a>
-										<?php endif; ?>
+										<a href="#" class="fta-mark-read" data-entry-id="<?php echo esc_attr( $entry['id'] ); ?>" data-is-read="<?php echo $entry['is_read'] ? '1' : '0'; ?>">
+											<?php echo esc_html( $entry['is_read'] ? __( 'Mark as Unread', FORMTURA_TEXTDOMAIN ) : __( 'Mark as Read', FORMTURA_TEXTDOMAIN ) ); ?>
+										</a>
 										<a href="#" class="fta-view-entry" data-entry-id="<?php echo esc_attr( $entry['id'] ); ?>">
 											<?php esc_html_e( 'View', FORMTURA_TEXTDOMAIN ); ?>
 										</a>
@@ -137,20 +222,48 @@ if ( $selected_form_id ) {
 						</tbody>
 					</table>
 					</div>
+
+					<?php if ( $total_pages > 1 ) : ?>
+						<?php
+						$page_url = static function ( $page ) use ( $selected_form_id ) {
+							return add_query_arg(
+								[
+									'page'    => 'formtura-entries',
+									'form_id' => $selected_form_id,
+									'paged'   => $page,
+								],
+								admin_url( 'admin.php' )
+							);
+						};
+						?>
+						<nav class="fta-entries-pagination" aria-label="<?php esc_attr_e( 'Entries pages', FORMTURA_TEXTDOMAIN ); ?>">
+							<?php if ( $current_page > 1 ) : ?>
+								<a class="fta-button fta-button-ghost" href="<?php echo esc_url( $page_url( $current_page - 1 ) ); ?>">
+									<?php esc_html_e( 'Previous', FORMTURA_TEXTDOMAIN ); ?>
+								</a>
+							<?php endif; ?>
+
+							<span class="fta-entries-pagination-status">
+								<?php
+								printf(
+									/* translators: 1: current page, 2: total pages, 3: total entries */
+									esc_html__( 'Page %1$s of %2$s (%3$s entries)', FORMTURA_TEXTDOMAIN ),
+									esc_html( number_format_i18n( $current_page ) ),
+									esc_html( number_format_i18n( $total_pages ) ),
+									esc_html( number_format_i18n( $total ) )
+								);
+								?>
+							</span>
+
+							<?php if ( $current_page < $total_pages ) : ?>
+								<a class="fta-button fta-button-ghost" href="<?php echo esc_url( $page_url( $current_page + 1 ) ); ?>">
+									<?php esc_html_e( 'Next', FORMTURA_TEXTDOMAIN ); ?>
+								</a>
+							<?php endif; ?>
+						</nav>
+					<?php endif; ?>
 				<?php endif; ?>
 			<?php endif; ?>
 		</div><!-- .fta-card -->
 	<?php endif; ?>
 </div><!-- .fta-admin-page -->
-
-<script>
-jQuery(document).ready(function($) {
-	// Handle form selection change
-	$('#fta-form-select').on('change', function() {
-		var formId = $(this).val();
-		if (formId) {
-			window.location.href = '<?php echo admin_url( 'admin.php?page=formtura-entries' ); ?>&form_id=' + formId;
-		}
-	});
-});
-</script>

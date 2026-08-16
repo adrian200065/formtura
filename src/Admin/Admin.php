@@ -202,6 +202,42 @@ class Admin {
 			]
 		);
 
+		// Enqueue the entries screen behaviour on the entries page.
+		if ( isset( $_GET['page'] ) && 'formtura-entries' === $_GET['page'] ) { // phpcs:ignore WordPress.Security.NonceVerification
+			wp_enqueue_script(
+				'formtura-entries',
+				FORMTURA_PLUGIN_URL . 'assets/js/entries.js',
+				[ 'jquery', 'formtura-admin' ],
+				fta_asset_version( 'assets/js/entries.js' ),
+				true
+			);
+
+			wp_localize_script(
+				'formtura-entries',
+				'formturaEntries',
+				[
+					'ajaxUrl'    => admin_url( 'admin-ajax.php' ),
+					'nonce'      => wp_create_nonce( 'formtura_admin' ),
+					'entriesUrl' => admin_url( 'admin.php?page=formtura-entries' ),
+					'strings'    => [
+						// Deleting an entry also removes its uploads and
+						// signatures from the private vault, so the warning
+						// says more than "are you sure".
+						'confirmDelete' => __( 'Delete this entry? Its uploaded files are deleted with it and cannot be recovered.', FORMTURA_TEXTDOMAIN ),
+						'deleted'       => __( 'Entry deleted.', FORMTURA_TEXTDOMAIN ),
+						'read'          => __( 'Read', FORMTURA_TEXTDOMAIN ),
+						'unread'        => __( 'Unread', FORMTURA_TEXTDOMAIN ),
+						'markRead'      => __( 'Mark as Read', FORMTURA_TEXTDOMAIN ),
+						'markUnread'    => __( 'Mark as Unread', FORMTURA_TEXTDOMAIN ),
+						/* translators: %s: entry ID */
+						'entryTitle'    => __( 'Entry #%s', FORMTURA_TEXTDOMAIN ),
+						'close'         => __( 'Close', FORMTURA_TEXTDOMAIN ),
+						'error'         => __( 'An error occurred. Please try again.', FORMTURA_TEXTDOMAIN ),
+					],
+				]
+			);
+		}
+
 		// Enqueue builder assets on builder page.
 		$is_builder_page = (
 			$hook === 'formtura_page_formtura-builder' ||

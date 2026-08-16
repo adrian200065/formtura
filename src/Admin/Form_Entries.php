@@ -145,12 +145,21 @@ class Form_Entries {
 			] );
 		}
 
-		$entries = fta_get_entries( $form_id );
-		$csv_data = $this->generate_csv( $entries );
+		// Entry_Export pages through every entry rather than taking the
+		// default first 20, flattens nested values instead of casting them to
+		// the word "Array", and neutralizes cells a spreadsheet would
+		// otherwise evaluate as formulas.
+		$csv_data = ( new Entry_Export() )->for_form( $form_id, fta_get_form( $form_id ) );
+
+		if ( '' === $csv_data ) {
+			wp_send_json_error( [
+				'message' => __( 'This form has no entries to export.', FORMTURA_TEXTDOMAIN ),
+			] );
+		}
 
 		wp_send_json_success( [
 			'csv' => $csv_data,
-			'filename' => 'formtura-entries-' . $form_id . '-' . date( 'Y-m-d' ) . '.csv',
+			'filename' => 'formtura-entries-' . $form_id . '-' . gmdate( 'Y-m-d' ) . '.csv',
 		] );
 	}
 
@@ -171,42 +180,55 @@ class Form_Entries {
 		}
 
 		$entry_id = isset( $_POST['entry_id'] ) ? absint( $_POST['entry_id'] ) : 0;
-		$is_read = isset( $_POST['is_read'] ) ? (bool) $_POST['is_read'] : true;
 
-		// Implementation will be in Entries_DB class.
+		if ( ! $entry_id ) {
+			wp_send_json_error( [
+				'message' => __( 'Invalid entry ID.', FORMTURA_TEXTDOMAIN ),
+			] );
+		}
+
+		// Checked before writing: Entries_DB::update() reports success for an
+		// UPDATE that matched no rows, so without this a request naming an
+		// entry that no longer exists would be answered "status updated".
+		if ( ! fta_get_entry( $entry_id ) ) {
+			wp_send_json_error( [
+				'message' => __( 'Entry not found.', FORMTURA_TEXTDOMAIN ),
+			] );
+		}
+
+		$is_read = $this->posted_flag( 'is_read', true );
+
+		if ( ! fta_update_entry( $entry_id, [ 'is_read' => $is_read ? 1 : 0 ] ) ) {
+			wp_send_json_error( [
+				'message' => __( 'Failed to update the entry status.', FORMTURA_TEXTDOMAIN ),
+			] );
+		}
+
 		wp_send_json_success( [
 			'message' => __( 'Entry status updated.', FORMTURA_TEXTDOMAIN ),
+			'is_read' => $is_read,
 		] );
 	}
 
 	/**
-	 * Generate CSV from entries.
+	 * Read a boolean flag out of the request.
 	 *
-	 * @since 1.0.0
-	 * @param array $entries Entries data.
-	 * @return string CSV data.
+	 * A plain (bool) cast reads the strings "false" and "off" as true, which
+	 * is the opposite of what a caller sending them asked for - and every
+	 * value in $_POST is a string.
+	 *
+	 * @since 1.0.6
+	 * @param string $key     Request key.
+	 * @param bool   $default Value to use when the key is absent.
+	 * @return bool
 	 */
-	private function generate_csv( $entries ) {
-		if ( empty( $entries ) ) {
-			return '';
+	private function posted_flag( $key, $default = false ) {
+		if ( ! isset( $_POST[ $key ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+			return $default;
 		}
 
-		$output = fopen( 'php://temp', 'r+' );
+		$value = sanitize_text_field( wp_unslash( $_POST[ $key ] ) ); // phpcs:ignore WordPress.Security.NonceVerification
 
-		// Get headers from first entry.
-		$first_entry = reset( $entries );
-		$headers = array_keys( $first_entry );
-		fputcsv( $output, $headers );
-
-		// Add data rows.
-		foreach ( $entries as $entry ) {
-			fputcsv( $output, $entry );
-		}
-
-		rewind( $output );
-		$csv = stream_get_contents( $output );
-		fclose( $output );
-
-		return $csv;
+		return ! in_array( strtolower( trim( (string) $value ) ), [ '', '0', 'false', 'off', 'no' ], true );
 	}
 }

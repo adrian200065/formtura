@@ -120,6 +120,11 @@ class Core {
 		// Initialize blocks (available in both admin and frontend).
 		new Blocks\Form_Selector();
 
+		// Registers WP Privacy API exporter/eraser hooks and the retention
+		// purge cron callback - must run in both admin and frontend
+		// contexts, like Frontend\Submission above.
+		new Admin\Privacy();
+
 		// Initialize integrations.
 		new Integrations\Integrations();
 	}

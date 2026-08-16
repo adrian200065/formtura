@@ -87,7 +87,14 @@ function fta_activate() {
 	if ( class_exists( '\Formtura\Database\Installer' ) ) {
 		\Formtura\Database\Installer::activate();
 	}
-	
+
+	// Schedule the daily retention purge. The callback itself is a no-op
+	// when entry_retention_days is 0 (the default), so scheduling it
+	// unconditionally needs no coordination with the setting's value.
+	if ( ! wp_next_scheduled( 'fta_purge_old_entries_event' ) ) {
+		wp_schedule_event( time(), 'daily', 'fta_purge_old_entries_event' );
+	}
+
 	// Flush rewrite rules.
 	flush_rewrite_rules();
 }
@@ -99,6 +106,9 @@ register_activation_hook( __FILE__, 'fta_activate' );
  * @since 1.0.0
  */
 function fta_deactivate() {
+	// Stop the retention purge from firing while the plugin is inactive.
+	wp_clear_scheduled_hook( 'fta_purge_old_entries_event' );
+
 	// Flush rewrite rules.
 	flush_rewrite_rules();
 }

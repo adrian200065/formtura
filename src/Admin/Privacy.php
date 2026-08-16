@@ -290,11 +290,16 @@ class Privacy {
 	 * @return array{items_removed: bool, items_retained: bool, messages: string[], done: bool}
 	 */
 	public function erase_data( $email_address, $page = 1 ) {
-		$page = max( 1, (int) $page );
-		$ids  = $this->matching_entry_ids( $email_address );
-
-		$offset   = ( $page - 1 ) * self::PAGE_SIZE;
-		$page_ids = array_slice( $ids, $offset, self::PAGE_SIZE );
+		// Deliberately not using $page to compute an offset: this is a
+		// mutating operation, so the match set shrinks as we delete. WordPress
+		// increments $page on every call regardless of how much erasure
+		// removed, so an offset derived from $page walks past entries that
+		// have already scrolled to the front of the now-shorter list -
+		// skipping them entirely. Always taking the front slice of the live
+		// (re-queried) result on every call is what converges correctly
+		// under mutation.
+		$ids      = $this->matching_entry_ids( $email_address );
+		$page_ids = array_slice( $ids, 0, self::PAGE_SIZE );
 
 		$removed = 0;
 
@@ -304,13 +309,15 @@ class Privacy {
 			}
 		}
 
+		$failed = count( $page_ids ) - $removed;
+
 		return [
 			'items_removed'  => $removed > 0,
-			'items_retained' => false,
+			'items_retained' => $failed > 0,
 			'messages'       => $removed > 0
 				? [ sprintf( __( '%d form entries removed.', FORMTURA_TEXTDOMAIN ), $removed ) ]
 				: [],
-			'done'           => ( $offset + count( $page_ids ) ) >= count( $ids ),
+			'done'           => count( $page_ids ) >= count( $ids ),
 		];
 	}
 }

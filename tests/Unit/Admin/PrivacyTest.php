@@ -36,6 +36,10 @@ class PrivacyTest extends TestCase {
 			public $store         = [];
 			public $deleted       = [];
 			public $deleteResult  = true;
+			// IDs that should fail deletion (delete() returns false and does
+			// not mutate the match sources for these), even though
+			// $deleteResult is true for everything else.
+			public $failIds        = [];
 			public $metaMatchCalls = [];
 			public $olderThanCalls = [];
 
@@ -60,10 +64,30 @@ class PrivacyTest extends TestCase {
 				return isset( $this->store[ $id ] ) ? $this->store[ $id ] : null;
 			}
 
+			/**
+			 * Mirrors a real DB: a successful delete removes $id from
+			 * whatever match source(s) it came from, so a subsequent
+			 * matching_entry_ids() re-query (as erase_data() does on every
+			 * page) reflects the deletion.
+			 */
 			public function delete( $id ) {
 				$this->deleted[] = $id;
 
-				return $this->deleteResult;
+				if ( in_array( $id, $this->failIds, true ) || ! $this->deleteResult ) {
+					return false;
+				}
+
+				foreach ( $this->byUser as &$ids ) {
+					$ids = array_values( array_diff( $ids, [ $id ] ) );
+				}
+				unset( $ids );
+
+				foreach ( $this->byMeta as &$ids ) {
+					$ids = array_values( array_diff( $ids, [ $id ] ) );
+				}
+				unset( $ids );
+
+				return true;
 			}
 		};
 	}
@@ -238,6 +262,51 @@ class PrivacyTest extends TestCase {
 		$this->assertSame( [], $result['messages'] );
 		$this->assertFalse( $result['items_removed'] );
 		$this->assertTrue( $result['done'] );
+	}
+
+	/**
+	 * erase_data() is a mutating operation: deleting a page's entries shrinks
+	 * the underlying match set, so matching_entry_ids() returns fewer IDs on
+	 * the next page. WordPress increments $page independent of how much
+	 * erasure removed, so an offset computed from $page (correct for the
+	 * read-only exporter) would walk past entries that scrolled to the front
+	 * of the now-shorter list. With 21 matches and PAGE_SIZE=20, an
+	 * offset-based page 2 would slice the 1-item re-query at offset 20 -
+	 * an empty result - silently leaving entry 21 un-erased while reporting
+	 * done. This test only catches that because the fake's delete() removes
+	 * the deleted ID from byUser, mirroring how a real DB's next query would
+	 * reflect the deletion.
+	 */
+	public function test_eraser_paginates_correctly_when_deletion_shrinks_the_match_set() {
+		$GLOBALS['fta_test_users']['owner@example.com'] = new \WP_User( 5, 'owner@example.com' );
+
+		$entries = $this->makeEntries();
+		$entries->byUser[5] = range( 1, 21 );
+
+		$privacy = new Privacy( $entries, $this->makeForms( [] ) );
+
+		$page1 = $privacy->erase_data( 'owner@example.com', 1 );
+		$this->assertSame( range( 1, 20 ), $entries->deleted );
+		$this->assertFalse( $page1['done'] );
+
+		$page2 = $privacy->erase_data( 'owner@example.com', 2 );
+		$this->assertSame( range( 1, 21 ), $entries->deleted );
+		$this->assertTrue( $page2['done'] );
+	}
+
+	public function test_eraser_reports_items_retained_when_a_deletion_fails() {
+		$GLOBALS['fta_test_users']['owner@example.com'] = new \WP_User( 5, 'owner@example.com' );
+
+		$entries = $this->makeEntries();
+		$entries->byUser[5] = [ 101, 102 ];
+		$entries->failIds   = [ 102 ];
+
+		$privacy = new Privacy( $entries, $this->makeForms( [] ) );
+		$result  = $privacy->erase_data( 'owner@example.com', 1 );
+
+		$this->assertSame( [ 101, 102 ], $entries->deleted );
+		$this->assertTrue( $result['items_removed'] );
+		$this->assertTrue( $result['items_retained'] );
 	}
 
 	public function test_constructor_registers_the_wp_privacy_hooks() {

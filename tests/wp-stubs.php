@@ -23,6 +23,10 @@ if ( ! defined( 'ARRAY_N' ) ) {
 	define( 'ARRAY_N', 'ARRAY_N' );
 }
 
+if ( ! defined( 'DAY_IN_SECONDS' ) ) {
+	define( 'DAY_IN_SECONDS', 86400 );
+}
+
 if ( ! class_exists( 'WP_Error' ) ) {
 	/**
 	 * Minimal stand-in for WordPress's WP_Error.

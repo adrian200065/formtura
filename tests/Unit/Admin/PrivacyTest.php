@@ -309,6 +309,33 @@ class PrivacyTest extends TestCase {
 		$this->assertTrue( $result['items_retained'] );
 	}
 
+	public function test_purge_is_a_no_op_when_retention_is_disabled() {
+		$GLOBALS['fta_test_options']['fta_settings'] = [ 'entry_retention_days' => 0 ];
+
+		$entries = $this->makeEntries();
+		( new Privacy( $entries, $this->makeForms( [] ) ) )->purge_old_entries();
+
+		$this->assertSame( [], $entries->olderThanCalls );
+		$this->assertSame( [], $entries->deleted );
+	}
+
+	public function test_purge_deletes_entries_older_than_the_configured_window() {
+		$GLOBALS['fta_test_options']['fta_settings'] = [ 'entry_retention_days' => 30 ];
+
+		$entries = $this->makeEntries();
+		$entries->olderThan = [ 201, 202 ];
+
+		$before = time();
+		( new Privacy( $entries, $this->makeForms( [] ) ) )->purge_old_entries();
+		$after  = time();
+
+		$this->assertSame( [ 201, 202 ], $entries->deleted );
+
+		$cutoff = strtotime( $entries->olderThanCalls[0] . ' UTC' );
+		$this->assertGreaterThanOrEqual( $before - ( 30 * DAY_IN_SECONDS ) - 2, $cutoff );
+		$this->assertLessThanOrEqual( $after - ( 30 * DAY_IN_SECONDS ) + 2, $cutoff );
+	}
+
 	public function test_constructor_registers_the_wp_privacy_hooks() {
 		$GLOBALS['fta_test_actions'] = [];
 		$GLOBALS['fta_test_filters'] = [];

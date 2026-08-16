@@ -320,4 +320,29 @@ class Privacy {
 			'done'           => count( $page_ids ) >= count( $ids ),
 		];
 	}
+
+	/**
+	 * Delete every entry, across all forms, older than the configured
+	 * retention window. A no-op when retention is disabled (the default).
+	 *
+	 * Registered against the daily fta_purge_old_entries_event cron action
+	 * (scheduled in formtura.php on plugin activation). The event stays
+	 * scheduled regardless of whether retention is currently enabled - this
+	 * check is what makes re-enabling it later require no re-scheduling.
+	 *
+	 * @since 1.0.6
+	 */
+	public function purge_old_entries() {
+		$days = (int) fta_get_setting( 'entry_retention_days', 0 );
+
+		if ( $days <= 0 ) {
+			return;
+		}
+
+		$cutoff = gmdate( 'Y-m-d H:i:s', time() - ( $days * DAY_IN_SECONDS ) );
+
+		foreach ( $this->entries()->get_ids_older_than( $cutoff ) as $entry_id ) {
+			$this->entries()->delete( $entry_id );
+		}
+	}
 }

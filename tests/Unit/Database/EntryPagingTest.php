@@ -109,4 +109,51 @@ class EntryPagingTest extends TestCase {
 	public function test_a_zero_page_size_never_becomes_an_empty_result() {
 		$this->assertStringContainsString( 'LIMIT 20 OFFSET 0', $this->queryFor( [ 'per_page' => 0 ] ) );
 	}
+
+	/**
+	 * LIMIT/OFFSET paging is only coherent over a total order. created_at has
+	 * second granularity, so any form taking more than one submission a second
+	 * has ties, and a tied set has no defined order - MySQL is free to serve a
+	 * row on two pages and another on none.
+	 *
+	 * Observed in QA against 24 entries sharing one timestamp: page two
+	 * returned four rows already served on page one, and four entries appeared
+	 * on neither page. The screen showed duplicates; the export, which pages
+	 * the same way, would have silently dropped those four.
+	 */
+	public function test_ordering_is_total_so_paging_cannot_repeat_or_skip_rows() {
+		$this->assertStringContainsString(
+			'ORDER BY created_at DESC, id DESC',
+			$this->queryFor( [] )
+		);
+	}
+
+	public function test_the_tiebreaker_follows_the_requested_direction() {
+		$this->assertStringContainsString(
+			'ORDER BY created_at ASC, id ASC',
+			$this->queryFor( [ 'order' => 'ASC' ] )
+		);
+	}
+
+	/**
+	 * Ordering by the primary key is already total; a second `id` clause would
+	 * be noise.
+	 */
+	public function test_ordering_by_id_is_not_given_a_redundant_tiebreaker() {
+		$query = $this->queryFor( [ 'orderby' => 'id' ] );
+
+		$this->assertStringContainsString( 'ORDER BY id DESC', $query );
+		$this->assertStringNotContainsString( 'id DESC, id', $query );
+	}
+
+	/**
+	 * form_id and user_id both end in "id" without being the primary key, so a
+	 * substring test for the tiebreaker would wrongly consider them total.
+	 */
+	public function test_columns_merely_ending_in_id_still_get_a_tiebreaker() {
+		$this->assertStringContainsString(
+			'ORDER BY form_id DESC, id DESC',
+			$this->queryFor( [ 'orderby' => 'form_id' ] )
+		);
+	}
 }

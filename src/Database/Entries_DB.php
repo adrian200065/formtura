@@ -153,6 +153,8 @@ class Entries_DB {
 			$orderby = "{$defaults['orderby']} {$defaults['order']}";
 		}
 
+		$orderby = $this->make_order_total( $orderby, $args['order'] );
+
 		$query = "SELECT * FROM {$this->table_name} WHERE {$where} ORDER BY {$orderby} LIMIT {$limit} OFFSET {$offset}";
 
 		$entries = $wpdb->get_results( $query, ARRAY_A );
@@ -164,6 +166,43 @@ class Entries_DB {
 		}
 
 		return $entries;
+	}
+
+	/**
+	 * Add a primary-key tiebreaker so the sort is a total order.
+	 *
+	 * LIMIT/OFFSET paging only makes sense over a total order. created_at has
+	 * second granularity, so any form taking more than one submission in the
+	 * same second has tied rows, and a tied set has no defined order - the
+	 * database may serve one row on two consecutive pages and another on
+	 * neither.
+	 *
+	 * This is not theoretical. Against 24 entries sharing a timestamp, page
+	 * two came back holding four rows already served on page one, and four
+	 * entries appeared on no page at all. The screen shows the duplicates;
+	 * the CSV export, which pages the same way, silently drops the rest -
+	 * which is the exact failure the export was fixed to stop doing.
+	 *
+	 * The primary key is unique, so appending it breaks every remaining tie.
+	 *
+	 * @since 1.0.6
+	 * @param string $orderby Sanitized ORDER BY fragment.
+	 * @param string $order   Requested direction.
+	 * @return string
+	 */
+	private function make_order_total( $orderby, $order ) {
+		foreach ( explode( ',', $orderby ) as $clause ) {
+			$column = strtok( trim( $clause ), ' ' );
+
+			// Compared as a whole token, not a substring: form_id and user_id
+			// both end in "id" without being unique, and treating either as a
+			// tiebreaker would leave the order partial.
+			if ( 'id' === strtolower( trim( (string) $column, '`' ) ) ) {
+				return $orderby;
+			}
+		}
+
+		return $orderby . ', id ' . ( 'ASC' === strtoupper( (string) $order ) ? 'ASC' : 'DESC' );
 	}
 
 	/**

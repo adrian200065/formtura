@@ -131,6 +131,13 @@ class Settings {
 			$sanitized['recaptcha_score_threshold'] = max( 0.0, min( 1.0, $threshold ) );
 		}
 
+		// Automatic entry retention. 0 means "never delete automatically" -
+		// the only value that must never change an existing install's
+		// behavior on upgrade, so it is the default.
+		if ( isset( $settings['entry_retention_days'] ) ) {
+			$sanitized['entry_retention_days'] = max( 0, (int) $settings['entry_retention_days'] );
+		}
+
 		// Currency settings.
 		if ( isset( $settings['currency'] ) ) {
 			$sanitized['currency'] = sanitize_text_field( $settings['currency'] );
@@ -163,6 +170,7 @@ class Settings {
 			'recaptcha_version'         => 'v2',
 			'recaptcha_score_threshold' => 0.5,
 			'currency'                  => 'USD',
+			'entry_retention_days'      => 0,
 			'delete_data_on_uninstall'  => false,
 		];
 	}

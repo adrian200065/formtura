@@ -276,4 +276,41 @@ class Privacy {
 			'data'        => $data,
 		];
 	}
+
+	/**
+	 * WP Privacy API eraser callback.
+	 *
+	 * Deletion goes through Entries_DB::delete(), which already removes the
+	 * entry row, its meta, and any uploaded files or signatures - no
+	 * separate file-cleanup step is needed here.
+	 *
+	 * @since 1.0.6
+	 * @param string $email_address Requested email address.
+	 * @param int    $page          1-indexed page number.
+	 * @return array{items_removed: bool, items_retained: bool, messages: string[], done: bool}
+	 */
+	public function erase_data( $email_address, $page = 1 ) {
+		$page = max( 1, (int) $page );
+		$ids  = $this->matching_entry_ids( $email_address );
+
+		$offset   = ( $page - 1 ) * self::PAGE_SIZE;
+		$page_ids = array_slice( $ids, $offset, self::PAGE_SIZE );
+
+		$removed = 0;
+
+		foreach ( $page_ids as $entry_id ) {
+			if ( $this->entries()->delete( $entry_id ) ) {
+				$removed++;
+			}
+		}
+
+		return [
+			'items_removed'  => $removed > 0,
+			'items_retained' => false,
+			'messages'       => $removed > 0
+				? [ sprintf( __( '%d form entries removed.', FORMTURA_TEXTDOMAIN ), $removed ) ]
+				: [],
+			'done'           => ( $offset + count( $page_ids ) ) >= count( $ids ),
+		];
+	}
 }

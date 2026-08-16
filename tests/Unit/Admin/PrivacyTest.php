@@ -214,6 +214,32 @@ class PrivacyTest extends TestCase {
 		$this->assertSame( [ 5, 10, 30, 40, 50 ], $ids );
 	}
 
+	public function test_eraser_deletes_matched_entries_and_reports_items_removed() {
+		$GLOBALS['fta_test_users']['owner@example.com'] = new \WP_User( 5, 'owner@example.com' );
+
+		$entries = $this->makeEntries();
+		$entries->byUser[5]  = [ 101, 102 ];
+		$entries->store[101] = [ 'id' => 101, 'form_id' => 1, 'data' => [] ];
+		$entries->store[102] = [ 'id' => 102, 'form_id' => 1, 'data' => [] ];
+
+		$privacy = new Privacy( $entries, $this->makeForms( [] ) );
+		$result  = $privacy->erase_data( 'owner@example.com', 1 );
+
+		$this->assertSame( [ 101, 102 ], $entries->deleted );
+		$this->assertTrue( $result['items_removed'] );
+		$this->assertFalse( $result['items_retained'] );
+		$this->assertTrue( $result['done'] );
+	}
+
+	public function test_eraser_is_a_no_op_when_nothing_matches() {
+		$privacy = new Privacy( $this->makeEntries(), $this->makeForms( [] ) );
+		$result  = $privacy->erase_data( 'nobody@example.com', 1 );
+
+		$this->assertSame( [], $result['messages'] );
+		$this->assertFalse( $result['items_removed'] );
+		$this->assertTrue( $result['done'] );
+	}
+
 	public function test_constructor_registers_the_wp_privacy_hooks() {
 		$GLOBALS['fta_test_actions'] = [];
 		$GLOBALS['fta_test_filters'] = [];

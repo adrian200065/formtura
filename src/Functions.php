@@ -112,6 +112,19 @@ function fta_create_entry( $data ) {
 }
 
 /**
+ * Update an entry.
+ *
+ * @since 1.0.6
+ * @param int   $entry_id Entry ID.
+ * @param array $data Fields to change. Supports `is_read` and `data`.
+ * @return bool True on success, false on failure.
+ */
+function fta_update_entry( $entry_id, $data ) {
+	$entries_db = new \Formtura\Database\Entries_DB();
+	return $entries_db->update( $entry_id, $data );
+}
+
+/**
  * Delete an entry.
  *
  * @since 1.0.0

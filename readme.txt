@@ -4,7 +4,7 @@ Tags: form, form builder, contact form, drag and drop, forms
 Requires at least: 5.8
 Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 1.0.5
+Stable tag: 1.0.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -107,6 +107,16 @@ Yes, you can export entries to CSV format from the Entries page.
 
 == Changelog ==
 
+= 1.0.6 =
+* Fixed a submission being reported as successful when only part of it saved. The entry was created, its answers were written without checking whether the writes succeeded, and the visitor was thanked either way - so a failed write sent notifications and kept the uploaded files for an entry whose answers were gone. Entries are now written in a single transaction that either saves completely or not at all
+* Fixed the entries screen showing an empty preview for every submission. It read the answers from a key the database layer has never produced, so no submitted value was ever displayed
+* Fixed the View, Delete, Mark as Read and Export Entries controls doing nothing when clicked. None of them had ever been connected to anything
+* Added an entry detail view that shows every answer, with administrator-only download links for uploaded files and signatures
+* Fixed CSV exports stopping at the first 20 entries with nothing to say so. Exports now cover every entry on the form
+* Fixed CSV exports writing the word "Array" in place of any answer that holds more than one value - checkboxes, addresses, names, file uploads and payment orders. Those answers now export as readable text, under column headings taken from your field labels
+* CSV cells that a spreadsheet would run as a formula are now escaped, so a submitted "=..." value can no longer execute when you open an export
+* Added paging to the entries screen, which previously showed only the first 20 entries with no way to reach the rest
+
 = 1.0.5 =
 * Uploaded files and signatures are now stored outside the public web root, and are no longer reachable by URL. Previously they lived in wp-content/uploads/formtura, protected only by an .htaccess file - which nginx and IIS ignore, leaving every uploaded file readable by anyone who knew or guessed its address
 * Existing files are moved into the new private location automatically when the plugin updates. If the move cannot complete, the plugin says so and retries on the next update rather than reporting success
@@ -153,6 +163,13 @@ Yes, you can export entries to CSV format from the Entries page.
 * CAPTCHA support
 
 == Upgrade Notice ==
+
+= 1.0.6 =
+Entry management is repaired in this release. If you have been exporting
+entries, re-export them: previous exports stopped at 20 entries and wrote the
+word "Array" in place of checkbox, address, name, file and payment answers.
+Open older exports with care - cells beginning with =, +, - or @ were written
+unescaped and run as formulas in Excel, LibreOffice and Sheets.
 
 = 1.0.5 =
 This upgrade moves every uploaded file and signature out of your public

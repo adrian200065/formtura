@@ -217,7 +217,16 @@
 
 			const $body = $('<div>', { class: 'fta-entry-modal-body' });
 
-			$body.append($details.clone().removeAttr('id').removeAttr('hidden'));
+			const $answers = $details.clone().removeAttr('id');
+
+			// Unhidden through the DOM rather than jQuery's removeAttr():
+			// jQuery 3 stopped syncing boolean properties there, so jQuery
+			// Migrate logs "removeAttr no longer sets boolean properties:
+			// hidden" every time a dialog opens. removeAttribute() clears the
+			// attribute and its reflected property together, and says nothing.
+			$answers[0].removeAttribute('hidden');
+
+			$body.append($answers);
 
 			$panel.append($header).append($body);
 

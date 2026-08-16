@@ -223,6 +223,26 @@ describe('entry management controls', () => {
 
 			expect(jQuery('.fta-entry-modal').length).toBe(1);
 		});
+
+		// The row's copy is hidden by both the attribute and the matching
+		// property. jQuery 3 stopped resetting the property when the
+		// attribute is removed, so clearing only the attribute leaves the
+		// clone's hidden property true and logs a Migrate deprecation warning
+		// on every open.
+		it('unhides the cloned answers by property, not just attribute', () => {
+			jQuery('.fta-view-entry').trigger('click');
+
+			const clone = jQuery('.fta-entry-modal .fta-entry-details')[0];
+
+			expect(clone.hasAttribute('hidden')).toBe(false);
+			expect(clone.hidden).toBe(false);
+		});
+
+		it('leaves the row\'s own copy hidden', () => {
+			jQuery('.fta-view-entry').trigger('click');
+
+			expect(document.getElementById('fta-entry-details-4').hidden).toBe(true);
+		});
 	});
 
 	describe('export', () => {

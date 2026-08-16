@@ -101,9 +101,9 @@ Yes, you can export entries to CSV format from the Entries page.
 
 Formtura stores the data visitors submit through your forms: the answers to whatever fields you add (which may include personal information depending on how you build your forms), uploaded files, signature images, the visitor's IP address, their browser's user agent string, and - for logged-in visitors - their WordPress user ID.
 
-This data is stored only in your site's own database and file storage. Formtura does not transmit it off your site. It is retained indefinitely by default; you can delete individual entries or a form's entries at any time from Formtura > Entries, or turn on automatic deletion under Formtura > Settings ("Automatically Delete Entries After").
+Formtura itself stores this data in your site's own database and file storage. It leaves your site only where you configure it to: in notification emails (including any third-party SMTP service you configure to send them), through optional integrations such as Mailchimp if you enable and configure them, and - if you enable reCAPTCHA - during reCAPTCHA verification, described below. It is retained indefinitely by default; you can delete individual entries or a form's entries at any time from Formtura > Entries, or turn on automatic deletion under Formtura > Settings ("Automatically Delete Entries After").
 
-Formtura supports WordPress's built-in personal data tools (Tools > Export Personal Data and Tools > Erase Personal Data), so a request for a visitor's data will include matching form entries, and an erasure request will delete them.
+Formtura supports WordPress's built-in personal data tools (Tools > Export Personal Data and Tools > Erase Personal Data), so a request for a visitor's data will include matching form entries, and an erasure request will delete them. Because Formtura's forms can include any combination of fields, a personal-data request for an email address will match every entry where that address appears in an email-type field - including cases where a visitor entered someone else's email address (for example, in a "notify this address" field) rather than their own.
 
 If you enable reCAPTCHA (Formtura > Settings), submitting a protected form sends the visitor's reCAPTCHA response token and IP address to Google's reCAPTCHA verification service. This is governed by Google's Privacy Policy (https://policies.google.com/privacy) and Terms of Service (https://policies.google.com/terms).
 
@@ -126,6 +126,9 @@ If you enable reCAPTCHA (Formtura > Settings), submitting a protected form sends
 * Fixed CSV exports writing the word "Array" in place of any answer that holds more than one value - checkboxes, addresses, names, file uploads and payment orders. Those answers now export as readable text, under column headings taken from your field labels
 * CSV cells that a spreadsheet would run as a formula are now escaped, so a submitted "=..." value can no longer execute when you open an export
 * Added paging to the entries screen, which previously showed only the first 20 entries with no way to reach the rest
+* Added an "Automatically Delete Entries After" setting (Formtura > Settings) that permanently deletes entries past a configured age, on a daily schedule
+* Added support for WordPress's built-in personal data tools (Tools > Export Personal Data and Tools > Erase Personal Data), so a request for a visitor's data now includes matching form entries and an erasure request deletes them
+* Added a Privacy section to this readme disclosing what data Formtura stores, where it can leave your site, and how it matches entries to personal data requests
 
 = 1.0.5 =
 * Uploaded files and signatures are now stored outside the public web root, and are no longer reachable by URL. Previously they lived in wp-content/uploads/formtura, protected only by an .htaccess file - which nginx and IIS ignore, leaving every uploaded file readable by anyone who knew or guessed its address

@@ -97,6 +97,16 @@ Yes! Formtura is designed to work with any properly coded WordPress theme.
 
 Yes, you can export entries to CSV format from the Entries page.
 
+== Privacy ==
+
+Formtura stores the data visitors submit through your forms: the answers to whatever fields you add (which may include personal information depending on how you build your forms), uploaded files, signature images, the visitor's IP address, their browser's user agent string, and - for logged-in visitors - their WordPress user ID.
+
+This data is stored only in your site's own database and file storage. Formtura does not transmit it off your site. It is retained indefinitely by default; you can delete individual entries or a form's entries at any time from Formtura > Entries, or turn on automatic deletion under Formtura > Settings ("Automatically Delete Entries After").
+
+Formtura supports WordPress's built-in personal data tools (Tools > Export Personal Data and Tools > Erase Personal Data), so a request for a visitor's data will include matching form entries, and an erasure request will delete them.
+
+If you enable reCAPTCHA (Formtura > Settings), submitting a protected form sends the visitor's reCAPTCHA response token and IP address to Google's reCAPTCHA verification service. This is governed by Google's Privacy Policy (https://policies.google.com/privacy) and Terms of Service (https://policies.google.com/terms).
+
 == Screenshots ==
 
 1. Beautiful drag-and-drop form builder interface

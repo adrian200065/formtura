@@ -71,6 +71,26 @@ if ( ! class_exists( 'WP_Error' ) ) {
 	}
 }
 
+if ( ! class_exists( 'WP_User' ) ) {
+	/**
+	 * Minimal stand-in for WordPress's WP_User — only the properties this
+	 * plugin reads.
+	 */
+	class WP_User {
+
+		/** @var int */
+		public $ID;
+
+		/** @var string */
+		public $user_email;
+
+		public function __construct( $id, $email ) {
+			$this->ID         = $id;
+			$this->user_email = $email;
+		}
+	}
+}
+
 if ( ! function_exists( 'esc_attr' ) ) {
 	function esc_attr( $text ) {
 		return htmlspecialchars( (string) $text, ENT_QUOTES, 'UTF-8' );
@@ -507,8 +527,31 @@ if ( ! function_exists( 'add_action' ) ) {
 	}
 }
 
+if ( ! function_exists( 'get_user_by' ) ) {
+	/**
+	 * Reads from $GLOBALS['fta_test_users'], keyed by lowercase email, so a
+	 * test can seed which WordPress accounts exist without a database.
+	 */
+	function get_user_by( $field, $value ) {
+		if ( 'email' !== $field ) {
+			return false;
+		}
+
+		$users = isset( $GLOBALS['fta_test_users'] ) ? $GLOBALS['fta_test_users'] : [];
+		$key   = strtolower( (string) $value );
+
+		return isset( $users[ $key ] ) ? $users[ $key ] : false;
+	}
+}
+
 if ( ! function_exists( 'add_filter' ) ) {
 	function add_filter( $hook, $callback, $priority = 10, $accepted_args = 1 ) {
+		// Recorded so tests can assert which filters a component registers,
+		// the same way add_action() already records actions.
+		if ( isset( $GLOBALS['fta_test_filters'] ) && is_array( $GLOBALS['fta_test_filters'] ) ) {
+			$GLOBALS['fta_test_filters'][] = [ $hook, $callback, $priority, $accepted_args ];
+		}
+
 		return true;
 	}
 }

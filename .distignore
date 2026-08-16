@@ -19,6 +19,7 @@
 /.agents/
 /.claude/
 /.codex/
+/.gstack/
 /.superpowers/
 /.vscode/
 /.idea/

@@ -36,3 +36,4 @@ coverage/
 
 # PHPUnit
 .phpunit.result.cache
+.gstack/

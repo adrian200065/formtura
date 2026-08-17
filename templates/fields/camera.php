@@ -23,7 +23,7 @@ $field_input_id     = fta_get_field_input_id( $field );
 $field_required     = ! empty( $field['required'] );
 $compact_upload_text = isset( $field['compactUploadText'] ) && '' !== $field['compactUploadText']
 	? $field['compactUploadText']
-	: __( 'Take Photo', FORMTURA_TEXTDOMAIN );
+	: __( 'Take Photo', 'formtura' );
 ?>
 
 <div class="<?php echo esc_attr( fta_get_field_wrapper_class( $field, 'fta-field-camera' ) ); ?>"<?php echo fta_get_field_wrapper_data( $field ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>

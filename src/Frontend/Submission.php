@@ -72,7 +72,7 @@ class Submission {
 
 		if ( ! $form_id ) {
 			wp_send_json_error( [
-				'message' => __( 'Invalid form ID.', FORMTURA_TEXTDOMAIN ),
+				'message' => __( 'Invalid form ID.', 'formtura' ),
 			] );
 		}
 
@@ -81,14 +81,14 @@ class Submission {
 
 		if ( ! $form ) {
 			wp_send_json_error( [
-				'message' => __( 'Form not found.', FORMTURA_TEXTDOMAIN ),
+				'message' => __( 'Form not found.', 'formtura' ),
 			] );
 		}
 
 		// Check if form is active.
 		if ( isset( $form['status'] ) && $form['status'] !== 'active' ) {
 			wp_send_json_error( [
-				'message' => __( 'This form is currently inactive.', FORMTURA_TEXTDOMAIN ),
+				'message' => __( 'This form is currently inactive.', 'formtura' ),
 			] );
 		}
 
@@ -182,7 +182,7 @@ class Submission {
 			( new Uploads( $this->storage ) )->cleanup( $files );
 
 			wp_send_json_error( [
-				'message' => __( 'Failed to save form submission. Please try again.', FORMTURA_TEXTDOMAIN ),
+				'message' => __( 'Failed to save form submission. Please try again.', 'formtura' ),
 			] );
 		}
 
@@ -196,7 +196,7 @@ class Submission {
 		// the default below on every submission.
 		$success_message = isset( $form['settings']['successMessage'] )
 			? $form['settings']['successMessage']
-			: __( 'Thank you! Your form has been submitted successfully.', FORMTURA_TEXTDOMAIN );
+			: __( 'Thank you! Your form has been submitted successfully.', 'formtura' );
 
 		$redirect_url = isset( $form['settings']['redirect_url'] ) ? $form['settings']['redirect_url'] : '';
 
@@ -226,7 +226,7 @@ class Submission {
 		// successes.
 		if ( $this->coupon_attempts_throttled() ) {
 			wp_send_json_error( [
-				'message' => __( 'This coupon code is not valid.', FORMTURA_TEXTDOMAIN ),
+				'message' => __( 'This coupon code is not valid.', 'formtura' ),
 			] );
 		}
 
@@ -248,7 +248,7 @@ class Submission {
 		if ( ! $form || '' === $field_id || '' === $code ) {
 			$this->record_failed_coupon_attempt();
 			wp_send_json_error( [
-				'message' => __( 'This coupon code is not valid.', FORMTURA_TEXTDOMAIN ),
+				'message' => __( 'This coupon code is not valid.', 'formtura' ),
 			] );
 		}
 
@@ -264,7 +264,7 @@ class Submission {
 		if ( null === $coupon ) {
 			$this->record_failed_coupon_attempt();
 			wp_send_json_error( [
-				'message' => __( 'This coupon code is not valid.', FORMTURA_TEXTDOMAIN ),
+				'message' => __( 'This coupon code is not valid.', 'formtura' ),
 			] );
 		}
 
@@ -385,7 +385,7 @@ class Submission {
 		$errors = [];
 
 		if ( ! isset( $form['fields'] ) || ! is_array( $form['fields'] ) ) {
-			return new \WP_Error( 'invalid_form', __( 'Invalid form configuration.', FORMTURA_TEXTDOMAIN ) );
+			return new \WP_Error( 'invalid_form', __( 'Invalid form configuration.', 'formtura' ) );
 		}
 
 		foreach ( $form['fields'] as $field ) {
@@ -417,7 +417,7 @@ class Submission {
 			if ( ! empty( $field['required'] ) && $is_empty && $this->is_field_conditionally_visible( $field, $submission ) ) {
 				$errors[ $field_name ] = sprintf(
 					/* translators: %s: field label */
-					__( '%s is required.', FORMTURA_TEXTDOMAIN ),
+					__( '%s is required.', 'formtura' ),
 					isset( $field['label'] ) ? $field['label'] : $field_name
 				);
 				continue;
@@ -446,7 +446,7 @@ class Submission {
 		}
 
 		if ( ! empty( $errors ) ) {
-			return new \WP_Error( 'validation_failed', __( 'Please correct the errors below.', FORMTURA_TEXTDOMAIN ), $errors );
+			return new \WP_Error( 'validation_failed', __( 'Please correct the errors below.', 'formtura' ), $errors );
 		}
 
 		return true;
@@ -570,7 +570,7 @@ class Submission {
 		switch ( $type ) {
 			case 'email':
 				if ( ! is_email( $value ) ) {
-					return new \WP_Error( 'invalid_email', __( 'Please enter a valid email address.', FORMTURA_TEXTDOMAIN ) );
+					return new \WP_Error( 'invalid_email', __( 'Please enter a valid email address.', 'formtura' ) );
 				}
 				break;
 
@@ -579,7 +579,7 @@ class Submission {
 			case 'website':
 			case 'url':
 				if ( ! filter_var( $value, FILTER_VALIDATE_URL ) ) {
-					return new \WP_Error( 'invalid_url', __( 'Please enter a valid URL.', FORMTURA_TEXTDOMAIN ) );
+					return new \WP_Error( 'invalid_url', __( 'Please enter a valid URL.', 'formtura' ) );
 				}
 				break;
 
@@ -587,7 +587,7 @@ class Submission {
 			case 'number-slider':
 			case 'rating':
 				if ( ! is_numeric( $value ) ) {
-					return new \WP_Error( 'invalid_number', __( 'Please enter a valid number.', FORMTURA_TEXTDOMAIN ) );
+					return new \WP_Error( 'invalid_number', __( 'Please enter a valid number.', 'formtura' ) );
 				}
 				break;
 		}
@@ -608,7 +608,7 @@ class Submission {
 	 */
 	private function validate_address( $value, $field ) {
 		if ( ! is_array( $value ) ) {
-			return new \WP_Error( 'invalid_address', __( 'Please enter a valid address.', FORMTURA_TEXTDOMAIN ) );
+			return new \WP_Error( 'invalid_address', __( 'Please enter a valid address.', 'formtura' ) );
 		}
 
 		if ( empty( $field['required'] ) ) {
@@ -617,7 +617,7 @@ class Submission {
 
 		foreach ( [ 'line1', 'city', 'state', 'zip' ] as $part ) {
 			if ( ! isset( $value[ $part ] ) || '' === trim( (string) $value[ $part ] ) ) {
-				return new \WP_Error( 'incomplete_address', __( 'Please complete the address.', FORMTURA_TEXTDOMAIN ) );
+				return new \WP_Error( 'incomplete_address', __( 'Please complete the address.', 'formtura' ) );
 			}
 		}
 
@@ -763,8 +763,8 @@ class Submission {
 			return new \WP_Error(
 				'recaptcha_missing',
 				'v2' === $config['version']
-					? __( 'Please confirm you are not a robot.', FORMTURA_TEXTDOMAIN )
-					: __( 'reCAPTCHA verification could not be completed. Please reload the page and try again.', FORMTURA_TEXTDOMAIN )
+					? __( 'Please confirm you are not a robot.', 'formtura' )
+					: __( 'reCAPTCHA verification could not be completed. Please reload the page and try again.', 'formtura' )
 			);
 		}
 
@@ -822,7 +822,7 @@ class Submission {
 	 * @return string
 	 */
 	private function recaptcha_failure_message() {
-		return __( 'reCAPTCHA verification failed. Please try again.', FORMTURA_TEXTDOMAIN );
+		return __( 'reCAPTCHA verification failed. Please try again.', 'formtura' );
 	}
 
 	/**

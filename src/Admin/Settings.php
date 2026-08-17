@@ -61,7 +61,7 @@ class Settings {
 		// Check permissions.
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error( [
-				'message' => __( 'You do not have permission to perform this action.', FORMTURA_TEXTDOMAIN ),
+				'message' => __( 'You do not have permission to perform this action.', 'formtura' ),
 			] );
 		}
 
@@ -76,11 +76,11 @@ class Settings {
 
 		if ( $result ) {
 			wp_send_json_success( [
-				'message' => __( 'Settings saved successfully.', FORMTURA_TEXTDOMAIN ),
+				'message' => __( 'Settings saved successfully.', 'formtura' ),
 			] );
 		} else {
 			wp_send_json_error( [
-				'message' => __( 'Failed to save settings.', FORMTURA_TEXTDOMAIN ),
+				'message' => __( 'Failed to save settings.', 'formtura' ),
 			] );
 		}
 	}

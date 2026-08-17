@@ -244,8 +244,8 @@ class Notifications {
 		return [
 			'enabled'  => true,
 			'to'       => '{admin_email}',
-			'subject'  => __( 'New Form Submission from {site_name}', FORMTURA_TEXTDOMAIN ),
-			'message'  => __( 'You have received a new form submission.', FORMTURA_TEXTDOMAIN ),
+			'subject'  => __( 'New Form Submission from {site_name}', 'formtura' ),
+			'message'  => __( 'You have received a new form submission.', 'formtura' ),
 			'reply_to' => '',
 			'cc'       => '',
 			'bcc'      => '',

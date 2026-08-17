@@ -127,7 +127,7 @@ class Uploads {
 				if ( ! empty( $field['required'] ) ) {
 					$errors[ $field_name ] = sprintf(
 						/* translators: %s: field label */
-						__( '%s is required.', FORMTURA_TEXTDOMAIN ),
+						__( '%s is required.', 'formtura' ),
 						isset( $field['label'] ) ? $field['label'] : $field_name
 					);
 				}
@@ -176,7 +176,7 @@ class Uploads {
 
 			return new \WP_Error(
 				'upload_failed',
-				__( 'Please correct the errors below.', FORMTURA_TEXTDOMAIN ),
+				__( 'Please correct the errors below.', 'formtura' ),
 				$errors
 			);
 		}
@@ -239,7 +239,7 @@ class Uploads {
 
 		// Guard against a forged path pointing outside PHP's upload area.
 		if ( ! is_uploaded_file( $file['tmp_name'] ) ) {
-			return new \WP_Error( 'upload_invalid', __( 'The uploaded file could not be verified.', FORMTURA_TEXTDOMAIN ) );
+			return new \WP_Error( 'upload_invalid', __( 'The uploaded file could not be verified.', 'formtura' ) );
 		}
 
 		$size_error = $this->check_size( $file, $field );
@@ -271,18 +271,18 @@ class Uploads {
 
 			case UPLOAD_ERR_INI_SIZE:
 			case UPLOAD_ERR_FORM_SIZE:
-				return new \WP_Error( 'upload_too_large', __( 'The file is larger than this server allows.', FORMTURA_TEXTDOMAIN ) );
+				return new \WP_Error( 'upload_too_large', __( 'The file is larger than this server allows.', 'formtura' ) );
 
 			case UPLOAD_ERR_PARTIAL:
-				return new \WP_Error( 'upload_partial', __( 'The file was only partially uploaded. Please try again.', FORMTURA_TEXTDOMAIN ) );
+				return new \WP_Error( 'upload_partial', __( 'The file was only partially uploaded. Please try again.', 'formtura' ) );
 
 			case UPLOAD_ERR_NO_TMP_DIR:
 			case UPLOAD_ERR_CANT_WRITE:
 			case UPLOAD_ERR_EXTENSION:
-				return new \WP_Error( 'upload_server_error', __( 'The file could not be saved. Please contact the site administrator.', FORMTURA_TEXTDOMAIN ) );
+				return new \WP_Error( 'upload_server_error', __( 'The file could not be saved. Please contact the site administrator.', 'formtura' ) );
 
 			default:
-				return new \WP_Error( 'upload_failed', __( 'The file could not be uploaded.', FORMTURA_TEXTDOMAIN ) );
+				return new \WP_Error( 'upload_failed', __( 'The file could not be uploaded.', 'formtura' ) );
 		}
 	}
 
@@ -301,13 +301,13 @@ class Uploads {
 		$bytes = 1024 * 1024;
 
 		if ( $size <= 0 ) {
-			return new \WP_Error( 'upload_empty', __( 'The file is empty.', FORMTURA_TEXTDOMAIN ) );
+			return new \WP_Error( 'upload_empty', __( 'The file is empty.', 'formtura' ) );
 		}
 
 		$server_max = wp_max_upload_size();
 
 		if ( $server_max > 0 && $size > $server_max ) {
-			return new \WP_Error( 'upload_too_large', __( 'The file is larger than this server allows.', FORMTURA_TEXTDOMAIN ) );
+			return new \WP_Error( 'upload_too_large', __( 'The file is larger than this server allows.', 'formtura' ) );
 		}
 
 		if ( ! empty( $field['maxFileSize'] ) && $size > (float) $field['maxFileSize'] * $bytes ) {
@@ -315,7 +315,7 @@ class Uploads {
 				'upload_too_large',
 				sprintf(
 					/* translators: %s: maximum size in megabytes */
-					__( 'The file must be smaller than %sMB.', FORMTURA_TEXTDOMAIN ),
+					__( 'The file must be smaller than %sMB.', 'formtura' ),
 					$field['maxFileSize']
 				)
 			);
@@ -326,7 +326,7 @@ class Uploads {
 				'upload_too_small',
 				sprintf(
 					/* translators: %s: minimum size in megabytes */
-					__( 'The file must be larger than %sMB.', FORMTURA_TEXTDOMAIN ),
+					__( 'The file must be larger than %sMB.', 'formtura' ),
 					$field['minFileSize']
 				)
 			);
@@ -347,11 +347,11 @@ class Uploads {
 		$extension = strtolower( pathinfo( $file['name'], PATHINFO_EXTENSION ) );
 
 		if ( '' === $extension ) {
-			return new \WP_Error( 'upload_no_extension', __( 'The file type could not be determined.', FORMTURA_TEXTDOMAIN ) );
+			return new \WP_Error( 'upload_no_extension', __( 'The file type could not be determined.', 'formtura' ) );
 		}
 
 		if ( in_array( $extension, self::$blocked_extensions, true ) ) {
-			return new \WP_Error( 'upload_blocked_type', __( 'This file type is not permitted.', FORMTURA_TEXTDOMAIN ) );
+			return new \WP_Error( 'upload_blocked_type', __( 'This file type is not permitted.', 'formtura' ) );
 		}
 
 		// The declared extension must match the actual contents, and be a type
@@ -359,11 +359,11 @@ class Uploads {
 		$checked = wp_check_filetype_and_ext( $file['tmp_name'], $file['name'] );
 
 		if ( empty( $checked['ext'] ) || empty( $checked['type'] ) ) {
-			return new \WP_Error( 'upload_unrecognised_type', __( 'This file type is not permitted.', FORMTURA_TEXTDOMAIN ) );
+			return new \WP_Error( 'upload_unrecognised_type', __( 'This file type is not permitted.', 'formtura' ) );
 		}
 
 		if ( strtolower( $checked['ext'] ) !== $extension ) {
-			return new \WP_Error( 'upload_type_mismatch', __( 'The file contents do not match its extension.', FORMTURA_TEXTDOMAIN ) );
+			return new \WP_Error( 'upload_type_mismatch', __( 'The file contents do not match its extension.', 'formtura' ) );
 		}
 
 		$allowed = $this->get_allowed_extensions( $field );
@@ -373,7 +373,7 @@ class Uploads {
 				'upload_disallowed_type',
 				sprintf(
 					/* translators: %s: comma separated list of extensions */
-					__( 'Allowed file types: %s.', FORMTURA_TEXTDOMAIN ),
+					__( 'Allowed file types: %s.', 'formtura' ),
 					implode( ', ', $allowed )
 				)
 			);
@@ -437,7 +437,7 @@ class Uploads {
 		if ( false === $dir ) {
 			return new \WP_Error(
 				'upload_store_failed',
-				__( 'The file could not be saved. Please contact the site administrator.', FORMTURA_TEXTDOMAIN )
+				__( 'The file could not be saved. Please contact the site administrator.', 'formtura' )
 			);
 		}
 
@@ -476,7 +476,7 @@ class Uploads {
 
 			return new \WP_Error(
 				'upload_store_failed',
-				__( 'The file could not be saved. Please contact the site administrator.', FORMTURA_TEXTDOMAIN )
+				__( 'The file could not be saved. Please contact the site administrator.', 'formtura' )
 			);
 		}
 

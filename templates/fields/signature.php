@@ -26,7 +26,7 @@ $field_required = ! empty( $field['required'] );
 	<?php fta_field_label( $field, $field_input_id ); ?>
 
 	<div class="fta-signature" data-fta-signature>
-		<canvas class="fta-signature-canvas" width="600" height="180" aria-label="<?php esc_attr_e( 'Signature area. Draw your signature with mouse or touch.', FORMTURA_TEXTDOMAIN ); ?>"></canvas>
+		<canvas class="fta-signature-canvas" width="600" height="180" aria-label="<?php esc_attr_e( 'Signature area. Draw your signature with mouse or touch.', 'formtura' ); ?>"></canvas>
 
 		<input
 			type="hidden"
@@ -37,7 +37,7 @@ $field_required = ! empty( $field['required'] );
 		/>
 
 		<button type="button" class="fta-signature-clear">
-			<?php esc_html_e( 'Clear', FORMTURA_TEXTDOMAIN ); ?>
+			<?php esc_html_e( 'Clear', 'formtura' ); ?>
 		</button>
 	</div>
 

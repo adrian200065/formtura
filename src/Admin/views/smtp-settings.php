@@ -17,22 +17,22 @@ if ( ! defined( 'ABSPATH' ) ) {
 <div class="wrap fta-admin-page">
 	<div class="fta-admin-header">
 		<div class="fta-admin-heading">
-			<p class="fta-admin-eyebrow"><?php esc_html_e( 'Email delivery', FORMTURA_TEXTDOMAIN ); ?></p>
-			<h1><?php esc_html_e( 'SMTP settings', FORMTURA_TEXTDOMAIN ); ?></h1>
-			<p class="fta-admin-subtitle"><?php esc_html_e( 'Configure a reliable sender and verify it with a test message.', FORMTURA_TEXTDOMAIN ); ?></p>
+			<p class="fta-admin-eyebrow"><?php esc_html_e( 'Email delivery', 'formtura' ); ?></p>
+			<h1><?php esc_html_e( 'SMTP settings', 'formtura' ); ?></h1>
+			<p class="fta-admin-subtitle"><?php esc_html_e( 'Configure a reliable sender and verify it with a test message.', 'formtura' ); ?></p>
 		</div>
 	</div><!-- .fta-admin-header -->
 
 	<div class="fta-card">
 		<form id="fta-smtp-form" class="fta-smtp-form">
-			<h2><?php esc_html_e( 'SMTP Configuration', FORMTURA_TEXTDOMAIN ); ?></h2>
-			<p><?php esc_html_e( 'Configure SMTP settings to send form notification emails reliably.', FORMTURA_TEXTDOMAIN ); ?></p>
+			<h2><?php esc_html_e( 'SMTP Configuration', 'formtura' ); ?></h2>
+			<p><?php esc_html_e( 'Configure SMTP settings to send form notification emails reliably.', 'formtura' ); ?></p>
 			
 			<table class="form-table">
 				<tbody>
 					<tr>
 						<th scope="row">
-							<label for="fta-smtp-enable"><?php esc_html_e( 'Enable SMTP', FORMTURA_TEXTDOMAIN ); ?></label>
+							<label for="fta-smtp-enable"><?php esc_html_e( 'Enable SMTP', 'formtura' ); ?></label>
 						</th>
 						<td>
 							<label>
@@ -41,14 +41,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 									name="smtp_settings[enabled]"
 									value="1"
 									<?php checked( isset( $smtp_settings['enabled'] ) ? $smtp_settings['enabled'] : false, 1 ); ?>>
-								<?php esc_html_e( 'Use SMTP for sending emails', FORMTURA_TEXTDOMAIN ); ?>
+								<?php esc_html_e( 'Use SMTP for sending emails', 'formtura' ); ?>
 							</label>
 						</td>
 					</tr>
 
 					<tr class="fta-smtp-field">
 						<th scope="row">
-							<label for="fta-smtp-host"><?php esc_html_e( 'SMTP Host', FORMTURA_TEXTDOMAIN ); ?></label>
+							<label for="fta-smtp-host"><?php esc_html_e( 'SMTP Host', 'formtura' ); ?></label>
 						</th>
 						<td>
 							<input type="text" 
@@ -58,14 +58,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 								class="regular-text"
 								placeholder="smtp.gmail.com">
 							<p class="description">
-								<?php esc_html_e( 'Your SMTP server hostname.', FORMTURA_TEXTDOMAIN ); ?>
+								<?php esc_html_e( 'Your SMTP server hostname.', 'formtura' ); ?>
 							</p>
 						</td>
 					</tr>
 
 					<tr class="fta-smtp-field">
 						<th scope="row">
-							<label for="fta-smtp-port"><?php esc_html_e( 'SMTP Port', FORMTURA_TEXTDOMAIN ); ?></label>
+							<label for="fta-smtp-port"><?php esc_html_e( 'SMTP Port', 'formtura' ); ?></label>
 						</th>
 						<td>
 							<input type="number" 
@@ -74,19 +74,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 								value="<?php echo esc_attr( isset( $smtp_settings['smtp_port'] ) ? $smtp_settings['smtp_port'] : '587' ); ?>" 
 								class="small-text">
 							<p class="description">
-								<?php esc_html_e( 'Common ports: 25, 465 (SSL), 587 (TLS)', FORMTURA_TEXTDOMAIN ); ?>
+								<?php esc_html_e( 'Common ports: 25, 465 (SSL), 587 (TLS)', 'formtura' ); ?>
 							</p>
 						</td>
 					</tr>
 
 					<tr class="fta-smtp-field">
 						<th scope="row">
-							<label for="fta-smtp-encryption"><?php esc_html_e( 'Encryption', FORMTURA_TEXTDOMAIN ); ?></label>
+							<label for="fta-smtp-encryption"><?php esc_html_e( 'Encryption', 'formtura' ); ?></label>
 						</th>
 						<td>
 							<select id="fta-smtp-encryption" name="smtp_settings[smtp_encryption]">
 								<option value="none" <?php selected( isset( $smtp_settings['smtp_encryption'] ) ? $smtp_settings['smtp_encryption'] : 'tls', 'none' ); ?>>
-									<?php esc_html_e( 'None', FORMTURA_TEXTDOMAIN ); ?>
+									<?php esc_html_e( 'None', 'formtura' ); ?>
 								</option>
 								<option value="ssl" <?php selected( isset( $smtp_settings['smtp_encryption'] ) ? $smtp_settings['smtp_encryption'] : 'tls', 'ssl' ); ?>>
 									SSL
@@ -96,14 +96,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 								</option>
 							</select>
 							<p class="description">
-								<?php esc_html_e( 'Recommended: TLS', FORMTURA_TEXTDOMAIN ); ?>
+								<?php esc_html_e( 'Recommended: TLS', 'formtura' ); ?>
 							</p>
 						</td>
 					</tr>
 
 					<tr class="fta-smtp-field">
 						<th scope="row">
-							<label for="fta-smtp-auth"><?php esc_html_e( 'Authentication', FORMTURA_TEXTDOMAIN ); ?></label>
+							<label for="fta-smtp-auth"><?php esc_html_e( 'Authentication', 'formtura' ); ?></label>
 						</th>
 						<td>
 							<label>
@@ -112,17 +112,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 									name="smtp_settings[smtp_auth]" 
 									value="1" 
 									<?php checked( isset( $smtp_settings['smtp_auth'] ) ? $smtp_settings['smtp_auth'] : true, 1 ); ?>>
-								<?php esc_html_e( 'Use SMTP authentication', FORMTURA_TEXTDOMAIN ); ?>
+								<?php esc_html_e( 'Use SMTP authentication', 'formtura' ); ?>
 							</label>
 							<p class="description">
-								<?php esc_html_e( 'Most SMTP servers require authentication.', FORMTURA_TEXTDOMAIN ); ?>
+								<?php esc_html_e( 'Most SMTP servers require authentication.', 'formtura' ); ?>
 							</p>
 						</td>
 					</tr>
 
 					<tr class="fta-smtp-field fta-smtp-auth-field">
 						<th scope="row">
-							<label for="fta-smtp-username"><?php esc_html_e( 'Username', FORMTURA_TEXTDOMAIN ); ?></label>
+							<label for="fta-smtp-username"><?php esc_html_e( 'Username', 'formtura' ); ?></label>
 						</th>
 						<td>
 							<input type="text" 
@@ -136,7 +136,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 					<tr class="fta-smtp-field fta-smtp-auth-field">
 						<th scope="row">
-							<label for="fta-smtp-password"><?php esc_html_e( 'Password', FORMTURA_TEXTDOMAIN ); ?></label>
+							<label for="fta-smtp-password"><?php esc_html_e( 'Password', 'formtura' ); ?></label>
 						</th>
 						<td>
 							<?php
@@ -153,12 +153,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 								value=""
 								class="regular-text"
 								autocomplete="new-password"
-								placeholder="<?php echo ! empty( $smtp_settings['smtp_password'] ) ? esc_attr__( 'Leave blank to keep the saved password', FORMTURA_TEXTDOMAIN ) : ''; ?>">
+								placeholder="<?php echo ! empty( $smtp_settings['smtp_password'] ) ? esc_attr__( 'Leave blank to keep the saved password', 'formtura' ) : ''; ?>">
 							<p class="description">
 								<?php if ( ! empty( $smtp_settings['smtp_password'] ) ) : ?>
-									<?php esc_html_e( 'A password is already saved, encrypted. Enter a new one to replace it.', FORMTURA_TEXTDOMAIN ); ?>
+									<?php esc_html_e( 'A password is already saved, encrypted. Enter a new one to replace it.', 'formtura' ); ?>
 								<?php else : ?>
-									<?php esc_html_e( 'Your SMTP password will be stored encrypted.', FORMTURA_TEXTDOMAIN ); ?>
+									<?php esc_html_e( 'Your SMTP password will be stored encrypted.', 'formtura' ); ?>
 								<?php endif; ?>
 							</p>
 						</td>
@@ -166,7 +166,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 					<tr class="fta-smtp-field">
 						<th scope="row">
-							<label for="fta-smtp-from-email"><?php esc_html_e( 'From Email', FORMTURA_TEXTDOMAIN ); ?></label>
+							<label for="fta-smtp-from-email"><?php esc_html_e( 'From Email', 'formtura' ); ?></label>
 						</th>
 						<td>
 							<input type="email" 
@@ -175,14 +175,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 								value="<?php echo esc_attr( isset( $smtp_settings['from_email'] ) ? $smtp_settings['from_email'] : get_option( 'admin_email' ) ); ?>" 
 								class="regular-text">
 							<p class="description">
-								<?php esc_html_e( 'Email address to send from.', FORMTURA_TEXTDOMAIN ); ?>
+								<?php esc_html_e( 'Email address to send from.', 'formtura' ); ?>
 							</p>
 						</td>
 					</tr>
 
 					<tr class="fta-smtp-field">
 						<th scope="row">
-							<label for="fta-smtp-from-name"><?php esc_html_e( 'From Name', FORMTURA_TEXTDOMAIN ); ?></label>
+							<label for="fta-smtp-from-name"><?php esc_html_e( 'From Name', 'formtura' ); ?></label>
 						</th>
 						<td>
 							<input type="text" 
@@ -191,14 +191,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 								value="<?php echo esc_attr( isset( $smtp_settings['from_name'] ) ? $smtp_settings['from_name'] : get_bloginfo( 'name' ) ); ?>" 
 								class="regular-text">
 							<p class="description">
-								<?php esc_html_e( 'Name to send from.', FORMTURA_TEXTDOMAIN ); ?>
+								<?php esc_html_e( 'Name to send from.', 'formtura' ); ?>
 							</p>
 						</td>
 					</tr>
 
 					<tr class="fta-smtp-field">
 						<th scope="row">
-							<label for="fta-smtp-test-email"><?php esc_html_e( 'Send Test Email To', FORMTURA_TEXTDOMAIN ); ?></label>
+							<label for="fta-smtp-test-email"><?php esc_html_e( 'Send Test Email To', 'formtura' ); ?></label>
 						</th>
 						<td>
 							<input type="email"
@@ -206,7 +206,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 								value="<?php echo esc_attr( get_option( 'admin_email' ) ); ?>"
 								class="regular-text">
 							<p class="description">
-								<?php esc_html_e( 'Save your settings first, then send a test message to this address.', FORMTURA_TEXTDOMAIN ); ?>
+								<?php esc_html_e( 'Save your settings first, then send a test message to this address.', 'formtura' ); ?>
 							</p>
 						</td>
 					</tr>
@@ -217,10 +217,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 			
 			<p class="submit">
 				<button type="submit" class="fta-button fta-button-primary fta-save-smtp">
-					<?php esc_html_e( 'Save SMTP Settings', FORMTURA_TEXTDOMAIN ); ?>
+					<?php esc_html_e( 'Save SMTP Settings', 'formtura' ); ?>
 				</button>
 				<button type="button" class="fta-button fta-button-secondary fta-test-smtp">
-					<?php esc_html_e( 'Send Test Email', FORMTURA_TEXTDOMAIN ); ?>
+					<?php esc_html_e( 'Send Test Email', 'formtura' ); ?>
 				</button>
 			</p>
 		</form>
@@ -261,7 +261,7 @@ jQuery(document).ready(function($) {
 		var $button = $form.find('.fta-save-smtp');
 		var buttonText = $button.text();
 		
-		$button.prop('disabled', true).text('<?php esc_html_e( 'Saving...', FORMTURA_TEXTDOMAIN ); ?>');
+		$button.prop('disabled', true).text('<?php esc_html_e( 'Saving...', 'formtura' ); ?>');
 		
 		$.ajax({
 			url: ajaxurl,
@@ -277,13 +277,13 @@ jQuery(document).ready(function($) {
 			},
 			success: function(response) {
 				if (response.success) {
-					window.FormturaAdmin.showNotice('<?php esc_html_e( 'SMTP settings saved successfully.', FORMTURA_TEXTDOMAIN ); ?>', 'success');
+					window.FormturaAdmin.showNotice('<?php esc_html_e( 'SMTP settings saved successfully.', 'formtura' ); ?>', 'success');
 				} else {
-					window.FormturaAdmin.showNotice(response.data.message || '<?php esc_html_e( 'Failed to save SMTP settings.', FORMTURA_TEXTDOMAIN ); ?>', 'error');
+					window.FormturaAdmin.showNotice(response.data.message || '<?php esc_html_e( 'Failed to save SMTP settings.', 'formtura' ); ?>', 'error');
 				}
 			},
 			error: function() {
-				window.FormturaAdmin.showNotice('<?php esc_html_e( 'An error occurred while saving SMTP settings.', FORMTURA_TEXTDOMAIN ); ?>', 'error');
+				window.FormturaAdmin.showNotice('<?php esc_html_e( 'An error occurred while saving SMTP settings.', 'formtura' ); ?>', 'error');
 			},
 			complete: function() {
 				$button.prop('disabled', false).text(buttonText);
@@ -298,11 +298,11 @@ jQuery(document).ready(function($) {
 		var email = $('#fta-smtp-test-email').val();
 
 		if (!email) {
-			window.FormturaAdmin.showNotice('<?php esc_html_e( 'Enter an email address to send the test to.', FORMTURA_TEXTDOMAIN ); ?>', 'error');
+			window.FormturaAdmin.showNotice('<?php esc_html_e( 'Enter an email address to send the test to.', 'formtura' ); ?>', 'error');
 			return;
 		}
 
-		$button.prop('disabled', true).text('<?php esc_html_e( 'Sending...', FORMTURA_TEXTDOMAIN ); ?>');
+		$button.prop('disabled', true).text('<?php esc_html_e( 'Sending...', 'formtura' ); ?>');
 
 		$.ajax({
 			url: ajaxurl,
@@ -314,13 +314,13 @@ jQuery(document).ready(function($) {
 			},
 			success: function(response) {
 				if (response.success) {
-					window.FormturaAdmin.showNotice('<?php esc_html_e( 'Test email sent successfully. Check your inbox.', FORMTURA_TEXTDOMAIN ); ?>', 'success');
+					window.FormturaAdmin.showNotice('<?php esc_html_e( 'Test email sent successfully. Check your inbox.', 'formtura' ); ?>', 'success');
 				} else {
-					window.FormturaAdmin.showNotice(response.data.message || '<?php esc_html_e( 'Failed to send test email.', FORMTURA_TEXTDOMAIN ); ?>', 'error');
+					window.FormturaAdmin.showNotice(response.data.message || '<?php esc_html_e( 'Failed to send test email.', 'formtura' ); ?>', 'error');
 				}
 			},
 			error: function() {
-				window.FormturaAdmin.showNotice('<?php esc_html_e( 'An error occurred while sending test email.', FORMTURA_TEXTDOMAIN ); ?>', 'error');
+				window.FormturaAdmin.showNotice('<?php esc_html_e( 'An error occurred while sending test email.', 'formtura' ); ?>', 'error');
 			},
 			complete: function() {
 				$button.prop('disabled', false).text(buttonText);

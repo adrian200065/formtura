@@ -69,7 +69,7 @@ class Form_Builder {
 		// Check permissions.
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error( [
-				'message' => __( 'You do not have permission to perform this action.', FORMTURA_TEXTDOMAIN ),
+				'message' => __( 'You do not have permission to perform this action.', 'formtura' ),
 			] );
 		}
 
@@ -80,7 +80,7 @@ class Form_Builder {
 
 		if ( empty( $form_data ) || ! is_array( $form_data ) ) {
 			wp_send_json_error( [
-				'message' => __( 'Invalid form data.', FORMTURA_TEXTDOMAIN ),
+				'message' => __( 'Invalid form data.', 'formtura' ),
 			] );
 		}
 
@@ -110,11 +110,11 @@ class Form_Builder {
 		// Save or update form.
 		if ( $form_id ) {
 			$result = fta_update_form( $form_id, $sanitized_data );
-			$message = __( 'Form updated successfully.', FORMTURA_TEXTDOMAIN );
+			$message = __( 'Form updated successfully.', 'formtura' );
 		} else {
 			$result = fta_create_form( $sanitized_data );
 			$form_id = $result;
-			$message = __( 'Form created successfully.', FORMTURA_TEXTDOMAIN );
+			$message = __( 'Form created successfully.', 'formtura' );
 		}
 
 		if ( $result ) {
@@ -124,7 +124,7 @@ class Form_Builder {
 			] );
 		} else {
 			wp_send_json_error( [
-				'message' => __( 'Failed to save form.', FORMTURA_TEXTDOMAIN ),
+				'message' => __( 'Failed to save form.', 'formtura' ),
 			] );
 		}
 	}
@@ -139,14 +139,14 @@ class Form_Builder {
 		$nonce = isset( $_REQUEST['nonce'] ) ? $_REQUEST['nonce'] : '';
 		if ( ! wp_verify_nonce( $nonce, 'formtura_admin' ) ) {
 			wp_send_json_error( [
-				'message' => __( 'Invalid nonce.', FORMTURA_TEXTDOMAIN ),
+				'message' => __( 'Invalid nonce.', 'formtura' ),
 			] );
 		}
 
 		// Check permissions.
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error( [
-				'message' => __( 'You do not have permission to perform this action.', FORMTURA_TEXTDOMAIN ),
+				'message' => __( 'You do not have permission to perform this action.', 'formtura' ),
 			] );
 		}
 
@@ -154,7 +154,7 @@ class Form_Builder {
 
 		if ( ! $form_id ) {
 			wp_send_json_error( [
-				'message' => __( 'Invalid form ID.', FORMTURA_TEXTDOMAIN ),
+				'message' => __( 'Invalid form ID.', 'formtura' ),
 			] );
 		}
 
@@ -177,7 +177,7 @@ class Form_Builder {
 			wp_send_json_success( $response );
 		} else {
 			wp_send_json_error( [
-				'message' => __( 'Form not found.', FORMTURA_TEXTDOMAIN ),
+				'message' => __( 'Form not found.', 'formtura' ),
 			] );
 		}
 	}
@@ -194,7 +194,7 @@ class Form_Builder {
 		// Check permissions.
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error( [
-				'message' => __( 'You do not have permission to perform this action.', FORMTURA_TEXTDOMAIN ),
+				'message' => __( 'You do not have permission to perform this action.', 'formtura' ),
 			] );
 		}
 
@@ -202,7 +202,7 @@ class Form_Builder {
 
 		if ( ! $form_id ) {
 			wp_send_json_error( [
-				'message' => __( 'Invalid form ID.', FORMTURA_TEXTDOMAIN ),
+				'message' => __( 'Invalid form ID.', 'formtura' ),
 			] );
 		}
 
@@ -210,25 +210,25 @@ class Form_Builder {
 
 		if ( ! $form ) {
 			wp_send_json_error( [
-				'message' => __( 'Form not found.', FORMTURA_TEXTDOMAIN ),
+				'message' => __( 'Form not found.', 'formtura' ),
 			] );
 		}
 
 		// Create duplicate.
 		$duplicate_data = $form;
-		$duplicate_data['title'] = $form['title'] . ' ' . __( '(Copy)', FORMTURA_TEXTDOMAIN );
+		$duplicate_data['title'] = $form['title'] . ' ' . __( '(Copy)', 'formtura' );
 		unset( $duplicate_data['id'] );
 
 		$new_form_id = fta_create_form( $duplicate_data );
 
 		if ( $new_form_id ) {
 			wp_send_json_success( [
-				'message' => __( 'Form duplicated successfully.', FORMTURA_TEXTDOMAIN ),
+				'message' => __( 'Form duplicated successfully.', 'formtura' ),
 				'form_id' => $new_form_id,
 			] );
 		} else {
 			wp_send_json_error( [
-				'message' => __( 'Failed to duplicate form.', FORMTURA_TEXTDOMAIN ),
+				'message' => __( 'Failed to duplicate form.', 'formtura' ),
 			] );
 		}
 	}

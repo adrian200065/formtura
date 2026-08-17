@@ -21,7 +21,7 @@ $min_value     = isset( $field['minValue'] ) ? $field['minValue'] : 0;
 $max_value     = isset( $field['maxValue'] ) ? $field['maxValue'] : 10;
 $increment     = ! empty( $field['increment'] ) ? $field['increment'] : 1;
 $default_value = isset( $field['defaultValue'] ) ? $field['defaultValue'] : $min_value;
-$value_display = isset( $field['valueDisplay'] ) ? $field['valueDisplay'] : __( 'Selected Value: {value}', FORMTURA_TEXTDOMAIN );
+$value_display = isset( $field['valueDisplay'] ) ? $field['valueDisplay'] : __( 'Selected Value: {value}', 'formtura' );
 
 // The {value} token is replaced live by assets/js/frontend.js; render the
 // default so the text is correct before scripts run.

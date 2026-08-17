@@ -15,23 +15,23 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 $template_categories = [
 	'all'         => [
-		'label' => __( 'All templates', FORMTURA_TEXTDOMAIN ),
+		'label' => __( 'All templates', 'formtura' ),
 		'ids'   => array_keys( $templates ),
 	],
 	'starting'    => [
-		'label' => __( 'Starting points', FORMTURA_TEXTDOMAIN ),
+		'label' => __( 'Starting points', 'formtura' ),
 		'ids'   => [ 'blank' ],
 	],
 	'customer'    => [
-		'label' => __( 'Customer forms', FORMTURA_TEXTDOMAIN ),
+		'label' => __( 'Customer forms', 'formtura' ),
 		'ids'   => [ 'contact', 'quote' ],
 	],
 	'engagement'  => [
-		'label' => __( 'Engagement', FORMTURA_TEXTDOMAIN ),
+		'label' => __( 'Engagement', 'formtura' ),
 		'ids'   => [ 'feedback', 'registration' ],
 	],
 	'hiring'      => [
-		'label' => __( 'Hiring', FORMTURA_TEXTDOMAIN ),
+		'label' => __( 'Hiring', 'formtura' ),
 		'ids'   => [ 'job_application' ],
 	],
 ];
@@ -50,27 +50,27 @@ $template_category_for_id = static function( $template_id ) use ( $template_cate
 <div class="wrap fta-admin-page fta-template-library">
 	<header class="fta-template-hero">
 		<div class="fta-template-hero-content">
-			<p class="fta-admin-eyebrow"><?php esc_html_e( 'Formtura templates', FORMTURA_TEXTDOMAIN ); ?></p>
+			<p class="fta-admin-eyebrow"><?php esc_html_e( 'Formtura templates', 'formtura' ); ?></p>
 			<h1>
 				<?php
 				printf(
 					/* translators: %d: number of available templates. */
-					esc_html__( '%d ready-to-use form templates', FORMTURA_TEXTDOMAIN ),
+					esc_html__( '%d ready-to-use form templates', 'formtura' ),
 					count( $templates )
 				);
 				?>
 			</h1>
-			<p><?php esc_html_e( 'Choose a starting point, preview its fields, and customize everything in the builder.', FORMTURA_TEXTDOMAIN ); ?></p>
+			<p><?php esc_html_e( 'Choose a starting point, preview its fields, and customize everything in the builder.', 'formtura' ); ?></p>
 
 			<div class="fta-template-search">
 				<label class="screen-reader-text" for="fta-template-search">
-					<?php esc_html_e( 'Search form templates', FORMTURA_TEXTDOMAIN ); ?>
+					<?php esc_html_e( 'Search form templates', 'formtura' ); ?>
 				</label>
 				<span class="dashicons dashicons-search" aria-hidden="true"></span>
 				<input
 					id="fta-template-search"
 					type="search"
-					placeholder="<?php esc_attr_e( 'Search templates', FORMTURA_TEXTDOMAIN ); ?>"
+					placeholder="<?php esc_attr_e( 'Search templates', 'formtura' ); ?>"
 					autocomplete="off"
 				>
 				<span class="fta-template-search-shortcut" aria-hidden="true">/</span>
@@ -79,13 +79,13 @@ $template_category_for_id = static function( $template_id ) use ( $template_cate
 	</header>
 
 	<div class="fta-template-catalog">
-		<aside class="fta-template-filters" aria-label="<?php esc_attr_e( 'Template filters', FORMTURA_TEXTDOMAIN ); ?>">
+		<aside class="fta-template-filters" aria-label="<?php esc_attr_e( 'Template filters', 'formtura' ); ?>">
 			<div class="fta-template-filter-heading">
-				<p class="fta-template-filter-label"><?php esc_html_e( 'Browse by', FORMTURA_TEXTDOMAIN ); ?></p>
-				<p><?php esc_html_e( 'Template type', FORMTURA_TEXTDOMAIN ); ?></p>
+				<p class="fta-template-filter-label"><?php esc_html_e( 'Browse by', 'formtura' ); ?></p>
+				<p><?php esc_html_e( 'Template type', 'formtura' ); ?></p>
 			</div>
 
-			<nav class="fta-template-filter-list" aria-label="<?php esc_attr_e( 'Template categories', FORMTURA_TEXTDOMAIN ); ?>">
+			<nav class="fta-template-filter-list" aria-label="<?php esc_attr_e( 'Template categories', 'formtura' ); ?>">
 				<?php foreach ( $template_categories as $category_id => $category ) : ?>
 					<button
 						type="button"
@@ -102,8 +102,8 @@ $template_category_for_id = static function( $template_id ) use ( $template_cate
 			<div class="fta-template-filter-summary">
 				<span class="dashicons dashicons-layout" aria-hidden="true"></span>
 				<div>
-					<strong><?php esc_html_e( 'Form layout', FORMTURA_TEXTDOMAIN ); ?></strong>
-					<span><?php esc_html_e( 'Classic · one page', FORMTURA_TEXTDOMAIN ); ?></span>
+					<strong><?php esc_html_e( 'Form layout', 'formtura' ); ?></strong>
+					<span><?php esc_html_e( 'Classic · one page', 'formtura' ); ?></span>
 				</div>
 			</div>
 		</aside>
@@ -111,12 +111,12 @@ $template_category_for_id = static function( $template_id ) use ( $template_cate
 		<main class="fta-template-results" aria-labelledby="fta-template-results-title">
 			<div class="fta-template-results-header">
 				<div>
-					<p class="fta-template-filter-label"><?php esc_html_e( 'Template library', FORMTURA_TEXTDOMAIN ); ?></p>
-					<h2 id="fta-template-results-title"><?php esc_html_e( 'Pick a form to start with', FORMTURA_TEXTDOMAIN ); ?></h2>
+					<p class="fta-template-filter-label"><?php esc_html_e( 'Template library', 'formtura' ); ?></p>
+					<h2 id="fta-template-results-title"><?php esc_html_e( 'Pick a form to start with', 'formtura' ); ?></h2>
 				</div>
 				<p class="fta-template-results-count" role="status" aria-live="polite">
 					<span data-template-visible-count><?php echo esc_html( count( $templates ) ); ?></span>
-					<?php esc_html_e( 'templates', FORMTURA_TEXTDOMAIN ); ?>
+					<?php esc_html_e( 'templates', 'formtura' ); ?>
 				</p>
 			</div>
 
@@ -140,32 +140,32 @@ $template_category_for_id = static function( $template_id ) use ( $template_cate
 							<div class="fta-template-preview-paper fta-template-preview-paper--<?php echo esc_attr( $preview_variant ); ?>">
 								<div class="fta-template-preview-brand">
 									<span class="fta-template-preview-mark"></span>
-									<span><?php esc_html_e( 'FORMTURA', FORMTURA_TEXTDOMAIN ); ?></span>
+									<span><?php esc_html_e( 'FORMTURA', 'formtura' ); ?></span>
 								</div>
 
 								<?php if ( 'contact' === $template_id ) : ?>
 									<div class="fta-template-preview-context fta-template-preview-context--contact">
-										<span class="fta-template-preview-context-label"><?php esc_html_e( 'Get in touch', FORMTURA_TEXTDOMAIN ); ?></span>
-										<span class="fta-template-preview-context-meta"><?php esc_html_e( 'We usually reply within one business day', FORMTURA_TEXTDOMAIN ); ?></span>
+										<span class="fta-template-preview-context-label"><?php esc_html_e( 'Get in touch', 'formtura' ); ?></span>
+										<span class="fta-template-preview-context-meta"><?php esc_html_e( 'We usually reply within one business day', 'formtura' ); ?></span>
 									</div>
 								<?php elseif ( 'quote' === $template_id ) : ?>
 									<div class="fta-template-preview-context fta-template-preview-context--quote">
-										<span class="fta-template-preview-context-label"><?php esc_html_e( 'Project brief', FORMTURA_TEXTDOMAIN ); ?></span>
-										<span class="fta-template-preview-context-meta"><?php esc_html_e( 'Step 1 of 2', FORMTURA_TEXTDOMAIN ); ?></span>
+										<span class="fta-template-preview-context-label"><?php esc_html_e( 'Project brief', 'formtura' ); ?></span>
+										<span class="fta-template-preview-context-meta"><?php esc_html_e( 'Step 1 of 2', 'formtura' ); ?></span>
 									</div>
 								<?php elseif ( 'registration' === $template_id ) : ?>
 									<div class="fta-template-preview-context fta-template-preview-context--registration">
 										<span class="fta-template-preview-date">
 											<strong>24</strong>
-											<small><?php esc_html_e( 'Oct', FORMTURA_TEXTDOMAIN ); ?></small>
+											<small><?php esc_html_e( 'Oct', 'formtura' ); ?></small>
 										</span>
-										<span class="fta-template-preview-context-label"><?php esc_html_e( 'Reserve your place', FORMTURA_TEXTDOMAIN ); ?></span>
-										<span class="fta-template-preview-context-meta"><?php esc_html_e( 'Online event', FORMTURA_TEXTDOMAIN ); ?></span>
+										<span class="fta-template-preview-context-label"><?php esc_html_e( 'Reserve your place', 'formtura' ); ?></span>
+										<span class="fta-template-preview-context-meta"><?php esc_html_e( 'Online event', 'formtura' ); ?></span>
 									</div>
 								<?php elseif ( 'job_application' === $template_id ) : ?>
 									<div class="fta-template-preview-context fta-template-preview-context--job_application">
-										<span class="fta-template-preview-context-label"><?php esc_html_e( 'Join our team', FORMTURA_TEXTDOMAIN ); ?></span>
-										<span class="fta-template-preview-context-meta"><?php esc_html_e( 'Candidate application', FORMTURA_TEXTDOMAIN ); ?></span>
+										<span class="fta-template-preview-context-label"><?php esc_html_e( 'Join our team', 'formtura' ); ?></span>
+										<span class="fta-template-preview-context-meta"><?php esc_html_e( 'Candidate application', 'formtura' ); ?></span>
 									</div>
 								<?php endif; ?>
 
@@ -177,15 +177,15 @@ $template_category_for_id = static function( $template_id ) use ( $template_cate
 								<?php if ( empty( $preview_fields ) ) : ?>
 									<div class="fta-template-preview-empty">
 										<span class="dashicons dashicons-plus-alt2"></span>
-										<strong><?php esc_html_e( 'Blank canvas', FORMTURA_TEXTDOMAIN ); ?></strong>
-										<small><?php esc_html_e( 'Add your first field', FORMTURA_TEXTDOMAIN ); ?></small>
+										<strong><?php esc_html_e( 'Blank canvas', 'formtura' ); ?></strong>
+										<small><?php esc_html_e( 'Add your first field', 'formtura' ); ?></small>
 									</div>
 								<?php else : ?>
 									<div class="fta-template-preview-fields fta-template-preview-fields--<?php echo esc_attr( $preview_variant ); ?>">
 										<?php foreach ( $preview_fields as $field ) : ?>
 											<?php
 											$field_type = isset( $field['type'] ) ? sanitize_html_class( $field['type'] ) : 'text';
-											$field_label = isset( $field['label'] ) ? $field['label'] : __( 'Field', FORMTURA_TEXTDOMAIN );
+											$field_label = isset( $field['label'] ) ? $field['label'] : __( 'Field', 'formtura' );
 											?>
 											<div class="fta-template-preview-field fta-template-preview-field-<?php echo esc_attr( $field_type ); ?>">
 												<span class="fta-template-preview-label">
@@ -227,7 +227,7 @@ $template_category_for_id = static function( $template_id ) use ( $template_cate
 									<?php
 									printf(
 										/* translators: %d: number of fields in a form template. */
-										esc_html( _n( '%d field', '%d fields', count( $fields ), FORMTURA_TEXTDOMAIN ) ),
+										esc_html( _n( '%d field', '%d fields', count( $fields ), 'formtura' ) ),
 										count( $fields )
 									);
 									?>
@@ -242,7 +242,7 @@ $template_category_for_id = static function( $template_id ) use ( $template_cate
 							class="fta-button fta-use-template"
 							data-template-id="<?php echo esc_attr( $template_id ); ?>"
 						>
-							<?php esc_html_e( 'Use template', FORMTURA_TEXTDOMAIN ); ?>
+							<?php esc_html_e( 'Use template', 'formtura' ); ?>
 						</button>
 					</article>
 				<?php endforeach; ?>
@@ -250,8 +250,8 @@ $template_category_for_id = static function( $template_id ) use ( $template_cate
 
 			<div class="fta-template-no-results" data-template-no-results hidden>
 				<span class="dashicons dashicons-search" aria-hidden="true"></span>
-				<h3><?php esc_html_e( 'No matching templates', FORMTURA_TEXTDOMAIN ); ?></h3>
-				<p><?php esc_html_e( 'Try a different search or choose another category.', FORMTURA_TEXTDOMAIN ); ?></p>
+				<h3><?php esc_html_e( 'No matching templates', 'formtura' ); ?></h3>
+				<p><?php esc_html_e( 'Try a different search or choose another category.', 'formtura' ); ?></p>
 			</div>
 		</main>
 	</div>
@@ -305,7 +305,7 @@ jQuery(document).ready(function($) {
 		const templateId = $(this).data('template-id');
 		const $button = $(this);
 
-		$button.prop('disabled', true).text('<?php echo esc_js( __( 'Creating…', FORMTURA_TEXTDOMAIN ) ); ?>');
+		$button.prop('disabled', true).text('<?php echo esc_js( __( 'Creating…', 'formtura' ) ); ?>');
 
 		$.ajax({
 			url: ajaxurl,
@@ -322,11 +322,11 @@ jQuery(document).ready(function($) {
 				}
 
 				window.FormturaAdmin.showNotice(response.data.message, 'error');
-				$button.prop('disabled', false).text('<?php echo esc_js( __( 'Use template', FORMTURA_TEXTDOMAIN ) ); ?>');
+				$button.prop('disabled', false).text('<?php echo esc_js( __( 'Use template', 'formtura' ) ); ?>');
 			},
 			error: function() {
-				window.FormturaAdmin.showNotice('<?php echo esc_js( __( 'An error occurred. Please try again.', FORMTURA_TEXTDOMAIN ) ); ?>', 'error');
-				$button.prop('disabled', false).text('<?php echo esc_js( __( 'Use template', FORMTURA_TEXTDOMAIN ) ); ?>');
+				window.FormturaAdmin.showNotice('<?php echo esc_js( __( 'An error occurred. Please try again.', 'formtura' ) ); ?>', 'error');
+				$button.prop('disabled', false).text('<?php echo esc_js( __( 'Use template', 'formtura' ) ); ?>');
 			}
 		});
 	});

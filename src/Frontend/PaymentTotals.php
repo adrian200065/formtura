@@ -110,7 +110,7 @@ class PaymentTotals {
 					// definition doesn't recognise instead, without the
 					// cast.
 					if ( is_array( $value ) ) {
-						$errors[ $field_name ] = __( 'Invalid selection.', FORMTURA_TEXTDOMAIN );
+						$errors[ $field_name ] = __( 'Invalid selection.', 'formtura' );
 						break;
 					}
 
@@ -136,7 +136,7 @@ class PaymentTotals {
 					// A value outside the definition is a forged request,
 					// not a pricing decision.
 					if ( null === $match ) {
-						$errors[ $field_name ] = __( 'Invalid selection.', FORMTURA_TEXTDOMAIN );
+						$errors[ $field_name ] = __( 'Invalid selection.', 'formtura' );
 						break;
 					}
 
@@ -156,7 +156,7 @@ class PaymentTotals {
 				// trim( (string) $value ) trips a warning rather than
 				// producing the field error this shape should get.
 				if ( is_array( $raw_code ) ) {
-					$errors[ $field_name ] = __( 'This coupon code is not valid.', FORMTURA_TEXTDOMAIN );
+					$errors[ $field_name ] = __( 'This coupon code is not valid.', 'formtura' );
 					continue;
 				}
 
@@ -169,7 +169,7 @@ class PaymentTotals {
 				$found = self::find_coupon( $field, $code );
 
 				if ( null === $found ) {
-					$errors[ $field_name ] = __( 'This coupon code is not valid.', FORMTURA_TEXTDOMAIN );
+					$errors[ $field_name ] = __( 'This coupon code is not valid.', 'formtura' );
 					continue;
 				}
 
@@ -181,7 +181,7 @@ class PaymentTotals {
 		if ( ! empty( $errors ) ) {
 			return new \WP_Error(
 				'payment_invalid',
-				__( 'Please correct the errors below.', FORMTURA_TEXTDOMAIN ),
+				__( 'Please correct the errors below.', 'formtura' ),
 				$errors
 			);
 		}

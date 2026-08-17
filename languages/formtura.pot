@@ -1,67 +1,1543 @@
-# Copyright (C) 2024 Formtura Team
+# Copyright (C) 2026 Formtura Team
 # This file is distributed under the GPL v2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Formtura 1.0.0\n"
-"Report-Msgid-Bugs-To: https://formtura.com/support\n"
-"POT-Creation-Date: 2024-01-01 00:00:00+00:00\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Project-Id-Version: Formtura 1.0.6\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/formtura\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: en\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Formtura 1.0.0\n"
+"POT-Creation-Date: 2026-08-17T23:31:34+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: formtura\n"
 
+#. Plugin Name of the plugin
 #: formtura.php
+#: src/Admin/Admin.php:70
+#: src/Admin/Admin.php:71
+#: src/Admin/views/forms-list.php:22
+#: src/Frontend/File_Download.php:214
 msgid "Formtura"
 msgstr ""
 
+#. Plugin URI of the plugin
+#. Author URI of the plugin
+#: formtura.php
+msgid "https://formtura.com"
+msgstr ""
+
+#. Description of the plugin
 #: formtura.php
 msgid "A modern, intuitive, and powerful form builder for WordPress with a beautiful drag-and-drop interface."
 msgstr ""
 
-#: src/Core.php
-msgid "Forms"
+#. Author of the plugin
+#: formtura.php
+msgid "Formtura Team"
 msgstr ""
 
-#: src/Core.php
-msgid "Settings"
-msgstr ""
-
-#: src/Admin/Admin.php
+#: src/Admin/Admin.php:82
+#: src/Admin/Admin.php:83
 msgid "All Forms"
 msgstr ""
 
-#: src/Admin/Admin.php
+#: src/Admin/Admin.php:92
+#: src/Admin/views/forms-list.php:27
+msgid "Add New Form"
+msgstr ""
+
+#: src/Admin/Admin.php:93
 msgid "Add New"
 msgstr ""
 
-#: src/Admin/Admin.php
+#: src/Admin/Admin.php:102
+#: src/Admin/Admin.php:103
+#: src/Admin/Admin.php:157
+msgid "Form Builder"
+msgstr ""
+
+#: src/Admin/Admin.php:121
+#: src/Admin/Admin.php:122
+#: src/Admin/views/forms-list.php:48
+#: src/Admin/views/forms-list.php:83
 msgid "Entries"
 msgstr ""
 
-#: src/Admin/Admin.php
+#: src/Admin/Admin.php:131
+#: src/Admin/Admin.php:132
+#: src/Admin/views/settings.php:21
+msgid "Settings"
+msgstr ""
+
+#: src/Admin/Admin.php:141
+#: src/Admin/Admin.php:142
 msgid "SMTP"
 msgstr ""
 
-#: src/Functions.php
-msgid "This field is required."
+#: src/Admin/Admin.php:197
+msgid "Are you sure you want to delete this item?"
 msgstr ""
 
-#: src/Functions.php
-msgid "Please enter a valid email address."
+#: src/Admin/Admin.php:198
+#: src/Admin/views/settings.php:215
+#: src/Admin/views/smtp-settings.php:264
+msgid "Saving..."
 msgstr ""
 
-#: src/Functions.php
-msgid "Please enter a valid URL."
+#: src/Admin/Admin.php:199
+msgid "Saved!"
 msgstr ""
 
-#: src/Functions.php
+#: src/Admin/Admin.php:200
+msgid "An error occurred."
+msgstr ""
+
+#: src/Admin/Admin.php:226
+msgid "Delete this entry? Its uploaded files are deleted with it and cannot be recovered."
+msgstr ""
+
+#: src/Admin/Admin.php:227
+msgid "Entry deleted."
+msgstr ""
+
+#: src/Admin/Admin.php:228
+#: src/Admin/Entry_Export.php:255
+#: src/Admin/views/entries-list.php:203
+msgid "Read"
+msgstr ""
+
+#: src/Admin/Admin.php:229
+#: src/Admin/Entry_Export.php:255
+#: src/Admin/views/entries-list.php:203
+msgid "Unread"
+msgstr ""
+
+#: src/Admin/Admin.php:230
+#: src/Admin/views/entries-list.php:210
+msgid "Mark as Read"
+msgstr ""
+
+#: src/Admin/Admin.php:231
+#: src/Admin/views/entries-list.php:210
+msgid "Mark as Unread"
+msgstr ""
+
+#. translators: %s: entry ID
+#: src/Admin/Admin.php:233
+#, php-format
+msgid "Entry #%s"
+msgstr ""
+
+#: src/Admin/Admin.php:234
+msgid "Close"
+msgstr ""
+
+#: src/Admin/Admin.php:235
+#: src/Admin/views/templates-library.php:328
+#: src/Frontend/Frontend.php:109
+msgid "An error occurred. Please try again."
+msgstr ""
+
+#. translators: %s: command to run
+#: src/Admin/Admin.php:343
+#, php-format
+msgid "Formtura requires Composer dependencies. Please run %s in the plugin directory."
+msgstr ""
+
+#. translators: %s: constant name
+#: src/Admin/Admin.php:362
+#, php-format
+msgid "Formtura private storage is not writable, so file uploads and signatures are being rejected. Make the private storage directory writable, or define %s in wp-config.php to a writable directory outside the web root."
+msgstr ""
+
+#. translators: %s: constant name
+#: src/Admin/Admin.php:382
+#, php-format
+msgid "Formtura could not move previously uploaded files out of the public uploads directory, so those files remain publicly readable. Check that the private storage directory is writable, or define %s to a writable directory outside the web root, then deactivate and reactivate the plugin to retry."
+msgstr ""
+
+#: src/Admin/Entry_Export.php:225
+msgid "Entry ID"
+msgstr ""
+
+#: src/Admin/Entry_Export.php:226
+#: src/Admin/Privacy.php:274
+#: src/Admin/views/entries-list.php:133
+msgid "Submitted"
+msgstr ""
+
+#: src/Admin/Entry_Export.php:227
+#: src/Admin/views/entries-list.php:132
+#: src/Admin/views/forms-list.php:49
+msgid "Status"
+msgstr ""
+
+#: src/Admin/Entry_Export.php:228
+#: src/Admin/Privacy.php:275
+msgid "IP Address"
+msgstr ""
+
+#: src/Admin/Entry_Export.php:229
+#: src/Admin/Privacy.php:276
+msgid "User Agent"
+msgstr ""
+
+#: src/Admin/Entry_Values.php:97
+msgid "Payment"
+msgstr ""
+
+#: src/Admin/Entry_Values.php:214
+msgid "coupon"
+msgstr ""
+
+#: src/Admin/Form_Builder.php:72
+#: src/Admin/Form_Builder.php:149
+#: src/Admin/Form_Builder.php:197
+#: src/Admin/Form_Entries.php:69
+#: src/Admin/Form_Entries.php:99
+#: src/Admin/Form_Entries.php:136
+#: src/Admin/Form_Entries.php:178
+#: src/Admin/Form_Templates.php:257
+#: src/Admin/Settings.php:64
+#: src/Admin/SMTP.php:177
+#: src/Admin/SMTP.php:213
+msgid "You do not have permission to perform this action."
+msgstr ""
+
+#: src/Admin/Form_Builder.php:83
+msgid "Invalid form data."
+msgstr ""
+
+#: src/Admin/Form_Builder.php:113
+msgid "Form updated successfully."
+msgstr ""
+
+#: src/Admin/Form_Builder.php:117
+#: src/Admin/Form_Templates.php:290
+msgid "Form created successfully."
+msgstr ""
+
+#: src/Admin/Form_Builder.php:127
+msgid "Failed to save form."
+msgstr ""
+
+#: src/Admin/Form_Builder.php:142
+msgid "Invalid nonce."
+msgstr ""
+
+#: src/Admin/Form_Builder.php:157
+#: src/Admin/Form_Builder.php:205
+#: src/Admin/Form_Entries.php:144
+#: src/Frontend/Submission.php:75
+msgid "Invalid form ID."
+msgstr ""
+
+#: src/Admin/Form_Builder.php:180
+#: src/Admin/Form_Builder.php:213
+#: src/Frontend/Submission.php:84
+#: src/Functions.php:295
 msgid "Form not found."
 msgstr ""
 
-#: templates/form-wrapper.php
+#: src/Admin/Form_Builder.php:219
+msgid "(Copy)"
+msgstr ""
+
+#: src/Admin/Form_Builder.php:226
+msgid "Form duplicated successfully."
+msgstr ""
+
+#: src/Admin/Form_Builder.php:231
+msgid "Failed to duplicate form."
+msgstr ""
+
+#: src/Admin/Form_Entries.php:107
+#: src/Admin/Form_Entries.php:186
+msgid "Invalid entry ID."
+msgstr ""
+
+#: src/Admin/Form_Entries.php:115
+msgid "Entry deleted successfully."
+msgstr ""
+
+#: src/Admin/Form_Entries.php:119
+msgid "Failed to delete entry."
+msgstr ""
+
+#: src/Admin/Form_Entries.php:156
+msgid "This form has no entries to export."
+msgstr ""
+
+#: src/Admin/Form_Entries.php:195
+msgid "Entry not found."
+msgstr ""
+
+#: src/Admin/Form_Entries.php:203
+msgid "Failed to update the entry status."
+msgstr ""
+
+#: src/Admin/Form_Entries.php:208
+msgid "Entry status updated."
+msgstr ""
+
+#: src/Admin/Form_Templates.php:61
+msgid "Blank Form"
+msgstr ""
+
+#: src/Admin/Form_Templates.php:62
+msgid "Start from scratch with a blank canvas."
+msgstr ""
+
+#: src/Admin/Form_Templates.php:67
+msgid "Contact Form"
+msgstr ""
+
+#: src/Admin/Form_Templates.php:68
+msgid "Simple contact form with name, email, and message."
+msgstr ""
+
+#: src/Admin/Form_Templates.php:73
+#: src/Admin/Form_Templates.php:96
+#: src/Functions.php:323
+msgid "Name"
+msgstr ""
+
+#: src/Admin/Form_Templates.php:78
+#: src/Admin/Form_Templates.php:101
+#: src/Functions.php:328
+msgid "Email"
+msgstr ""
+
+#: src/Admin/Form_Templates.php:83
+msgid "Message"
+msgstr ""
+
+#: src/Admin/Form_Templates.php:85
+msgid "Enter your message here..."
+msgstr ""
+
+#: src/Admin/Form_Templates.php:90
+msgid "Request a Quote"
+msgstr ""
+
+#: src/Admin/Form_Templates.php:91
+msgid "Collect quote requests from potential customers."
+msgstr ""
+
+#: src/Admin/Form_Templates.php:106
+msgid "Company"
+msgstr ""
+
+#: src/Admin/Form_Templates.php:111
+msgid "Service Interested In"
+msgstr ""
+
+#: src/Admin/Form_Templates.php:114
+msgid "Web Design"
+msgstr ""
+
+#: src/Admin/Form_Templates.php:115
+msgid "Web Development"
+msgstr ""
+
+#: src/Admin/Form_Templates.php:116
+msgid "SEO Services"
+msgstr ""
+
+#: src/Admin/Form_Templates.php:117
+#: src/Admin/Form_Templates.php:227
+msgid "Marketing"
+msgstr ""
+
+#: src/Admin/Form_Templates.php:118
+#: src/Admin/Form_Templates.php:229
+msgid "Other"
+msgstr ""
+
+#: src/Admin/Form_Templates.php:123
+msgid "Project Details"
+msgstr ""
+
+#: src/Admin/Form_Templates.php:125
+msgid "Tell us about your project..."
+msgstr ""
+
+#: src/Admin/Form_Templates.php:130
+msgid "Feedback Survey"
+msgstr ""
+
+#: src/Admin/Form_Templates.php:131
+msgid "Gather user feedback and suggestions."
+msgstr ""
+
+#: src/Admin/Form_Templates.php:136
+msgid "How satisfied are you with our service?"
+msgstr ""
+
+#: src/Admin/Form_Templates.php:139
+msgid "Very Satisfied"
+msgstr ""
+
+#: src/Admin/Form_Templates.php:140
+msgid "Satisfied"
+msgstr ""
+
+#: src/Admin/Form_Templates.php:141
+msgid "Neutral"
+msgstr ""
+
+#: src/Admin/Form_Templates.php:142
+msgid "Dissatisfied"
+msgstr ""
+
+#: src/Admin/Form_Templates.php:143
+msgid "Very Dissatisfied"
+msgstr ""
+
+#: src/Admin/Form_Templates.php:148
+msgid "Would you recommend us to others?"
+msgstr ""
+
+#: src/Admin/Form_Templates.php:151
+msgid "Definitely"
+msgstr ""
+
+#: src/Admin/Form_Templates.php:152
+msgid "Probably"
+msgstr ""
+
+#: src/Admin/Form_Templates.php:153
+msgid "Not Sure"
+msgstr ""
+
+#: src/Admin/Form_Templates.php:154
+msgid "Probably Not"
+msgstr ""
+
+#: src/Admin/Form_Templates.php:155
+msgid "Definitely Not"
+msgstr ""
+
+#: src/Admin/Form_Templates.php:160
+msgid "Additional Comments"
+msgstr ""
+
+#: src/Admin/Form_Templates.php:162
+msgid "Share your thoughts..."
+msgstr ""
+
+#: src/Admin/Form_Templates.php:167
+msgid "Event Registration"
+msgstr ""
+
+#: src/Admin/Form_Templates.php:168
+msgid "Collect registrations for events or webinars."
+msgstr ""
+
+#: src/Admin/Form_Templates.php:173
+#: src/Admin/Form_Templates.php:207
+msgid "Full Name"
+msgstr ""
+
+#: src/Admin/Form_Templates.php:178
+#: src/Admin/Form_Templates.php:212
+msgid "Email Address"
+msgstr ""
+
+#: src/Admin/Form_Templates.php:183
+#: src/Admin/Form_Templates.php:217
+msgid "Phone Number"
+msgstr ""
+
+#: src/Admin/Form_Templates.php:188
+msgid "Number of Attendees"
+msgstr ""
+
+#: src/Admin/Form_Templates.php:194
+msgid "Special Requirements"
+msgstr ""
+
+#: src/Admin/Form_Templates.php:196
+msgid "Dietary restrictions, accessibility needs, etc."
+msgstr ""
+
+#: src/Admin/Form_Templates.php:201
+msgid "Job Application"
+msgstr ""
+
+#: src/Admin/Form_Templates.php:202
+msgid "Accept job applications online."
+msgstr ""
+
+#: src/Admin/Form_Templates.php:222
+msgid "Position Applying For"
+msgstr ""
+
+#: src/Admin/Form_Templates.php:225
+msgid "Developer"
+msgstr ""
+
+#: src/Admin/Form_Templates.php:226
+msgid "Designer"
+msgstr ""
+
+#: src/Admin/Form_Templates.php:228
+msgid "Sales"
+msgstr ""
+
+#: src/Admin/Form_Templates.php:234
+msgid "Cover Letter"
+msgstr ""
+
+#: src/Admin/Form_Templates.php:236
+msgid "Tell us why you're a great fit..."
+msgstr ""
+
+#: src/Admin/Form_Templates.php:265
+msgid "Invalid template ID."
+msgstr ""
+
+#: src/Admin/Form_Templates.php:273
+msgid "Template not found."
+msgstr ""
+
+#: src/Admin/Form_Templates.php:296
+msgid "Failed to create form."
+msgstr ""
+
+#: src/Admin/Privacy.php:128
+#: src/Admin/Privacy.php:144
+msgid "Formtura Form Entries"
+msgstr ""
+
+#: src/Admin/Privacy.php:290
+msgid "Form Entries"
+msgstr ""
+
+#. translators: %d: number of entries removed.
+#: src/Admin/Privacy.php:337
+#, php-format
+msgid "%d form entries removed."
+msgstr ""
+
+#: src/Admin/Settings.php:79
+#: src/Admin/views/settings.php:231
+msgid "Settings saved successfully."
+msgstr ""
+
+#: src/Admin/Settings.php:83
+#: src/Admin/views/settings.php:233
+msgid "Failed to save settings."
+msgstr ""
+
+#: src/Admin/SMTP.php:192
+#: src/Admin/views/smtp-settings.php:280
+msgid "SMTP settings saved successfully."
+msgstr ""
+
+#: src/Admin/SMTP.php:196
+#: src/Admin/views/smtp-settings.php:282
+msgid "Failed to save SMTP settings."
+msgstr ""
+
+#: src/Admin/SMTP.php:221
+#: src/Frontend/Submission.php:573
+#: src/Functions.php:254
+msgid "Please enter a valid email address."
+msgstr ""
+
+#: src/Admin/SMTP.php:226
+msgid "Formtura Test Email"
+msgstr ""
+
+#: src/Admin/SMTP.php:227
+msgid "This is a test email from Formtura. If you received this, your SMTP configuration is working correctly!"
+msgstr ""
+
+#: src/Admin/SMTP.php:233
+msgid "Test email sent successfully! Please check your inbox."
+msgstr ""
+
+#: src/Admin/SMTP.php:237
+msgid "Failed to send test email. Please check your SMTP settings."
+msgstr ""
+
+#: src/Admin/views/entries-list.php:84
+msgid "Responses"
+msgstr ""
+
+#: src/Admin/views/entries-list.php:85
+msgid "Form entries"
+msgstr ""
+
+#: src/Admin/views/entries-list.php:86
+msgid "Review and export submissions without leaving WordPress."
+msgstr ""
+
+#: src/Admin/views/entries-list.php:90
+msgid "Export Entries"
+msgstr ""
+
+#: src/Admin/views/entries-list.php:98
+#: src/Admin/views/forms-list.php:34
+msgid "No forms yet"
+msgstr ""
+
+#: src/Admin/views/entries-list.php:99
+msgid "Create a form first to start receiving entries."
+msgstr ""
+
+#: src/Admin/views/entries-list.php:101
+#: src/Admin/views/forms-list.php:37
+msgid "Create Your First Form"
+msgstr ""
+
+#: src/Admin/views/entries-list.php:108
+msgid "Select Form:"
+msgstr ""
+
+#: src/Admin/views/entries-list.php:110
+msgid "-- Select a Form --"
+msgstr ""
+
+#: src/Admin/views/entries-list.php:122
+msgid "No entries yet"
+msgstr ""
+
+#: src/Admin/views/entries-list.php:123
+msgid "This form hasn't received any submissions yet."
+msgstr ""
+
+#: src/Admin/views/entries-list.php:130
+msgid "ID"
+msgstr ""
+
+#: src/Admin/views/entries-list.php:131
+msgid "Entry Data"
+msgstr ""
+
+#: src/Admin/views/entries-list.php:134
+#: src/Admin/views/forms-list.php:51
+msgid "Actions"
+msgstr ""
+
+#: src/Admin/views/entries-list.php:160
+msgid "View all fields..."
+msgstr ""
+
+#: src/Admin/views/entries-list.php:174
+msgid "This entry has no stored field data."
+msgstr ""
+
+#: src/Admin/views/entries-list.php:190
+msgid "Download"
+msgstr ""
+
+#: src/Admin/views/entries-list.php:213
+msgid "View"
+msgstr ""
+
+#: src/Admin/views/entries-list.php:216
+#: src/Admin/views/forms-list.php:86
+msgid "Delete"
+msgstr ""
+
+#: src/Admin/views/entries-list.php:239
+msgid "Entries pages"
+msgstr ""
+
+#: src/Admin/views/entries-list.php:242
+msgid "Previous"
+msgstr ""
+
+#. translators: 1: current page, 2: total pages, 3: total entries
+#: src/Admin/views/entries-list.php:250
+#, php-format
+msgid "Page %1$s of %2$s (%3$s entries)"
+msgstr ""
+
+#: src/Admin/views/entries-list.php:260
+msgid "Next"
+msgstr ""
+
+#: src/Admin/views/forms-list.php:23
+msgid "Forms"
+msgstr ""
+
+#: src/Admin/views/forms-list.php:24
+msgid "Build, publish, and review every form from one workspace."
+msgstr ""
+
+#: src/Admin/views/forms-list.php:35
+msgid "Create a form to start collecting responses."
+msgstr ""
+
+#: src/Admin/views/forms-list.php:47
+msgid "Title"
+msgstr ""
+
+#: src/Admin/views/forms-list.php:50
+msgid "Created"
+msgstr ""
+
+#: src/Admin/views/forms-list.php:80
+msgid "Edit"
+msgstr ""
+
+#: src/Admin/views/settings.php:20
+msgid "Configuration"
+msgstr ""
+
+#: src/Admin/views/settings.php:22
+msgid "Manage form security, delivery defaults, and plugin behavior."
+msgstr ""
+
+#: src/Admin/views/settings.php:28
+msgid "General Settings"
+msgstr ""
+
+#: src/Admin/views/settings.php:36
+msgid "reCAPTCHA Version"
+msgstr ""
+
+#: src/Admin/views/settings.php:41
+msgid "v2 - \"I'm not a robot\" checkbox"
+msgstr ""
+
+#: src/Admin/views/settings.php:44
+msgid "v3 - invisible score based"
+msgstr ""
+
+#: src/Admin/views/settings.php:48
+msgid "Keys are issued per version. A v2 key will not work with v3, or the other way around."
+msgstr ""
+
+#: src/Admin/views/settings.php:55
+msgid "reCAPTCHA Site Key"
+msgstr ""
+
+#: src/Admin/views/settings.php:64
+msgid "Your Google reCAPTCHA site key, for the version selected above."
+msgstr ""
+
+#: src/Admin/views/settings.php:71
+msgid "reCAPTCHA Secret Key"
+msgstr ""
+
+#: src/Admin/views/settings.php:80
+msgid "Your matching secret key. reCAPTCHA is only applied to forms once both keys are saved."
+msgstr ""
+
+#: src/Admin/views/settings.php:87
+msgid "reCAPTCHA v3 Score Threshold"
+msgstr ""
+
+#: src/Admin/views/settings.php:99
+msgid "Submissions scoring below this are rejected. 1.0 is very likely human, 0.0 very likely a bot. Google suggests 0.5. Ignored for v2."
+msgstr ""
+
+#: src/Admin/views/settings.php:106
+msgid "Delete Data on Uninstall"
+msgstr ""
+
+#: src/Admin/views/settings.php:115
+msgid "Delete all plugin data when uninstalling"
+msgstr ""
+
+#: src/Admin/views/settings.php:118
+msgid "Warning: This will permanently delete all forms, entries, and settings."
+msgstr ""
+
+#: src/Admin/views/settings.php:125
+msgid "Automatically Delete Entries After"
+msgstr ""
+
+#: src/Admin/views/settings.php:135
+msgid "days"
+msgstr ""
+
+#: src/Admin/views/settings.php:137
+msgid "Entries older than this are deleted automatically, across all forms. Set to 0 to disable automatic deletion."
+msgstr ""
+
+#: src/Admin/views/settings.php:144
+msgid "Disable Default CSS"
+msgstr ""
+
+#: src/Admin/views/settings.php:153
+msgid "Disable default form styles"
+msgstr ""
+
+#: src/Admin/views/settings.php:156
+msgid "Check this if you want to use your own custom CSS for forms."
+msgstr ""
+
+#: src/Admin/views/settings.php:163
+msgid "From Email Address"
+msgstr ""
+
+#: src/Admin/views/settings.php:172
+msgid "Default email address for form notifications."
+msgstr ""
+
+#: src/Admin/views/settings.php:179
+#: src/Admin/views/smtp-settings.php:185
+msgid "From Name"
+msgstr ""
+
+#: src/Admin/views/settings.php:188
+msgid "Default sender name for form notifications."
+msgstr ""
+
+#: src/Admin/views/settings.php:199
+msgid "Save Settings"
+msgstr ""
+
+#: src/Admin/views/settings.php:237
+msgid "An error occurred while saving settings."
+msgstr ""
+
+#: src/Admin/views/smtp-settings.php:20
+msgid "Email delivery"
+msgstr ""
+
+#: src/Admin/views/smtp-settings.php:21
+msgid "SMTP settings"
+msgstr ""
+
+#: src/Admin/views/smtp-settings.php:22
+msgid "Configure a reliable sender and verify it with a test message."
+msgstr ""
+
+#: src/Admin/views/smtp-settings.php:28
+msgid "SMTP Configuration"
+msgstr ""
+
+#: src/Admin/views/smtp-settings.php:29
+msgid "Configure SMTP settings to send form notification emails reliably."
+msgstr ""
+
+#: src/Admin/views/smtp-settings.php:35
+msgid "Enable SMTP"
+msgstr ""
+
+#: src/Admin/views/smtp-settings.php:44
+msgid "Use SMTP for sending emails"
+msgstr ""
+
+#: src/Admin/views/smtp-settings.php:51
+msgid "SMTP Host"
+msgstr ""
+
+#: src/Admin/views/smtp-settings.php:61
+msgid "Your SMTP server hostname."
+msgstr ""
+
+#: src/Admin/views/smtp-settings.php:68
+msgid "SMTP Port"
+msgstr ""
+
+#: src/Admin/views/smtp-settings.php:77
+msgid "Common ports: 25, 465 (SSL), 587 (TLS)"
+msgstr ""
+
+#: src/Admin/views/smtp-settings.php:84
+msgid "Encryption"
+msgstr ""
+
+#: src/Admin/views/smtp-settings.php:89
+msgid "None"
+msgstr ""
+
+#: src/Admin/views/smtp-settings.php:99
+msgid "Recommended: TLS"
+msgstr ""
+
+#: src/Admin/views/smtp-settings.php:106
+msgid "Authentication"
+msgstr ""
+
+#: src/Admin/views/smtp-settings.php:115
+msgid "Use SMTP authentication"
+msgstr ""
+
+#: src/Admin/views/smtp-settings.php:118
+msgid "Most SMTP servers require authentication."
+msgstr ""
+
+#: src/Admin/views/smtp-settings.php:125
+msgid "Username"
+msgstr ""
+
+#: src/Admin/views/smtp-settings.php:139
+#: src/Functions.php:389
+msgid "Password"
+msgstr ""
+
+#: src/Admin/views/smtp-settings.php:156
+msgid "Leave blank to keep the saved password"
+msgstr ""
+
+#: src/Admin/views/smtp-settings.php:159
+msgid "A password is already saved, encrypted. Enter a new one to replace it."
+msgstr ""
+
+#: src/Admin/views/smtp-settings.php:161
+msgid "Your SMTP password will be stored encrypted."
+msgstr ""
+
+#: src/Admin/views/smtp-settings.php:169
+msgid "From Email"
+msgstr ""
+
+#: src/Admin/views/smtp-settings.php:178
+msgid "Email address to send from."
+msgstr ""
+
+#: src/Admin/views/smtp-settings.php:194
+msgid "Name to send from."
+msgstr ""
+
+#: src/Admin/views/smtp-settings.php:201
+msgid "Send Test Email To"
+msgstr ""
+
+#: src/Admin/views/smtp-settings.php:209
+msgid "Save your settings first, then send a test message to this address."
+msgstr ""
+
+#: src/Admin/views/smtp-settings.php:220
+msgid "Save SMTP Settings"
+msgstr ""
+
+#: src/Admin/views/smtp-settings.php:223
+msgid "Send Test Email"
+msgstr ""
+
+#: src/Admin/views/smtp-settings.php:286
+msgid "An error occurred while saving SMTP settings."
+msgstr ""
+
+#: src/Admin/views/smtp-settings.php:301
+msgid "Enter an email address to send the test to."
+msgstr ""
+
+#: src/Admin/views/smtp-settings.php:305
+msgid "Sending..."
+msgstr ""
+
+#: src/Admin/views/smtp-settings.php:317
+msgid "Test email sent successfully. Check your inbox."
+msgstr ""
+
+#: src/Admin/views/smtp-settings.php:319
+msgid "Failed to send test email."
+msgstr ""
+
+#: src/Admin/views/smtp-settings.php:323
+msgid "An error occurred while sending test email."
+msgstr ""
+
+#: src/Admin/views/templates-library.php:18
+msgid "All templates"
+msgstr ""
+
+#: src/Admin/views/templates-library.php:22
+msgid "Starting points"
+msgstr ""
+
+#: src/Admin/views/templates-library.php:26
+msgid "Customer forms"
+msgstr ""
+
+#: src/Admin/views/templates-library.php:30
+msgid "Engagement"
+msgstr ""
+
+#: src/Admin/views/templates-library.php:34
+msgid "Hiring"
+msgstr ""
+
+#: src/Admin/views/templates-library.php:53
+msgid "Formtura templates"
+msgstr ""
+
+#. translators: %d: number of available templates.
+#: src/Admin/views/templates-library.php:58
+#, php-format
+msgid "%d ready-to-use form templates"
+msgstr ""
+
+#: src/Admin/views/templates-library.php:63
+msgid "Choose a starting point, preview its fields, and customize everything in the builder."
+msgstr ""
+
+#: src/Admin/views/templates-library.php:67
+msgid "Search form templates"
+msgstr ""
+
+#: src/Admin/views/templates-library.php:73
+msgid "Search templates"
+msgstr ""
+
+#: src/Admin/views/templates-library.php:82
+msgid "Template filters"
+msgstr ""
+
+#: src/Admin/views/templates-library.php:84
+msgid "Browse by"
+msgstr ""
+
+#: src/Admin/views/templates-library.php:85
+msgid "Template type"
+msgstr ""
+
+#: src/Admin/views/templates-library.php:88
+msgid "Template categories"
+msgstr ""
+
+#: src/Admin/views/templates-library.php:105
+msgid "Form layout"
+msgstr ""
+
+#: src/Admin/views/templates-library.php:106
+msgid "Classic · one page"
+msgstr ""
+
+#: src/Admin/views/templates-library.php:114
+msgid "Template library"
+msgstr ""
+
+#: src/Admin/views/templates-library.php:115
+msgid "Pick a form to start with"
+msgstr ""
+
+#: src/Admin/views/templates-library.php:119
+msgid "templates"
+msgstr ""
+
+#: src/Admin/views/templates-library.php:143
+msgid "FORMTURA"
+msgstr ""
+
+#: src/Admin/views/templates-library.php:148
+msgid "Get in touch"
+msgstr ""
+
+#: src/Admin/views/templates-library.php:149
+msgid "We usually reply within one business day"
+msgstr ""
+
+#: src/Admin/views/templates-library.php:153
+msgid "Project brief"
+msgstr ""
+
+#: src/Admin/views/templates-library.php:154
+msgid "Step 1 of 2"
+msgstr ""
+
+#: src/Admin/views/templates-library.php:160
+msgid "Oct"
+msgstr ""
+
+#: src/Admin/views/templates-library.php:162
+msgid "Reserve your place"
+msgstr ""
+
+#: src/Admin/views/templates-library.php:163
+msgid "Online event"
+msgstr ""
+
+#: src/Admin/views/templates-library.php:167
+msgid "Join our team"
+msgstr ""
+
+#: src/Admin/views/templates-library.php:168
+msgid "Candidate application"
+msgstr ""
+
+#: src/Admin/views/templates-library.php:180
+msgid "Blank canvas"
+msgstr ""
+
+#: src/Admin/views/templates-library.php:181
+msgid "Add your first field"
+msgstr ""
+
+#: src/Admin/views/templates-library.php:188
+msgid "Field"
+msgstr ""
+
+#. translators: %d: number of fields in a form template.
+#: src/Admin/views/templates-library.php:230
+#, php-format
+msgid "%d field"
+msgid_plural "%d fields"
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/Admin/views/templates-library.php:245
+#: src/Admin/views/templates-library.php:325
+#: src/Admin/views/templates-library.php:329
+msgid "Use template"
+msgstr ""
+
+#: src/Admin/views/templates-library.php:253
+msgid "No matching templates"
+msgstr ""
+
+#: src/Admin/views/templates-library.php:254
+msgid "Try a different search or choose another category."
+msgstr ""
+
+#: src/Admin/views/templates-library.php:308
+msgid "Creating…"
+msgstr ""
+
+#: src/Blocks/Form_Selector.php:76
+msgid "Please select a form."
+msgstr ""
+
+#: src/Database/Forms_DB.php:119
+msgid "Untitled Form"
+msgstr ""
+
+#: src/Frontend/File_Download.php:102
+msgid "You do not have permission to access this file."
+msgstr ""
+
+#: src/Frontend/File_Download.php:110
+#: src/Frontend/File_Download.php:116
+#: src/Frontend/File_Download.php:122
+msgid "The requested file could not be found."
+msgstr ""
+
+#: src/Frontend/Frontend.php:108
+msgid "Submitting..."
+msgstr ""
+
+#: src/Frontend/Frontend.php:110
+#: src/Frontend/Submission.php:766
+msgid "Please confirm you are not a robot."
+msgstr ""
+
+#: src/Frontend/Frontend.php:111
+msgid "reCAPTCHA could not be loaded. Please reload the page and try again."
+msgstr ""
+
+#: src/Frontend/Frontend.php:112
+msgid "Please add your signature."
+msgstr ""
+
+#: src/Frontend/Frontend.php:113
+msgid "Coupon applied."
+msgstr ""
+
+#: src/Frontend/Frontend.php:114
+#: src/Frontend/PaymentTotals.php:159
+#: src/Frontend/PaymentTotals.php:172
+#: src/Frontend/Submission.php:229
+#: src/Frontend/Submission.php:251
+#: src/Frontend/Submission.php:267
+msgid "This coupon code is not valid."
+msgstr ""
+
+#: src/Frontend/Frontend.php:189
+msgid "Please provide a valid form ID."
+msgstr ""
+
+#: src/Frontend/Notifications.php:247
+msgid "New Form Submission from {site_name}"
+msgstr ""
+
+#: src/Frontend/Notifications.php:248
+msgid "You have received a new form submission."
+msgstr ""
+
+#: src/Frontend/PaymentTotals.php:113
+#: src/Frontend/PaymentTotals.php:139
+msgid "Invalid selection."
+msgstr ""
+
+#: src/Frontend/PaymentTotals.php:184
+#: src/Frontend/Signature.php:121
+#: src/Frontend/Signature.php:151
+#: src/Frontend/Submission.php:449
+#: src/Frontend/Uploads.php:179
+msgid "Please correct the errors below."
+msgstr ""
+
+#. translators: %s: field label
+#: src/Frontend/Signature.php:100
+#: src/Frontend/Submission.php:420
+#: src/Frontend/Uploads.php:130
+#, php-format
+msgid "%s is required."
+msgstr ""
+
+#: src/Frontend/Signature.php:167
+msgid "The signature could not be read. Please sign again."
+msgstr ""
+
+#: src/Frontend/Signature.php:213
+msgid "The signature could not be saved. Please try again."
+msgstr ""
+
+#: src/Frontend/Submission.php:91
+msgid "This form is currently inactive."
+msgstr ""
+
+#: src/Frontend/Submission.php:185
+msgid "Failed to save form submission. Please try again."
+msgstr ""
+
+#: src/Frontend/Submission.php:199
+msgid "Thank you! Your form has been submitted successfully."
+msgstr ""
+
+#: src/Frontend/Submission.php:388
+msgid "Invalid form configuration."
+msgstr ""
+
+#: src/Frontend/Submission.php:582
+#: src/Functions.php:259
+msgid "Please enter a valid URL."
+msgstr ""
+
+#: src/Frontend/Submission.php:590
+msgid "Please enter a valid number."
+msgstr ""
+
+#: src/Frontend/Submission.php:611
+msgid "Please enter a valid address."
+msgstr ""
+
+#: src/Frontend/Submission.php:620
+msgid "Please complete the address."
+msgstr ""
+
+#: src/Frontend/Submission.php:767
+msgid "reCAPTCHA verification could not be completed. Please reload the page and try again."
+msgstr ""
+
+#: src/Frontend/Submission.php:825
+msgid "reCAPTCHA verification failed. Please try again."
+msgstr ""
+
+#: src/Frontend/Uploads.php:242
+msgid "The uploaded file could not be verified."
+msgstr ""
+
+#: src/Frontend/Uploads.php:274
+#: src/Frontend/Uploads.php:310
+msgid "The file is larger than this server allows."
+msgstr ""
+
+#: src/Frontend/Uploads.php:277
+msgid "The file was only partially uploaded. Please try again."
+msgstr ""
+
+#: src/Frontend/Uploads.php:282
+#: src/Frontend/Uploads.php:440
+#: src/Frontend/Uploads.php:479
+msgid "The file could not be saved. Please contact the site administrator."
+msgstr ""
+
+#: src/Frontend/Uploads.php:285
+msgid "The file could not be uploaded."
+msgstr ""
+
+#: src/Frontend/Uploads.php:304
+msgid "The file is empty."
+msgstr ""
+
+#. translators: %s: maximum size in megabytes
+#: src/Frontend/Uploads.php:318
+#, php-format
+msgid "The file must be smaller than %sMB."
+msgstr ""
+
+#. translators: %s: minimum size in megabytes
+#: src/Frontend/Uploads.php:329
+#, php-format
+msgid "The file must be larger than %sMB."
+msgstr ""
+
+#: src/Frontend/Uploads.php:350
+msgid "The file type could not be determined."
+msgstr ""
+
+#: src/Frontend/Uploads.php:354
+#: src/Frontend/Uploads.php:362
+msgid "This file type is not permitted."
+msgstr ""
+
+#: src/Frontend/Uploads.php:366
+msgid "The file contents do not match its extension."
+msgstr ""
+
+#. translators: %s: comma separated list of extensions
+#: src/Frontend/Uploads.php:376
+#, php-format
+msgid "Allowed file types: %s."
+msgstr ""
+
+#: src/Functions.php:249
+msgid "This field is required."
+msgstr ""
+
+#. translators: %d: minimum number of characters.
+#: src/Functions.php:266
+#, php-format
+msgid "Minimum %d characters required."
+msgstr ""
+
+#. translators: %d: maximum number of characters.
+#: src/Functions.php:275
+#, php-format
+msgid "Maximum %d characters allowed."
+msgstr ""
+
+#: src/Functions.php:313
+msgid "Single Line Text"
+msgstr ""
+
+#: src/Functions.php:318
+msgid "Paragraph Text"
+msgstr ""
+
+#: src/Functions.php:333
+msgid "Dropdown"
+msgstr ""
+
+#: src/Functions.php:338
+msgid "Multiple Choice"
+msgstr ""
+
+#: src/Functions.php:343
+msgid "Checkboxes"
+msgstr ""
+
+#: src/Functions.php:348
+msgid "Number"
+msgstr ""
+
+#: src/Functions.php:353
+msgid "Phone"
+msgstr ""
+
+#: src/Functions.php:358
+msgid "Website / URL"
+msgstr ""
+
+#: src/Functions.php:363
+msgid "HTML"
+msgstr ""
+
+#: src/Functions.php:368
+msgid "Hidden Field"
+msgstr ""
+
+#: src/Functions.php:373
+msgid "CAPTCHA"
+msgstr ""
+
+#: src/Functions.php:379
+msgid "Address"
+msgstr ""
+
+#: src/Functions.php:384
+msgid "Date / Time"
+msgstr ""
+
+#: src/Functions.php:394
+msgid "File Upload"
+msgstr ""
+
+#: src/Functions.php:399
+msgid "Slider"
+msgstr ""
+
+#: src/Functions.php:404
+msgid "Star Rating"
+msgstr ""
+
+#: src/Functions.php:409
+msgid "Repeater"
+msgstr ""
+
+#: src/Functions.php:414
+msgid "Signature"
+msgstr ""
+
+#: src/Integrations/Providers/Mailchimp.php:143
+msgid "Mailchimp API key not configured."
+msgstr ""
+
+#: src/Integrations/Providers/Mailchimp.php:173
+msgid "Mailchimp API error."
+msgstr ""
+
+#. translators: %s: site name
+#: templates/email/notification.php:85
+#, php-format
+msgid "This email was sent from %s"
+msgstr ""
+
+#: templates/fields/address.php:28
+msgid "Address Line 1"
+msgstr ""
+
+#: templates/fields/address.php:29
+msgid "Address Line 2"
+msgstr ""
+
+#: templates/fields/address.php:30
+msgid "City"
+msgstr ""
+
+#: templates/fields/address.php:31
+msgid "State / Province / Region"
+msgstr ""
+
+#: templates/fields/address.php:31
+msgid "State"
+msgstr ""
+
+#: templates/fields/address.php:32
+msgid "Postal Code"
+msgstr ""
+
+#: templates/fields/address.php:32
+msgid "ZIP Code"
+msgstr ""
+
+#: templates/fields/address.php:33
+msgid "Country"
+msgstr ""
+
+#: templates/fields/camera.php:26
+msgid "Take Photo"
+msgstr ""
+
+#: templates/fields/coupon.php:33
+msgid "Coupon code"
+msgstr ""
+
+#: templates/fields/coupon.php:36
+msgid "Apply"
+msgstr ""
+
+#: templates/fields/file-upload.php:30
+msgid "Drop a file here or click to upload"
+msgstr ""
+
+#: templates/fields/file-upload.php:31
+msgid "Choose File"
+msgstr ""
+
+#. translators: %s: Maximum file size in MB
+#: templates/fields/file-upload.php:137
+#, php-format
+msgid "Maximum file size: %sMB"
+msgstr ""
+
+#: templates/fields/name.php:35
+msgid "First Name"
+msgstr ""
+
+#: templates/fields/name.php:36
+msgid "Middle Name"
+msgstr ""
+
+#: templates/fields/name.php:37
+msgid "Last Name"
+msgstr ""
+
+#: templates/fields/number-slider.php:24
+msgid "Selected Value: {value}"
+msgstr ""
+
+#: templates/fields/payment-dropdown.php:35
+msgid "Select an item"
+msgstr ""
+
+#. translators: 1: selected star, 2: maximum rating
+#: templates/fields/rating.php:50
+#, php-format
+msgid "%1$s of %2$s stars"
+msgstr ""
+
+#: templates/fields/select.php:40
+msgid "Select an option"
+msgstr ""
+
+#: templates/fields/signature.php:29
+msgid "Signature area. Draw your signature with mouse or touch."
+msgstr ""
+
+#: templates/fields/signature.php:40
+msgid "Clear"
+msgstr ""
+
+#: templates/fields/total.php:39
+msgid "Item"
+msgstr ""
+
+#: templates/fields/total.php:40
+msgid "Price"
+msgstr ""
+
+#: templates/fields/total.php:48
+msgid "Total"
+msgstr ""
+
+#: templates/form-wrapper.php:27
+#: builder/components/FormSettingsDialog.jsx:133
 msgid "Submit"
+msgstr ""
+
+#. translators: %s: field type slug
+#: templates/form-wrapper.php:68
+#, php-format
+msgid "Formtura: no frontend template for field type \"%s\". This notice is only visible to administrators with WP_DEBUG enabled."
+msgstr ""
+
+#: builder/components/FormSettingsDialog.jsx:101
+msgid "Form settings"
+msgstr ""
+
+#: builder/components/FormSettingsDialog.jsx:105
+msgid "Form Title"
+msgstr ""
+
+#: builder/components/FormSettingsDialog.jsx:112
+msgid "Untitled form"
+msgstr ""
+
+#: builder/components/FormSettingsDialog.jsx:117
+msgid "Description"
+msgstr ""
+
+#: builder/components/FormSettingsDialog.jsx:127
+msgid "Submit Button Text"
+msgstr ""
+
+#: builder/components/FormSettingsDialog.jsx:138
+msgid "Success Message"
+msgstr ""
+
+#: builder/components/FormSettingsDialog.jsx:144
+msgid "Thank you for your submission!"
+msgstr ""
+
+#: builder/components/FormSettingsDialog.jsx:155
+msgid "Save"
+msgstr ""
+
+#: builder/components/FormSettingsDialog.jsx:162
+msgid "Cancel"
 msgstr ""

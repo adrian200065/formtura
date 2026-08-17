@@ -82,7 +82,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<?php
 				printf(
 					/* translators: %s: site name */
-					esc_html__( 'This email was sent from %s', FORMTURA_TEXTDOMAIN ),
+					esc_html__( 'This email was sent from %s', 'formtura' ),
 					'<a href="' . esc_url( home_url() ) . '">' . esc_html( get_bloginfo( 'name' ) ) . '</a>'
 				);
 				?>

@@ -66,7 +66,7 @@ class Form_Entries {
 		// Check permissions.
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error( [
-				'message' => __( 'You do not have permission to perform this action.', FORMTURA_TEXTDOMAIN ),
+				'message' => __( 'You do not have permission to perform this action.', 'formtura' ),
 			] );
 		}
 
@@ -96,7 +96,7 @@ class Form_Entries {
 		// Check permissions.
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error( [
-				'message' => __( 'You do not have permission to perform this action.', FORMTURA_TEXTDOMAIN ),
+				'message' => __( 'You do not have permission to perform this action.', 'formtura' ),
 			] );
 		}
 
@@ -104,7 +104,7 @@ class Form_Entries {
 
 		if ( ! $entry_id ) {
 			wp_send_json_error( [
-				'message' => __( 'Invalid entry ID.', FORMTURA_TEXTDOMAIN ),
+				'message' => __( 'Invalid entry ID.', 'formtura' ),
 			] );
 		}
 
@@ -112,11 +112,11 @@ class Form_Entries {
 
 		if ( $result ) {
 			wp_send_json_success( [
-				'message' => __( 'Entry deleted successfully.', FORMTURA_TEXTDOMAIN ),
+				'message' => __( 'Entry deleted successfully.', 'formtura' ),
 			] );
 		} else {
 			wp_send_json_error( [
-				'message' => __( 'Failed to delete entry.', FORMTURA_TEXTDOMAIN ),
+				'message' => __( 'Failed to delete entry.', 'formtura' ),
 			] );
 		}
 	}
@@ -133,7 +133,7 @@ class Form_Entries {
 		// Check permissions.
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error( [
-				'message' => __( 'You do not have permission to perform this action.', FORMTURA_TEXTDOMAIN ),
+				'message' => __( 'You do not have permission to perform this action.', 'formtura' ),
 			] );
 		}
 
@@ -141,7 +141,7 @@ class Form_Entries {
 
 		if ( ! $form_id ) {
 			wp_send_json_error( [
-				'message' => __( 'Invalid form ID.', FORMTURA_TEXTDOMAIN ),
+				'message' => __( 'Invalid form ID.', 'formtura' ),
 			] );
 		}
 
@@ -153,7 +153,7 @@ class Form_Entries {
 
 		if ( '' === $csv_data ) {
 			wp_send_json_error( [
-				'message' => __( 'This form has no entries to export.', FORMTURA_TEXTDOMAIN ),
+				'message' => __( 'This form has no entries to export.', 'formtura' ),
 			] );
 		}
 
@@ -175,7 +175,7 @@ class Form_Entries {
 		// Check permissions.
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error( [
-				'message' => __( 'You do not have permission to perform this action.', FORMTURA_TEXTDOMAIN ),
+				'message' => __( 'You do not have permission to perform this action.', 'formtura' ),
 			] );
 		}
 
@@ -183,7 +183,7 @@ class Form_Entries {
 
 		if ( ! $entry_id ) {
 			wp_send_json_error( [
-				'message' => __( 'Invalid entry ID.', FORMTURA_TEXTDOMAIN ),
+				'message' => __( 'Invalid entry ID.', 'formtura' ),
 			] );
 		}
 
@@ -192,7 +192,7 @@ class Form_Entries {
 		// entry that no longer exists would be answered "status updated".
 		if ( ! fta_get_entry( $entry_id ) ) {
 			wp_send_json_error( [
-				'message' => __( 'Entry not found.', FORMTURA_TEXTDOMAIN ),
+				'message' => __( 'Entry not found.', 'formtura' ),
 			] );
 		}
 
@@ -200,12 +200,12 @@ class Form_Entries {
 
 		if ( ! fta_update_entry( $entry_id, [ 'is_read' => $is_read ? 1 : 0 ] ) ) {
 			wp_send_json_error( [
-				'message' => __( 'Failed to update the entry status.', FORMTURA_TEXTDOMAIN ),
+				'message' => __( 'Failed to update the entry status.', 'formtura' ),
 			] );
 		}
 
 		wp_send_json_success( [
-			'message' => __( 'Entry status updated.', FORMTURA_TEXTDOMAIN ),
+			'message' => __( 'Entry status updated.', 'formtura' ),
 			'is_read' => $is_read,
 		] );
 	}

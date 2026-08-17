@@ -67,8 +67,8 @@ class Admin {
 	public function register_menu() {
 		// Main menu.
 		add_menu_page(
-			__( 'Formtura', FORMTURA_TEXTDOMAIN ),
-			__( 'Formtura', FORMTURA_TEXTDOMAIN ),
+			__( 'Formtura', 'formtura' ),
+			__( 'Formtura', 'formtura' ),
 			'manage_options',
 			'formtura',
 			[ $this, 'render_forms_page' ],
@@ -79,8 +79,8 @@ class Admin {
 		// Forms submenu (default).
 		add_submenu_page(
 			'formtura',
-			__( 'All Forms', FORMTURA_TEXTDOMAIN ),
-			__( 'All Forms', FORMTURA_TEXTDOMAIN ),
+			__( 'All Forms', 'formtura' ),
+			__( 'All Forms', 'formtura' ),
 			'manage_options',
 			'formtura',
 			[ $this, 'render_forms_page' ]
@@ -89,8 +89,8 @@ class Admin {
 		// Add New Form.
 		add_submenu_page(
 			'formtura',
-			__( 'Add New Form', FORMTURA_TEXTDOMAIN ),
-			__( 'Add New', FORMTURA_TEXTDOMAIN ),
+			__( 'Add New Form', 'formtura' ),
+			__( 'Add New', 'formtura' ),
 			'manage_options',
 			'formtura-new',
 			[ $this, 'render_new_form_page' ]
@@ -99,8 +99,8 @@ class Admin {
 		// Form Builder (hidden from menu).
 		$builder_hook = add_submenu_page(
 			null, // Hidden from menu
-			__( 'Form Builder', FORMTURA_TEXTDOMAIN ),
-			__( 'Form Builder', FORMTURA_TEXTDOMAIN ),
+			__( 'Form Builder', 'formtura' ),
+			__( 'Form Builder', 'formtura' ),
 			'manage_options',
 			'formtura-builder',
 			[ $this, 'render_builder_page' ]
@@ -118,8 +118,8 @@ class Admin {
 		// Entries.
 		add_submenu_page(
 			'formtura',
-			__( 'Entries', FORMTURA_TEXTDOMAIN ),
-			__( 'Entries', FORMTURA_TEXTDOMAIN ),
+			__( 'Entries', 'formtura' ),
+			__( 'Entries', 'formtura' ),
 			'manage_options',
 			'formtura-entries',
 			[ $this, 'render_entries_page' ]
@@ -128,8 +128,8 @@ class Admin {
 		// Settings.
 		add_submenu_page(
 			'formtura',
-			__( 'Settings', FORMTURA_TEXTDOMAIN ),
-			__( 'Settings', FORMTURA_TEXTDOMAIN ),
+			__( 'Settings', 'formtura' ),
+			__( 'Settings', 'formtura' ),
 			'manage_options',
 			'formtura-settings',
 			[ $this, 'render_settings_page' ]
@@ -138,8 +138,8 @@ class Admin {
 		// SMTP.
 		add_submenu_page(
 			'formtura',
-			__( 'SMTP', FORMTURA_TEXTDOMAIN ),
-			__( 'SMTP', FORMTURA_TEXTDOMAIN ),
+			__( 'SMTP', 'formtura' ),
+			__( 'SMTP', 'formtura' ),
 			'manage_options',
 			'formtura-smtp',
 			[ $this, 'render_smtp_page' ]
@@ -154,7 +154,7 @@ class Admin {
 	public function set_builder_page_title() {
 		global $title;
 
-		$title = __( 'Form Builder', FORMTURA_TEXTDOMAIN );
+		$title = __( 'Form Builder', 'formtura' );
 	}
 
 	/**
@@ -194,10 +194,10 @@ class Admin {
 				'ajaxUrl' => admin_url( 'admin-ajax.php' ),
 				'nonce'   => wp_create_nonce( 'formtura_admin' ),
 				'strings' => [
-					'confirmDelete' => __( 'Are you sure you want to delete this item?', FORMTURA_TEXTDOMAIN ),
-					'saving'        => __( 'Saving...', FORMTURA_TEXTDOMAIN ),
-					'saved'         => __( 'Saved!', FORMTURA_TEXTDOMAIN ),
-					'error'         => __( 'An error occurred.', FORMTURA_TEXTDOMAIN ),
+					'confirmDelete' => __( 'Are you sure you want to delete this item?', 'formtura' ),
+					'saving'        => __( 'Saving...', 'formtura' ),
+					'saved'         => __( 'Saved!', 'formtura' ),
+					'error'         => __( 'An error occurred.', 'formtura' ),
 				],
 			]
 		);
@@ -223,16 +223,16 @@ class Admin {
 						// Deleting an entry also removes its uploads and
 						// signatures from the private vault, so the warning
 						// says more than "are you sure".
-						'confirmDelete' => __( 'Delete this entry? Its uploaded files are deleted with it and cannot be recovered.', FORMTURA_TEXTDOMAIN ),
-						'deleted'       => __( 'Entry deleted.', FORMTURA_TEXTDOMAIN ),
-						'read'          => __( 'Read', FORMTURA_TEXTDOMAIN ),
-						'unread'        => __( 'Unread', FORMTURA_TEXTDOMAIN ),
-						'markRead'      => __( 'Mark as Read', FORMTURA_TEXTDOMAIN ),
-						'markUnread'    => __( 'Mark as Unread', FORMTURA_TEXTDOMAIN ),
+						'confirmDelete' => __( 'Delete this entry? Its uploaded files are deleted with it and cannot be recovered.', 'formtura' ),
+						'deleted'       => __( 'Entry deleted.', 'formtura' ),
+						'read'          => __( 'Read', 'formtura' ),
+						'unread'        => __( 'Unread', 'formtura' ),
+						'markRead'      => __( 'Mark as Read', 'formtura' ),
+						'markUnread'    => __( 'Mark as Unread', 'formtura' ),
 						/* translators: %s: entry ID */
-						'entryTitle'    => __( 'Entry #%s', FORMTURA_TEXTDOMAIN ),
-						'close'         => __( 'Close', FORMTURA_TEXTDOMAIN ),
-						'error'         => __( 'An error occurred. Please try again.', FORMTURA_TEXTDOMAIN ),
+						'entryTitle'    => __( 'Entry #%s', 'formtura' ),
+						'close'         => __( 'Close', 'formtura' ),
+						'error'         => __( 'An error occurred. Please try again.', 'formtura' ),
 					],
 				]
 			);
@@ -254,14 +254,22 @@ class Admin {
 				fta_asset_version( 'assets/css/builder.css' )
 			);
 
-			// Enqueue React builder JS
+			// Enqueue React builder JS. Depends on wp-i18n so window.wp.i18n
+			// (which builder/utils/i18n.js reads __() from) is guaranteed to
+			// exist before this script runs.
 			wp_enqueue_script(
 				'formtura-builder',
 				FORMTURA_PLUGIN_URL . 'assets/js/builder.js',
-				[],
+				[ 'wp-i18n' ],
 				fta_asset_version( 'assets/js/builder.js' ),
 				true
 			);
+
+			// Loads languages/formtura-formtura-builder-{locale}.json, if a
+			// translation for the current locale has been generated (see
+			// `wp i18n make-json` in the release process). Falls through to
+			// the strings' English literals when none exists.
+			wp_set_script_translations( 'formtura-builder', FORMTURA_TEXTDOMAIN, FORMTURA_PLUGIN_DIR . 'languages' );
 
 			// Get all public post types for dynamic choices
 			$post_types = get_post_types( [ 'public' => true ], 'objects' );
@@ -332,7 +340,7 @@ class Admin {
 					<?php
 					printf(
 						/* translators: %s: command to run */
-						__( 'Formtura requires Composer dependencies. Please run %s in the plugin directory.', FORMTURA_TEXTDOMAIN ),
+						__( 'Formtura requires Composer dependencies. Please run %s in the plugin directory.', 'formtura' ),
 						'<code>composer install</code>'
 					);
 					?>
@@ -351,7 +359,7 @@ class Admin {
 					<?php
 					printf(
 						/* translators: %s: constant name */
-						esc_html__( 'Formtura private storage is not writable, so file uploads and signatures are being rejected. Make the private storage directory writable, or define %s in wp-config.php to a writable directory outside the web root.', FORMTURA_TEXTDOMAIN ),
+						esc_html__( 'Formtura private storage is not writable, so file uploads and signatures are being rejected. Make the private storage directory writable, or define %s in wp-config.php to a writable directory outside the web root.', 'formtura' ),
 						'<code>FORMTURA_PRIVATE_UPLOAD_DIR</code>'
 					);
 					?>
@@ -371,7 +379,7 @@ class Admin {
 					<?php
 					printf(
 						/* translators: %s: constant name */
-						esc_html__( 'Formtura could not move previously uploaded files out of the public uploads directory, so those files remain publicly readable. Check that the private storage directory is writable, or define %s to a writable directory outside the web root, then deactivate and reactivate the plugin to retry.', FORMTURA_TEXTDOMAIN ),
+						esc_html__( 'Formtura could not move previously uploaded files out of the public uploads directory, so those files remain publicly readable. Check that the private storage directory is writable, or define %s to a writable directory outside the web root, then deactivate and reactivate the plugin to retry.', 'formtura' ),
 						'<code>FORMTURA_PRIVATE_UPLOAD_DIR</code>'
 					);
 					?>

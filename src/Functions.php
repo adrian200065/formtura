@@ -246,27 +246,35 @@ function fta_sanitize_field( $value, $type = 'text' ) {
 function fta_validate_field( $value, $rules ) {
 	// Required validation.
 	if ( ! empty( $rules['required'] ) && empty( $value ) ) {
-		return __( 'This field is required.', FORMTURA_TEXTDOMAIN );
+		return __( 'This field is required.', 'formtura' );
 	}
 
 	// Email validation.
 	if ( ! empty( $rules['email'] ) && ! is_email( $value ) ) {
-		return __( 'Please enter a valid email address.', FORMTURA_TEXTDOMAIN );
+		return __( 'Please enter a valid email address.', 'formtura' );
 	}
 
 	// URL validation.
 	if ( ! empty( $rules['url'] ) && ! filter_var( $value, FILTER_VALIDATE_URL ) ) {
-		return __( 'Please enter a valid URL.', FORMTURA_TEXTDOMAIN );
+		return __( 'Please enter a valid URL.', 'formtura' );
 	}
 
 	// Min length validation.
 	if ( isset( $rules['min_length'] ) && strlen( $value ) < $rules['min_length'] ) {
-		return sprintf( __( 'Minimum %d characters required.', FORMTURA_TEXTDOMAIN ), $rules['min_length'] );
+		return sprintf(
+			/* translators: %d: minimum number of characters. */
+			__( 'Minimum %d characters required.', 'formtura' ),
+			$rules['min_length']
+		);
 	}
 
 	// Max length validation.
 	if ( isset( $rules['max_length'] ) && strlen( $value ) > $rules['max_length'] ) {
-		return sprintf( __( 'Maximum %d characters allowed.', FORMTURA_TEXTDOMAIN ), $rules['max_length'] );
+		return sprintf(
+			/* translators: %d: maximum number of characters. */
+			__( 'Maximum %d characters allowed.', 'formtura' ),
+			$rules['max_length']
+		);
 	}
 
 	return true;
@@ -284,7 +292,7 @@ function fta_render_form( $form_id, $args = [] ) {
 	$form = fta_get_form( $form_id );
 
 	if ( ! $form ) {
-		return '<p>' . __( 'Form not found.', FORMTURA_TEXTDOMAIN ) . '</p>';
+		return '<p>' . __( 'Form not found.', 'formtura' ) . '</p>';
 	}
 
 	ob_start();
@@ -302,108 +310,108 @@ function fta_get_field_types() {
 	return apply_filters( 'fta_field_types', [
 		// Standard Fields
 		'text' => [
-			'label'     => __( 'Single Line Text', FORMTURA_TEXTDOMAIN ),
+			'label'     => __( 'Single Line Text', 'formtura' ),
 			'icon'      => 'text',
 			'category'  => 'standard',
 		],
 		'textarea' => [
-			'label'     => __( 'Paragraph Text', FORMTURA_TEXTDOMAIN ),
+			'label'     => __( 'Paragraph Text', 'formtura' ),
 			'icon'      => 'align-left',
 			'category'  => 'standard',
 		],
 		'name' => [
-			'label'     => __( 'Name', FORMTURA_TEXTDOMAIN ),
+			'label'     => __( 'Name', 'formtura' ),
 			'icon'      => 'user',
 			'category'  => 'standard',
 		],
 		'email' => [
-			'label'     => __( 'Email', FORMTURA_TEXTDOMAIN ),
+			'label'     => __( 'Email', 'formtura' ),
 			'icon'      => 'mail',
 			'category'  => 'standard',
 		],
 		'select' => [
-			'label'     => __( 'Dropdown', FORMTURA_TEXTDOMAIN ),
+			'label'     => __( 'Dropdown', 'formtura' ),
 			'icon'      => 'chevron-down',
 			'category'  => 'standard',
 		],
 		'radio' => [
-			'label'     => __( 'Multiple Choice', FORMTURA_TEXTDOMAIN ),
+			'label'     => __( 'Multiple Choice', 'formtura' ),
 			'icon'      => 'circle',
 			'category'  => 'standard',
 		],
 		'checkbox' => [
-			'label'     => __( 'Checkboxes', FORMTURA_TEXTDOMAIN ),
+			'label'     => __( 'Checkboxes', 'formtura' ),
 			'icon'      => 'check-square',
 			'category'  => 'standard',
 		],
 		'number' => [
-			'label'     => __( 'Number', FORMTURA_TEXTDOMAIN ),
+			'label'     => __( 'Number', 'formtura' ),
 			'icon'      => 'hash',
 			'category'  => 'standard',
 		],
 		'phone' => [
-			'label'     => __( 'Phone', FORMTURA_TEXTDOMAIN ),
+			'label'     => __( 'Phone', 'formtura' ),
 			'icon'      => 'phone',
 			'category'  => 'standard',
 		],
 		'website' => [
-			'label'     => __( 'Website / URL', FORMTURA_TEXTDOMAIN ),
+			'label'     => __( 'Website / URL', 'formtura' ),
 			'icon'      => 'globe',
 			'category'  => 'standard',
 		],
 		'html' => [
-			'label'     => __( 'HTML', FORMTURA_TEXTDOMAIN ),
+			'label'     => __( 'HTML', 'formtura' ),
 			'icon'      => 'code',
 			'category'  => 'standard',
 		],
 		'hidden' => [
-			'label'     => __( 'Hidden Field', FORMTURA_TEXTDOMAIN ),
+			'label'     => __( 'Hidden Field', 'formtura' ),
 			'icon'      => 'eye-off',
 			'category'  => 'standard',
 		],
 		'captcha' => [
-			'label'     => __( 'CAPTCHA', FORMTURA_TEXTDOMAIN ),
+			'label'     => __( 'CAPTCHA', 'formtura' ),
 			'icon'      => 'lock',
 			'category'  => 'standard',
 		],
 		// Advanced Fields
 		'address' => [
-			'label'     => __( 'Address', FORMTURA_TEXTDOMAIN ),
+			'label'     => __( 'Address', 'formtura' ),
 			'icon'      => 'map-pin',
 			'category'  => 'advanced',
 		],
 		'datetime' => [
-			'label'     => __( 'Date / Time', FORMTURA_TEXTDOMAIN ),
+			'label'     => __( 'Date / Time', 'formtura' ),
 			'icon'      => 'calendar',
 			'category'  => 'advanced',
 		],
 		'password' => [
-			'label'     => __( 'Password', FORMTURA_TEXTDOMAIN ),
+			'label'     => __( 'Password', 'formtura' ),
 			'icon'      => 'lock',
 			'category'  => 'advanced',
 		],
 		'file-upload' => [
-			'label'     => __( 'File Upload', FORMTURA_TEXTDOMAIN ),
+			'label'     => __( 'File Upload', 'formtura' ),
 			'icon'      => 'upload',
 			'category'  => 'advanced',
 		],
 		'number-slider' => [
-			'label'     => __( 'Slider', FORMTURA_TEXTDOMAIN ),
+			'label'     => __( 'Slider', 'formtura' ),
 			'icon'      => 'trending-up',
 			'category'  => 'advanced',
 		],
 		'rating' => [
-			'label'     => __( 'Star Rating', FORMTURA_TEXTDOMAIN ),
+			'label'     => __( 'Star Rating', 'formtura' ),
 			'icon'      => 'star',
 			'category'  => 'advanced',
 		],
 		'repeater' => [
-			'label'     => __( 'Repeater', FORMTURA_TEXTDOMAIN ),
+			'label'     => __( 'Repeater', 'formtura' ),
 			'icon'      => 'repeat',
 			'category'  => 'advanced',
 		],
 		'signature' => [
-			'label'     => __( 'Signature', FORMTURA_TEXTDOMAIN ),
+			'label'     => __( 'Signature', 'formtura' ),
 			'icon'      => 'pen-tool',
 			'category'  => 'advanced',
 		],

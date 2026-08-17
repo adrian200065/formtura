@@ -81,13 +81,13 @@ $fta_entry_pairs = static function ( array $entry_data, array $labels ) {
 <div class="wrap fta-admin-page">
 	<div class="fta-admin-header">
 		<div class="fta-admin-heading">
-			<p class="fta-admin-eyebrow"><?php esc_html_e( 'Responses', FORMTURA_TEXTDOMAIN ); ?></p>
-			<h1><?php esc_html_e( 'Form entries', FORMTURA_TEXTDOMAIN ); ?></h1>
-			<p class="fta-admin-subtitle"><?php esc_html_e( 'Review and export submissions without leaving WordPress.', FORMTURA_TEXTDOMAIN ); ?></p>
+			<p class="fta-admin-eyebrow"><?php esc_html_e( 'Responses', 'formtura' ); ?></p>
+			<h1><?php esc_html_e( 'Form entries', 'formtura' ); ?></h1>
+			<p class="fta-admin-subtitle"><?php esc_html_e( 'Review and export submissions without leaving WordPress.', 'formtura' ); ?></p>
 		</div>
 		<?php if ( $selected_form_id && ! empty( $entries ) ) : ?>
 			<button class="fta-button fta-button-secondary fta-export-entries" data-form-id="<?php echo esc_attr( $selected_form_id ); ?>">
-				<?php esc_html_e( 'Export Entries', FORMTURA_TEXTDOMAIN ); ?>
+				<?php esc_html_e( 'Export Entries', 'formtura' ); ?>
 			</button>
 		<?php endif; ?>
 	</div><!-- .fta-admin-header -->
@@ -95,19 +95,19 @@ $fta_entry_pairs = static function ( array $entry_data, array $labels ) {
 	<?php if ( empty( $forms ) ) : ?>
 		<div class="fta-card">
 			<div class="fta-empty-state">
-				<h2><?php esc_html_e( 'No forms yet', FORMTURA_TEXTDOMAIN ); ?></h2>
-				<p><?php esc_html_e( 'Create a form first to start receiving entries.', FORMTURA_TEXTDOMAIN ); ?></p>
+				<h2><?php esc_html_e( 'No forms yet', 'formtura' ); ?></h2>
+				<p><?php esc_html_e( 'Create a form first to start receiving entries.', 'formtura' ); ?></p>
 				<a href="<?php echo esc_url( admin_url( 'admin.php?page=formtura-new' ) ); ?>" class="fta-button fta-button-primary">
-					<?php esc_html_e( 'Create Your First Form', FORMTURA_TEXTDOMAIN ); ?>
+					<?php esc_html_e( 'Create Your First Form', 'formtura' ); ?>
 				</a>
 			</div><!-- .fta-empty-state -->
 		</div><!-- .fta-card -->
 	<?php else : ?>
 		<div class="fta-card">
 			<div class="fta-entries-filter">
-				<label for="fta-form-select"><?php esc_html_e( 'Select Form:', FORMTURA_TEXTDOMAIN ); ?></label>
+				<label for="fta-form-select"><?php esc_html_e( 'Select Form:', 'formtura' ); ?></label>
 				<select id="fta-form-select" class="fta-form-select">
-					<option value=""><?php esc_html_e( '-- Select a Form --', FORMTURA_TEXTDOMAIN ); ?></option>
+					<option value=""><?php esc_html_e( '-- Select a Form --', 'formtura' ); ?></option>
 					<?php foreach ( $forms as $form_item ) : ?>
 						<option value="<?php echo esc_attr( $form_item['id'] ); ?>" <?php selected( $selected_form_id, $form_item['id'] ); ?>>
 							<?php echo esc_html( $form_item['title'] ); ?>
@@ -119,19 +119,19 @@ $fta_entry_pairs = static function ( array $entry_data, array $labels ) {
 			<?php if ( $selected_form_id ) : ?>
 				<?php if ( empty( $entries ) ) : ?>
 					<div class="fta-empty-state">
-						<h2><?php esc_html_e( 'No entries yet', FORMTURA_TEXTDOMAIN ); ?></h2>
-						<p><?php esc_html_e( 'This form hasn\'t received any submissions yet.', FORMTURA_TEXTDOMAIN ); ?></p>
+						<h2><?php esc_html_e( 'No entries yet', 'formtura' ); ?></h2>
+						<p><?php esc_html_e( 'This form hasn\'t received any submissions yet.', 'formtura' ); ?></p>
 					</div><!-- .fta-empty-state -->
 				<?php else : ?>
 					<div class="fta-table-shell">
 					<table class="wp-list-table widefat fixed striped fta-entries-table">
 						<thead>
 							<tr>
-								<th scope="col"><?php esc_html_e( 'ID', FORMTURA_TEXTDOMAIN ); ?></th>
-								<th scope="col"><?php esc_html_e( 'Entry Data', FORMTURA_TEXTDOMAIN ); ?></th>
-								<th scope="col"><?php esc_html_e( 'Status', FORMTURA_TEXTDOMAIN ); ?></th>
-								<th scope="col"><?php esc_html_e( 'Submitted', FORMTURA_TEXTDOMAIN ); ?></th>
-								<th scope="col"><?php esc_html_e( 'Actions', FORMTURA_TEXTDOMAIN ); ?></th>
+								<th scope="col"><?php esc_html_e( 'ID', 'formtura' ); ?></th>
+								<th scope="col"><?php esc_html_e( 'Entry Data', 'formtura' ); ?></th>
+								<th scope="col"><?php esc_html_e( 'Status', 'formtura' ); ?></th>
+								<th scope="col"><?php esc_html_e( 'Submitted', 'formtura' ); ?></th>
+								<th scope="col"><?php esc_html_e( 'Actions', 'formtura' ); ?></th>
 							</tr>
 						</thead>
 						<tbody>
@@ -157,7 +157,7 @@ $fta_entry_pairs = static function ( array $entry_data, array $labels ) {
 
 											<?php if ( count( $pairs ) > $preview_limit ) : ?>
 												<a href="#" class="fta-view-entry" data-entry-id="<?php echo esc_attr( $entry['id'] ); ?>">
-													<?php esc_html_e( 'View all fields...', FORMTURA_TEXTDOMAIN ); ?>
+													<?php esc_html_e( 'View all fields...', 'formtura' ); ?>
 												</a>
 											<?php endif; ?>
 										</div>
@@ -171,7 +171,7 @@ $fta_entry_pairs = static function ( array $entry_data, array $labels ) {
 										?>
 										<div class="fta-entry-details" id="fta-entry-details-<?php echo esc_attr( $entry['id'] ); ?>" hidden>
 											<?php if ( empty( $pairs ) ) : ?>
-												<p class="fta-entry-empty"><?php esc_html_e( 'This entry has no stored field data.', FORMTURA_TEXTDOMAIN ); ?></p>
+												<p class="fta-entry-empty"><?php esc_html_e( 'This entry has no stored field data.', 'formtura' ); ?></p>
 											<?php endif; ?>
 
 											<?php foreach ( $pairs as $pair ) : ?>
@@ -187,7 +187,7 @@ $fta_entry_pairs = static function ( array $entry_data, array $labels ) {
 																// checks manage_options on every request.
 																?>
 																<a href="<?php echo esc_url( File_Download::url( $entry['id'], $pair['key'], (int) $index ) ); ?>">
-																	<?php echo esc_html( isset( $record['name'] ) ? $record['name'] : __( 'Download', FORMTURA_TEXTDOMAIN ) ); ?>
+																	<?php echo esc_html( isset( $record['name'] ) ? $record['name'] : __( 'Download', 'formtura' ) ); ?>
 																</a>
 															<?php endforeach; ?>
 														</span>
@@ -200,20 +200,20 @@ $fta_entry_pairs = static function ( array $entry_data, array $labels ) {
 									</td>
 									<td>
 										<span class="fta-status fta-status-<?php echo esc_attr( $status_class ); ?>">
-											<?php echo esc_html( $entry['is_read'] ? __( 'Read', FORMTURA_TEXTDOMAIN ) : __( 'Unread', FORMTURA_TEXTDOMAIN ) ); ?>
+											<?php echo esc_html( $entry['is_read'] ? __( 'Read', 'formtura' ) : __( 'Unread', 'formtura' ) ); ?>
 										</span>
 									</td>
 									<td><?php echo esc_html( date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), strtotime( $entry['created_at'] ) ) ); ?></td>
 									<td>
 										<div class="fta-table-actions">
 										<a href="#" class="fta-mark-read" data-entry-id="<?php echo esc_attr( $entry['id'] ); ?>" data-is-read="<?php echo $entry['is_read'] ? '1' : '0'; ?>">
-											<?php echo esc_html( $entry['is_read'] ? __( 'Mark as Unread', FORMTURA_TEXTDOMAIN ) : __( 'Mark as Read', FORMTURA_TEXTDOMAIN ) ); ?>
+											<?php echo esc_html( $entry['is_read'] ? __( 'Mark as Unread', 'formtura' ) : __( 'Mark as Read', 'formtura' ) ); ?>
 										</a>
 										<a href="#" class="fta-view-entry" data-entry-id="<?php echo esc_attr( $entry['id'] ); ?>">
-											<?php esc_html_e( 'View', FORMTURA_TEXTDOMAIN ); ?>
+											<?php esc_html_e( 'View', 'formtura' ); ?>
 										</a>
 										<a href="#" class="fta-delete-entry fta-link-button-danger" data-entry-id="<?php echo esc_attr( $entry['id'] ); ?>">
-											<?php esc_html_e( 'Delete', FORMTURA_TEXTDOMAIN ); ?>
+											<?php esc_html_e( 'Delete', 'formtura' ); ?>
 										</a>
 										</div>
 									</td>
@@ -236,10 +236,10 @@ $fta_entry_pairs = static function ( array $entry_data, array $labels ) {
 							);
 						};
 						?>
-						<nav class="fta-entries-pagination" aria-label="<?php esc_attr_e( 'Entries pages', FORMTURA_TEXTDOMAIN ); ?>">
+						<nav class="fta-entries-pagination" aria-label="<?php esc_attr_e( 'Entries pages', 'formtura' ); ?>">
 							<?php if ( $current_page > 1 ) : ?>
 								<a class="fta-button fta-button-ghost" href="<?php echo esc_url( $page_url( $current_page - 1 ) ); ?>">
-									<?php esc_html_e( 'Previous', FORMTURA_TEXTDOMAIN ); ?>
+									<?php esc_html_e( 'Previous', 'formtura' ); ?>
 								</a>
 							<?php endif; ?>
 
@@ -247,7 +247,7 @@ $fta_entry_pairs = static function ( array $entry_data, array $labels ) {
 								<?php
 								printf(
 									/* translators: 1: current page, 2: total pages, 3: total entries */
-									esc_html__( 'Page %1$s of %2$s (%3$s entries)', FORMTURA_TEXTDOMAIN ),
+									esc_html__( 'Page %1$s of %2$s (%3$s entries)', 'formtura' ),
 									esc_html( number_format_i18n( $current_page ) ),
 									esc_html( number_format_i18n( $total_pages ) ),
 									esc_html( number_format_i18n( $total ) )
@@ -257,7 +257,7 @@ $fta_entry_pairs = static function ( array $entry_data, array $labels ) {
 
 							<?php if ( $current_page < $total_pages ) : ?>
 								<a class="fta-button fta-button-ghost" href="<?php echo esc_url( $page_url( $current_page + 1 ) ); ?>">
-									<?php esc_html_e( 'Next', FORMTURA_TEXTDOMAIN ); ?>
+									<?php esc_html_e( 'Next', 'formtura' ); ?>
 								</a>
 							<?php endif; ?>
 						</nav>

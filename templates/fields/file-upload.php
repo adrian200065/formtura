@@ -27,8 +27,8 @@ $allowed_file_types = isset( $field['allowedFileTypes'] ) ? $field['allowedFileT
 $specified_types    = isset( $field['specifiedTypes'] ) ? $field['specifiedTypes'] : 'jpg, jpeg, jpe, png, gif';
 $min_file_size      = isset( $field['minFileSize'] ) ? $field['minFileSize'] : '';
 $max_file_size      = isset( $field['maxFileSize'] ) ? $field['maxFileSize'] : '';
-$upload_text        = isset( $field['uploadText'] ) ? $field['uploadText'] : __( 'Drop a file here or click to upload', FORMTURA_TEXTDOMAIN );
-$compact_upload_text = isset( $field['compactUploadText'] ) ? $field['compactUploadText'] : __( 'Choose File', FORMTURA_TEXTDOMAIN );
+$upload_text        = isset( $field['uploadText'] ) ? $field['uploadText'] : __( 'Drop a file here or click to upload', 'formtura' );
+$compact_upload_text = isset( $field['compactUploadText'] ) ? $field['compactUploadText'] : __( 'Choose File', 'formtura' );
 
 // Build accept attribute for file input
 $accept = '';
@@ -134,7 +134,7 @@ $max_size_display = ! empty( $max_file_size ) ? $max_file_size : '256';
 				<?php
 				printf(
 					/* translators: %s: Maximum file size in MB */
-					esc_html__( 'Maximum file size: %sMB', FORMTURA_TEXTDOMAIN ),
+					esc_html__( 'Maximum file size: %sMB', 'formtura' ),
 					esc_html( $max_size_display )
 				);
 				?>

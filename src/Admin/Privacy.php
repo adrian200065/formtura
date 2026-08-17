@@ -125,7 +125,7 @@ class Privacy {
 	 */
 	public function register_exporter( $exporters ) {
 		$exporters['formtura-entries'] = [
-			'exporter_friendly_name' => __( 'Formtura Form Entries', FORMTURA_TEXTDOMAIN ),
+			'exporter_friendly_name' => __( 'Formtura Form Entries', 'formtura' ),
 			'callback'               => [ $this, 'export_data' ],
 		];
 
@@ -141,7 +141,7 @@ class Privacy {
 	 */
 	public function register_eraser( $erasers ) {
 		$erasers['formtura-entries'] = [
-			'eraser_friendly_name' => __( 'Formtura Form Entries', FORMTURA_TEXTDOMAIN ),
+			'eraser_friendly_name' => __( 'Formtura Form Entries', 'formtura' ),
 			'callback'              => [ $this, 'erase_data' ],
 		];
 
@@ -271,9 +271,9 @@ class Privacy {
 	 */
 	private function export_item( $entry ) {
 		$data = [
-			[ 'name' => __( 'Submitted', FORMTURA_TEXTDOMAIN ), 'value' => isset( $entry['created_at'] ) ? $entry['created_at'] : '' ],
-			[ 'name' => __( 'IP Address', FORMTURA_TEXTDOMAIN ), 'value' => isset( $entry['ip_address'] ) ? $entry['ip_address'] : '' ],
-			[ 'name' => __( 'User Agent', FORMTURA_TEXTDOMAIN ), 'value' => isset( $entry['user_agent'] ) ? $entry['user_agent'] : '' ],
+			[ 'name' => __( 'Submitted', 'formtura' ), 'value' => isset( $entry['created_at'] ) ? $entry['created_at'] : '' ],
+			[ 'name' => __( 'IP Address', 'formtura' ), 'value' => isset( $entry['ip_address'] ) ? $entry['ip_address'] : '' ],
+			[ 'name' => __( 'User Agent', 'formtura' ), 'value' => isset( $entry['user_agent'] ) ? $entry['user_agent'] : '' ],
 		];
 
 		$answers = isset( $entry['data'] ) && is_array( $entry['data'] ) ? $entry['data'] : [];
@@ -287,7 +287,7 @@ class Privacy {
 
 		return [
 			'group_id'    => 'formtura-entries',
-			'group_label' => __( 'Form Entries', FORMTURA_TEXTDOMAIN ),
+			'group_label' => __( 'Form Entries', 'formtura' ),
 			'item_id'     => 'formtura-entry-' . $entry['id'],
 			'data'        => $data,
 		];
@@ -331,7 +331,13 @@ class Privacy {
 			'items_removed'  => $removed > 0,
 			'items_retained' => $failed > 0,
 			'messages'       => $removed > 0
-				? [ sprintf( __( '%d form entries removed.', FORMTURA_TEXTDOMAIN ), $removed ) ]
+				? [
+				sprintf(
+					/* translators: %d: number of entries removed. */
+					__( '%d form entries removed.', 'formtura' ),
+					$removed
+				),
+			]
 				: [],
 			'done'           => count( $page_ids ) >= count( $ids ),
 		];

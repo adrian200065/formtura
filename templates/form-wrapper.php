@@ -24,7 +24,7 @@ $form_settings = isset( $form['settings'] ) ? $form['settings'] : [];
 // The builder stores this under the camelCase key it posts (see
 // Form_Builder::sanitize_settings_data()); snake_case here never matched a
 // saved setting, so a custom label silently fell back to "Submit".
-$submit_text = isset( $form_settings['submitButtonText'] ) ? $form_settings['submitButtonText'] : __( 'Submit', FORMTURA_TEXTDOMAIN );
+$submit_text = isset( $form_settings['submitButtonText'] ) ? $form_settings['submitButtonText'] : __( 'Submit', 'formtura' );
 $recaptcha = fta_get_recaptcha_config();
 ?>
 
@@ -65,7 +65,7 @@ $recaptcha = fta_get_recaptcha_config();
 								'<div class="fta-field fta-field-missing"><strong>%s</strong></div>',
 								esc_html( sprintf(
 									/* translators: %s: field type slug */
-									__( 'Formtura: no frontend template for field type "%s". This notice is only visible to administrators with WP_DEBUG enabled.', FORMTURA_TEXTDOMAIN ),
+									__( 'Formtura: no frontend template for field type "%s". This notice is only visible to administrators with WP_DEBUG enabled.', 'formtura' ),
 									$field_type
 								) )
 							);

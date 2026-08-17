@@ -36,8 +36,8 @@ $hide_label     = ! empty( $field['hideLabel'] );
 		<table class="fta-order-summary">
 			<thead>
 				<tr>
-					<th scope="col"><?php esc_html_e( 'Item', FORMTURA_TEXTDOMAIN ); ?></th>
-					<th scope="col"><?php esc_html_e( 'Price', FORMTURA_TEXTDOMAIN ); ?></th>
+					<th scope="col"><?php esc_html_e( 'Item', 'formtura' ); ?></th>
+					<th scope="col"><?php esc_html_e( 'Price', 'formtura' ); ?></th>
 				</tr>
 			</thead>
 			<tbody class="fta-order-summary-body"></tbody>
@@ -45,7 +45,7 @@ $hide_label     = ! empty( $field['hideLabel'] );
 	<?php endif; ?>
 
 	<div class="fta-total-display">
-		<span class="fta-total-label"><?php esc_html_e( 'Total', FORMTURA_TEXTDOMAIN ); ?></span>
+		<span class="fta-total-label"><?php esc_html_e( 'Total', 'formtura' ); ?></span>
 		<span class="fta-total-amount"><?php echo esc_html( fta_format_price( 0 ) ); ?></span>
 	</div>
 </div><!-- /.fta-field-total -->

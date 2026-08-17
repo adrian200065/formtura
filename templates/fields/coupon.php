@@ -30,10 +30,10 @@ $field_input_id = fta_get_field_input_id( $field );
 			id="<?php echo esc_attr( $field_input_id ); ?>"
 			name="<?php echo esc_attr( $field_name ); ?>"
 			class="fta-field-input fta-coupon-input"
-			placeholder="<?php echo esc_attr( isset( $field['placeholder'] ) ? $field['placeholder'] : __( 'Coupon code', FORMTURA_TEXTDOMAIN ) ); ?>"
+			placeholder="<?php echo esc_attr( isset( $field['placeholder'] ) ? $field['placeholder'] : __( 'Coupon code', 'formtura' ) ); ?>"
 		/>
 		<button type="button" class="fta-coupon-apply">
-			<?php esc_html_e( 'Apply', FORMTURA_TEXTDOMAIN ); ?>
+			<?php esc_html_e( 'Apply', 'formtura' ); ?>
 		</button>
 	</div>
 

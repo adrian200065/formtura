@@ -73,7 +73,7 @@ class Form_Selector {
 		$form_id = isset( $attributes['formId'] ) ? absint( $attributes['formId'] ) : 0;
 
 		if ( ! $form_id ) {
-			return '<p>' . __( 'Please select a form.', FORMTURA_TEXTDOMAIN ) . '</p>';
+			return '<p>' . __( 'Please select a form.', 'formtura' ) . '</p>';
 		}
 
 		return fta_render_form( $form_id );

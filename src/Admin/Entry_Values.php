@@ -94,7 +94,7 @@ class Entry_Values {
 		$key = (string) $key;
 
 		if ( self::PAYMENT_KEY === $key ) {
-			return __( 'Payment', FORMTURA_TEXTDOMAIN );
+			return __( 'Payment', 'formtura' );
 		}
 
 		if ( isset( $labels[ $key ] ) && '' !== $labels[ $key ] ) {
@@ -211,7 +211,7 @@ class Entry_Values {
 		if ( ! empty( $payment['coupon'] ) ) {
 			$text .= sprintf(
 				' [%s: %s]',
-				__( 'coupon', FORMTURA_TEXTDOMAIN ),
+				__( 'coupon', 'formtura' ),
 				(string) $payment['coupon']
 			);
 		}

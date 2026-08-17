@@ -37,7 +37,7 @@ $input_name = $is_multiple ? $field_name . '[]' : $field_name;
 		<?php echo $field_required ? 'required' : ''; ?>
 	>
 		<?php if ( ! $is_multiple ) : ?>
-			<option value=""><?php echo esc_html( $field_placeholder ? $field_placeholder : __( 'Select an option', FORMTURA_TEXTDOMAIN ) ); ?></option>
+			<option value=""><?php echo esc_html( $field_placeholder ? $field_placeholder : __( 'Select an option', 'formtura' ) ); ?></option>
 		<?php endif; ?>
 
 		<?php foreach ( $choices as $choice ) : ?>

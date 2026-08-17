@@ -97,7 +97,7 @@ class Signature {
 				if ( ! empty( $field['required'] ) ) {
 					$errors[ $field_name ] = sprintf(
 						/* translators: %s: field label */
-						__( '%s is required.', FORMTURA_TEXTDOMAIN ),
+						__( '%s is required.', 'formtura' ),
 						isset( $field['label'] ) ? $field['label'] : $field_name
 					);
 				}
@@ -118,7 +118,7 @@ class Signature {
 		if ( ! empty( $errors ) ) {
 			return new \WP_Error(
 				'signature_failed',
-				__( 'Please correct the errors below.', FORMTURA_TEXTDOMAIN ),
+				__( 'Please correct the errors below.', 'formtura' ),
 				$errors
 			);
 		}
@@ -148,7 +148,7 @@ class Signature {
 
 			return new \WP_Error(
 				'signature_failed',
-				__( 'Please correct the errors below.', FORMTURA_TEXTDOMAIN ),
+				__( 'Please correct the errors below.', 'formtura' ),
 				$errors
 			);
 		}
@@ -164,7 +164,7 @@ class Signature {
 	 * @return string|\WP_Error Binary PNG bytes, or WP_Error.
 	 */
 	public static function decode_data_url( $value ) {
-		$invalid = new \WP_Error( 'invalid_signature', __( 'The signature could not be read. Please sign again.', FORMTURA_TEXTDOMAIN ) );
+		$invalid = new \WP_Error( 'invalid_signature', __( 'The signature could not be read. Please sign again.', 'formtura' ) );
 
 		if ( 0 !== strpos( $value, 'data:image/png;base64,' ) ) {
 			return $invalid;
@@ -210,7 +210,7 @@ class Signature {
 	 * @return array|\WP_Error File record matching the uploads shape.
 	 */
 	private function store_png( $binary ) {
-		$failed = new \WP_Error( 'signature_store_failed', __( 'The signature could not be saved. Please try again.', FORMTURA_TEXTDOMAIN ) );
+		$failed = new \WP_Error( 'signature_store_failed', __( 'The signature could not be saved. Please try again.', 'formtura' ) );
 
 		// Fails closed: with no writable private vault there is nowhere safe to
 		// put a signature, and falling back to a public directory is exactly

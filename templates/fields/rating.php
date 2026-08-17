@@ -47,7 +47,7 @@ $hide_label     = ! empty( $field['hideLabel'] );
 						<?php
 						printf(
 							/* translators: 1: selected star, 2: maximum rating */
-							esc_html__( '%1$s of %2$s stars', FORMTURA_TEXTDOMAIN ),
+							esc_html__( '%1$s of %2$s stars', 'formtura' ),
 							esc_html( $star ),
 							esc_html( $max_rating )
 						);

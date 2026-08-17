@@ -17,15 +17,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 <div class="wrap fta-admin-page">
 	<div class="fta-admin-header">
 		<div class="fta-admin-heading">
-			<p class="fta-admin-eyebrow"><?php esc_html_e( 'Configuration', FORMTURA_TEXTDOMAIN ); ?></p>
-			<h1><?php esc_html_e( 'Settings', FORMTURA_TEXTDOMAIN ); ?></h1>
-			<p class="fta-admin-subtitle"><?php esc_html_e( 'Manage form security, delivery defaults, and plugin behavior.', FORMTURA_TEXTDOMAIN ); ?></p>
+			<p class="fta-admin-eyebrow"><?php esc_html_e( 'Configuration', 'formtura' ); ?></p>
+			<h1><?php esc_html_e( 'Settings', 'formtura' ); ?></h1>
+			<p class="fta-admin-subtitle"><?php esc_html_e( 'Manage form security, delivery defaults, and plugin behavior.', 'formtura' ); ?></p>
 		</div>
 	</div><!-- .fta-admin-header -->
 
 	<div class="fta-card">
 		<form id="fta-settings-form" class="fta-settings-form">
-			<h2><?php esc_html_e( 'General Settings', FORMTURA_TEXTDOMAIN ); ?></h2>
+			<h2><?php esc_html_e( 'General Settings', 'formtura' ); ?></h2>
 			
 			<table class="form-table">
 				<tbody>
@@ -33,26 +33,26 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 					<tr>
 						<th scope="row">
-							<label for="fta-recaptcha-version"><?php esc_html_e( 'reCAPTCHA Version', FORMTURA_TEXTDOMAIN ); ?></label>
+							<label for="fta-recaptcha-version"><?php esc_html_e( 'reCAPTCHA Version', 'formtura' ); ?></label>
 						</th>
 						<td>
 							<select id="fta-recaptcha-version" name="settings[recaptcha_version]">
 								<option value="v2" <?php selected( $recaptcha_version, 'v2' ); ?>>
-									<?php esc_html_e( 'v2 - "I\'m not a robot" checkbox', FORMTURA_TEXTDOMAIN ); ?>
+									<?php esc_html_e( 'v2 - "I\'m not a robot" checkbox', 'formtura' ); ?>
 								</option>
 								<option value="v3" <?php selected( $recaptcha_version, 'v3' ); ?>>
-									<?php esc_html_e( 'v3 - invisible score based', FORMTURA_TEXTDOMAIN ); ?>
+									<?php esc_html_e( 'v3 - invisible score based', 'formtura' ); ?>
 								</option>
 							</select>
 							<p class="description">
-								<?php esc_html_e( 'Keys are issued per version. A v2 key will not work with v3, or the other way around.', FORMTURA_TEXTDOMAIN ); ?>
+								<?php esc_html_e( 'Keys are issued per version. A v2 key will not work with v3, or the other way around.', 'formtura' ); ?>
 							</p>
 						</td>
 					</tr>
 
 					<tr>
 						<th scope="row">
-							<label for="fta-recaptcha-site-key"><?php esc_html_e( 'reCAPTCHA Site Key', FORMTURA_TEXTDOMAIN ); ?></label>
+							<label for="fta-recaptcha-site-key"><?php esc_html_e( 'reCAPTCHA Site Key', 'formtura' ); ?></label>
 						</th>
 						<td>
 							<input type="text"
@@ -61,14 +61,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 								value="<?php echo esc_attr( isset( $settings['recaptcha_site_key'] ) ? $settings['recaptcha_site_key'] : '' ); ?>"
 								class="regular-text">
 							<p class="description">
-								<?php esc_html_e( 'Your Google reCAPTCHA site key, for the version selected above.', FORMTURA_TEXTDOMAIN ); ?>
+								<?php esc_html_e( 'Your Google reCAPTCHA site key, for the version selected above.', 'formtura' ); ?>
 							</p>
 						</td>
 					</tr>
 
 					<tr>
 						<th scope="row">
-							<label for="fta-recaptcha-secret-key"><?php esc_html_e( 'reCAPTCHA Secret Key', FORMTURA_TEXTDOMAIN ); ?></label>
+							<label for="fta-recaptcha-secret-key"><?php esc_html_e( 'reCAPTCHA Secret Key', 'formtura' ); ?></label>
 						</th>
 						<td>
 							<input type="password"
@@ -77,14 +77,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 								value="<?php echo esc_attr( isset( $settings['recaptcha_secret_key'] ) ? $settings['recaptcha_secret_key'] : '' ); ?>"
 								class="regular-text">
 							<p class="description">
-								<?php esc_html_e( 'Your matching secret key. reCAPTCHA is only applied to forms once both keys are saved.', FORMTURA_TEXTDOMAIN ); ?>
+								<?php esc_html_e( 'Your matching secret key. reCAPTCHA is only applied to forms once both keys are saved.', 'formtura' ); ?>
 							</p>
 						</td>
 					</tr>
 
 					<tr>
 						<th scope="row">
-							<label for="fta-recaptcha-score-threshold"><?php esc_html_e( 'reCAPTCHA v3 Score Threshold', FORMTURA_TEXTDOMAIN ); ?></label>
+							<label for="fta-recaptcha-score-threshold"><?php esc_html_e( 'reCAPTCHA v3 Score Threshold', 'formtura' ); ?></label>
 						</th>
 						<td>
 							<input type="number"
@@ -96,14 +96,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 								max="1"
 								class="small-text">
 							<p class="description">
-								<?php esc_html_e( 'Submissions scoring below this are rejected. 1.0 is very likely human, 0.0 very likely a bot. Google suggests 0.5. Ignored for v2.', FORMTURA_TEXTDOMAIN ); ?>
+								<?php esc_html_e( 'Submissions scoring below this are rejected. 1.0 is very likely human, 0.0 very likely a bot. Google suggests 0.5. Ignored for v2.', 'formtura' ); ?>
 							</p>
 						</td>
 					</tr>
 
 					<tr>
 						<th scope="row">
-							<label for="fta-delete-data"><?php esc_html_e( 'Delete Data on Uninstall', FORMTURA_TEXTDOMAIN ); ?></label>
+							<label for="fta-delete-data"><?php esc_html_e( 'Delete Data on Uninstall', 'formtura' ); ?></label>
 						</th>
 						<td>
 							<label>
@@ -112,17 +112,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 									name="settings[delete_data_on_uninstall]" 
 									value="1" 
 									<?php checked( ! empty( $settings['delete_data_on_uninstall'] ) ); ?>>
-								<?php esc_html_e( 'Delete all plugin data when uninstalling', FORMTURA_TEXTDOMAIN ); ?>
+								<?php esc_html_e( 'Delete all plugin data when uninstalling', 'formtura' ); ?>
 							</label>
 							<p class="description">
-								<?php esc_html_e( 'Warning: This will permanently delete all forms, entries, and settings.', FORMTURA_TEXTDOMAIN ); ?>
+								<?php esc_html_e( 'Warning: This will permanently delete all forms, entries, and settings.', 'formtura' ); ?>
 							</p>
 						</td>
 					</tr>
 
 					<tr>
 						<th scope="row">
-							<label for="fta-entry-retention-days"><?php esc_html_e( 'Automatically Delete Entries After', FORMTURA_TEXTDOMAIN ); ?></label>
+							<label for="fta-entry-retention-days"><?php esc_html_e( 'Automatically Delete Entries After', 'formtura' ); ?></label>
 						</th>
 						<td>
 							<input type="number"
@@ -132,16 +132,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 								step="1"
 								min="0"
 								class="small-text">
-							<?php esc_html_e( 'days', FORMTURA_TEXTDOMAIN ); ?>
+							<?php esc_html_e( 'days', 'formtura' ); ?>
 							<p class="description">
-								<?php esc_html_e( 'Entries older than this are deleted automatically, across all forms. Set to 0 to disable automatic deletion.', FORMTURA_TEXTDOMAIN ); ?>
+								<?php esc_html_e( 'Entries older than this are deleted automatically, across all forms. Set to 0 to disable automatic deletion.', 'formtura' ); ?>
 							</p>
 						</td>
 					</tr>
 
 					<tr>
 						<th scope="row">
-							<label for="fta-disable-css"><?php esc_html_e( 'Disable Default CSS', FORMTURA_TEXTDOMAIN ); ?></label>
+							<label for="fta-disable-css"><?php esc_html_e( 'Disable Default CSS', 'formtura' ); ?></label>
 						</th>
 						<td>
 							<label>
@@ -150,17 +150,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 									name="settings[disable_default_css]" 
 									value="1" 
 									<?php checked( isset( $settings['disable_default_css'] ) ? $settings['disable_default_css'] : false, 1 ); ?>>
-								<?php esc_html_e( 'Disable default form styles', FORMTURA_TEXTDOMAIN ); ?>
+								<?php esc_html_e( 'Disable default form styles', 'formtura' ); ?>
 							</label>
 							<p class="description">
-								<?php esc_html_e( 'Check this if you want to use your own custom CSS for forms.', FORMTURA_TEXTDOMAIN ); ?>
+								<?php esc_html_e( 'Check this if you want to use your own custom CSS for forms.', 'formtura' ); ?>
 							</p>
 						</td>
 					</tr>
 
 					<tr>
 						<th scope="row">
-							<label for="fta-from-email"><?php esc_html_e( 'From Email Address', FORMTURA_TEXTDOMAIN ); ?></label>
+							<label for="fta-from-email"><?php esc_html_e( 'From Email Address', 'formtura' ); ?></label>
 						</th>
 						<td>
 							<input type="email" 
@@ -169,14 +169,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 								value="<?php echo esc_attr( isset( $settings['from_email'] ) ? $settings['from_email'] : get_option( 'admin_email' ) ); ?>" 
 								class="regular-text">
 							<p class="description">
-								<?php esc_html_e( 'Default email address for form notifications.', FORMTURA_TEXTDOMAIN ); ?>
+								<?php esc_html_e( 'Default email address for form notifications.', 'formtura' ); ?>
 							</p>
 						</td>
 					</tr>
 
 					<tr>
 						<th scope="row">
-							<label for="fta-from-name"><?php esc_html_e( 'From Name', FORMTURA_TEXTDOMAIN ); ?></label>
+							<label for="fta-from-name"><?php esc_html_e( 'From Name', 'formtura' ); ?></label>
 						</th>
 						<td>
 							<input type="text" 
@@ -185,7 +185,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 								value="<?php echo esc_attr( isset( $settings['from_name'] ) ? $settings['from_name'] : get_bloginfo( 'name' ) ); ?>" 
 								class="regular-text">
 							<p class="description">
-								<?php esc_html_e( 'Default sender name for form notifications.', FORMTURA_TEXTDOMAIN ); ?>
+								<?php esc_html_e( 'Default sender name for form notifications.', 'formtura' ); ?>
 							</p>
 						</td>
 					</tr>
@@ -196,7 +196,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			
 			<p class="submit">
 				<button type="submit" class="fta-button fta-button-primary fta-save-settings">
-					<?php esc_html_e( 'Save Settings', FORMTURA_TEXTDOMAIN ); ?>
+					<?php esc_html_e( 'Save Settings', 'formtura' ); ?>
 				</button>
 			</p>
 		</form>
@@ -212,7 +212,7 @@ jQuery(document).ready(function($) {
 		var $button = $form.find('.fta-save-settings');
 		var buttonText = $button.text();
 		
-		$button.prop('disabled', true).text('<?php esc_html_e( 'Saving...', FORMTURA_TEXTDOMAIN ); ?>');
+		$button.prop('disabled', true).text('<?php esc_html_e( 'Saving...', 'formtura' ); ?>');
 		
 		$.ajax({
 			url: ajaxurl,
@@ -228,13 +228,13 @@ jQuery(document).ready(function($) {
 			},
 			success: function(response) {
 				if (response.success) {
-					window.FormturaAdmin.showNotice('<?php esc_html_e( 'Settings saved successfully.', FORMTURA_TEXTDOMAIN ); ?>', 'success');
+					window.FormturaAdmin.showNotice('<?php esc_html_e( 'Settings saved successfully.', 'formtura' ); ?>', 'success');
 				} else {
-					window.FormturaAdmin.showNotice(response.data.message || '<?php esc_html_e( 'Failed to save settings.', FORMTURA_TEXTDOMAIN ); ?>', 'error');
+					window.FormturaAdmin.showNotice(response.data.message || '<?php esc_html_e( 'Failed to save settings.', 'formtura' ); ?>', 'error');
 				}
 			},
 			error: function() {
-				window.FormturaAdmin.showNotice('<?php esc_html_e( 'An error occurred while saving settings.', FORMTURA_TEXTDOMAIN ); ?>', 'error');
+				window.FormturaAdmin.showNotice('<?php esc_html_e( 'An error occurred while saving settings.', 'formtura' ); ?>', 'error');
 			},
 			complete: function() {
 				$button.prop('disabled', false).text(buttonText);

@@ -105,13 +105,13 @@ class Frontend {
 						'symbol' => fta_get_currency_symbol(),
 					],
 					'strings'   => [
-						'submitting'       => __( 'Submitting...', FORMTURA_TEXTDOMAIN ),
-						'error'            => __( 'An error occurred. Please try again.', FORMTURA_TEXTDOMAIN ),
-						'recaptchaMissing' => __( 'Please confirm you are not a robot.', FORMTURA_TEXTDOMAIN ),
-						'recaptchaError'   => __( 'reCAPTCHA could not be loaded. Please reload the page and try again.', FORMTURA_TEXTDOMAIN ),
-						'signatureMissing' => __( 'Please add your signature.', FORMTURA_TEXTDOMAIN ),
-						'couponApplied'    => __( 'Coupon applied.', FORMTURA_TEXTDOMAIN ),
-						'couponInvalid'    => __( 'This coupon code is not valid.', FORMTURA_TEXTDOMAIN ),
+						'submitting'       => __( 'Submitting...', 'formtura' ),
+						'error'            => __( 'An error occurred. Please try again.', 'formtura' ),
+						'recaptchaMissing' => __( 'Please confirm you are not a robot.', 'formtura' ),
+						'recaptchaError'   => __( 'reCAPTCHA could not be loaded. Please reload the page and try again.', 'formtura' ),
+						'signatureMissing' => __( 'Please add your signature.', 'formtura' ),
+						'couponApplied'    => __( 'Coupon applied.', 'formtura' ),
+						'couponInvalid'    => __( 'This coupon code is not valid.', 'formtura' ),
 					],
 				]
 			);
@@ -186,7 +186,7 @@ class Frontend {
 		$form_id = absint( $atts['id'] );
 
 		if ( ! $form_id ) {
-			return '<p>' . __( 'Please provide a valid form ID.', FORMTURA_TEXTDOMAIN ) . '</p>';
+			return '<p>' . __( 'Please provide a valid form ID.', 'formtura' ) . '</p>';
 		}
 
 		return fta_render_form( $form_id );

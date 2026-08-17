@@ -222,11 +222,11 @@ class Entry_Export {
 	 */
 	private function header_row( array $columns, array $labels ) {
 		$row = [
-			__( 'Entry ID', FORMTURA_TEXTDOMAIN ),
-			__( 'Submitted', FORMTURA_TEXTDOMAIN ),
-			__( 'Status', FORMTURA_TEXTDOMAIN ),
-			__( 'IP Address', FORMTURA_TEXTDOMAIN ),
-			__( 'User Agent', FORMTURA_TEXTDOMAIN ),
+			__( 'Entry ID', 'formtura' ),
+			__( 'Submitted', 'formtura' ),
+			__( 'Status', 'formtura' ),
+			__( 'IP Address', 'formtura' ),
+			__( 'User Agent', 'formtura' ),
 		];
 
 		foreach ( $columns as $key ) {
@@ -252,7 +252,7 @@ class Entry_Export {
 		$row = [
 			isset( $entry['id'] ) ? (string) $entry['id'] : '',
 			isset( $entry['created_at'] ) ? (string) $entry['created_at'] : '',
-			! empty( $entry['is_read'] ) ? __( 'Read', FORMTURA_TEXTDOMAIN ) : __( 'Unread', FORMTURA_TEXTDOMAIN ),
+			! empty( $entry['is_read'] ) ? __( 'Read', 'formtura' ) : __( 'Unread', 'formtura' ),
 			isset( $entry['ip_address'] ) ? (string) $entry['ip_address'] : '',
 			isset( $entry['user_agent'] ) ? (string) $entry['user_agent'] : '',
 		];

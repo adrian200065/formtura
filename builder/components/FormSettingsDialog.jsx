@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { __ } from '../utils/i18n';
 
 /**
  * FormSettingsDialog - Edit the form-level settings the builder otherwise
@@ -97,23 +98,23 @@ const FormSettingsDialog = ({ isOpen, formSettings = {}, onSave, onClose }) => {
       >
         <div className="formtura-confirm-content">
           <h3 id="form-settings-dialog-title" className="formtura-confirm-title">
-            Form settings
+            {__('Form settings', 'formtura')}
           </h3>
 
           <div className="formtura-form-group">
-            <label htmlFor="formtura-settings-title">Form Title</label>
+            <label htmlFor="formtura-settings-title">{__('Form Title', 'formtura')}</label>
             <input
               id="formtura-settings-title"
               ref={titleInputRef}
               type="text"
               value={draft.title || ''}
               onChange={(e) => update('title', e.target.value)}
-              placeholder="Untitled form"
+              placeholder={__('Untitled form', 'formtura')}
             />
           </div>
 
           <div className="formtura-form-group">
-            <label htmlFor="formtura-settings-description">Description</label>
+            <label htmlFor="formtura-settings-description">{__('Description', 'formtura')}</label>
             <textarea
               id="formtura-settings-description"
               value={draft.description || ''}
@@ -123,24 +124,24 @@ const FormSettingsDialog = ({ isOpen, formSettings = {}, onSave, onClose }) => {
           </div>
 
           <div className="formtura-form-group">
-            <label htmlFor="formtura-settings-submit-text">Submit Button Text</label>
+            <label htmlFor="formtura-settings-submit-text">{__('Submit Button Text', 'formtura')}</label>
             <input
               id="formtura-settings-submit-text"
               type="text"
               value={draft.submitButtonText || ''}
               onChange={(e) => update('submitButtonText', e.target.value)}
-              placeholder="Submit"
+              placeholder={__('Submit', 'formtura')}
             />
           </div>
 
           <div className="formtura-form-group">
-            <label htmlFor="formtura-settings-success-message">Success Message</label>
+            <label htmlFor="formtura-settings-success-message">{__('Success Message', 'formtura')}</label>
             <textarea
               id="formtura-settings-success-message"
               value={draft.successMessage || ''}
               onChange={(e) => update('successMessage', e.target.value)}
               rows={3}
-              placeholder="Thank you for your submission!"
+              placeholder={__('Thank you for your submission!', 'formtura')}
             />
           </div>
         </div>
@@ -151,14 +152,14 @@ const FormSettingsDialog = ({ isOpen, formSettings = {}, onSave, onClose }) => {
             className="formtura-confirm-btn formtura-confirm-btn-primary"
             onClick={handleSave}
           >
-            Save
+            {__('Save', 'formtura')}
           </button>
           <button
             type="button"
             className="formtura-confirm-btn formtura-confirm-btn-secondary"
             onClick={onClose}
           >
-            Cancel
+            {__('Cancel', 'formtura')}
           </button>
         </div>
       </div>

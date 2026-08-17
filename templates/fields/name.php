@@ -32,9 +32,9 @@ $formats = [
 $parts = isset( $formats[ $format ] ) ? $formats[ $format ] : [];
 
 $sublabels = [
-	'first'  => __( 'First Name', FORMTURA_TEXTDOMAIN ),
-	'middle' => __( 'Middle Name', FORMTURA_TEXTDOMAIN ),
-	'last'   => __( 'Last Name', FORMTURA_TEXTDOMAIN ),
+	'first'  => __( 'First Name', 'formtura' ),
+	'middle' => __( 'Middle Name', 'formtura' ),
+	'last'   => __( 'Last Name', 'formtura' ),
 ];
 
 $placeholders = [

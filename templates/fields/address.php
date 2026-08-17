@@ -25,12 +25,12 @@ $legend         = isset( $field['label'] ) ? $field['label'] : '';
 $scheme         = isset( $field['scheme'] ) && 'international' === $field['scheme'] ? 'international' : 'us';
 
 $sublabels = [
-	'line1'   => __( 'Address Line 1', FORMTURA_TEXTDOMAIN ),
-	'line2'   => __( 'Address Line 2', FORMTURA_TEXTDOMAIN ),
-	'city'    => __( 'City', FORMTURA_TEXTDOMAIN ),
-	'state'   => 'international' === $scheme ? __( 'State / Province / Region', FORMTURA_TEXTDOMAIN ) : __( 'State', FORMTURA_TEXTDOMAIN ),
-	'zip'     => 'international' === $scheme ? __( 'Postal Code', FORMTURA_TEXTDOMAIN ) : __( 'ZIP Code', FORMTURA_TEXTDOMAIN ),
-	'country' => __( 'Country', FORMTURA_TEXTDOMAIN ),
+	'line1'   => __( 'Address Line 1', 'formtura' ),
+	'line2'   => __( 'Address Line 2', 'formtura' ),
+	'city'    => __( 'City', 'formtura' ),
+	'state'   => 'international' === $scheme ? __( 'State / Province / Region', 'formtura' ) : __( 'State', 'formtura' ),
+	'zip'     => 'international' === $scheme ? __( 'Postal Code', 'formtura' ) : __( 'ZIP Code', 'formtura' ),
+	'country' => __( 'Country', 'formtura' ),
 ];
 
 // line2 and country stay optional even when the field is required.

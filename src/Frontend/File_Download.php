@@ -99,7 +99,7 @@ class File_Download {
 	 */
 	public function handle() {
 		if ( ! is_user_logged_in() || ! current_user_can( self::CAPABILITY ) ) {
-			$this->deny( __( 'You do not have permission to access this file.', FORMTURA_TEXTDOMAIN ), 403 );
+			$this->deny( __( 'You do not have permission to access this file.', 'formtura' ), 403 );
 		}
 
 		$entry_id = isset( $_GET['entry_id'] ) ? absint( $_GET['entry_id'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification
@@ -107,19 +107,19 @@ class File_Download {
 		$index    = isset( $_GET['file'] ) ? absint( $_GET['file'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification
 
 		if ( ! $entry_id || '' === $field ) {
-			$this->deny( __( 'The requested file could not be found.', FORMTURA_TEXTDOMAIN ), 404 );
+			$this->deny( __( 'The requested file could not be found.', 'formtura' ), 404 );
 		}
 
 		$record = $this->find_record( $entry_id, $field, $index );
 
 		if ( null === $record ) {
-			$this->deny( __( 'The requested file could not be found.', FORMTURA_TEXTDOMAIN ), 404 );
+			$this->deny( __( 'The requested file could not be found.', 'formtura' ), 404 );
 		}
 
 		$path = $this->storage->resolve( $record );
 
 		if ( false === $path ) {
-			$this->deny( __( 'The requested file could not be found.', FORMTURA_TEXTDOMAIN ), 404 );
+			$this->deny( __( 'The requested file could not be found.', 'formtura' ), 404 );
 		}
 
 		$this->stream( $path, $record );
@@ -211,7 +211,7 @@ class File_Download {
 	private function deny( $message, $status ) {
 		wp_die(
 			esc_html( $message ),
-			esc_html__( 'Formtura', FORMTURA_TEXTDOMAIN ),
+			esc_html__( 'Formtura', 'formtura' ),
 			[ 'response' => $status ]
 		);
 	}

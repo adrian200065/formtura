@@ -174,7 +174,7 @@ class SMTP {
 		// Check permissions.
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error( [
-				'message' => __( 'You do not have permission to perform this action.', FORMTURA_TEXTDOMAIN ),
+				'message' => __( 'You do not have permission to perform this action.', 'formtura' ),
 			] );
 		}
 
@@ -189,11 +189,11 @@ class SMTP {
 
 		if ( $result ) {
 			wp_send_json_success( [
-				'message' => __( 'SMTP settings saved successfully.', FORMTURA_TEXTDOMAIN ),
+				'message' => __( 'SMTP settings saved successfully.', 'formtura' ),
 			] );
 		} else {
 			wp_send_json_error( [
-				'message' => __( 'Failed to save SMTP settings.', FORMTURA_TEXTDOMAIN ),
+				'message' => __( 'Failed to save SMTP settings.', 'formtura' ),
 			] );
 		}
 	}
@@ -210,7 +210,7 @@ class SMTP {
 		// Check permissions.
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error( [
-				'message' => __( 'You do not have permission to perform this action.', FORMTURA_TEXTDOMAIN ),
+				'message' => __( 'You do not have permission to perform this action.', 'formtura' ),
 			] );
 		}
 
@@ -218,23 +218,23 @@ class SMTP {
 
 		if ( ! is_email( $email ) ) {
 			wp_send_json_error( [
-				'message' => __( 'Please enter a valid email address.', FORMTURA_TEXTDOMAIN ),
+				'message' => __( 'Please enter a valid email address.', 'formtura' ),
 			] );
 		}
 
 		// Send test email.
-		$subject = __( 'Formtura Test Email', FORMTURA_TEXTDOMAIN );
-		$message = __( 'This is a test email from Formtura. If you received this, your SMTP configuration is working correctly!', FORMTURA_TEXTDOMAIN );
+		$subject = __( 'Formtura Test Email', 'formtura' );
+		$message = __( 'This is a test email from Formtura. If you received this, your SMTP configuration is working correctly!', 'formtura' );
 
 		$result = wp_mail( $email, $subject, $message );
 
 		if ( $result ) {
 			wp_send_json_success( [
-				'message' => __( 'Test email sent successfully! Please check your inbox.', FORMTURA_TEXTDOMAIN ),
+				'message' => __( 'Test email sent successfully! Please check your inbox.', 'formtura' ),
 			] );
 		} else {
 			wp_send_json_error( [
-				'message' => __( 'Failed to send test email. Please check your SMTP settings.', FORMTURA_TEXTDOMAIN ),
+				'message' => __( 'Failed to send test email. Please check your SMTP settings.', 'formtura' ),
 			] );
 		}
 	}

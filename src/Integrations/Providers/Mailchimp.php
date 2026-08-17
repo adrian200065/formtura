@@ -140,7 +140,7 @@ class Mailchimp {
 	 */
 	private function api_request( $endpoint, $method = 'GET', $data = [] ) {
 		if ( empty( $this->api_key ) || empty( $this->api_endpoint ) ) {
-			return new \WP_Error( 'no_api_key', __( 'Mailchimp API key not configured.', FORMTURA_TEXTDOMAIN ) );
+			return new \WP_Error( 'no_api_key', __( 'Mailchimp API key not configured.', 'formtura' ) );
 		}
 
 		$url = $this->api_endpoint . $endpoint;
@@ -170,7 +170,7 @@ class Mailchimp {
 		if ( $code >= 400 ) {
 			return new \WP_Error(
 				'api_error',
-				isset( $body['detail'] ) ? $body['detail'] : __( 'Mailchimp API error.', FORMTURA_TEXTDOMAIN )
+				isset( $body['detail'] ) ? $body['detail'] : __( 'Mailchimp API error.', 'formtura' )
 			);
 		}
 

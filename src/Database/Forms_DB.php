@@ -116,7 +116,7 @@ class Forms_DB {
 		global $wpdb;
 
 		$defaults = [
-			'title'       => __( 'Untitled Form', FORMTURA_TEXTDOMAIN ),
+			'title'       => __( 'Untitled Form', 'formtura' ),
 			'description' => '',
 			'fields'      => [],
 			'settings'    => [],

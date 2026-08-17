@@ -156,4 +156,39 @@ class EntryPagingTest extends TestCase {
 			$this->queryFor( [ 'orderby' => 'form_id' ] )
 		);
 	}
+
+	/**
+	 * Keyset paging: a caller that already holds the id of the last row it
+	 * read can ask for whatever comes after it directly, instead of asking
+	 * the database to skip a row count that a concurrent insert can shift out
+	 * from under it.
+	 */
+	public function test_after_id_seeks_past_the_given_row_instead_of_using_offset() {
+		$query = $this->queryFor( [ 'after_id' => 55, 'per_page' => 50 ] );
+
+		$this->assertStringContainsString( 'id < 55', $query );
+		$this->assertStringNotContainsString( 'OFFSET', $query );
+		$this->assertStringContainsString( 'LIMIT 50', $query );
+	}
+
+	/**
+	 * An ascending seek looks for rows past the cursor in the other
+	 * direction.
+	 */
+	public function test_after_id_follows_the_requested_direction() {
+		$query = $this->queryFor( [ 'after_id' => 55, 'order' => 'ASC' ] );
+
+		$this->assertStringContainsString( 'id > 55', $query );
+	}
+
+	/**
+	 * page/per_page must still work exactly as before when no cursor is
+	 * given - after_id is opt-in.
+	 */
+	public function test_without_after_id_offset_paging_is_unchanged() {
+		$this->assertStringContainsString(
+			'LIMIT 200 OFFSET 400',
+			$this->queryFor( [ 'page' => 3, 'per_page' => 200 ] )
+		);
+	}
 }

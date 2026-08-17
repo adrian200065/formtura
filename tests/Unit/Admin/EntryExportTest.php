@@ -255,6 +255,32 @@ class EntryExportTest extends TestCase {
 	}
 
 	/**
+	 * OFFSET paging skips whatever a concurrent insert pushes across the page
+	 * boundary while a multi-page export is in progress: an insert landing
+	 * ahead of the cursor shifts every existing row down by one, so the next
+	 * OFFSET-based page starts one row later than it should and silently
+	 * drops the row that shift pushed across it. Seeking from the id of the
+	 * last row actually read has nothing to skip - it is unaffected by rows
+	 * inserted anywhere else.
+	 */
+	public function test_an_entry_arriving_mid_export_does_not_cause_a_row_to_be_skipped() {
+		// Larger than Entry_Export::BATCH_SIZE, so the export needs a second
+		// page and the insert - timed for right after the first page is
+		// read - actually lands between two paging calls.
+		$source = $this->raceProneSource( 250, 1 );
+
+		$rows = $this->rows( $this->exporter( $source )->for_form( 7, $this->form() ) );
+
+		// One header row plus the 250 entries that existed when the export
+		// began - the entry inserted mid-export is not expected to appear,
+		// but nothing that existed at the start should be missing.
+		$this->assertCount( 251, $rows );
+
+		$ids = array_column( array_slice( $rows, 1 ), 0 );
+		$this->assertEqualsCanonicalizing( range( 1, 250 ), array_map( 'intval', $ids ) );
+	}
+
+	/**
 	 * An entries source holding a fixed number of entries, which honours the
 	 * page/per_page arguments the exporter pages with.
 	 *
@@ -268,6 +294,11 @@ class EntryExportTest extends TestCase {
 			$entries[] = $this->entry( $i, [ 'field_1' => 'Visitor ' . $i ] );
 		}
 
+		// Newest first, matching Entries_DB's default ORDER BY created_at
+		// DESC, id DESC - required for the after_id branch below to behave
+		// like the real query.
+		$entries = array_reverse( $entries );
+
 		return new class( $entries ) {
 			public $calls = 0;
 			private $entries;
@@ -280,9 +311,108 @@ class EntryExportTest extends TestCase {
 				$this->calls++;
 
 				$per_page = isset( $args['per_page'] ) ? (int) $args['per_page'] : 20;
-				$page     = isset( $args['page'] ) ? max( 1, (int) $args['page'] ) : 1;
+
+				if ( isset( $args['after_id'] ) ) {
+					$after = (int) $args['after_id'];
+
+					$remaining = array_values(
+						array_filter(
+							$this->entries,
+							static function ( $entry ) use ( $after ) {
+								return $entry['id'] < $after;
+							}
+						)
+					);
+
+					return array_slice( $remaining, 0, $per_page );
+				}
+
+				$page = isset( $args['page'] ) ? max( 1, (int) $args['page'] ) : 1;
 
 				return array_slice( $this->entries, ( $page - 1 ) * $per_page, $per_page );
+			}
+		};
+	}
+
+	/**
+	 * An entries source ordered newest-first (descending id, matching the
+	 * database's default order) that inserts one new row - simulating a
+	 * visitor submitting mid-export - the call after the given one.
+	 *
+	 * @param int $total          Entries that exist when the export starts.
+	 * @param int $insert_after_call Number of get_by_form() calls to serve
+	 *        before the new entry lands.
+	 * @return object
+	 */
+	private function raceProneSource( $total, $insert_after_call ) {
+		$entries = [];
+
+		for ( $i = 1; $i <= $total; $i++ ) {
+			$entries[] = $this->entry( $i, [ 'field_1' => 'Visitor ' . $i ] );
+		}
+
+		// Newest first, matching Entries_DB's default ORDER BY created_at
+		// DESC, id DESC.
+		$entries = array_reverse( $entries );
+
+		$latecomer = [
+			'id'         => 999,
+			'form_id'    => 7,
+			'user_id'    => 0,
+			'ip_address' => '203.0.113.9',
+			'user_agent' => 'Mozilla/5.0',
+			'is_read'    => false,
+			'created_at' => '2026-08-15 09:30:01',
+			'data'       => [ 'field_1' => 'Latecomer' ],
+		];
+
+		return new class( $entries, $insert_after_call, $latecomer ) {
+			public $calls = 0;
+			private $entries;
+			private $insert_after_call;
+			private $latecomer;
+
+			public function __construct( $entries, $insert_after_call, $latecomer ) {
+				$this->entries           = $entries;
+				$this->insert_after_call = $insert_after_call;
+				$this->latecomer         = $latecomer;
+			}
+
+			public function get_by_form( $form_id, $args = [] ) {
+				$this->calls++;
+
+				$per_page = isset( $args['per_page'] ) ? (int) $args['per_page'] : 20;
+
+				if ( isset( $args['after_id'] ) ) {
+					$after = (int) $args['after_id'];
+
+					$remaining = array_values(
+						array_filter(
+							$this->entries,
+							static function ( $entry ) use ( $after ) {
+								return $entry['id'] < $after;
+							}
+						)
+					);
+
+					$result = array_slice( $remaining, 0, $per_page );
+				} else {
+					// OFFSET paging: a plain slice from the front of whatever
+					// the list looks like right now, which is exactly what
+					// makes it race-prone.
+					$page = isset( $args['page'] ) ? max( 1, (int) $args['page'] ) : 1;
+
+					$result = array_slice( $this->entries, ( $page - 1 ) * $per_page, $per_page );
+				}
+
+				if ( $this->calls === $this->insert_after_call ) {
+					// A new entry arrives right after this page was read,
+					// newest-first means it lands at the front of the result
+					// set - ahead of every row not yet paged through.
+					array_unshift( $this->entries, $this->latecomer );
+				}
+
+				return $result;
 			}
 		};
 	}

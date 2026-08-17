@@ -90,32 +90,39 @@ class Entry_Export {
 	 * applies the default 20-row limit - so any form past its first page
 	 * exported a truncated file with nothing to say so.
 	 *
+	 * Paged with a keyset cursor (the id of the last row read) rather than
+	 * OFFSET. OFFSET counts rows from the start of the result on every call,
+	 * so an entry submitted while the export is still paging shifts every
+	 * row after it and the next OFFSET lands on the wrong row - serving one
+	 * row twice or, depending on timing, skipping one entirely. Seeking past
+	 * the last id actually read is unaffected by what gets inserted
+	 * elsewhere in the table.
+	 *
 	 * @since 1.0.6
 	 * @param int $form_id Form ID.
 	 * @return array[] Entries.
 	 */
 	private function read_all( $form_id ) {
-		$all  = [];
-		$page = 1;
+		$all      = [];
+		$after_id = null;
 
 		do {
-			$batch = $this->entries()->get_by_form(
-				$form_id,
-				[
-					'page'     => $page,
-					'per_page' => self::BATCH_SIZE,
-				]
-			);
+			$args = [ 'per_page' => self::BATCH_SIZE ];
+
+			if ( null !== $after_id ) {
+				$args['after_id'] = $after_id;
+			}
+
+			$batch = $this->entries()->get_by_form( $form_id, $args );
 
 			if ( ! is_array( $batch ) || empty( $batch ) ) {
 				break;
 			}
 
 			foreach ( $batch as $entry ) {
-				$all[] = $entry;
+				$all[]    = $entry;
+				$after_id = $entry['id'];
 			}
-
-			$page++;
 		} while ( count( $batch ) === self::BATCH_SIZE );
 
 		return $all;

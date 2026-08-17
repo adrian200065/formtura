@@ -155,7 +155,22 @@ class Entries_DB {
 
 		$orderby = $this->make_order_total( $orderby, $args['order'] );
 
-		$query = "SELECT * FROM {$this->table_name} WHERE {$where} ORDER BY {$orderby} LIMIT {$limit} OFFSET {$offset}";
+		// Keyset paging: seek past the row a caller already read instead of
+		// skipping a row count. OFFSET counts rows from the start of the
+		// result on every call, so an insert landing ahead of the cursor
+		// while a multi-page read is in progress - a busy form's export, for
+		// example - shifts every row after it by one and the page boundary
+		// silently skips the row that shift pushed across it. Seeking from
+		// the last row's own id has nothing to skip: the next page starts
+		// strictly after that id regardless of what was inserted elsewhere.
+		if ( isset( $requested['after_id'] ) ) {
+			$comparison = 'ASC' === strtoupper( (string) $args['order'] ) ? '>' : '<';
+			$where     .= $wpdb->prepare( " AND id {$comparison} %d", absint( $requested['after_id'] ) );
+
+			$query = "SELECT * FROM {$this->table_name} WHERE {$where} ORDER BY {$orderby} LIMIT {$limit}";
+		} else {
+			$query = "SELECT * FROM {$this->table_name} WHERE {$where} ORDER BY {$orderby} LIMIT {$limit} OFFSET {$offset}";
+		}
 
 		$entries = $wpdb->get_results( $query, ARRAY_A );
 

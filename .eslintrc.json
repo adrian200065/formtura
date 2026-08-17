@@ -1,0 +1,83 @@
+{
+  "root": true,
+  "env": {
+    "browser": true,
+    "es2021": true
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:react/recommended",
+    "plugin:react/jsx-runtime",
+    "plugin:react-hooks/recommended"
+  ],
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "jsx": true
+    }
+  },
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
+  },
+  "rules": {
+    "no-unused-vars": ["warn", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
+    "react/prop-types": "off"
+  },
+  "ignorePatterns": [
+    "node_modules/",
+    "vendor/",
+    "dist/",
+    "assets/js/builder.js",
+    "assets/js/builder.js.map"
+  ],
+  "overrides": [
+    {
+      "files": ["assets/js/admin.js", "assets/js/entries.js", "assets/js/frontend.js"],
+      "env": {
+        "browser": true,
+        "jquery": true,
+        "es2021": false,
+        "es6": true
+      },
+      "parserOptions": {
+        "sourceType": "script"
+      },
+      "globals": {
+        "ajaxurl": "readonly",
+        "formturaAdmin": "readonly",
+        "formturaFrontend": "readonly",
+        "formturaEntries": "readonly",
+        "grecaptcha": "readonly"
+      }
+    },
+    {
+      "files": ["builder/utils/errorHandler.js"],
+      "globals": {
+        "process": "readonly"
+      }
+    },
+    {
+      "files": [
+        "**/__tests__/**/*.[jt]s?(x)",
+        "**/*.test.[jt]s?(x)",
+        "jest.setup.js"
+      ],
+      "env": {
+        "jest": true,
+        "node": true
+      }
+    },
+    {
+      "files": ["jest.config.js"],
+      "env": {
+        "node": true
+      },
+      "parserOptions": {
+        "sourceType": "script"
+      }
+    }
+  ]
+}

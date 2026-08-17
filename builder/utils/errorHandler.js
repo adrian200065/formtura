@@ -18,7 +18,11 @@ export const LogLevel = {
  * Check if we're in development mode
  */
 const isDevelopment = () => {
-  return window.formturaBuilder?.debug === true || process.env.NODE_ENV === 'development';
+  // Vite never defines a `process` global for browser code - only Node
+  // tooling (Jest included) does - so this has to check for its existence
+  // before reading off of it.
+  return window.formturaBuilder?.debug === true
+    || ( typeof process !== 'undefined' && process.env.NODE_ENV === 'development' );
 };
 
 /**

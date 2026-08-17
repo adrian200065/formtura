@@ -36,11 +36,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 						</th>
 						<td>
 							<label>
-								<input type="checkbox" 
-									id="fta-smtp-enable" 
-									name="smtp_settings[enable_smtp]" 
-									value="1" 
-									<?php checked( isset( $smtp_settings['enable_smtp'] ) ? $smtp_settings['enable_smtp'] : false, 1 ); ?>>
+								<input type="checkbox"
+									id="fta-smtp-enable"
+									name="smtp_settings[enabled]"
+									value="1"
+									<?php checked( isset( $smtp_settings['enabled'] ) ? $smtp_settings['enabled'] : false, 1 ); ?>>
 								<?php esc_html_e( 'Use SMTP for sending emails', FORMTURA_TEXTDOMAIN ); ?>
 							</label>
 						</td>
@@ -139,14 +139,27 @@ if ( ! defined( 'ABSPATH' ) ) {
 							<label for="fta-smtp-password"><?php esc_html_e( 'Password', FORMTURA_TEXTDOMAIN ); ?></label>
 						</th>
 						<td>
-							<input type="password" 
-								id="fta-smtp-password" 
-								name="smtp_settings[smtp_password]" 
-								value="<?php echo esc_attr( isset( $smtp_settings['smtp_password'] ) ? $smtp_settings['smtp_password'] : '' ); ?>" 
+							<?php
+							// Never rendered: the stored value is encrypted at
+							// rest, and putting it back in the page would
+							// undo that the moment anyone views source. A
+							// blank submission on save leaves the stored
+							// password untouched - see
+							// SMTP::encrypted_secret().
+							?>
+							<input type="password"
+								id="fta-smtp-password"
+								name="smtp_settings[smtp_password]"
+								value=""
 								class="regular-text"
-								autocomplete="new-password">
+								autocomplete="new-password"
+								placeholder="<?php echo ! empty( $smtp_settings['smtp_password'] ) ? esc_attr__( 'Leave blank to keep the saved password', FORMTURA_TEXTDOMAIN ) : ''; ?>">
 							<p class="description">
-								<?php esc_html_e( 'Your SMTP password will be stored encrypted.', FORMTURA_TEXTDOMAIN ); ?>
+								<?php if ( ! empty( $smtp_settings['smtp_password'] ) ) : ?>
+									<?php esc_html_e( 'A password is already saved, encrypted. Enter a new one to replace it.', FORMTURA_TEXTDOMAIN ); ?>
+								<?php else : ?>
+									<?php esc_html_e( 'Your SMTP password will be stored encrypted.', FORMTURA_TEXTDOMAIN ); ?>
+								<?php endif; ?>
 							</p>
 						</td>
 					</tr>
@@ -179,6 +192,21 @@ if ( ! defined( 'ABSPATH' ) ) {
 								class="regular-text">
 							<p class="description">
 								<?php esc_html_e( 'Name to send from.', FORMTURA_TEXTDOMAIN ); ?>
+							</p>
+						</td>
+					</tr>
+
+					<tr class="fta-smtp-field">
+						<th scope="row">
+							<label for="fta-smtp-test-email"><?php esc_html_e( 'Send Test Email To', FORMTURA_TEXTDOMAIN ); ?></label>
+						</th>
+						<td>
+							<input type="email"
+								id="fta-smtp-test-email"
+								value="<?php echo esc_attr( get_option( 'admin_email' ) ); ?>"
+								class="regular-text">
+							<p class="description">
+								<?php esc_html_e( 'Save your settings first, then send a test message to this address.', FORMTURA_TEXTDOMAIN ); ?>
 							</p>
 						</td>
 					</tr>
@@ -267,15 +295,22 @@ jQuery(document).ready(function($) {
 	$('.fta-test-smtp').on('click', function() {
 		var $button = $(this);
 		var buttonText = $button.text();
-		
+		var email = $('#fta-smtp-test-email').val();
+
+		if (!email) {
+			window.FormturaAdmin.showNotice('<?php esc_html_e( 'Enter an email address to send the test to.', FORMTURA_TEXTDOMAIN ); ?>', 'error');
+			return;
+		}
+
 		$button.prop('disabled', true).text('<?php esc_html_e( 'Sending...', FORMTURA_TEXTDOMAIN ); ?>');
-		
+
 		$.ajax({
 			url: ajaxurl,
 			type: 'POST',
 			data: {
-				action: 'fta_test_smtp',
-				nonce: $('#formtura_nonce').val()
+				action: 'fta_send_test_email',
+				nonce: $('#formtura_nonce').val(),
+				email: email
 			},
 			success: function(response) {
 				if (response.success) {

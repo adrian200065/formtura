@@ -104,7 +104,7 @@ class SMTP {
 		$phpmailer->Port = fta_get_smtp_setting( 'smtp_port', 587 );
 		$phpmailer->SMTPAuth = fta_get_smtp_setting( 'smtp_auth', true );
 		$phpmailer->Username = fta_get_smtp_setting( 'smtp_username', '' );
-		$phpmailer->Password = fta_get_smtp_setting( 'smtp_password', '' );
+		$phpmailer->Password = Secret_Crypto::decrypt( fta_get_smtp_setting( 'smtp_password', '' ) );
 		$phpmailer->SMTPSecure = fta_get_smtp_setting( 'smtp_encryption', 'tls' );
 	}
 
@@ -120,7 +120,7 @@ class SMTP {
 		$phpmailer->Port = 587;
 		$phpmailer->SMTPAuth = true;
 		$phpmailer->Username = 'apikey';
-		$phpmailer->Password = fta_get_smtp_setting( 'sendgrid_api_key', '' );
+		$phpmailer->Password = Secret_Crypto::decrypt( fta_get_smtp_setting( 'sendgrid_api_key', '' ) );
 		$phpmailer->SMTPSecure = 'tls';
 	}
 
@@ -139,7 +139,7 @@ class SMTP {
 		$phpmailer->Port = 587;
 		$phpmailer->SMTPAuth = true;
 		$phpmailer->Username = fta_get_smtp_setting( 'mailgun_username', '' );
-		$phpmailer->Password = fta_get_smtp_setting( 'mailgun_password', '' );
+		$phpmailer->Password = Secret_Crypto::decrypt( fta_get_smtp_setting( 'mailgun_password', '' ) );
 		$phpmailer->SMTPSecure = 'tls';
 	}
 
@@ -158,7 +158,7 @@ class SMTP {
 		$phpmailer->Port = 587;
 		$phpmailer->SMTPAuth = true;
 		$phpmailer->Username = fta_get_smtp_setting( 'ses_access_key', '' );
-		$phpmailer->Password = fta_get_smtp_setting( 'ses_secret_key', '' );
+		$phpmailer->Password = Secret_Crypto::decrypt( fta_get_smtp_setting( 'ses_secret_key', '' ) );
 		$phpmailer->SMTPSecure = 'tls';
 	}
 
@@ -284,7 +284,7 @@ class SMTP {
 		}
 
 		if ( isset( $settings['smtp_password'] ) ) {
-			$sanitized['smtp_password'] = $settings['smtp_password']; // Don't sanitize password.
+			$sanitized['smtp_password'] = $this->encrypted_secret( $settings['smtp_password'], 'smtp_password' ); // Don't sanitize password.
 		}
 
 		if ( isset( $settings['smtp_encryption'] ) ) {
@@ -293,7 +293,7 @@ class SMTP {
 
 		// SendGrid settings.
 		if ( isset( $settings['sendgrid_api_key'] ) ) {
-			$sanitized['sendgrid_api_key'] = sanitize_text_field( $settings['sendgrid_api_key'] );
+			$sanitized['sendgrid_api_key'] = $this->encrypted_secret( sanitize_text_field( $settings['sendgrid_api_key'] ), 'sendgrid_api_key' );
 		}
 
 		// Mailgun settings.
@@ -302,7 +302,7 @@ class SMTP {
 		}
 
 		if ( isset( $settings['mailgun_password'] ) ) {
-			$sanitized['mailgun_password'] = $settings['mailgun_password'];
+			$sanitized['mailgun_password'] = $this->encrypted_secret( $settings['mailgun_password'], 'mailgun_password' );
 		}
 
 		if ( isset( $settings['mailgun_region'] ) ) {
@@ -315,7 +315,7 @@ class SMTP {
 		}
 
 		if ( isset( $settings['ses_secret_key'] ) ) {
-			$sanitized['ses_secret_key'] = $settings['ses_secret_key'];
+			$sanitized['ses_secret_key'] = $this->encrypted_secret( $settings['ses_secret_key'], 'ses_secret_key' );
 		}
 
 		if ( isset( $settings['ses_region'] ) ) {
@@ -323,5 +323,29 @@ class SMTP {
 		}
 
 		return $sanitized;
+	}
+
+	/**
+	 * Encrypt a submitted secret for storage, or keep the one already saved.
+	 *
+	 * The settings screen never re-renders a saved secret's real value (see
+	 * the password field in smtp-settings.php), so the form always resubmits
+	 * it blank unless the administrator is actively changing it. Encrypting
+	 * an empty submission would overwrite - and lose - a working credential
+	 * every time any other field on the form is saved.
+	 *
+	 * @since 1.0.7
+	 * @param mixed  $submitted Raw submitted value.
+	 * @param string $key       Setting key, used to look up the current value.
+	 * @return string
+	 */
+	private function encrypted_secret( $submitted, $key ) {
+		$submitted = (string) $submitted;
+
+		if ( '' === $submitted ) {
+			return fta_get_smtp_setting( $key, '' );
+		}
+
+		return Secret_Crypto::encrypt( $submitted );
 	}
 }

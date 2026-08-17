@@ -141,6 +141,12 @@ if ( ! function_exists( 'esc_attr_e' ) ) {
 	}
 }
 
+if ( ! function_exists( 'esc_attr__' ) ) {
+	function esc_attr__( $text, $domain = 'default' ) {
+		return htmlspecialchars( (string) $text, ENT_QUOTES, 'UTF-8' );
+	}
+}
+
 if ( ! function_exists( 'esc_html_e' ) ) {
 	function esc_html_e( $text, $domain = 'default' ) {
 		echo htmlspecialchars( (string) $text, ENT_QUOTES, 'UTF-8' );
@@ -774,5 +780,48 @@ if ( ! function_exists( 'trailingslashit' ) ) {
 if ( ! function_exists( 'untrailingslashit' ) ) {
 	function untrailingslashit( $value ) {
 		return rtrim( $value, '/\\' );
+	}
+}
+
+if ( ! function_exists( 'sanitize_email' ) ) {
+	function sanitize_email( $email ) {
+		return trim( (string) $email );
+	}
+}
+
+if ( ! function_exists( 'is_email' ) ) {
+	function is_email( $email ) {
+		$email = (string) $email;
+
+		return false !== filter_var( $email, FILTER_VALIDATE_EMAIL ) ? $email : false;
+	}
+}
+
+if ( ! function_exists( 'wp_mail' ) ) {
+	/**
+	 * Records the call in $GLOBALS['fta_test_last_mail'] so a test can assert
+	 * on what was sent. Returns $GLOBALS['fta_test_wp_mail_result'] (default
+	 * true) so a test can simulate a delivery failure.
+	 */
+	function wp_mail( $to, $subject, $message, $headers = '', $attachments = [] ) {
+		$GLOBALS['fta_test_last_mail'] = [
+			'to'      => $to,
+			'subject' => $subject,
+			'message' => $message,
+			'headers' => $headers,
+		];
+
+		return isset( $GLOBALS['fta_test_wp_mail_result'] ) ? $GLOBALS['fta_test_wp_mail_result'] : true;
+	}
+}
+
+if ( ! function_exists( 'wp_salt' ) ) {
+	/**
+	 * Real WordPress derives this from the AUTH_KEY/AUTH_SALT constants (or a
+	 * generated fallback). A fixed, non-empty per-scheme string is enough for
+	 * tests - what matters is that it is stable across calls within a run.
+	 */
+	function wp_salt( $scheme = 'auth' ) {
+		return 'fta-test-salt-' . $scheme;
 	}
 }

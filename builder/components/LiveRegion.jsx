@@ -8,10 +8,12 @@ import { useEffect, useState } from 'react';
  */
 const LiveRegion = ({ politeness = 'polite' }) => {
   const [message, setMessage] = useState('');
+  const [level, setLevel] = useState(politeness);
 
   useEffect(() => {
     // Expose global API for announcing messages
-    window.formturaAnnounce = (msg, level = 'polite') => {
+    window.formturaAnnounce = (msg, msgLevel = politeness) => {
+      setLevel(msgLevel);
       setMessage(msg);
 
       // Clear after announcement
@@ -21,12 +23,12 @@ const LiveRegion = ({ politeness = 'polite' }) => {
     return () => {
       delete window.formturaAnnounce;
     };
-  }, []);
+  }, [politeness]);
 
   return (
     <div
       role="status"
-      aria-live={politeness}
+      aria-live={level}
       aria-atomic="true"
       className="formtura-sr-only"
     >

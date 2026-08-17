@@ -189,9 +189,13 @@ class Submission {
 		// Send notifications.
 		do_action( 'fta_after_form_submission', $entry_id, $form, $entry_data );
 
-		// Get success message and redirect URL.
-		$success_message = isset( $form['settings']['success_message'] )
-			? $form['settings']['success_message']
+		// Get success message and redirect URL. The builder stores this
+		// under the camelCase key it posts (see
+		// Form_Builder::sanitize_settings_data()); snake_case here never
+		// matched a saved setting, so a custom message silently fell back to
+		// the default below on every submission.
+		$success_message = isset( $form['settings']['successMessage'] )
+			? $form['settings']['successMessage']
 			: __( 'Thank you! Your form has been submitted successfully.', FORMTURA_TEXTDOMAIN );
 
 		$redirect_url = isset( $form['settings']['redirect_url'] ) ? $form['settings']['redirect_url'] : '';

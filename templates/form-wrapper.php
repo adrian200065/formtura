@@ -21,7 +21,10 @@ $form_title = isset( $form['title'] ) ? $form['title'] : '';
 $form_description = isset( $form['description'] ) ? $form['description'] : '';
 $form_fields = isset( $form['fields'] ) ? $form['fields'] : [];
 $form_settings = isset( $form['settings'] ) ? $form['settings'] : [];
-$submit_text = isset( $form_settings['submit_button_text'] ) ? $form_settings['submit_button_text'] : __( 'Submit', FORMTURA_TEXTDOMAIN );
+// The builder stores this under the camelCase key it posts (see
+// Form_Builder::sanitize_settings_data()); snake_case here never matched a
+// saved setting, so a custom label silently fell back to "Submit".
+$submit_text = isset( $form_settings['submitButtonText'] ) ? $form_settings['submitButtonText'] : __( 'Submit', FORMTURA_TEXTDOMAIN );
 $recaptcha = fta_get_recaptcha_config();
 ?>
 

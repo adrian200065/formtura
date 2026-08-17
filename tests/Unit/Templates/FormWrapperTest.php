@@ -39,19 +39,22 @@ class FormWrapperTest extends TestCase {
 	/**
 	 * Render the form wrapper and return its markup.
 	 *
+	 * @param array $form_settings Form-level settings, in the shape the
+	 *        builder saves them (see FormWrapperSettingsTest).
 	 * @return string
 	 */
-	private function render() {
+	private function render( array $form_settings = [] ) {
 		$form = [
-			'id'     => 7,
-			'title'  => 'Contact',
-			'fields' => [
+			'id'       => 7,
+			'title'    => 'Contact',
+			'fields'   => [
 				[
 					'id'    => 'field_1',
 					'type'  => 'text',
 					'label' => 'Your name',
 				],
 			],
+			'settings' => $form_settings,
 		];
 		$args = [];
 
@@ -110,5 +113,26 @@ class FormWrapperTest extends TestCase {
 		] );
 
 		$this->assertStringNotContainsString( 'super-secret-value', $this->render() );
+	}
+
+	/**
+	 * The builder saves this setting as `submitButtonText` (camelCase) - see
+	 * Form_Builder::sanitize_settings_data(). Reading `submit_button_text`
+	 * here meant a custom label set in the builder never reached the page;
+	 * the button silently fell back to "Submit" every time.
+	 */
+	public function test_submit_button_uses_the_builder_saved_setting() {
+		$html = $this->render( [ 'submitButtonText' => 'Send Message' ] );
+
+		$this->assertStringContainsString( 'Send Message', $html );
+	}
+
+	public function test_submit_button_falls_back_to_submit_when_unset() {
+		$html = $this->render();
+
+		$button = substr( $html, strpos( $html, 'fta-submit-button' ) );
+		$button = substr( $button, 0, strpos( $button, '</button>' ) );
+
+		$this->assertStringContainsString( 'Submit', $button );
 	}
 }

@@ -1,6 +1,6 @@
 import { closestCenter, DndContext, DragOverlay, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
-import { ArrowLeft, Check, Code2, Eye } from 'lucide-react';
+import { ArrowLeft, Check, Code2, Eye, Settings } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { handleError, handleSuccess } from '../utils/errorHandler';
 import { createField, getDefaultLabel } from '../utils/fieldDefaults';
@@ -8,6 +8,7 @@ import { generateFieldId } from '../utils/helpers';
 import FieldLibrary from './FieldLibrary';
 import FormCanvas from './FormCanvas';
 import FormPreview from './FormPreview';
+import FormSettingsDialog from './FormSettingsDialog';
 import { announce } from './LiveRegion';
 import Button from './ui/Button';
 
@@ -24,6 +25,7 @@ const FormBuilder = ({ formId }) => {
   const [isSaving, setIsSaving] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -235,6 +237,13 @@ const FormBuilder = ({ formId }) => {
           <div className="formtura-canvas-actions">
             <Button
               variant="ghost"
+              icon={Settings}
+              onClick={() => setShowSettings(true)}
+            >
+              Form settings
+            </Button>
+            <Button
+              variant="ghost"
               icon={Eye}
               onClick={() => setShowPreview(true)}
             >
@@ -296,6 +305,13 @@ const FormBuilder = ({ formId }) => {
             onClose={() => setShowPreview(false)}
           />
         )}
+
+        <FormSettingsDialog
+          isOpen={showSettings}
+          formSettings={formSettings}
+          onSave={(updated) => setFormSettings((current) => ({ ...current, ...updated }))}
+          onClose={() => setShowSettings(false)}
+        />
       </div>
     </DndContext>
   );

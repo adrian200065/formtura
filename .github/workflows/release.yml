@@ -77,6 +77,9 @@ jobs:
       - name: Run Jest
         run: pnpm exec jest --runInBand
 
+      - name: Run ESLint
+        run: pnpm run lint
+
   # Runs on the plugin's declared minimum. Production dependencies install
   # cleanly there because composer.json requires no runtime packages, and
   # verify-release.sh runs `php -l` over every shipped file - so this job is

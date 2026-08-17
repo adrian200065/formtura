@@ -153,7 +153,7 @@
 		/**
 		 * Toggle visibility of dependent fields.
 		 */
-		toggleVisibility(e) {
+		toggleVisibility() {
 			const $toggle = $(this);
 			const target = $toggle.data('toggle-target');
 			const $target = $(target);

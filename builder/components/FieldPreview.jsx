@@ -60,7 +60,7 @@ const FieldPreview = ({ field }) => {
           />
         );
 
-      case 'select':
+      case 'select': {
         // Get choices based on dynamic choices setting
         const getDropdownChoices = () => {
           if (field.dynamicChoices === 'post_type') {
@@ -160,6 +160,7 @@ const FieldPreview = ({ field }) => {
             ))}
           </select>
         );
+      }
 
       case 'radio': {
         // Get choices based on dynamic choices setting
@@ -349,7 +350,7 @@ const FieldPreview = ({ field }) => {
         );
       }
 
-      case 'name':
+      case 'name': {
         const nameFormat = field.format || 'first-last';
         const firstPlaceholder = field.firstNamePlaceholder || 'First Name';
         const middlePlaceholder = field.middleNamePlaceholder || 'Middle Name';
@@ -394,6 +395,7 @@ const FieldPreview = ({ field }) => {
             </div>
           );
         }
+      }
 
       case 'phone':
         return (
@@ -423,7 +425,7 @@ const FieldPreview = ({ field }) => {
           />
         );
 
-      case 'number-slider':
+      case 'number-slider': {
         const minValue = field.minValue !== undefined ? field.minValue : 0;
         const maxValue = field.maxValue !== undefined ? field.maxValue : 10;
         const defaultValue = field.defaultValue !== undefined ? field.defaultValue : minValue;
@@ -443,6 +445,7 @@ const FieldPreview = ({ field }) => {
             <div className="formtura-slider-value">{displayText}</div>
           </div>
         );
+      }
 
       case 'total':
         if (field.enableSummary) {
@@ -489,7 +492,7 @@ const FieldPreview = ({ field }) => {
           </div>
         );
 
-      case 'file-upload':
+      case 'file-upload': {
         const uploadText = field.uploadText || 'Drop a file here or click to upload';
         const maxFileSizeDisplay = field.maxFileSize || '516';
 
@@ -508,8 +511,9 @@ const FieldPreview = ({ field }) => {
             </div>
           </div>
         );
+      }
 
-      case 'repeater':
+      case 'repeater': {
         const addLabel = field.addNewLabel || 'Add';
         const removeLabel = field.removeLabel || 'Remove';
 
@@ -536,8 +540,9 @@ const FieldPreview = ({ field }) => {
             </div>
           </div>
         );
+      }
 
-      case 'rating':
+      case 'rating': {
         const maxStars = field.maxRating || 5;
         const stars = [];
         for (let i = 0; i < maxStars; i++) {
@@ -550,6 +555,7 @@ const FieldPreview = ({ field }) => {
             {stars}
           </div>
         );
+      }
 
       case 'rich-text':
         // Renders as a plain textarea on the frontend, so the preview must

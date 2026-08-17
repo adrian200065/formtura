@@ -10,7 +10,6 @@ const DateTimePicker = ({ field, fieldSizeClass }) => {
   const containerRef = useRef(null);
 
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  const monthsFull = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
   // Calculate year range from field settings
   const currentYearNum = new Date().getFullYear();
@@ -315,7 +314,7 @@ const FormPreview = ({ fields, formSettings, onClose }) => {
             />
           );
 
-        case 'select':
+        case 'select': {
           // Get choices based on dynamic choices setting
           const getSelectChoices = () => {
             if (field.dynamicChoices === 'post_type' || field.dynamicChoices === 'taxonomy') {
@@ -359,6 +358,7 @@ const FormPreview = ({ fields, formSettings, onClose }) => {
               ))}
             </select>
           );
+        }
 
         case 'radio': {
           // Get choice layout class
@@ -468,7 +468,7 @@ const FormPreview = ({ fields, formSettings, onClose }) => {
           );
         }
 
-        case 'name':
+        case 'name': {
           const nameFormat = field.format || 'first-last';
           const firstPlaceholder = field.firstNamePlaceholder || 'First Name';
           const middlePlaceholder = field.middleNamePlaceholder || 'Middle Name';
@@ -518,6 +518,7 @@ const FormPreview = ({ fields, formSettings, onClose }) => {
               </div>
             );
           }
+        }
 
         case 'phone':
           return (
@@ -541,7 +542,7 @@ const FormPreview = ({ fields, formSettings, onClose }) => {
         case 'datetime':
           return <DateTimePicker field={field} fieldSizeClass={fieldSizeClass} />;
 
-        case 'number-slider':
+        case 'number-slider': {
           const minValue = field.minValue !== undefined ? field.minValue : 0;
           const maxValue = field.maxValue !== undefined ? field.maxValue : 10;
           const defaultValue = field.defaultValue !== undefined ? field.defaultValue : minValue;
@@ -562,6 +563,7 @@ const FormPreview = ({ fields, formSettings, onClose }) => {
               <div className="formtura-slider-value">{displayText}</div>
             </div>
           );
+        }
 
         case 'rating':
           return <StarRatingPreview field={field} />;
@@ -582,7 +584,7 @@ const FormPreview = ({ fields, formSettings, onClose }) => {
             />
           );
 
-        case 'file-upload':
+        case 'file-upload': {
           const previewUploadText = field.uploadText || 'Drop a file here or click to upload';
           const previewMaxFileSize = field.maxFileSize || '516';
 
@@ -601,6 +603,7 @@ const FormPreview = ({ fields, formSettings, onClose }) => {
               </div>
             </div>
           );
+        }
 
         case 'html':
           // `content` first, matching templates/fields/html.php: that is the
@@ -658,7 +661,7 @@ const FormPreview = ({ fields, formSettings, onClose }) => {
     const items = [];
     let currentRow = [];
 
-    fields.forEach((field, index) => {
+    fields.forEach((field) => {
       const hasGrid = hasGridClasses(field);
       const hasFirstClass = field.cssClasses?.includes('fta-first');
 

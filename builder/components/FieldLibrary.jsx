@@ -406,7 +406,7 @@ const DraggableField = ({ type, label, icon: Icon, onAdd }) => {
 };
 
 // Non-draggable field that triggers a click action (for CAPTCHA, etc.)
-const ClickableField = ({ type, label, icon: Icon, onClick }) => {
+const ClickableField = ({ label, icon: Icon, onClick }) => {
   return (
     <button
       type="button"
@@ -895,11 +895,12 @@ const WysiwygEditor = ({ value, onChange }) => {
       case 'i':
         newText = `<em>${selectedText}</em>`;
         break;
-      case 'link':
+      case 'link': {
         const url = prompt('Enter URL:', 'https://');
         if (!url) return;
         newText = `<a href="${url}">${selectedText || url}</a>`;
         break;
+      }
       case 'b-quote':
         newText = `<blockquote>${selectedText}</blockquote>`;
         break;
@@ -909,11 +910,12 @@ const WysiwygEditor = ({ value, onChange }) => {
       case 'ins':
         newText = `<ins>${selectedText}</ins>`;
         break;
-      case 'img':
+      case 'img': {
         const imgUrl = prompt('Enter image URL:', 'https://');
         if (!imgUrl) return;
         newText = `<img src="${imgUrl}" alt="${selectedText || ''}" />`;
         break;
+      }
       case 'ul':
         newText = `<ul>\n  <li>${selectedText || 'Item'}</li>\n</ul>`;
         break;
@@ -3586,7 +3588,7 @@ const SmartLogicTab = ({ field, fields = [], onUpdate }) => {
             </span>
           </div>
           <p className="formtura-field-description">
-            Auto-populate this field based on another field's value
+            Auto-populate this field based on another field&apos;s value
           </p>
         </div>
 

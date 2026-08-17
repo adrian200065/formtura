@@ -80,6 +80,47 @@ jobs:
       - name: Run ESLint
         run: pnpm run lint
 
+  # Advisories move independently of code changes - a dependency can go from
+  # clean to vulnerable between two PRs that touch nothing it depends on - so
+  # this runs on its own rather than being folded into `test`, and is not a
+  # dependency of `package`: a newly-published advisory should be visible
+  # immediately without blocking an otherwise-ready release on it.
+  audit:
+    name: Dependency audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          tools: composer:v2
+          coverage: none
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - name: Install dependencies
+        run: |
+          composer install --no-interaction --prefer-dist
+          pnpm install --frozen-lockfile
+
+      - name: Composer audit
+        run: composer audit
+
+      - name: pnpm audit
+        run: pnpm audit
+
   # Runs on the plugin's declared minimum. Production dependencies install
   # cleanly there because composer.json requires no runtime packages, and
   # verify-release.sh runs `php -l` over every shipped file - so this job is

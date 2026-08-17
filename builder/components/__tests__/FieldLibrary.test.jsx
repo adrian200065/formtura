@@ -4,13 +4,15 @@ import FieldLibrary from '../FieldLibrary';
 
 // Renders FieldLibrary with a single field selected, which auto-switches the
 // sidebar to the "options" tab / "general" sub-tab where GeneralTab (and its
-// payment items editor) lives.
-const renderWithField = (field, onFieldUpdate = jest.fn()) => {
+// payment items editor) lives. `otherFields` are additional sibling fields on
+// the same form, needed by conditional-logic tests that populate a
+// trigger-field dropdown from the form's other fields.
+const renderWithField = (field, onFieldUpdate = jest.fn(), otherFields = []) => {
   const utils = render(
     <DndContext>
       <FieldLibrary
         selectedField={field.id}
-        fields={[field]}
+        fields={[field, ...otherFields]}
         onFieldUpdate={onFieldUpdate}
         isCollapsed={false}
         onToggleCollapse={() => {}}
@@ -19,6 +21,12 @@ const renderWithField = (field, onFieldUpdate = jest.fn()) => {
     </DndContext>
   );
   return { ...utils, onFieldUpdate };
+};
+
+// Navigates to the Smart Logic sub-tab, where the Conditional Logic section
+// lives.
+const openSmartLogicTab = () => {
+  fireEvent.click(screen.getByRole('button', { name: 'Smart Logic' }));
 };
 
 // Renders FieldLibrary with nothing selected, which is its default state:
@@ -220,5 +228,179 @@ describe('FieldLibrary payment items editor', () => {
 
     expect(defaultMarkers).toHaveLength(2);
     defaultMarkers.forEach((marker) => expect(marker).toHaveAttribute('type', 'radio'));
+  });
+});
+
+describe('FieldLibrary conditional logic', () => {
+  // "+ Add Condition" previously had no click handler at all, so there was
+  // no way to actually create a condition through the builder UI.
+  it('adds an empty condition row when "+ Add Condition" is clicked', () => {
+    const field = {
+      id: 'field_2',
+      type: 'text',
+      label: 'Comments',
+      conditionalLogic: { enabled: true, action: 'show', match: 'all', conditions: [] },
+    };
+    const trigger = { id: 'field_1', type: 'text', label: 'Name' };
+
+    const { onFieldUpdate } = renderWithField(field, jest.fn(), [trigger]);
+    openSmartLogicTab();
+
+    fireEvent.click(screen.getByRole('button', { name: '+ Add Condition' }));
+
+    expect(onFieldUpdate).toHaveBeenCalledWith('field_2', {
+      conditionalLogic: {
+        enabled: true,
+        action: 'show',
+        match: 'all',
+        conditions: [ { field: '', operator: 'is', value: '' } ],
+      },
+    });
+  });
+
+  it('lists the form\'s other fields, but not the field being edited, in the trigger dropdown', () => {
+    const field = {
+      id: 'field_2',
+      type: 'text',
+      label: 'Comments',
+      conditionalLogic: {
+        enabled: true,
+        action: 'show',
+        match: 'all',
+        conditions: [ { field: '', operator: 'is', value: '' } ],
+      },
+    };
+    const others = [
+      { id: 'field_1', type: 'text', label: 'Name' },
+      { id: 'field_3', type: 'select', label: 'Country' },
+    ];
+
+    renderWithField(field, jest.fn(), others);
+    openSmartLogicTab();
+
+    const triggerSelect = screen.getByLabelText('Condition field');
+    const optionLabels = Array.from(triggerSelect.options).map((o) => o.textContent);
+
+    expect(optionLabels).toEqual(expect.arrayContaining([ 'Name', 'Country' ]));
+    expect(optionLabels).not.toContain('Comments');
+  });
+
+  it('updates the condition\'s trigger field when changed', () => {
+    const field = {
+      id: 'field_2',
+      type: 'text',
+      label: 'Comments',
+      conditionalLogic: {
+        enabled: true,
+        action: 'show',
+        match: 'all',
+        conditions: [ { field: '', operator: 'is', value: '' } ],
+      },
+    };
+    const trigger = { id: 'field_1', type: 'text', label: 'Name' };
+
+    const { onFieldUpdate } = renderWithField(field, jest.fn(), [trigger]);
+    openSmartLogicTab();
+
+    fireEvent.change(screen.getByLabelText('Condition field'), { target: { value: 'field_1' } });
+
+    expect(onFieldUpdate).toHaveBeenCalledWith('field_2', {
+      conditionalLogic: {
+        enabled: true,
+        action: 'show',
+        match: 'all',
+        conditions: [ { field: 'field_1', operator: 'is', value: '' } ],
+      },
+    });
+  });
+
+  it('updates the condition\'s operator when changed', () => {
+    const field = {
+      id: 'field_2',
+      type: 'text',
+      label: 'Comments',
+      conditionalLogic: {
+        enabled: true,
+        action: 'show',
+        match: 'all',
+        conditions: [ { field: 'field_1', operator: 'is', value: '' } ],
+      },
+    };
+    const trigger = { id: 'field_1', type: 'text', label: 'Name' };
+
+    const { onFieldUpdate } = renderWithField(field, jest.fn(), [trigger]);
+    openSmartLogicTab();
+
+    fireEvent.change(screen.getByLabelText('Condition operator'), { target: { value: 'contains' } });
+
+    expect(onFieldUpdate).toHaveBeenCalledWith('field_2', {
+      conditionalLogic: {
+        enabled: true,
+        action: 'show',
+        match: 'all',
+        conditions: [ { field: 'field_1', operator: 'contains', value: '' } ],
+      },
+    });
+  });
+
+  it('updates the condition\'s value when changed', () => {
+    const field = {
+      id: 'field_2',
+      type: 'text',
+      label: 'Comments',
+      conditionalLogic: {
+        enabled: true,
+        action: 'show',
+        match: 'all',
+        conditions: [ { field: 'field_1', operator: 'is', value: '' } ],
+      },
+    };
+    const trigger = { id: 'field_1', type: 'text', label: 'Name' };
+
+    const { onFieldUpdate } = renderWithField(field, jest.fn(), [trigger]);
+    openSmartLogicTab();
+
+    fireEvent.change(screen.getByLabelText('Condition value'), { target: { value: 'Ada' } });
+
+    expect(onFieldUpdate).toHaveBeenCalledWith('field_2', {
+      conditionalLogic: {
+        enabled: true,
+        action: 'show',
+        match: 'all',
+        conditions: [ { field: 'field_1', operator: 'is', value: 'Ada' } ],
+      },
+    });
+  });
+
+  it('removes a condition row when its remove button is clicked, leaving the others', () => {
+    const field = {
+      id: 'field_2',
+      type: 'text',
+      label: 'Comments',
+      conditionalLogic: {
+        enabled: true,
+        action: 'show',
+        match: 'all',
+        conditions: [
+          { field: 'field_1', operator: 'is', value: 'Ada' },
+          { field: 'field_1', operator: 'is_not', value: 'Bob' },
+        ],
+      },
+    };
+    const trigger = { id: 'field_1', type: 'text', label: 'Name' };
+
+    const { onFieldUpdate } = renderWithField(field, jest.fn(), [trigger]);
+    openSmartLogicTab();
+
+    fireEvent.click(screen.getAllByRole('button', { name: 'Remove condition' })[0]);
+
+    expect(onFieldUpdate).toHaveBeenCalledWith('field_2', {
+      conditionalLogic: {
+        enabled: true,
+        action: 'show',
+        match: 'all',
+        conditions: [ { field: 'field_1', operator: 'is_not', value: 'Bob' } ],
+      },
+    });
   });
 });

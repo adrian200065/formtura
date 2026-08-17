@@ -408,8 +408,13 @@ class Submission {
 
 			$is_empty = $this->is_empty_value( $field_value );
 
-			// Required field validation.
-			if ( ! empty( $field['required'] ) && $is_empty ) {
+			// Required field validation. A field hidden by its own
+			// conditional logic is exempt - recomputed here straight from
+			// $submission (the same source a trigger field's own value comes
+			// from), not trusted from any client-supplied hidden state, so
+			// this can't be bypassed by a client that skips running the
+			// frontend JS.
+			if ( ! empty( $field['required'] ) && $is_empty && $this->is_field_conditionally_visible( $field, $submission ) ) {
 				$errors[ $field_name ] = sprintf(
 					/* translators: %s: field label */
 					__( '%s is required.', FORMTURA_TEXTDOMAIN ),
@@ -445,6 +450,100 @@ class Submission {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Whether a field is visible given its own conditional logic and the
+	 * submitted values of its trigger fields. Mirrors
+	 * evaluateConditionalLogic() in assets/js/frontend.js so a required
+	 * field the frontend hides doesn't also get enforced as required here.
+	 *
+	 * @since 1.0.8
+	 * @param array $field      Field configuration.
+	 * @param array $submission Submitted data, keyed by field name.
+	 * @return bool
+	 */
+	private function is_field_conditionally_visible( $field, $submission ) {
+		$logic = null;
+
+		if ( ! empty( $field['conditionalLogic'] ) && is_array( $field['conditionalLogic'] ) ) {
+			$logic = $field['conditionalLogic'];
+		} elseif ( ! empty( $field['conditional_logic'] ) && is_array( $field['conditional_logic'] ) ) {
+			$logic = $field['conditional_logic'];
+		}
+
+		if ( ! $logic || empty( $logic['enabled'] ) ) {
+			return true;
+		}
+
+		$conditions = isset( $logic['conditions'] ) && is_array( $logic['conditions'] ) ? $logic['conditions'] : [];
+		$match_any  = isset( $logic['match'] ) && 'any' === $logic['match'];
+
+		$conditions_met = $match_any ? false : true;
+
+		foreach ( $conditions as $condition ) {
+			$met = $this->conditional_logic_condition_met( $condition, $submission );
+
+			if ( $match_any ) {
+				if ( $met ) {
+					$conditions_met = true;
+					break;
+				}
+			} elseif ( ! $met ) {
+				$conditions_met = false;
+				break;
+			}
+		}
+
+		$show = ! isset( $logic['action'] ) || 'hide' !== $logic['action'];
+
+		return ( $show && $conditions_met ) || ( ! $show && ! $conditions_met );
+	}
+
+	/**
+	 * Evaluate a single conditional logic condition against the submission.
+	 *
+	 * @since 1.0.8
+	 * @param array $condition  Condition, with `field`, `operator`, `value`.
+	 * @param array $submission Submitted data, keyed by field name.
+	 * @return bool
+	 */
+	private function conditional_logic_condition_met( $condition, $submission ) {
+		$trigger_name  = isset( $condition['field'] ) ? $condition['field'] : '';
+		$trigger_value = isset( $submission[ $trigger_name ] ) ? $submission[ $trigger_name ] : '';
+		$operator      = isset( $condition['operator'] ) ? $condition['operator'] : 'is';
+		$value         = isset( $condition['value'] ) ? (string) $condition['value'] : '';
+
+		// A checkbox group's trigger value is the array of its checked
+		// values; only membership operators make sense against it.
+		if ( is_array( $trigger_value ) ) {
+			switch ( $operator ) {
+				case 'is':
+				case 'contains':
+					return in_array( $value, $trigger_value, true );
+				case 'is_not':
+					return ! in_array( $value, $trigger_value, true );
+				default:
+					return false;
+			}
+		}
+
+		$trigger_value = (string) $trigger_value;
+
+		switch ( $operator ) {
+			case 'is':
+				return $trigger_value === $value;
+			case 'is_not':
+				return $trigger_value !== $value;
+			case 'contains':
+				return false !== strpos( $trigger_value, $value );
+			case 'greater_than':
+				return (float) $trigger_value > (float) $value;
+			case 'less_than':
+				return (float) $trigger_value < (float) $value;
+			default:
+				return false;
+		}
 	}
 
 	/**

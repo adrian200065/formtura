@@ -681,7 +681,7 @@ const FieldLibrary = ({
                       <AdvancedTab field={field} onUpdate={onFieldUpdate} />
                     )}
                     {optionsTab === 'smart-logic' && (
-                      <SmartLogicTab field={field} onUpdate={onFieldUpdate} />
+                      <SmartLogicTab field={field} fields={fields} onUpdate={onFieldUpdate} />
                     )}
                   </div>
                 </>
@@ -3427,9 +3427,28 @@ const AdvancedTab = ({ field, onUpdate }) => {
 };
 
 // Smart Logic Tab Component
-const SmartLogicTab = ({ field, onUpdate }) => {
+const SmartLogicTab = ({ field, fields = [], onUpdate }) => {
   const handleChange = (key, value) => {
     onUpdate(field.id, { [key]: value });
+  };
+
+  const otherFields = fields.filter((f) => f.id !== field.id);
+  const conditions = field.conditionalLogic?.conditions || [];
+
+  const updateConditions = (updated) => {
+    handleChange('conditionalLogic', { ...field.conditionalLogic, conditions: updated });
+  };
+
+  const addCondition = () => {
+    updateConditions([ ...conditions, { field: '', operator: 'is', value: '' } ]);
+  };
+
+  const updateCondition = (index, key, value) => {
+    updateConditions(conditions.map((c, i) => (i === index ? { ...c, [key]: value } : c)));
+  };
+
+  const removeCondition = (index) => {
+    updateConditions(conditions.filter((_, i) => i !== index));
   };
 
   return (
@@ -3495,7 +3514,52 @@ const SmartLogicTab = ({ field, onUpdate }) => {
               </select>
             </div>
 
-            <button className="formtura-btn" type="button">
+            {conditions.map((condition, index) => (
+              <div className="formtura-logic-condition" key={index}>
+                <select
+                  aria-label="Condition field"
+                  value={condition.field}
+                  onChange={(e) => updateCondition(index, 'field', e.target.value)}
+                >
+                  <option value="">Select a field...</option>
+                  {otherFields.map((f) => (
+                    <option key={f.id} value={f.id}>{f.label || f.id}</option>
+                  ))}
+                </select>
+
+                <select
+                  aria-label="Condition operator"
+                  value={condition.operator}
+                  onChange={(e) => updateCondition(index, 'operator', e.target.value)}
+                >
+                  <option value="is">is</option>
+                  <option value="is_not">is not</option>
+                  <option value="contains">contains</option>
+                  <option value="greater_than">greater than</option>
+                  <option value="less_than">less than</option>
+                </select>
+
+                <input
+                  type="text"
+                  className="formtura-choice-input"
+                  aria-label="Condition value"
+                  value={condition.value}
+                  onChange={(e) => updateCondition(index, 'value', e.target.value)}
+                  placeholder="Value"
+                />
+
+                <button
+                  type="button"
+                  className="formtura-btn-icon"
+                  aria-label="Remove condition"
+                  onClick={() => removeCondition(index)}
+                >
+                  &times;
+                </button>
+              </div>
+            ))}
+
+            <button className="formtura-btn" type="button" onClick={addCondition}>
               + Add Condition
             </button>
           </div>

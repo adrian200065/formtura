@@ -290,6 +290,135 @@ class FormBuilderSanitizeTest extends TestCase {
 	}
 
 	/**
+	 * Conditional logic round-trips with the fields Submission::
+	 * validate_submission() and assets/js/frontend.js both key off of.
+	 */
+	public function test_conditional_logic_round_trips_with_correct_types() {
+		$result = $this->sanitize( [
+			'conditionalLogic' => [
+				'enabled'    => true,
+				'action'     => 'hide',
+				'match'      => 'any',
+				'conditions' => [
+					[ 'field' => 'field_1', 'operator' => 'is', 'value' => 'yes' ],
+				],
+			],
+		] );
+
+		$this->assertSame(
+			[
+				'enabled'    => true,
+				'action'     => 'hide',
+				'match'      => 'any',
+				'conditions' => [
+					[ 'field' => 'field_1', 'operator' => 'is', 'value' => 'yes' ],
+				],
+			],
+			$result['conditionalLogic']
+		);
+	}
+
+	/**
+	 * `action` and `match` are the only two values the frontend and server
+	 * evaluators understand; an unexpected value must not pass through and
+	 * silently mean something the evaluators don't implement.
+	 */
+	public function test_conditional_logic_action_and_match_fall_back_to_defaults() {
+		$result = $this->sanitize( [
+			'conditionalLogic' => [
+				'enabled' => true,
+				'action'  => 'delete-everything',
+				'match'   => 'most',
+			],
+		] );
+
+		$this->assertSame( 'show', $result['conditionalLogic']['action'] );
+		$this->assertSame( 'all', $result['conditionalLogic']['match'] );
+	}
+
+	/**
+	 * A condition with an operator outside the five the evaluators
+	 * implement must be dropped, not stored - it would otherwise always
+	 * evaluate to false silently instead of at least being visibly absent.
+	 */
+	public function test_conditional_logic_condition_with_unknown_operator_is_dropped() {
+		$result = $this->sanitize( [
+			'conditionalLogic' => [
+				'enabled'    => true,
+				'conditions' => [
+					[ 'field' => 'field_1', 'operator' => 'is', 'value' => 'a' ],
+					[ 'field' => 'field_2', 'operator' => 'sql_injection', 'value' => 'b' ],
+				],
+			],
+		] );
+
+		$this->assertCount( 1, $result['conditionalLogic']['conditions'] );
+		$this->assertSame( 'field_1', $result['conditionalLogic']['conditions'][0]['field'] );
+	}
+
+	/**
+	 * A condition missing its trigger field is meaningless - nothing to
+	 * evaluate against - and must be dropped without leaving a key gap.
+	 */
+	public function test_conditional_logic_condition_without_a_field_is_dropped_without_a_key_gap() {
+		$result = $this->sanitize( [
+			'conditionalLogic' => [
+				'enabled'    => true,
+				'conditions' => [
+					[ 'field' => 'field_1', 'operator' => 'is', 'value' => 'a' ],
+					[ 'field' => '', 'operator' => 'is', 'value' => 'b' ],
+					[ 'field' => 'field_3', 'operator' => 'is', 'value' => 'c' ],
+				],
+			],
+		] );
+
+		$this->assertSame( [ 0, 1 ], array_keys( $result['conditionalLogic']['conditions'] ) );
+		$this->assertSame( 'field_1', $result['conditionalLogic']['conditions'][0]['field'] );
+		$this->assertSame( 'field_3', $result['conditionalLogic']['conditions'][1]['field'] );
+	}
+
+	/**
+	 * A trigger field value is free text sanitized with sanitize_text_field(),
+	 * the same treatment every other free-text setting in this sanitizer
+	 * gets - it must not survive a script tag verbatim.
+	 */
+	public function test_conditional_logic_condition_value_is_sanitized() {
+		$result = $this->sanitize( [
+			'conditionalLogic' => [
+				'enabled'    => true,
+				'conditions' => [
+					[ 'field' => 'field_1', 'operator' => 'is', 'value' => '<script>alert(1)</script>' ],
+				],
+			],
+		] );
+
+		$this->assertSame( 'alert(1)', $result['conditionalLogic']['conditions'][0]['value'] );
+	}
+
+	/**
+	 * The legacy snake_case key (`conditional_logic`, pre-dating the
+	 * builder's camelCase settings) normalises to the same `conditionalLogic`
+	 * key new saves use - see the identical submitButtonText/successMessage
+	 * normalisation in sanitize_settings_data().
+	 */
+	public function test_legacy_snake_case_conditional_logic_normalises_to_camel_case() {
+		$result = $this->sanitize( [
+			'conditional_logic' => [
+				'enabled'    => true,
+				'action'     => 'show',
+				'match'      => 'all',
+				'conditions' => [
+					[ 'field' => 'field_1', 'operator' => 'is', 'value' => 'yes' ],
+				],
+			],
+		] );
+
+		$this->assertArrayNotHasKey( 'conditional_logic', $result );
+		$this->assertTrue( $result['conditionalLogic']['enabled'] );
+		$this->assertSame( 'field_1', $result['conditionalLogic']['conditions'][0]['field'] );
+	}
+
+	/**
 	 * Coverage guard for the builder save path (Task 12).
 	 *
 	 * This cycle's actual defect was never a wrong value - it was a setting

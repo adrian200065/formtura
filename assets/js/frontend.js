@@ -932,9 +932,18 @@
 
 				if (!logic) return;
 
-				// Watch for changes on trigger fields
-				$(logic.triggers).on('change', function() {
-					FormturaFrontend.evaluateConditionalLogic($field, logic);
+				const conditions = logic.conditions || [];
+
+				// Watch for changes on each condition's own trigger field -
+				// there is no separate `triggers` list in the saved data.
+				const triggerNames = conditions
+					.map(condition => condition.field)
+					.filter((name, index, names) => name && names.indexOf(name) === index);
+
+				triggerNames.forEach(name => {
+					$(`[name="${name}"], [name="${name}[]"]`).on('change input', function() {
+						FormturaFrontend.evaluateConditionalLogic($field, logic);
+					});
 				});
 
 				// Initial evaluation
@@ -943,15 +952,49 @@
 		},
 
 		/**
+		 * Read a trigger field's current value by name. A checkbox or radio
+		 * group returns the array of its checked values - a plain .val()
+		 * only ever returns one, regardless of how many are checked.
+		 */
+		getConditionalLogicTriggerValue(name) {
+			const $els = $(`[name="${name}"], [name="${name}[]"]`);
+
+			if (!$els.length) {
+				return '';
+			}
+
+			const type = $els.attr('type');
+
+			if (type === 'checkbox' || type === 'radio') {
+				return $els.filter(':checked').map((i, el) => el.value).get();
+			}
+
+			return $els.first().val();
+		},
+
+		/**
 		 * Evaluate conditional logic for a field.
 		 */
 		evaluateConditionalLogic($field, logic) {
-			let show = logic.action === 'show';
+			const show = logic.action === 'show';
+			const conditions = logic.conditions || [];
 
-			// Evaluate conditions
-			const conditionsMet = logic.conditions.every(condition => {
-				const $triggerField = $(`[name="${condition.field}"]`);
-				const triggerValue = $triggerField.val();
+			const conditionMet = condition => {
+				const triggerValue = FormturaFrontend.getConditionalLogicTriggerValue(condition.field);
+
+				// A checkbox/radio trigger's value is the array of its
+				// checked options; only membership operators make sense.
+				if (Array.isArray(triggerValue)) {
+					switch (condition.operator) {
+						case 'is':
+						case 'contains':
+							return triggerValue.includes(condition.value);
+						case 'is_not':
+							return !triggerValue.includes(condition.value);
+						default:
+							return false;
+					}
+				}
 
 				switch (condition.operator) {
 					case 'is':
@@ -967,7 +1010,11 @@
 					default:
 						return false;
 				}
-			});
+			};
+
+			const conditionsMet = logic.match === 'any'
+				? conditions.some(conditionMet)
+				: conditions.every(conditionMet);
 
 			// Show or hide based on logic
 			if ((show && conditionsMet) || (!show && !conditionsMet)) {

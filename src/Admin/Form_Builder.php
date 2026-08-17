@@ -487,19 +487,20 @@ class Form_Builder {
 			$sanitized['yearRangeEnd'] = sanitize_text_field( $field['yearRangeEnd'] );
 		}
 
-		// Sanitize conditional logic (new format).
+		// Sanitize conditional logic (React uses camelCase: conditionalLogic;
+		// conditional_logic is a legacy snake_case key from before the
+		// builder's settings normalised to camelCase - see the identical
+		// submitButtonText/successMessage handling in
+		// sanitize_settings_data()).
 		if ( isset( $field['conditionalLogic'] ) && is_array( $field['conditionalLogic'] ) ) {
-			$sanitized['conditionalLogic'] = $field['conditionalLogic'];
+			$sanitized['conditionalLogic'] = $this->sanitize_conditional_logic( $field['conditionalLogic'] );
+		} elseif ( isset( $field['conditional_logic'] ) && is_array( $field['conditional_logic'] ) ) {
+			$sanitized['conditionalLogic'] = $this->sanitize_conditional_logic( $field['conditional_logic'] );
 		}
 
 		// Sanitize validation rules.
 		if ( isset( $field['validation'] ) && is_array( $field['validation'] ) ) {
 			$sanitized['validation'] = $field['validation'];
-		}
-
-		// Sanitize conditional logic.
-		if ( isset( $field['conditional_logic'] ) && is_array( $field['conditional_logic'] ) ) {
-			$sanitized['conditional_logic'] = $field['conditional_logic'];
 		}
 
 		// Sanitize payment items (for payment-checkbox, payment-multiple,
@@ -583,6 +584,53 @@ class Form_Builder {
 		if ( isset( $field['compactUploadText'] ) ) {
 			$sanitized['compactUploadText'] = sanitize_text_field( $field['compactUploadText'] );
 		}
+
+		return $sanitized;
+	}
+
+	/**
+	 * Sanitize a field's conditional logic.
+	 *
+	 * Both assets/js/frontend.js and Submission::validate_submission()
+	 * evaluate this structure directly, so an unrecognised action, match, or
+	 * operator has to be rejected here rather than stored and silently
+	 * evaluated as false everywhere it's read.
+	 *
+	 * @since 1.0.8
+	 * @param array $logic Raw conditional logic, as posted by the builder.
+	 * @return array Sanitized conditional logic.
+	 */
+	private function sanitize_conditional_logic( $logic ) {
+		$sanitized = [
+			'enabled' => ! empty( $logic['enabled'] ),
+			'action'  => isset( $logic['action'] ) && 'hide' === $logic['action'] ? 'hide' : 'show',
+			'match'   => isset( $logic['match'] ) && 'any' === $logic['match'] ? 'any' : 'all',
+		];
+
+		$operators  = [ 'is', 'is_not', 'contains', 'greater_than', 'less_than' ];
+		$conditions = [];
+
+		if ( isset( $logic['conditions'] ) && is_array( $logic['conditions'] ) ) {
+			foreach ( $logic['conditions'] as $condition ) {
+				if ( ! is_array( $condition ) || empty( $condition['field'] ) ) {
+					continue;
+				}
+
+				$operator = isset( $condition['operator'] ) ? $condition['operator'] : 'is';
+
+				if ( ! in_array( $operator, $operators, true ) ) {
+					continue;
+				}
+
+				$conditions[] = [
+					'field'    => sanitize_text_field( $condition['field'] ),
+					'operator' => $operator,
+					'value'    => isset( $condition['value'] ) ? sanitize_text_field( $condition['value'] ) : '',
+				];
+			}
+		}
+
+		$sanitized['conditions'] = $conditions;
 
 		return $sanitized;
 	}

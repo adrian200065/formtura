@@ -36,7 +36,7 @@ class Form_Templates {
 	 */
 	private function init_hooks() {
 		// AJAX handlers.
-		add_action( 'wp_ajax_fta_create_from_template', [ $this, 'ajax_create_from_template' ] );
+		add_action( 'wp_ajax_fta_create_from_template', array( $this, 'ajax_create_from_template' ) );
 	}
 
 	/**
@@ -56,188 +56,188 @@ class Form_Templates {
 	 * @return array Array of templates.
 	 */
 	public function get_templates() {
-		$templates = [
-			'blank' => [
+		$templates = array(
+			'blank'           => array(
 				'title'       => __( 'Blank Form', 'formtura' ),
 				'description' => __( 'Start from scratch with a blank canvas.', 'formtura' ),
 				'icon'        => 'file-plus',
-				'fields'      => [],
-			],
-			'contact' => [
+				'fields'      => array(),
+			),
+			'contact'         => array(
 				'title'       => __( 'Contact Form', 'formtura' ),
 				'description' => __( 'Simple contact form with name, email, and message.', 'formtura' ),
 				'icon'        => 'mail',
-				'fields'      => [
-					[
-						'type'        => 'name',
-						'label'       => __( 'Name', 'formtura' ),
-						'required'    => true,
-					],
-					[
-						'type'        => 'email',
-						'label'       => __( 'Email', 'formtura' ),
-						'required'    => true,
-					],
-					[
+				'fields'      => array(
+					array(
+						'type'     => 'name',
+						'label'    => __( 'Name', 'formtura' ),
+						'required' => true,
+					),
+					array(
+						'type'     => 'email',
+						'label'    => __( 'Email', 'formtura' ),
+						'required' => true,
+					),
+					array(
 						'type'        => 'textarea',
 						'label'       => __( 'Message', 'formtura' ),
 						'required'    => true,
 						'placeholder' => __( 'Enter your message here...', 'formtura' ),
-					],
-				],
-			],
-			'quote' => [
+					),
+				),
+			),
+			'quote'           => array(
 				'title'       => __( 'Request a Quote', 'formtura' ),
 				'description' => __( 'Collect quote requests from potential customers.', 'formtura' ),
 				'icon'        => 'dollar-sign',
-				'fields'      => [
-					[
+				'fields'      => array(
+					array(
 						'type'     => 'name',
 						'label'    => __( 'Name', 'formtura' ),
 						'required' => true,
-					],
-					[
+					),
+					array(
 						'type'     => 'email',
 						'label'    => __( 'Email', 'formtura' ),
 						'required' => true,
-					],
-					[
+					),
+					array(
 						'type'     => 'text',
 						'label'    => __( 'Company', 'formtura' ),
 						'required' => false,
-					],
-					[
+					),
+					array(
 						'type'     => 'select',
 						'label'    => __( 'Service Interested In', 'formtura' ),
 						'required' => true,
-						'options'  => [
+						'options'  => array(
 							__( 'Web Design', 'formtura' ),
 							__( 'Web Development', 'formtura' ),
 							__( 'SEO Services', 'formtura' ),
 							__( 'Marketing', 'formtura' ),
 							__( 'Other', 'formtura' ),
-						],
-					],
-					[
+						),
+					),
+					array(
 						'type'        => 'textarea',
 						'label'       => __( 'Project Details', 'formtura' ),
 						'required'    => true,
 						'placeholder' => __( 'Tell us about your project...', 'formtura' ),
-					],
-				],
-			],
-			'feedback' => [
+					),
+				),
+			),
+			'feedback'        => array(
 				'title'       => __( 'Feedback Survey', 'formtura' ),
 				'description' => __( 'Gather user feedback and suggestions.', 'formtura' ),
 				'icon'        => 'message-square',
-				'fields'      => [
-					[
+				'fields'      => array(
+					array(
 						'type'     => 'radio',
 						'label'    => __( 'How satisfied are you with our service?', 'formtura' ),
 						'required' => true,
-						'options'  => [
+						'options'  => array(
 							__( 'Very Satisfied', 'formtura' ),
 							__( 'Satisfied', 'formtura' ),
 							__( 'Neutral', 'formtura' ),
 							__( 'Dissatisfied', 'formtura' ),
 							__( 'Very Dissatisfied', 'formtura' ),
-						],
-					],
-					[
+						),
+					),
+					array(
 						'type'     => 'radio',
 						'label'    => __( 'Would you recommend us to others?', 'formtura' ),
 						'required' => true,
-						'options'  => [
+						'options'  => array(
 							__( 'Definitely', 'formtura' ),
 							__( 'Probably', 'formtura' ),
 							__( 'Not Sure', 'formtura' ),
 							__( 'Probably Not', 'formtura' ),
 							__( 'Definitely Not', 'formtura' ),
-						],
-					],
-					[
+						),
+					),
+					array(
 						'type'        => 'textarea',
 						'label'       => __( 'Additional Comments', 'formtura' ),
 						'required'    => false,
 						'placeholder' => __( 'Share your thoughts...', 'formtura' ),
-					],
-				],
-			],
-			'registration' => [
+					),
+				),
+			),
+			'registration'    => array(
 				'title'       => __( 'Event Registration', 'formtura' ),
 				'description' => __( 'Collect registrations for events or webinars.', 'formtura' ),
 				'icon'        => 'calendar',
-				'fields'      => [
-					[
+				'fields'      => array(
+					array(
 						'type'     => 'name',
 						'label'    => __( 'Full Name', 'formtura' ),
 						'required' => true,
-					],
-					[
+					),
+					array(
 						'type'     => 'email',
 						'label'    => __( 'Email Address', 'formtura' ),
 						'required' => true,
-					],
-					[
+					),
+					array(
 						'type'     => 'text',
 						'label'    => __( 'Phone Number', 'formtura' ),
 						'required' => false,
-					],
-					[
+					),
+					array(
 						'type'     => 'select',
 						'label'    => __( 'Number of Attendees', 'formtura' ),
 						'required' => true,
-						'options'  => [ '1', '2', '3', '4', '5+' ],
-					],
-					[
+						'options'  => array( '1', '2', '3', '4', '5+' ),
+					),
+					array(
 						'type'        => 'textarea',
 						'label'       => __( 'Special Requirements', 'formtura' ),
 						'required'    => false,
 						'placeholder' => __( 'Dietary restrictions, accessibility needs, etc.', 'formtura' ),
-					],
-				],
-			],
-			'job_application' => [
+					),
+				),
+			),
+			'job_application' => array(
 				'title'       => __( 'Job Application', 'formtura' ),
 				'description' => __( 'Accept job applications online.', 'formtura' ),
 				'icon'        => 'briefcase',
-				'fields'      => [
-					[
+				'fields'      => array(
+					array(
 						'type'     => 'name',
 						'label'    => __( 'Full Name', 'formtura' ),
 						'required' => true,
-					],
-					[
+					),
+					array(
 						'type'     => 'email',
 						'label'    => __( 'Email Address', 'formtura' ),
 						'required' => true,
-					],
-					[
+					),
+					array(
 						'type'     => 'text',
 						'label'    => __( 'Phone Number', 'formtura' ),
 						'required' => true,
-					],
-					[
+					),
+					array(
 						'type'     => 'select',
 						'label'    => __( 'Position Applying For', 'formtura' ),
 						'required' => true,
-						'options'  => [
+						'options'  => array(
 							__( 'Developer', 'formtura' ),
 							__( 'Designer', 'formtura' ),
 							__( 'Marketing', 'formtura' ),
 							__( 'Sales', 'formtura' ),
 							__( 'Other', 'formtura' ),
-						],
-					],
-					[
+						),
+					),
+					array(
 						'type'        => 'textarea',
 						'label'       => __( 'Cover Letter', 'formtura' ),
 						'required'    => false,
 						'placeholder' => __( 'Tell us why you\'re a great fit...', 'formtura' ),
-					],
-				],
-			],
-		];
+					),
+				),
+			),
+		);
 
 		return apply_filters( 'fta_form_templates', $templates );
 	}
@@ -253,48 +253,58 @@ class Form_Templates {
 
 		// Check permissions.
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( [
-				'message' => __( 'You do not have permission to perform this action.', 'formtura' ),
-			] );
+			wp_send_json_error(
+				array(
+					'message' => __( 'You do not have permission to perform this action.', 'formtura' ),
+				)
+			);
 		}
 
 		$template_id = isset( $_POST['template_id'] ) ? sanitize_key( $_POST['template_id'] ) : '';
 
 		if ( empty( $template_id ) ) {
-			wp_send_json_error( [
-				'message' => __( 'Invalid template ID.', 'formtura' ),
-			] );
+			wp_send_json_error(
+				array(
+					'message' => __( 'Invalid template ID.', 'formtura' ),
+				)
+			);
 		}
 
 		$templates = $this->get_templates();
 
 		if ( ! isset( $templates[ $template_id ] ) ) {
-			wp_send_json_error( [
-				'message' => __( 'Template not found.', 'formtura' ),
-			] );
+			wp_send_json_error(
+				array(
+					'message' => __( 'Template not found.', 'formtura' ),
+				)
+			);
 		}
 
 		$template = $templates[ $template_id ];
 
 		// Create form from template.
-		$form_data = [
+		$form_data = array(
 			'title'  => $template['title'],
 			'fields' => $template['fields'],
 			'status' => 'active',
-		];
+		);
 
 		$form_id = fta_create_form( $form_data );
 
 		if ( $form_id ) {
-			wp_send_json_success( [
-				'message'       => __( 'Form created successfully.', 'formtura' ),
-				'form_id'       => $form_id,
-				'redirect_url'  => admin_url( 'admin.php?page=formtura-builder&form_id=' . $form_id ),
-			] );
+			wp_send_json_success(
+				array(
+					'message'      => __( 'Form created successfully.', 'formtura' ),
+					'form_id'      => $form_id,
+					'redirect_url' => admin_url( 'admin.php?page=formtura-builder&form_id=' . $form_id ),
+				)
+			);
 		} else {
-			wp_send_json_error( [
-				'message' => __( 'Failed to create form.', 'formtura' ),
-			] );
+			wp_send_json_error(
+				array(
+					'message' => __( 'Failed to create form.', 'formtura' ),
+				)
+			);
 		}
 	}
 }

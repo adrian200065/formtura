@@ -13,30 +13,30 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$template_categories = [
-	'all'         => [
+$template_categories = array(
+	'all'        => array(
 		'label' => __( 'All templates', 'formtura' ),
 		'ids'   => array_keys( $templates ),
-	],
-	'starting'    => [
+	),
+	'starting'   => array(
 		'label' => __( 'Starting points', 'formtura' ),
-		'ids'   => [ 'blank' ],
-	],
-	'customer'    => [
+		'ids'   => array( 'blank' ),
+	),
+	'customer'   => array(
 		'label' => __( 'Customer forms', 'formtura' ),
-		'ids'   => [ 'contact', 'quote' ],
-	],
-	'engagement'  => [
+		'ids'   => array( 'contact', 'quote' ),
+	),
+	'engagement' => array(
 		'label' => __( 'Engagement', 'formtura' ),
-		'ids'   => [ 'feedback', 'registration' ],
-	],
-	'hiring'      => [
+		'ids'   => array( 'feedback', 'registration' ),
+	),
+	'hiring'     => array(
 		'label' => __( 'Hiring', 'formtura' ),
-		'ids'   => [ 'job_application' ],
-	],
-];
+		'ids'   => array( 'job_application' ),
+	),
+);
 
-$template_category_for_id = static function( $template_id ) use ( $template_categories ) {
+$template_category_for_id = static function ( $template_id ) use ( $template_categories ) {
 	foreach ( $template_categories as $category_id => $category ) {
 		if ( 'all' !== $category_id && in_array( $template_id, $category['ids'], true ) ) {
 			return $category_id;
@@ -125,7 +125,7 @@ $template_category_for_id = static function( $template_id ) use ( $template_cate
 					<?php
 					$category_id     = $template_category_for_id( $template_id );
 					$category        = $template_categories[ $category_id ];
-					$fields          = isset( $template['fields'] ) && is_array( $template['fields'] ) ? $template['fields'] : [];
+					$fields          = isset( $template['fields'] ) && is_array( $template['fields'] ) ? $template['fields'] : array();
 					$preview_fields  = array_slice( $fields, 0, 4 );
 					$preview_variant = sanitize_html_class( $template_id );
 					$search_text     = strtolower( $template['title'] . ' ' . $template['description'] . ' ' . $category['label'] );
@@ -184,7 +184,7 @@ $template_category_for_id = static function( $template_id ) use ( $template_cate
 									<div class="fta-template-preview-fields fta-template-preview-fields--<?php echo esc_attr( $preview_variant ); ?>">
 										<?php foreach ( $preview_fields as $field ) : ?>
 											<?php
-											$field_type = isset( $field['type'] ) ? sanitize_html_class( $field['type'] ) : 'text';
+											$field_type  = isset( $field['type'] ) ? sanitize_html_class( $field['type'] ) : 'text';
 											$field_label = isset( $field['label'] ) ? $field['label'] : __( 'Field', 'formtura' );
 											?>
 											<div class="fta-template-preview-field fta-template-preview-field-<?php echo esc_attr( $field_type ); ?>">
@@ -202,7 +202,7 @@ $template_category_for_id = static function( $template_id ) use ( $template_cate
 													</span>
 												<?php elseif ( 'textarea' === $field_type ) : ?>
 													<span class="fta-template-preview-control fta-template-preview-control-textarea"></span>
-												<?php elseif ( in_array( $field_type, [ 'radio', 'checkbox', 'checkboxes' ], true ) ) : ?>
+												<?php elseif ( in_array( $field_type, array( 'radio', 'checkbox', 'checkboxes' ), true ) ) : ?>
 													<span class="fta-template-preview-options">
 														<i></i><i></i><i></i>
 													</span>

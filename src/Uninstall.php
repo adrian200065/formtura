@@ -31,7 +31,7 @@ class Uninstall {
 	 * @since 1.0.5
 	 * @var string[]
 	 */
-	private static $options = [
+	private static $options = array(
 		'fta_version',
 		'fta_settings',
 		'fta_smtp_settings',
@@ -41,7 +41,7 @@ class Uninstall {
 		'fta_keep_data_on_uninstall',
 		'fta_private_migration_failed',
 		'fta_db_version',
-	];
+	);
 
 	/**
 	 * Tables this plugin owns, without the site prefix.
@@ -49,11 +49,11 @@ class Uninstall {
 	 * @since 1.0.5
 	 * @var string[]
 	 */
-	private static $tables = [
+	private static $tables = array(
 		'fta_forms',
 		'fta_entries',
 		'fta_entry_meta',
-	];
+	);
 
 	/**
 	 * Run the uninstall routine.
@@ -62,6 +62,9 @@ class Uninstall {
 	 * deletion. Absent or false settings both mean retain.
 	 *
 	 * @since 1.0.5
+	 * @param \Formtura\Frontend\File_Storage|null $storage Optional storage
+	 *        service. Injected by tests so deletion runs against a
+	 *        temporary vault.
 	 * @return void
 	 */
 	public static function run( $storage = null ) {
@@ -110,7 +113,7 @@ class Uninstall {
 	 * @return bool
 	 */
 	private static function should_delete_data() {
-		$settings = get_option( 'fta_settings', [] );
+		$settings = get_option( 'fta_settings', array() );
 
 		if ( ! is_array( $settings ) ) {
 			return false;

@@ -37,10 +37,10 @@ class Frontend {
 	 */
 	private function init_hooks() {
 		// Register shortcode.
-		add_shortcode( FORMTURA_TEXTDOMAIN, [ $this, 'render_form_shortcode' ] );
+		add_shortcode( FORMTURA_TEXTDOMAIN, array( $this, 'render_form_shortcode' ) );
 
 		// Enqueue frontend scripts and styles.
-		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_assets' ] );
+		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 	}
 
 	/**
@@ -71,7 +71,7 @@ class Frontend {
 			wp_enqueue_style(
 				'formtura-frontend',
 				FORMTURA_PLUGIN_URL . 'assets/css/frontend.css',
-				[],
+				array(),
 				fta_asset_version( 'assets/css/frontend.css' )
 			);
 		}
@@ -81,7 +81,7 @@ class Frontend {
 			wp_enqueue_script(
 				'formtura-frontend',
 				FORMTURA_PLUGIN_URL . 'assets/js/frontend.js',
-				[ 'jquery' ],
+				array( 'jquery' ),
 				fta_asset_version( 'assets/js/frontend.js' ),
 				true
 			);
@@ -90,21 +90,21 @@ class Frontend {
 			wp_localize_script(
 				'formtura-frontend',
 				'formturaFrontend',
-				[
+				array(
 					'ajaxUrl'   => admin_url( 'admin-ajax.php' ),
 					'nonce'     => wp_create_nonce( 'formtura_frontend' ),
 					'recaptcha' => $recaptcha['enabled']
-						? [
+						? array(
 							// Only the public half of the key pair goes to the browser.
 							'siteKey' => $recaptcha['site_key'],
 							'version' => $recaptcha['version'],
 							'action'  => $recaptcha['action'],
-						]
+						)
 						: null,
-					'currency'  => [
+					'currency'  => array(
 						'symbol' => fta_get_currency_symbol(),
-					],
-					'strings'   => [
+					),
+					'strings'   => array(
 						'submitting'       => __( 'Submitting...', 'formtura' ),
 						'error'            => __( 'An error occurred. Please try again.', 'formtura' ),
 						'recaptchaMissing' => __( 'Please confirm you are not a robot.', 'formtura' ),
@@ -112,8 +112,8 @@ class Frontend {
 						'signatureMissing' => __( 'Please add your signature.', 'formtura' ),
 						'couponApplied'    => __( 'Coupon applied.', 'formtura' ),
 						'couponInvalid'    => __( 'This coupon code is not valid.', 'formtura' ),
-					],
-				]
+					),
+				)
 			);
 		}
 
@@ -126,10 +126,10 @@ class Frontend {
 			$recaptcha_url = 'v3' === $recaptcha['version']
 				? add_query_arg( 'render', $recaptcha['site_key'], 'https://www.google.com/recaptcha/api.js' )
 				: add_query_arg(
-					[
+					array(
 						'render' => 'explicit',
 						'onload' => 'formturaRecaptchaOnload',
-					],
+					),
 					'https://www.google.com/recaptcha/api.js'
 				);
 
@@ -138,7 +138,7 @@ class Frontend {
 				$recaptcha_url,
 				// Depends on our script so the onload callback is defined by the
 				// time Google's API runs it.
-				[ 'formtura-frontend' ],
+				array( 'formtura-frontend' ),
 				null,
 				true
 			);
@@ -179,9 +179,13 @@ class Frontend {
 	 * @return string Form HTML.
 	 */
 	public function render_form_shortcode( $atts ) {
-		$atts = shortcode_atts( [
-			'id' => 0,
-		], $atts, FORMTURA_TEXTDOMAIN );
+		$atts = shortcode_atts(
+			array(
+				'id' => 0,
+			),
+			$atts,
+			FORMTURA_TEXTDOMAIN
+		);
 
 		$form_id = absint( $atts['id'] );
 

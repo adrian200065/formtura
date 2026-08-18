@@ -57,7 +57,7 @@ class Entry_Values {
 	 * @return array<string,string> Labels keyed by field name.
 	 */
 	public static function labels( $form ) {
-		$labels = [];
+		$labels = array();
 
 		if ( ! is_array( $form ) || ! isset( $form['fields'] ) || ! is_array( $form['fields'] ) ) {
 			return $labels;
@@ -90,7 +90,7 @@ class Entry_Values {
 	 * @param array  $labels Label map from labels().
 	 * @return string
 	 */
-	public static function label( $key, array $labels = [] ) {
+	public static function label( $key, array $labels = array() ) {
 		$key = (string) $key;
 
 		if ( self::PAYMENT_KEY === $key ) {
@@ -158,7 +158,7 @@ class Entry_Values {
 			return '';
 		}
 
-		$parts = [];
+		$parts = array();
 
 		foreach ( $value as $item ) {
 			$text = self::to_text( $item, $depth + 1 );
@@ -188,7 +188,7 @@ class Entry_Values {
 
 		$text = trim( $currency . ' ' . $amount );
 
-		$items = [];
+		$items = array();
 
 		if ( isset( $payment['items'] ) && is_array( $payment['items'] ) ) {
 			foreach ( $payment['items'] as $item ) {
@@ -232,14 +232,14 @@ class Entry_Values {
 	 */
 	public static function file_records( $value ) {
 		if ( ! is_array( $value ) ) {
-			return [];
+			return array();
 		}
 
 		if ( File_Storage::is_file_record( $value ) ) {
-			return [ $value ];
+			return array( $value );
 		}
 
-		$records = [];
+		$records = array();
 
 		foreach ( $value as $item ) {
 			if ( is_array( $item ) && File_Storage::is_file_record( $item ) ) {

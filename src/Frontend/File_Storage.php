@@ -229,12 +229,12 @@ class File_Storage {
 			return false;
 		}
 
-		return [
+		return array(
 			'name' => sanitize_file_name( $name ),
 			'path' => $relative,
 			'type' => (string) $type,
 			'size' => (int) $size,
-		];
+		);
 	}
 
 	/**
@@ -494,7 +494,7 @@ class File_Storage {
 			}
 
 			// Plugin-written protection, not user data.
-			if ( in_array( $item, [ '.htaccess', 'index.php', 'web.config' ], true ) ) {
+			if ( in_array( $item, array( '.htaccess', 'index.php', 'web.config' ), true ) ) {
 				continue;
 			}
 
@@ -596,13 +596,13 @@ class File_Storage {
 
 			if ( is_dir( $path ) && ! is_link( $path ) ) {
 				if ( ! $this->prune_empty_directories( $path ) ) {
-					$remaining++;
+					++$remaining;
 				}
 
 				continue;
 			}
 
-			$remaining++;
+			++$remaining;
 		}
 
 		if ( 0 === $remaining ) {

@@ -83,10 +83,10 @@ class Core {
 	 */
 	private function init_hooks() {
 		// Localization.
-		add_action( 'init', [ $this, 'load_textdomain' ] );
+		add_action( 'init', array( $this, 'load_textdomain' ) );
 
 		// Plugin action links.
-		add_filter( 'plugin_action_links_' . FORMTURA_PLUGIN_BASENAME, [ $this, 'plugin_action_links' ] );
+		add_filter( 'plugin_action_links_' . FORMTURA_PLUGIN_BASENAME, array( $this, 'plugin_action_links' ) );
 	}
 
 	/**
@@ -151,10 +151,10 @@ class Core {
 	 */
 	public function plugin_action_links( $links ) {
 		// Use plain strings to avoid translation loading before init hook.
-		$plugin_links = [
+		$plugin_links = array(
 			'<a href="' . admin_url( 'admin.php?page=formtura' ) . '">Forms</a>',
 			'<a href="' . admin_url( 'admin.php?page=formtura-settings' ) . '">Settings</a>',
-		];
+		);
 
 		return array_merge( $plugin_links, $links );
 	}
@@ -170,6 +170,7 @@ class Core {
 	 * Prevent unserializing of the instance.
 	 *
 	 * @since 1.0.0
+	 * @throws \Exception Always, to block unserializing this singleton.
 	 */
 	public function __wakeup() {
 		throw new \Exception( 'Cannot unserialize singleton' );

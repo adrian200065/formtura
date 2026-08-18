@@ -67,10 +67,10 @@ class Privacy {
 	 * @since 1.0.6
 	 */
 	private function init_hooks() {
-		add_filter( 'wp_privacy_personal_data_exporters', [ $this, 'register_exporter' ] );
-		add_filter( 'wp_privacy_personal_data_erasers', [ $this, 'register_eraser' ] );
-		add_action( 'fta_purge_old_entries_event', [ $this, 'purge_old_entries' ] );
-		add_action( 'init', [ $this, 'maybe_schedule_purge' ] );
+		add_filter( 'wp_privacy_personal_data_exporters', array( $this, 'register_exporter' ) );
+		add_filter( 'wp_privacy_personal_data_erasers', array( $this, 'register_eraser' ) );
+		add_action( 'fta_purge_old_entries_event', array( $this, 'purge_old_entries' ) );
+		add_action( 'init', array( $this, 'maybe_schedule_purge' ) );
 	}
 
 	/**
@@ -124,10 +124,10 @@ class Privacy {
 	 * @return array
 	 */
 	public function register_exporter( $exporters ) {
-		$exporters['formtura-entries'] = [
+		$exporters['formtura-entries'] = array(
 			'exporter_friendly_name' => __( 'Formtura Form Entries', 'formtura' ),
-			'callback'               => [ $this, 'export_data' ],
-		];
+			'callback'               => array( $this, 'export_data' ),
+		);
 
 		return $exporters;
 	}
@@ -140,10 +140,10 @@ class Privacy {
 	 * @return array
 	 */
 	public function register_eraser( $erasers ) {
-		$erasers['formtura-entries'] = [
+		$erasers['formtura-entries'] = array(
 			'eraser_friendly_name' => __( 'Formtura Form Entries', 'formtura' ),
-			'callback'              => [ $this, 'erase_data' ],
-		];
+			'callback'             => array( $this, 'erase_data' ),
+		);
 
 		return $erasers;
 	}
@@ -164,10 +164,10 @@ class Privacy {
 		$email = trim( (string) $email );
 
 		if ( '' === $email ) {
-			return [];
+			return array();
 		}
 
-		$ids = [];
+		$ids = array();
 
 		$user = get_user_by( 'email', $email );
 
@@ -178,7 +178,7 @@ class Privacy {
 		// A high, explicit limit: Forms_DB::get_all()'s default caps at 20,
 		// which would silently miss forms past the first page on any site
 		// with more than 20 forms.
-		foreach ( $this->forms()->get_all( [ 'limit' => 100000 ] ) as $form ) {
+		foreach ( $this->forms()->get_all( array( 'limit' => 100000 ) ) as $form ) {
 			$email_fields = $this->email_field_names( $form );
 
 			if ( empty( $email_fields ) ) {
@@ -212,7 +212,7 @@ class Privacy {
 	 * @return string[]
 	 */
 	private function email_field_names( $form ) {
-		$names = [];
+		$names = array();
 
 		if ( empty( $form['fields'] ) || ! is_array( $form['fields'] ) ) {
 			return $names;
@@ -246,7 +246,7 @@ class Privacy {
 		$offset   = ( $page - 1 ) * self::PAGE_SIZE;
 		$page_ids = array_slice( $ids, $offset, self::PAGE_SIZE );
 
-		$items = [];
+		$items = array();
 
 		foreach ( $page_ids as $entry_id ) {
 			$entry = $this->entries()->get( $entry_id );
@@ -256,10 +256,10 @@ class Privacy {
 			}
 		}
 
-		return [
+		return array(
 			'data' => $items,
 			'done' => ( $offset + count( $page_ids ) ) >= count( $ids ),
-		];
+		);
 	}
 
 	/**
@@ -270,27 +270,36 @@ class Privacy {
 	 * @return array
 	 */
 	private function export_item( $entry ) {
-		$data = [
-			[ 'name' => __( 'Submitted', 'formtura' ), 'value' => isset( $entry['created_at'] ) ? $entry['created_at'] : '' ],
-			[ 'name' => __( 'IP Address', 'formtura' ), 'value' => isset( $entry['ip_address'] ) ? $entry['ip_address'] : '' ],
-			[ 'name' => __( 'User Agent', 'formtura' ), 'value' => isset( $entry['user_agent'] ) ? $entry['user_agent'] : '' ],
-		];
+		$data = array(
+			array(
+				'name'  => __( 'Submitted', 'formtura' ),
+				'value' => isset( $entry['created_at'] ) ? $entry['created_at'] : '',
+			),
+			array(
+				'name'  => __( 'IP Address', 'formtura' ),
+				'value' => isset( $entry['ip_address'] ) ? $entry['ip_address'] : '',
+			),
+			array(
+				'name'  => __( 'User Agent', 'formtura' ),
+				'value' => isset( $entry['user_agent'] ) ? $entry['user_agent'] : '',
+			),
+		);
 
-		$answers = isset( $entry['data'] ) && is_array( $entry['data'] ) ? $entry['data'] : [];
+		$answers = isset( $entry['data'] ) && is_array( $entry['data'] ) ? $entry['data'] : array();
 
 		foreach ( $answers as $key => $value ) {
-			$data[] = [
+			$data[] = array(
 				'name'  => (string) $key,
 				'value' => is_array( $value ) ? wp_json_encode( $value ) : (string) $value,
-			];
+			);
 		}
 
-		return [
+		return array(
 			'group_id'    => 'formtura-entries',
 			'group_label' => __( 'Form Entries', 'formtura' ),
 			'item_id'     => 'formtura-entry-' . $entry['id'],
 			'data'        => $data,
-		];
+		);
 	}
 
 	/**
@@ -321,26 +330,26 @@ class Privacy {
 
 		foreach ( $page_ids as $entry_id ) {
 			if ( $this->entries()->delete( $entry_id ) ) {
-				$removed++;
+				++$removed;
 			}
 		}
 
 		$failed = count( $page_ids ) - $removed;
 
-		return [
+		return array(
 			'items_removed'  => $removed > 0,
 			'items_retained' => $failed > 0,
 			'messages'       => $removed > 0
-				? [
-				sprintf(
-					/* translators: %d: number of entries removed. */
-					__( '%d form entries removed.', 'formtura' ),
-					$removed
-				),
-			]
-				: [],
+				? array(
+					sprintf(
+						/* translators: %d: number of entries removed. */
+						__( '%d form entries removed.', 'formtura' ),
+						$removed
+					),
+				)
+				: array(),
 			'done'           => count( $page_ids ) >= count( $ids ),
-		];
+		);
 	}
 
 	/**

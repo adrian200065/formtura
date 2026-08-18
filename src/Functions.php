@@ -32,7 +32,7 @@ function fta_get_form( $form_id ) {
  * @param array $args Query arguments.
  * @return array Array of forms.
  */
-function fta_get_forms( $args = [] ) {
+function fta_get_forms( $args = array() ) {
 	$forms_db = new \Formtura\Database\Forms_DB();
 	return $forms_db->get_all( $args );
 }
@@ -94,7 +94,7 @@ function fta_get_entry( $entry_id ) {
  * @param array $args Query arguments.
  * @return array Array of entries.
  */
-function fta_get_entries( $form_id, $args = [] ) {
+function fta_get_entries( $form_id, $args = array() ) {
 	$entries_db = new \Formtura\Database\Entries_DB();
 	return $entries_db->get_by_form( $form_id, $args );
 }
@@ -145,7 +145,7 @@ function fta_delete_entry( $entry_id ) {
  * @return mixed Setting value or all settings.
  */
 function fta_get_setting( $key = '', $default = null ) {
-	$settings = get_option( 'fta_settings', [] );
+	$settings = get_option( 'fta_settings', array() );
 
 	if ( empty( $key ) ) {
 		return $settings;
@@ -163,7 +163,7 @@ function fta_get_setting( $key = '', $default = null ) {
  * @return bool True on success, false on failure.
  */
 function fta_update_setting( $key, $value ) {
-	$settings = get_option( 'fta_settings', [] );
+	$settings         = get_option( 'fta_settings', array() );
 	$settings[ $key ] = $value;
 	return update_option( 'fta_settings', $settings );
 }
@@ -177,7 +177,7 @@ function fta_update_setting( $key, $value ) {
  * @return mixed Setting value or all settings.
  */
 function fta_get_smtp_setting( $key = '', $default = null ) {
-	$settings = get_option( 'fta_smtp_settings', [] );
+	$settings = get_option( 'fta_smtp_settings', array() );
 
 	if ( empty( $key ) ) {
 		return $settings;
@@ -213,14 +213,14 @@ function fta_get_recaptcha_config() {
 	$threshold = is_numeric( $threshold ) ? (float) $threshold : 0.5;
 	$threshold = max( 0.0, min( 1.0, $threshold ) );
 
-	return [
+	return array(
 		'enabled'         => '' !== $site_key && '' !== $secret_key,
 		'site_key'        => $site_key,
 		'secret_key'      => $secret_key,
 		'version'         => $version,
 		'action'          => 'formtura_submit',
 		'score_threshold' => $threshold,
-	];
+	);
 }
 
 /**
@@ -239,8 +239,8 @@ function fta_sanitize_field( $value, $type = 'text' ) {
  * Validate form field data.
  *
  * @since 1.0.0
- * @param mixed  $value Field value.
- * @param array  $rules Validation rules.
+ * @param mixed $value Field value.
+ * @param array $rules Validation rules.
  * @return bool|string True if valid, error message if invalid.
  */
 function fta_validate_field( $value, $rules ) {
@@ -288,7 +288,7 @@ function fta_validate_field( $value, $rules ) {
  * @param array $args Optional arguments.
  * @return string Form HTML.
  */
-function fta_render_form( $form_id, $args = [] ) {
+function fta_render_form( $form_id, $args = array() ) {
 	$form = fta_get_form( $form_id );
 
 	if ( ! $form ) {
@@ -307,115 +307,118 @@ function fta_render_form( $form_id, $args = [] ) {
  * @return array Array of field types.
  */
 function fta_get_field_types() {
-	return apply_filters( 'fta_field_types', [
-		// Standard Fields
-		'text' => [
-			'label'     => __( 'Single Line Text', 'formtura' ),
-			'icon'      => 'text',
-			'category'  => 'standard',
-		],
-		'textarea' => [
-			'label'     => __( 'Paragraph Text', 'formtura' ),
-			'icon'      => 'align-left',
-			'category'  => 'standard',
-		],
-		'name' => [
-			'label'     => __( 'Name', 'formtura' ),
-			'icon'      => 'user',
-			'category'  => 'standard',
-		],
-		'email' => [
-			'label'     => __( 'Email', 'formtura' ),
-			'icon'      => 'mail',
-			'category'  => 'standard',
-		],
-		'select' => [
-			'label'     => __( 'Dropdown', 'formtura' ),
-			'icon'      => 'chevron-down',
-			'category'  => 'standard',
-		],
-		'radio' => [
-			'label'     => __( 'Multiple Choice', 'formtura' ),
-			'icon'      => 'circle',
-			'category'  => 'standard',
-		],
-		'checkbox' => [
-			'label'     => __( 'Checkboxes', 'formtura' ),
-			'icon'      => 'check-square',
-			'category'  => 'standard',
-		],
-		'number' => [
-			'label'     => __( 'Number', 'formtura' ),
-			'icon'      => 'hash',
-			'category'  => 'standard',
-		],
-		'phone' => [
-			'label'     => __( 'Phone', 'formtura' ),
-			'icon'      => 'phone',
-			'category'  => 'standard',
-		],
-		'website' => [
-			'label'     => __( 'Website / URL', 'formtura' ),
-			'icon'      => 'globe',
-			'category'  => 'standard',
-		],
-		'html' => [
-			'label'     => __( 'HTML', 'formtura' ),
-			'icon'      => 'code',
-			'category'  => 'standard',
-		],
-		'hidden' => [
-			'label'     => __( 'Hidden Field', 'formtura' ),
-			'icon'      => 'eye-off',
-			'category'  => 'standard',
-		],
-		'captcha' => [
-			'label'     => __( 'CAPTCHA', 'formtura' ),
-			'icon'      => 'lock',
-			'category'  => 'standard',
-		],
-		// Advanced Fields
-		'address' => [
-			'label'     => __( 'Address', 'formtura' ),
-			'icon'      => 'map-pin',
-			'category'  => 'advanced',
-		],
-		'datetime' => [
-			'label'     => __( 'Date / Time', 'formtura' ),
-			'icon'      => 'calendar',
-			'category'  => 'advanced',
-		],
-		'password' => [
-			'label'     => __( 'Password', 'formtura' ),
-			'icon'      => 'lock',
-			'category'  => 'advanced',
-		],
-		'file-upload' => [
-			'label'     => __( 'File Upload', 'formtura' ),
-			'icon'      => 'upload',
-			'category'  => 'advanced',
-		],
-		'number-slider' => [
-			'label'     => __( 'Slider', 'formtura' ),
-			'icon'      => 'trending-up',
-			'category'  => 'advanced',
-		],
-		'rating' => [
-			'label'     => __( 'Star Rating', 'formtura' ),
-			'icon'      => 'star',
-			'category'  => 'advanced',
-		],
-		'repeater' => [
-			'label'     => __( 'Repeater', 'formtura' ),
-			'icon'      => 'repeat',
-			'category'  => 'advanced',
-		],
-		'signature' => [
-			'label'     => __( 'Signature', 'formtura' ),
-			'icon'      => 'pen-tool',
-			'category'  => 'advanced',
-		],
-	] );
+	return apply_filters(
+		'fta_field_types',
+		array(
+			// Standard Fields.
+			'text'          => array(
+				'label'    => __( 'Single Line Text', 'formtura' ),
+				'icon'     => 'text',
+				'category' => 'standard',
+			),
+			'textarea'      => array(
+				'label'    => __( 'Paragraph Text', 'formtura' ),
+				'icon'     => 'align-left',
+				'category' => 'standard',
+			),
+			'name'          => array(
+				'label'    => __( 'Name', 'formtura' ),
+				'icon'     => 'user',
+				'category' => 'standard',
+			),
+			'email'         => array(
+				'label'    => __( 'Email', 'formtura' ),
+				'icon'     => 'mail',
+				'category' => 'standard',
+			),
+			'select'        => array(
+				'label'    => __( 'Dropdown', 'formtura' ),
+				'icon'     => 'chevron-down',
+				'category' => 'standard',
+			),
+			'radio'         => array(
+				'label'    => __( 'Multiple Choice', 'formtura' ),
+				'icon'     => 'circle',
+				'category' => 'standard',
+			),
+			'checkbox'      => array(
+				'label'    => __( 'Checkboxes', 'formtura' ),
+				'icon'     => 'check-square',
+				'category' => 'standard',
+			),
+			'number'        => array(
+				'label'    => __( 'Number', 'formtura' ),
+				'icon'     => 'hash',
+				'category' => 'standard',
+			),
+			'phone'         => array(
+				'label'    => __( 'Phone', 'formtura' ),
+				'icon'     => 'phone',
+				'category' => 'standard',
+			),
+			'website'       => array(
+				'label'    => __( 'Website / URL', 'formtura' ),
+				'icon'     => 'globe',
+				'category' => 'standard',
+			),
+			'html'          => array(
+				'label'    => __( 'HTML', 'formtura' ),
+				'icon'     => 'code',
+				'category' => 'standard',
+			),
+			'hidden'        => array(
+				'label'    => __( 'Hidden Field', 'formtura' ),
+				'icon'     => 'eye-off',
+				'category' => 'standard',
+			),
+			'captcha'       => array(
+				'label'    => __( 'CAPTCHA', 'formtura' ),
+				'icon'     => 'lock',
+				'category' => 'standard',
+			),
+			// Advanced Fields.
+			'address'       => array(
+				'label'    => __( 'Address', 'formtura' ),
+				'icon'     => 'map-pin',
+				'category' => 'advanced',
+			),
+			'datetime'      => array(
+				'label'    => __( 'Date / Time', 'formtura' ),
+				'icon'     => 'calendar',
+				'category' => 'advanced',
+			),
+			'password'      => array(
+				'label'    => __( 'Password', 'formtura' ),
+				'icon'     => 'lock',
+				'category' => 'advanced',
+			),
+			'file-upload'   => array(
+				'label'    => __( 'File Upload', 'formtura' ),
+				'icon'     => 'upload',
+				'category' => 'advanced',
+			),
+			'number-slider' => array(
+				'label'    => __( 'Slider', 'formtura' ),
+				'icon'     => 'trending-up',
+				'category' => 'advanced',
+			),
+			'rating'        => array(
+				'label'    => __( 'Star Rating', 'formtura' ),
+				'icon'     => 'star',
+				'category' => 'advanced',
+			),
+			'repeater'      => array(
+				'label'    => __( 'Repeater', 'formtura' ),
+				'icon'     => 'repeat',
+				'category' => 'advanced',
+			),
+			'signature'     => array(
+				'label'    => __( 'Signature', 'formtura' ),
+				'icon'     => 'pen-tool',
+				'category' => 'advanced',
+			),
+		)
+	);
 }
 
 /**
@@ -472,18 +475,18 @@ function fta_normalize_field_choice( $choice ) {
 		$label = isset( $choice['label'] ) ? $choice['label'] : '';
 		$value = isset( $choice['value'] ) && '' !== $choice['value'] ? $choice['value'] : $label;
 
-		return [
+		return array(
 			'label'     => (string) $label,
 			'value'     => (string) $value,
 			'isDefault' => ! empty( $choice['isDefault'] ),
-		];
+		);
 	}
 
-	return [
+	return array(
 		'label'     => (string) $choice,
 		'value'     => (string) $choice,
 		'isDefault' => false,
-	];
+	);
 }
 
 /**
@@ -499,42 +502,46 @@ function fta_normalize_field_choice( $choice ) {
  */
 function fta_get_field_choices( $field ) {
 	$source  = isset( $field['dynamicChoices'] ) ? $field['dynamicChoices'] : '';
-	$choices = [];
+	$choices = array();
 
 	if ( 'post_type' === $source && ! empty( $field['dynamicPostType'] ) ) {
-		$posts = get_posts( [
-			'post_type'      => sanitize_key( $field['dynamicPostType'] ),
-			'posts_per_page' => 100,
-			'post_status'    => 'publish',
-			'orderby'        => 'title',
-			'order'          => 'ASC',
-		] );
+		$posts = get_posts(
+			array(
+				'post_type'      => sanitize_key( $field['dynamicPostType'] ),
+				'posts_per_page' => 100,
+				'post_status'    => 'publish',
+				'orderby'        => 'title',
+				'order'          => 'ASC',
+			)
+		);
 
 		foreach ( $posts as $post ) {
-			$choices[] = [
+			$choices[] = array(
 				'label'     => $post->post_title,
 				'value'     => (string) $post->ID,
 				'isDefault' => false,
-			];
+			);
 		}
 	} elseif ( 'taxonomy' === $source && ! empty( $field['dynamicTaxonomy'] ) ) {
-		$terms = get_terms( [
-			'taxonomy'   => sanitize_key( $field['dynamicTaxonomy'] ),
-			'hide_empty' => false,
-			'number'     => 100,
-		] );
+		$terms = get_terms(
+			array(
+				'taxonomy'   => sanitize_key( $field['dynamicTaxonomy'] ),
+				'hide_empty' => false,
+				'number'     => 100,
+			)
+		);
 
 		if ( ! is_wp_error( $terms ) ) {
 			foreach ( $terms as $term ) {
-				$choices[] = [
+				$choices[] = array(
 					'label'     => $term->name,
 					'value'     => (string) $term->term_id,
 					'isDefault' => false,
-				];
+				);
 			}
 		}
 	} else {
-		$raw = [];
+		$raw = array();
 
 		if ( ! empty( $field['choices'] ) && is_array( $field['choices'] ) ) {
 			$raw = $field['choices'];
@@ -561,14 +568,17 @@ function fta_get_field_choices( $field ) {
 function fta_get_currency_symbol() {
 	$currency = (string) fta_get_setting( 'currency', 'USD' );
 
-	$symbols = apply_filters( 'fta_currency_symbols', [
-		'USD' => '$',
-		'EUR' => '€',
-		'GBP' => '£',
-		'AUD' => '$',
-		'CAD' => '$',
-		'JPY' => '¥',
-	] );
+	$symbols = apply_filters(
+		'fta_currency_symbols',
+		array(
+			'USD' => '$',
+			'EUR' => '€',
+			'GBP' => '£',
+			'AUD' => '$',
+			'CAD' => '$',
+			'JPY' => '¥',
+		)
+	);
 
 	return isset( $symbols[ $currency ] ) ? $symbols[ $currency ] : $currency;
 }
@@ -599,8 +609,8 @@ function fta_format_price( $amount ) {
  * @return array[] Normalized items.
  */
 function fta_get_field_items( $field ) {
-	$items      = isset( $field['items'] ) && is_array( $field['items'] ) ? $field['items'] : [];
-	$normalized = [];
+	$items      = isset( $field['items'] ) && is_array( $field['items'] ) ? $field['items'] : array();
+	$normalized = array();
 
 	foreach ( $items as $item ) {
 		if ( ! is_array( $item ) ) {
@@ -614,12 +624,12 @@ function fta_get_field_items( $field ) {
 			continue;
 		}
 
-		$normalized[] = [
+		$normalized[] = array(
 			'label'     => $label,
 			'value'     => $value,
 			'price'     => isset( $item['price'] ) && is_numeric( $item['price'] ) ? (float) $item['price'] : 0.0,
 			'isDefault' => ! empty( $item['isDefault'] ),
-		];
+		);
 	}
 
 	return $normalized;
@@ -634,7 +644,7 @@ function fta_get_field_items( $field ) {
  * @return string Space separated class list.
  */
 function fta_get_field_wrapper_class( $field, $base_class = '' ) {
-	$classes = [ 'fta-field' ];
+	$classes = array( 'fta-field' );
 
 	if ( $base_class ) {
 		$classes[] = $base_class;
@@ -759,9 +769,9 @@ function fta_log( $message, $level = 'info' ) {
  * @param array  $args Optional. Arguments to pass to template.
  * @return bool True when a template was located and included.
  */
-function fta_get_template_part( $slug, $name = '', $args = [] ) {
-	$templates = [];
-	$name = (string) $name;
+function fta_get_template_part( $slug, $name = '', $args = array() ) {
+	$templates = array();
+	$name      = (string) $name;
 
 	if ( '' !== $name ) {
 		$templates[] = "{$slug}-{$name}.php";
@@ -770,9 +780,16 @@ function fta_get_template_part( $slug, $name = '', $args = [] ) {
 	$templates[] = "{$slug}.php";
 
 	// Allow themes to override templates.
-	$located = locate_template( array_map( function( $template ) {
-		return 'formtura/' . $template;
-	}, $templates ), false, false );
+	$located = locate_template(
+		array_map(
+			function ( $template ) {
+				return 'formtura/' . $template;
+			},
+			$templates
+		),
+		false,
+		false
+	);
 
 	// Fall back to plugin templates.
 	if ( ! $located ) {
@@ -785,7 +802,9 @@ function fta_get_template_part( $slug, $name = '', $args = [] ) {
 	}
 
 	if ( $located ) {
-		extract( $args );
+		// Every template under templates/ expects a single $field variable;
+		// see the @var docblocks in templates/fields/*.php.
+		$field = isset( $args['field'] ) ? $args['field'] : null;
 		include $located;
 
 		return true;

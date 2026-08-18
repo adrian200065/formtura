@@ -36,10 +36,10 @@ class Form_Entries {
 	 */
 	private function init_hooks() {
 		// AJAX handlers.
-		add_action( 'wp_ajax_fta_get_entries', [ $this, 'ajax_get_entries' ] );
-		add_action( 'wp_ajax_fta_delete_entry', [ $this, 'ajax_delete_entry' ] );
-		add_action( 'wp_ajax_fta_export_entries', [ $this, 'ajax_export_entries' ] );
-		add_action( 'wp_ajax_fta_mark_entry_read', [ $this, 'ajax_mark_entry_read' ] );
+		add_action( 'wp_ajax_fta_get_entries', array( $this, 'ajax_get_entries' ) );
+		add_action( 'wp_ajax_fta_delete_entry', array( $this, 'ajax_delete_entry' ) );
+		add_action( 'wp_ajax_fta_export_entries', array( $this, 'ajax_export_entries' ) );
+		add_action( 'wp_ajax_fta_mark_entry_read', array( $this, 'ajax_mark_entry_read' ) );
 	}
 
 	/**
@@ -48,7 +48,7 @@ class Form_Entries {
 	 * @since 1.0.0
 	 */
 	public function render() {
-		$forms = fta_get_forms();
+		$forms            = fta_get_forms();
 		$selected_form_id = isset( $_GET['form_id'] ) ? absint( $_GET['form_id'] ) : 0;
 
 		include FORMTURA_PLUGIN_DIR . 'src/Admin/views/entries-list.php';
@@ -65,23 +65,30 @@ class Form_Entries {
 
 		// Check permissions.
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( [
-				'message' => __( 'You do not have permission to perform this action.', 'formtura' ),
-			] );
+			wp_send_json_error(
+				array(
+					'message' => __( 'You do not have permission to perform this action.', 'formtura' ),
+				)
+			);
 		}
 
-		$form_id = isset( $_POST['form_id'] ) ? absint( $_POST['form_id'] ) : 0;
-		$page = isset( $_POST['page'] ) ? absint( $_POST['page'] ) : 1;
+		$form_id  = isset( $_POST['form_id'] ) ? absint( $_POST['form_id'] ) : 0;
+		$page     = isset( $_POST['page'] ) ? absint( $_POST['page'] ) : 1;
 		$per_page = isset( $_POST['per_page'] ) ? absint( $_POST['per_page'] ) : 20;
 
-		$entries = fta_get_entries( $form_id, [
-			'page'     => $page,
-			'per_page' => $per_page,
-		] );
+		$entries = fta_get_entries(
+			$form_id,
+			array(
+				'page'     => $page,
+				'per_page' => $per_page,
+			)
+		);
 
-		wp_send_json_success( [
-			'entries' => $entries,
-		] );
+		wp_send_json_success(
+			array(
+				'entries' => $entries,
+			)
+		);
 	}
 
 	/**
@@ -95,29 +102,37 @@ class Form_Entries {
 
 		// Check permissions.
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( [
-				'message' => __( 'You do not have permission to perform this action.', 'formtura' ),
-			] );
+			wp_send_json_error(
+				array(
+					'message' => __( 'You do not have permission to perform this action.', 'formtura' ),
+				)
+			);
 		}
 
 		$entry_id = isset( $_POST['entry_id'] ) ? absint( $_POST['entry_id'] ) : 0;
 
 		if ( ! $entry_id ) {
-			wp_send_json_error( [
-				'message' => __( 'Invalid entry ID.', 'formtura' ),
-			] );
+			wp_send_json_error(
+				array(
+					'message' => __( 'Invalid entry ID.', 'formtura' ),
+				)
+			);
 		}
 
 		$result = fta_delete_entry( $entry_id );
 
 		if ( $result ) {
-			wp_send_json_success( [
-				'message' => __( 'Entry deleted successfully.', 'formtura' ),
-			] );
+			wp_send_json_success(
+				array(
+					'message' => __( 'Entry deleted successfully.', 'formtura' ),
+				)
+			);
 		} else {
-			wp_send_json_error( [
-				'message' => __( 'Failed to delete entry.', 'formtura' ),
-			] );
+			wp_send_json_error(
+				array(
+					'message' => __( 'Failed to delete entry.', 'formtura' ),
+				)
+			);
 		}
 	}
 
@@ -132,17 +147,21 @@ class Form_Entries {
 
 		// Check permissions.
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( [
-				'message' => __( 'You do not have permission to perform this action.', 'formtura' ),
-			] );
+			wp_send_json_error(
+				array(
+					'message' => __( 'You do not have permission to perform this action.', 'formtura' ),
+				)
+			);
 		}
 
 		$form_id = isset( $_POST['form_id'] ) ? absint( $_POST['form_id'] ) : 0;
 
 		if ( ! $form_id ) {
-			wp_send_json_error( [
-				'message' => __( 'Invalid form ID.', 'formtura' ),
-			] );
+			wp_send_json_error(
+				array(
+					'message' => __( 'Invalid form ID.', 'formtura' ),
+				)
+			);
 		}
 
 		// Entry_Export pages through every entry rather than taking the
@@ -152,15 +171,19 @@ class Form_Entries {
 		$csv_data = ( new Entry_Export() )->for_form( $form_id, fta_get_form( $form_id ) );
 
 		if ( '' === $csv_data ) {
-			wp_send_json_error( [
-				'message' => __( 'This form has no entries to export.', 'formtura' ),
-			] );
+			wp_send_json_error(
+				array(
+					'message' => __( 'This form has no entries to export.', 'formtura' ),
+				)
+			);
 		}
 
-		wp_send_json_success( [
-			'csv' => $csv_data,
-			'filename' => 'formtura-entries-' . $form_id . '-' . gmdate( 'Y-m-d' ) . '.csv',
-		] );
+		wp_send_json_success(
+			array(
+				'csv'      => $csv_data,
+				'filename' => 'formtura-entries-' . $form_id . '-' . gmdate( 'Y-m-d' ) . '.csv',
+			)
+		);
 	}
 
 	/**
@@ -174,40 +197,50 @@ class Form_Entries {
 
 		// Check permissions.
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( [
-				'message' => __( 'You do not have permission to perform this action.', 'formtura' ),
-			] );
+			wp_send_json_error(
+				array(
+					'message' => __( 'You do not have permission to perform this action.', 'formtura' ),
+				)
+			);
 		}
 
 		$entry_id = isset( $_POST['entry_id'] ) ? absint( $_POST['entry_id'] ) : 0;
 
 		if ( ! $entry_id ) {
-			wp_send_json_error( [
-				'message' => __( 'Invalid entry ID.', 'formtura' ),
-			] );
+			wp_send_json_error(
+				array(
+					'message' => __( 'Invalid entry ID.', 'formtura' ),
+				)
+			);
 		}
 
 		// Checked before writing: Entries_DB::update() reports success for an
 		// UPDATE that matched no rows, so without this a request naming an
 		// entry that no longer exists would be answered "status updated".
 		if ( ! fta_get_entry( $entry_id ) ) {
-			wp_send_json_error( [
-				'message' => __( 'Entry not found.', 'formtura' ),
-			] );
+			wp_send_json_error(
+				array(
+					'message' => __( 'Entry not found.', 'formtura' ),
+				)
+			);
 		}
 
 		$is_read = $this->posted_flag( 'is_read', true );
 
-		if ( ! fta_update_entry( $entry_id, [ 'is_read' => $is_read ? 1 : 0 ] ) ) {
-			wp_send_json_error( [
-				'message' => __( 'Failed to update the entry status.', 'formtura' ),
-			] );
+		if ( ! fta_update_entry( $entry_id, array( 'is_read' => $is_read ? 1 : 0 ) ) ) {
+			wp_send_json_error(
+				array(
+					'message' => __( 'Failed to update the entry status.', 'formtura' ),
+				)
+			);
 		}
 
-		wp_send_json_success( [
-			'message' => __( 'Entry status updated.', 'formtura' ),
-			'is_read' => $is_read,
-		] );
+		wp_send_json_success(
+			array(
+				'message' => __( 'Entry status updated.', 'formtura' ),
+				'is_read' => $is_read,
+			)
+		);
 	}
 
 	/**
@@ -229,6 +262,6 @@ class Form_Entries {
 
 		$value = sanitize_text_field( wp_unslash( $_POST[ $key ] ) ); // phpcs:ignore WordPress.Security.NonceVerification
 
-		return ! in_array( strtolower( trim( (string) $value ) ), [ '', '0', 'false', 'off', 'no' ], true );
+		return ! in_array( strtolower( trim( (string) $value ) ), array( '', '0', 'false', 'off', 'no' ), true );
 	}
 }

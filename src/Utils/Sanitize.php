@@ -72,7 +72,7 @@ class Sanitize {
 	 */
 	public static function array( $array ) {
 		if ( ! is_array( $array ) ) {
-			return [];
+			return array();
 		}
 
 		foreach ( $array as $key => $value ) {

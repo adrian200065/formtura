@@ -63,7 +63,7 @@ $forms = fta_get_forms();
 							</td>
 							<td>
 								<?php
-								$entries_db = new \Formtura\Database\Entries_DB();
+								$entries_db  = new \Formtura\Database\Entries_DB();
 								$entry_count = $entries_db->get_count( $form['id'] );
 								echo esc_html( $entry_count );
 								?>

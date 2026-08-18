@@ -28,7 +28,7 @@ class PaymentTotals {
 	 *
 	 * @var string[]
 	 */
-	const ITEM_TYPES = [ 'payment-single', 'payment-checkbox', 'payment-multiple', 'payment-dropdown' ];
+	const ITEM_TYPES = array( 'payment-single', 'payment-checkbox', 'payment-multiple', 'payment-dropdown' );
 
 	/**
 	 * Whether a form contains any payment fields.
@@ -60,14 +60,14 @@ class PaymentTotals {
 	 * @return array|\WP_Error Order data, or WP_Error with per-field messages.
 	 */
 	public function compute( $form, $submission ) {
-		$items       = [];
-		$errors      = [];
+		$items       = array();
+		$errors      = array();
 		$coupon      = null;
 		$coupon_code = null;
 
 		// A published method: guard the same shape form_has_payment_fields()
 		// already guards, rather than trust the caller to have checked it.
-		$fields = isset( $form['fields'] ) && is_array( $form['fields'] ) ? $form['fields'] : [];
+		$fields = isset( $form['fields'] ) && is_array( $form['fields'] ) ? $form['fields'] : array();
 
 		foreach ( $fields as $field ) {
 			$type       = isset( $field['type'] ) ? $field['type'] : '';
@@ -78,29 +78,29 @@ class PaymentTotals {
 			}
 
 			if ( 'payment-single' === $type ) {
-				$items[] = [
+				$items[] = array(
 					'label' => isset( $field['label'] ) ? (string) $field['label'] : '',
 					'price' => isset( $field['price'] ) && is_numeric( $field['price'] ) ? (float) $field['price'] : 0.0,
-				];
+				);
 
 				continue;
 			}
 
-			if ( in_array( $type, [ 'payment-checkbox', 'payment-multiple', 'payment-dropdown' ], true ) ) {
-				$submitted = isset( $submission[ $field_name ] ) ? $submission[ $field_name ] : [];
-				$submitted = is_array( $submitted ) ? $submitted : [ $submitted ];
+			if ( in_array( $type, array( 'payment-checkbox', 'payment-multiple', 'payment-dropdown' ), true ) ) {
+				$submitted = isset( $submission[ $field_name ] ) ? $submission[ $field_name ] : array();
+				$submitted = is_array( $submitted ) ? $submitted : array( $submitted );
 
 				// Single-select types have exactly one real selection. An
 				// array with more than one element can only come from a
 				// crafted request, and summing every element would record a
 				// total the visitor never saw - take the first and ignore
 				// the rest.
-				if ( in_array( $type, [ 'payment-multiple', 'payment-dropdown' ], true ) ) {
+				if ( in_array( $type, array( 'payment-multiple', 'payment-dropdown' ), true ) ) {
 					$submitted = array_slice( $submitted, 0, 1 );
 				}
 
 				$defined = fta_get_field_items( $field );
-				$seen    = [];
+				$seen    = array();
 
 				foreach ( $submitted as $value ) {
 					// A nested array (e.g. a crafted field_items[][]=x
@@ -140,10 +140,10 @@ class PaymentTotals {
 						break;
 					}
 
-					$items[] = [
+					$items[] = array(
 						'label' => $match['label'],
 						'price' => $match['price'],
-					];
+					);
 				}
 
 				continue;
@@ -196,12 +196,12 @@ class PaymentTotals {
 			$amount -= 'percent' === $coupon['type'] ? $amount * $coupon['value'] / 100 : $coupon['value'];
 		}
 
-		return [
+		return array(
 			'amount'   => round( max( 0.0, $amount ), 2 ),
 			'currency' => (string) fta_get_setting( 'currency', 'USD' ),
 			'items'    => $items,
 			'coupon'   => $coupon_code,
-		];
+		);
 	}
 
 	/**
@@ -216,7 +216,7 @@ class PaymentTotals {
 	 * @return array|null [ 'code', 'type', 'value' ] or null when unknown.
 	 */
 	public static function find_coupon( $field, $code ) {
-		$coupons = isset( $field['coupons'] ) && is_array( $field['coupons'] ) ? $field['coupons'] : [];
+		$coupons = isset( $field['coupons'] ) && is_array( $field['coupons'] ) ? $field['coupons'] : array();
 
 		// A published method that Task 11's AJAX endpoint calls directly
 		// with a raw $_POST value - which could be an array. No code in the
@@ -249,11 +249,11 @@ class PaymentTotals {
 				$value = min( 100.0, $value );
 			}
 
-			return [
+			return array(
 				'code'  => (string) $coupon['code'],
 				'type'  => $type,
 				'value' => $value,
-			];
+			);
 		}
 
 		return null;

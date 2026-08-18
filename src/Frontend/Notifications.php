@@ -36,7 +36,7 @@ class Notifications {
 	 */
 	private function init_hooks() {
 		// Send notifications after form submission.
-		add_action( 'fta_after_form_submission', [ $this, 'send_notifications' ], 10, 3 );
+		add_action( 'fta_after_form_submission', array( $this, 'send_notifications' ), 10, 3 );
 	}
 
 	/**
@@ -85,17 +85,17 @@ class Notifications {
 		$message = $this->parse_smart_tags( $notification['message'], $entry_data, $entry_id );
 
 		// Set headers.
-		$headers = [ 'Content-Type: text/html; charset=UTF-8' ];
+		$headers = array( 'Content-Type: text/html; charset=UTF-8' );
 
 		// Add reply-to if specified.
 		if ( ! empty( $notification['reply_to'] ) ) {
-			$reply_to = $this->parse_smart_tags( $notification['reply_to'], $entry_data, $entry_id );
+			$reply_to  = $this->parse_smart_tags( $notification['reply_to'], $entry_data, $entry_id );
 			$headers[] = 'Reply-To: ' . $reply_to;
 		}
 
 		// Add CC if specified.
 		if ( ! empty( $notification['cc'] ) ) {
-			$cc = $this->parse_smart_tags( $notification['cc'], $entry_data, $entry_id );
+			$cc        = $this->parse_smart_tags( $notification['cc'], $entry_data, $entry_id );
 			$cc_emails = array_map( 'trim', explode( ',', $cc ) );
 			foreach ( $cc_emails as $cc_email ) {
 				$headers[] = 'Cc: ' . $cc_email;
@@ -104,7 +104,7 @@ class Notifications {
 
 		// Add BCC if specified.
 		if ( ! empty( $notification['bcc'] ) ) {
-			$bcc = $this->parse_smart_tags( $notification['bcc'], $entry_data, $entry_id );
+			$bcc        = $this->parse_smart_tags( $notification['bcc'], $entry_data, $entry_id );
 			$bcc_emails = array_map( 'trim', explode( ',', $bcc ) );
 			foreach ( $bcc_emails as $bcc_email ) {
 				$headers[] = 'Bcc: ' . $bcc_email;
@@ -122,12 +122,14 @@ class Notifications {
 
 		// Log if debug mode is enabled.
 		if ( fta_get_setting( 'debug_mode', false ) ) {
-			fta_log( sprintf(
-				'Email notification %s. To: %s, Subject: %s',
-				$sent ? 'sent' : 'failed',
-				implode( ', ', $to ),
-				$subject
-			) );
+			fta_log(
+				sprintf(
+					'Email notification %s. To: %s, Subject: %s',
+					$sent ? 'sent' : 'failed',
+					implode( ', ', $to ),
+					$subject
+				)
+			);
 		}
 
 		do_action( 'fta_after_notification_sent', $sent, $notification, $form, $entry_data );
@@ -180,7 +182,7 @@ class Notifications {
 			return (string) $value;
 		}
 
-		$parts = [];
+		$parts = array();
 
 		foreach ( $value as $index => $item ) {
 			if ( is_array( $item ) ) {
@@ -241,7 +243,7 @@ class Notifications {
 	 * @return array Default notification settings.
 	 */
 	public function get_default_notification() {
-		return [
+		return array(
 			'enabled'  => true,
 			'to'       => '{admin_email}',
 			'subject'  => __( 'New Form Submission from {site_name}', 'formtura' ),
@@ -249,6 +251,6 @@ class Notifications {
 			'reply_to' => '',
 			'cc'       => '',
 			'bcc'      => '',
-		];
+		);
 	}
 }

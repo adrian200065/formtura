@@ -25,7 +25,7 @@ class Integrations {
 	 *
 	 * @var array
 	 */
-	private $integrations = [];
+	private $integrations = array();
 
 	/**
 	 * Constructor.
@@ -44,14 +44,17 @@ class Integrations {
 	 */
 	private function register_integrations() {
 		// Use plain strings to avoid translation loading before init hook.
-		$this->integrations = apply_filters( 'fta_integrations', [
-			'mailchimp' => [
-				'name'        => 'Mailchimp',
-				'description' => 'Add form subscribers to Mailchimp lists.',
-				'class'       => 'Formtura\\Integrations\\Providers\\Mailchimp',
-				'enabled'     => false,
-			],
-		] );
+		$this->integrations = apply_filters(
+			'fta_integrations',
+			array(
+				'mailchimp' => array(
+					'name'        => 'Mailchimp',
+					'description' => 'Add form subscribers to Mailchimp lists.',
+					'class'       => 'Formtura\\Integrations\\Providers\\Mailchimp',
+					'enabled'     => false,
+				),
+			)
+		);
 	}
 
 	/**

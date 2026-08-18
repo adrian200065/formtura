@@ -52,7 +52,7 @@ class Mailchimp {
 	 */
 	private function init_hooks() {
 		// Add subscriber after form submission.
-		add_action( 'fta_after_form_submission', [ $this, 'add_subscriber' ], 10, 3 );
+		add_action( 'fta_after_form_submission', array( $this, 'add_subscriber' ), 10, 3 );
 	}
 
 	/**
@@ -66,7 +66,7 @@ class Mailchimp {
 		}
 
 		// Extract datacenter from API key.
-		$parts = explode( '-', $this->api_key );
+		$parts      = explode( '-', $this->api_key );
 		$datacenter = isset( $parts[1] ) ? $parts[1] : 'us1';
 
 		$this->api_endpoint = "https://{$datacenter}.api.mailchimp.com/3.0/";
@@ -86,7 +86,7 @@ class Mailchimp {
 			return;
 		}
 
-		$list_id = isset( $form['settings']['mailchimp_list_id'] ) ? $form['settings']['mailchimp_list_id'] : '';
+		$list_id     = isset( $form['settings']['mailchimp_list_id'] ) ? $form['settings']['mailchimp_list_id'] : '';
 		$email_field = isset( $form['settings']['mailchimp_email_field'] ) ? $form['settings']['mailchimp_email_field'] : 'email';
 
 		if ( empty( $list_id ) || ! isset( $entry_data[ $email_field ] ) ) {
@@ -96,11 +96,11 @@ class Mailchimp {
 		$email = $entry_data[ $email_field ];
 
 		// Prepare subscriber data.
-		$subscriber_data = [
+		$subscriber_data = array(
 			'email_address' => $email,
 			'status'        => 'subscribed',
 			'merge_fields'  => $this->get_merge_fields( $entry_data, $form ),
-		];
+		);
 
 		// Add to list.
 		$this->api_request( "lists/{$list_id}/members", 'POST', $subscriber_data );
@@ -115,7 +115,7 @@ class Mailchimp {
 	 * @return array Merge fields.
 	 */
 	private function get_merge_fields( $entry_data, $form ) {
-		$merge_fields = [];
+		$merge_fields = array();
 
 		// Map common fields.
 		if ( isset( $entry_data['first_name'] ) ) {
@@ -138,21 +138,21 @@ class Mailchimp {
 	 * @param array  $data Request data.
 	 * @return array|WP_Error Response data or WP_Error on failure.
 	 */
-	private function api_request( $endpoint, $method = 'GET', $data = [] ) {
+	private function api_request( $endpoint, $method = 'GET', $data = array() ) {
 		if ( empty( $this->api_key ) || empty( $this->api_endpoint ) ) {
 			return new \WP_Error( 'no_api_key', __( 'Mailchimp API key not configured.', 'formtura' ) );
 		}
 
 		$url = $this->api_endpoint . $endpoint;
 
-		$args = [
+		$args = array(
 			'method'  => $method,
-			'headers' => [
+			'headers' => array(
 				'Authorization' => 'Basic ' . base64_encode( 'user:' . $this->api_key ),
 				'Content-Type'  => 'application/json',
-			],
+			),
 			'timeout' => 30,
-		];
+		);
 
 		if ( ! empty( $data ) ) {
 			$args['body'] = wp_json_encode( $data );
@@ -190,6 +190,6 @@ class Mailchimp {
 			return $response;
 		}
 
-		return isset( $response['lists'] ) ? $response['lists'] : [];
+		return isset( $response['lists'] ) ? $response['lists'] : array();
 	}
 }

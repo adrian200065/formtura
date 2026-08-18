@@ -36,7 +36,7 @@ class Form_Selector {
 	 */
 	private function init_hooks() {
 		// Register block.
-		add_action( 'init', [ $this, 'register_block' ] );
+		add_action( 'init', array( $this, 'register_block' ) );
 	}
 
 	/**
@@ -51,15 +51,18 @@ class Form_Selector {
 		}
 
 		// Register block.
-		register_block_type( 'formtura/form-selector', [
-			'attributes'      => [
-				'formId' => [
-					'type'    => 'number',
-					'default' => 0,
-				],
-			],
-			'render_callback' => [ $this, 'render_block' ],
-		] );
+		register_block_type(
+			'formtura/form-selector',
+			array(
+				'attributes'      => array(
+					'formId' => array(
+						'type'    => 'number',
+						'default' => 0,
+					),
+				),
+				'render_callback' => array( $this, 'render_block' ),
+			)
+		);
 	}
 
 	/**

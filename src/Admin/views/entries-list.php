@@ -18,13 +18,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 // How many answers a row previews before the detail panel is the way to see
 // the rest.
-$preview_limit = 3;
-$per_page      = 20;
+$preview_limit    = 3;
+$entries_per_page = 20;
 
 // Get entries if form is selected.
-$entries      = [];
+$entries      = array();
 $form         = null;
-$labels       = [];
+$labels       = array();
 $total        = 0;
 $total_pages  = 1;
 $current_page = 1;
@@ -33,15 +33,15 @@ if ( $selected_form_id ) {
 	$entries_db   = new \Formtura\Database\Entries_DB();
 	$current_page = isset( $_GET['paged'] ) ? max( 1, absint( $_GET['paged'] ) ) : 1; // phpcs:ignore WordPress.Security.NonceVerification
 	$total        = $entries_db->get_count( $selected_form_id );
-	$total_pages  = max( 1, (int) ceil( $total / $per_page ) );
+	$total_pages  = max( 1, (int) ceil( $total / $entries_per_page ) );
 	$current_page = min( $current_page, $total_pages );
 
 	$entries = $entries_db->get_by_form(
 		$selected_form_id,
-		[
+		array(
 			'page'     => $current_page,
-			'per_page' => $per_page,
-		]
+			'per_page' => $entries_per_page,
+		)
 	);
 
 	$form = fta_get_form( $selected_form_id );
@@ -63,15 +63,15 @@ if ( $selected_form_id ) {
  * @return array[]
  */
 $fta_entry_pairs = static function ( array $entry_data, array $labels ) {
-	$pairs = [];
+	$pairs = array();
 
 	foreach ( $entry_data as $key => $value ) {
-		$pairs[] = [
+		$pairs[] = array(
 			'key'   => (string) $key,
 			'label' => Entry_Values::label( $key, $labels ),
 			'text'  => Entry_Values::text_for( $key, $value ),
 			'files' => Entry_Values::file_records( $value ),
-		];
+		);
 	}
 
 	return $pairs;
@@ -140,7 +140,7 @@ $fta_entry_pairs = static function ( array $entry_data, array $labels ) {
 								// Entries_DB returns the unserialized answers
 								// under 'data'. Reading 'entry_data' - a key it
 								// has never produced - left every preview blank.
-								$entry_data   = isset( $entry['data'] ) && is_array( $entry['data'] ) ? $entry['data'] : [];
+								$entry_data   = isset( $entry['data'] ) && is_array( $entry['data'] ) ? $entry['data'] : array();
 								$pairs        = $fta_entry_pairs( $entry_data, $labels );
 								$status_class = $entry['is_read'] ? 'read' : 'unread';
 								?>
@@ -227,15 +227,15 @@ $fta_entry_pairs = static function ( array $entry_data, array $labels ) {
 						<?php
 						$page_url = static function ( $page ) use ( $selected_form_id ) {
 							return add_query_arg(
-								[
+								array(
 									'page'    => 'formtura-entries',
 									'form_id' => $selected_form_id,
 									'paged'   => $page,
-								],
+								),
 								admin_url( 'admin.php' )
 							);
 						};
-						?>
+	?>
 						<nav class="fta-entries-pagination" aria-label="<?php esc_attr_e( 'Entries pages', 'formtura' ); ?>">
 							<?php if ( $current_page > 1 ) : ?>
 								<a class="fta-button fta-button-ghost" href="<?php echo esc_url( $page_url( $current_page - 1 ) ); ?>">

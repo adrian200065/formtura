@@ -36,7 +36,7 @@ class Settings {
 	 */
 	private function init_hooks() {
 		// AJAX handlers.
-		add_action( 'wp_ajax_fta_save_settings', [ $this, 'ajax_save_settings' ] );
+		add_action( 'wp_ajax_fta_save_settings', array( $this, 'ajax_save_settings' ) );
 	}
 
 	/**
@@ -60,13 +60,16 @@ class Settings {
 
 		// Check permissions.
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( [
-				'message' => __( 'You do not have permission to perform this action.', 'formtura' ),
-			] );
+			wp_send_json_error(
+				array(
+					'message' => __( 'You do not have permission to perform this action.', 'formtura' ),
+				)
+			);
 		}
 
 		// Get settings data.
-		$settings = isset( $_POST['settings'] ) ? $_POST['settings'] : [];
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- every field is sanitized below in sanitize_settings().
+		$settings = isset( $_POST['settings'] ) ? wp_unslash( $_POST['settings'] ) : array();
 
 		// Sanitize settings.
 		$sanitized_settings = $this->sanitize_settings( $settings );
@@ -75,13 +78,17 @@ class Settings {
 		$result = update_option( 'fta_settings', $sanitized_settings );
 
 		if ( $result ) {
-			wp_send_json_success( [
-				'message' => __( 'Settings saved successfully.', 'formtura' ),
-			] );
+			wp_send_json_success(
+				array(
+					'message' => __( 'Settings saved successfully.', 'formtura' ),
+				)
+			);
 		} else {
-			wp_send_json_error( [
-				'message' => __( 'Failed to save settings.', 'formtura' ),
-			] );
+			wp_send_json_error(
+				array(
+					'message' => __( 'Failed to save settings.', 'formtura' ),
+				)
+			);
 		}
 	}
 
@@ -93,7 +100,7 @@ class Settings {
 	 * @return array Sanitized settings.
 	 */
 	private function sanitize_settings( $settings ) {
-		$sanitized = [];
+		$sanitized = array();
 
 		// General settings.
 		if ( isset( $settings['license_key'] ) ) {
@@ -122,7 +129,7 @@ class Settings {
 		}
 
 		if ( isset( $settings['recaptcha_version'] ) ) {
-			$sanitized['recaptcha_version'] = in_array( $settings['recaptcha_version'], [ 'v2', 'v3' ], true ) ? $settings['recaptcha_version'] : 'v2';
+			$sanitized['recaptcha_version'] = in_array( $settings['recaptcha_version'], array( 'v2', 'v3' ), true ) ? $settings['recaptcha_version'] : 'v2';
 		}
 
 		if ( isset( $settings['recaptcha_score_threshold'] ) ) {
@@ -160,7 +167,7 @@ class Settings {
 	 * @return array Default settings.
 	 */
 	public function get_defaults() {
-		return [
+		return array(
 			'license_key'               => '',
 			'load_css'                  => true,
 			'load_js'                   => true,
@@ -172,6 +179,6 @@ class Settings {
 			'currency'                  => 'USD',
 			'entry_retention_days'      => 0,
 			'delete_data_on_uninstall'  => false,
-		];
+		);
 	}
 }

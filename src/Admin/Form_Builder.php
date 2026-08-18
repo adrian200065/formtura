@@ -36,9 +36,9 @@ class Form_Builder {
 	 */
 	private function init_hooks() {
 		// AJAX handlers.
-		add_action( 'wp_ajax_fta_save_form', [ $this, 'ajax_save_form' ] );
-		add_action( 'wp_ajax_fta_get_form', [ $this, 'ajax_get_form' ] );
-		add_action( 'wp_ajax_fta_duplicate_form', [ $this, 'ajax_duplicate_form' ] );
+		add_action( 'wp_ajax_fta_save_form', array( $this, 'ajax_save_form' ) );
+		add_action( 'wp_ajax_fta_get_form', array( $this, 'ajax_get_form' ) );
+		add_action( 'wp_ajax_fta_duplicate_form', array( $this, 'ajax_duplicate_form' ) );
 	}
 
 	/**
@@ -68,31 +68,36 @@ class Form_Builder {
 
 		// Check permissions.
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( [
-				'message' => __( 'You do not have permission to perform this action.', 'formtura' ),
-			] );
+			wp_send_json_error(
+				array(
+					'message' => __( 'You do not have permission to perform this action.', 'formtura' ),
+				)
+			);
 		}
 
 		// Get form data.
 		$form_id = isset( $_POST['form_id'] ) ? absint( $_POST['form_id'] ) : 0;
-		$form_data_json = isset( $_POST['form_data'] ) ? stripslashes( $_POST['form_data'] ) : '';
-		$form_data = json_decode( $form_data_json, true );
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- this is a JSON envelope decoded below; every field it contains is sanitized in sanitize_form_data() at the end of this method.
+		$form_data_json = isset( $_POST['form_data'] ) ? wp_unslash( $_POST['form_data'] ) : '';
+		$form_data      = json_decode( $form_data_json, true );
 
 		if ( empty( $form_data ) || ! is_array( $form_data ) ) {
-			wp_send_json_error( [
-				'message' => __( 'Invalid form data.', 'formtura' ),
-			] );
+			wp_send_json_error(
+				array(
+					'message' => __( 'Invalid form data.', 'formtura' ),
+				)
+			);
 		}
 
 		// Extract fields and settings from the form_data structure.
-		$fields = isset( $form_data['fields'] ) ? $form_data['fields'] : [];
-		$settings = isset( $form_data['settings'] ) ? $form_data['settings'] : [];
+		$fields   = isset( $form_data['fields'] ) ? $form_data['fields'] : array();
+		$settings = isset( $form_data['settings'] ) ? $form_data['settings'] : array();
 
 		// Prepare data for database.
-		$db_data = [
+		$db_data = array(
 			'fields'   => $fields,
 			'settings' => $settings,
-		];
+		);
 
 		// Add title from settings if available.
 		if ( isset( $settings['title'] ) && ! empty( $settings['title'] ) ) {
@@ -109,23 +114,27 @@ class Form_Builder {
 
 		// Save or update form.
 		if ( $form_id ) {
-			$result = fta_update_form( $form_id, $sanitized_data );
+			$result  = fta_update_form( $form_id, $sanitized_data );
 			$message = __( 'Form updated successfully.', 'formtura' );
 		} else {
-			$result = fta_create_form( $sanitized_data );
+			$result  = fta_create_form( $sanitized_data );
 			$form_id = $result;
 			$message = __( 'Form created successfully.', 'formtura' );
 		}
 
 		if ( $result ) {
-			wp_send_json_success( [
-				'message' => $message,
-				'form_id' => $form_id,
-			] );
+			wp_send_json_success(
+				array(
+					'message' => $message,
+					'form_id' => $form_id,
+				)
+			);
 		} else {
-			wp_send_json_error( [
-				'message' => __( 'Failed to save form.', 'formtura' ),
-			] );
+			wp_send_json_error(
+				array(
+					'message' => __( 'Failed to save form.', 'formtura' ),
+				)
+			);
 		}
 	}
 
@@ -136,49 +145,58 @@ class Form_Builder {
 	 */
 	public function ajax_get_form() {
 		// Verify nonce.
-		$nonce = isset( $_REQUEST['nonce'] ) ? $_REQUEST['nonce'] : '';
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- verified manually below via wp_verify_nonce(), equivalent to check_ajax_referer().
+		$nonce = isset( $_REQUEST['nonce'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['nonce'] ) ) : '';
 		if ( ! wp_verify_nonce( $nonce, 'formtura_admin' ) ) {
-			wp_send_json_error( [
-				'message' => __( 'Invalid nonce.', 'formtura' ),
-			] );
+			wp_send_json_error(
+				array(
+					'message' => __( 'Invalid nonce.', 'formtura' ),
+				)
+			);
 		}
 
 		// Check permissions.
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( [
-				'message' => __( 'You do not have permission to perform this action.', 'formtura' ),
-			] );
+			wp_send_json_error(
+				array(
+					'message' => __( 'You do not have permission to perform this action.', 'formtura' ),
+				)
+			);
 		}
 
 		$form_id = isset( $_REQUEST['form_id'] ) ? absint( $_REQUEST['form_id'] ) : 0;
 
 		if ( ! $form_id ) {
-			wp_send_json_error( [
-				'message' => __( 'Invalid form ID.', 'formtura' ),
-			] );
+			wp_send_json_error(
+				array(
+					'message' => __( 'Invalid form ID.', 'formtura' ),
+				)
+			);
 		}
 
 		$form = fta_get_form( $form_id );
 
 		if ( $form ) {
 			// Prepare form_data structure for React app.
-			$form_data = [
-				'fields'   => isset( $form['fields'] ) ? $form['fields'] : [],
-				'settings' => isset( $form['settings'] ) ? $form['settings'] : [],
-			];
+			$form_data = array(
+				'fields'   => isset( $form['fields'] ) ? $form['fields'] : array(),
+				'settings' => isset( $form['settings'] ) ? $form['settings'] : array(),
+			);
 
 			// Return form data in the format React expects.
-			$response = [
+			$response = array(
 				'id'        => $form['id'],
 				'title'     => $form['title'],
 				'form_data' => wp_json_encode( $form_data ),
-			];
+			);
 
 			wp_send_json_success( $response );
 		} else {
-			wp_send_json_error( [
-				'message' => __( 'Form not found.', 'formtura' ),
-			] );
+			wp_send_json_error(
+				array(
+					'message' => __( 'Form not found.', 'formtura' ),
+				)
+			);
 		}
 	}
 
@@ -193,43 +211,53 @@ class Form_Builder {
 
 		// Check permissions.
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( [
-				'message' => __( 'You do not have permission to perform this action.', 'formtura' ),
-			] );
+			wp_send_json_error(
+				array(
+					'message' => __( 'You do not have permission to perform this action.', 'formtura' ),
+				)
+			);
 		}
 
 		$form_id = isset( $_POST['form_id'] ) ? absint( $_POST['form_id'] ) : 0;
 
 		if ( ! $form_id ) {
-			wp_send_json_error( [
-				'message' => __( 'Invalid form ID.', 'formtura' ),
-			] );
+			wp_send_json_error(
+				array(
+					'message' => __( 'Invalid form ID.', 'formtura' ),
+				)
+			);
 		}
 
 		$form = fta_get_form( $form_id );
 
 		if ( ! $form ) {
-			wp_send_json_error( [
-				'message' => __( 'Form not found.', 'formtura' ),
-			] );
+			wp_send_json_error(
+				array(
+					'message' => __( 'Form not found.', 'formtura' ),
+				)
+			);
 		}
 
 		// Create duplicate.
-		$duplicate_data = $form;
+		$duplicate_data          = $form;
 		$duplicate_data['title'] = $form['title'] . ' ' . __( '(Copy)', 'formtura' );
 		unset( $duplicate_data['id'] );
 
 		$new_form_id = fta_create_form( $duplicate_data );
 
 		if ( $new_form_id ) {
-			wp_send_json_success( [
-				'message' => __( 'Form duplicated successfully.', 'formtura' ),
-				'form_id' => $new_form_id,
-			] );
+			wp_send_json_success(
+				array(
+					'message' => __( 'Form duplicated successfully.', 'formtura' ),
+					'form_id' => $new_form_id,
+				)
+			);
 		} else {
-			wp_send_json_error( [
-				'message' => __( 'Failed to duplicate form.', 'formtura' ),
-			] );
+			wp_send_json_error(
+				array(
+					'message' => __( 'Failed to duplicate form.', 'formtura' ),
+				)
+			);
 		}
 	}
 
@@ -241,7 +269,7 @@ class Form_Builder {
 	 * @return array Sanitized data.
 	 */
 	private function sanitize_form_data( $data ) {
-		$sanitized = [];
+		$sanitized = array();
 
 		// Sanitize title.
 		if ( isset( $data['title'] ) ) {
@@ -255,7 +283,7 @@ class Form_Builder {
 
 		// Sanitize fields.
 		if ( isset( $data['fields'] ) && is_array( $data['fields'] ) ) {
-			$sanitized['fields'] = array_map( [ $this, 'sanitize_field_data' ], $data['fields'] );
+			$sanitized['fields'] = array_map( array( $this, 'sanitize_field_data' ), $data['fields'] );
 		}
 
 		// Sanitize settings.
@@ -265,7 +293,7 @@ class Form_Builder {
 
 		// Sanitize status.
 		if ( isset( $data['status'] ) ) {
-			$sanitized['status'] = in_array( $data['status'], [ 'active', 'inactive' ], true ) ? $data['status'] : 'active';
+			$sanitized['status'] = in_array( $data['status'], array( 'active', 'inactive' ), true ) ? $data['status'] : 'active';
 		}
 
 		return $sanitized;
@@ -279,7 +307,7 @@ class Form_Builder {
 	 * @return array Sanitized field data.
 	 */
 	private function sanitize_field_data( $field ) {
-		$sanitized = [];
+		$sanitized = array();
 
 		// Sanitize field ID.
 		if ( isset( $field['id'] ) ) {
@@ -355,16 +383,19 @@ class Form_Builder {
 
 		// Sanitize choices (for select, radio, checkbox, checkboxes).
 		if ( isset( $field['choices'] ) && is_array( $field['choices'] ) ) {
-			$sanitized['choices'] = array_map( function( $choice ) {
-				if ( is_array( $choice ) ) {
-					return [
-						'label'     => isset( $choice['label'] ) ? sanitize_text_field( $choice['label'] ) : '',
-						'value'     => isset( $choice['value'] ) ? sanitize_text_field( $choice['value'] ) : '',
-						'isDefault' => isset( $choice['isDefault'] ) ? (bool) $choice['isDefault'] : false,
-					];
-				}
-				return sanitize_text_field( $choice );
-			}, $field['choices'] );
+			$sanitized['choices'] = array_map(
+				function ( $choice ) {
+					if ( is_array( $choice ) ) {
+							return array(
+								'label'     => isset( $choice['label'] ) ? sanitize_text_field( $choice['label'] ) : '',
+								'value'     => isset( $choice['value'] ) ? sanitize_text_field( $choice['value'] ) : '',
+								'isDefault' => isset( $choice['isDefault'] ) ? (bool) $choice['isDefault'] : false,
+							);
+					}
+					return sanitize_text_field( $choice );
+				},
+				$field['choices']
+			);
 		}
 
 		// Sanitize choice layout (for radio, checkbox, checkboxes).
@@ -462,7 +493,7 @@ class Form_Builder {
 
 		// Sanitize calculation formula.
 		if ( isset( $field['calculationFormula'] ) ) {
-			// Allow basic math operators and field references like {field_id}
+			// Allow basic math operators and field references like {field_id}.
 			$sanitized['calculationFormula'] = sanitize_text_field( $field['calculationFormula'] );
 		}
 
@@ -509,14 +540,19 @@ class Form_Builder {
 		// the result sequentially so a dropped middle entry still round-trips
 		// through wp_json_encode() as a JSON array, not an object with a gap.
 		if ( isset( $field['items'] ) && is_array( $field['items'] ) ) {
-			$sanitized['items'] = array_values( array_map( function( $item ) {
-				return [
-					'label'     => isset( $item['label'] ) ? sanitize_text_field( $item['label'] ) : '',
-					'value'     => isset( $item['value'] ) ? sanitize_text_field( $item['value'] ) : '',
-					'price'     => isset( $item['price'] ) && is_numeric( $item['price'] ) ? floatval( $item['price'] ) : 0.0,
-					'isDefault' => isset( $item['isDefault'] ) ? (bool) $item['isDefault'] : false,
-				];
-			}, array_filter( $field['items'], 'is_array' ) ) );
+			$sanitized['items'] = array_values(
+				array_map(
+					function ( $item ) {
+						return array(
+							'label'     => isset( $item['label'] ) ? sanitize_text_field( $item['label'] ) : '',
+							'value'     => isset( $item['value'] ) ? sanitize_text_field( $item['value'] ) : '',
+							'price'     => isset( $item['price'] ) && is_numeric( $item['price'] ) ? floatval( $item['price'] ) : 0.0,
+							'isDefault' => isset( $item['isDefault'] ) ? (bool) $item['isDefault'] : false,
+						);
+					},
+					array_filter( $field['items'], 'is_array' )
+				)
+			);
 		}
 
 		// Sanitize single item price (for payment-single).
@@ -541,18 +577,23 @@ class Form_Builder {
 		// step. As with items above, non-array entries are dropped and the
 		// result is re-keyed so the gap survives wp_json_encode() as an array.
 		if ( isset( $field['coupons'] ) && is_array( $field['coupons'] ) ) {
-			$sanitized['coupons'] = array_values( array_map( function( $coupon ) {
-				return [
-					'code'  => isset( $coupon['code'] ) ? sanitize_text_field( $coupon['code'] ) : '',
-					'type'  => isset( $coupon['type'] ) && 'percent' === $coupon['type'] ? 'percent' : 'fixed',
-					'value' => isset( $coupon['value'] ) && is_numeric( $coupon['value'] ) ? floatval( $coupon['value'] ) : 0.0,
-				];
-			}, array_filter( $field['coupons'], 'is_array' ) ) );
+			$sanitized['coupons'] = array_values(
+				array_map(
+					function ( $coupon ) {
+						return array(
+							'code'  => isset( $coupon['code'] ) ? sanitize_text_field( $coupon['code'] ) : '',
+							'type'  => isset( $coupon['type'] ) && 'percent' === $coupon['type'] ? 'percent' : 'fixed',
+							'value' => isset( $coupon['value'] ) && is_numeric( $coupon['value'] ) ? floatval( $coupon['value'] ) : 0.0,
+						);
+					},
+					array_filter( $field['coupons'], 'is_array' )
+				)
+			);
 		}
 
 		// Sanitize address scheme.
 		if ( isset( $field['scheme'] ) ) {
-			$sanitized['scheme'] = in_array( $field['scheme'], [ 'us', 'international' ], true ) ? $field['scheme'] : 'us';
+			$sanitized['scheme'] = in_array( $field['scheme'], array( 'us', 'international' ), true ) ? $field['scheme'] : 'us';
 		}
 
 		// Sanitize file upload options.
@@ -565,7 +606,7 @@ class Form_Builder {
 		if ( isset( $field['allowedFileTypes'] ) ) {
 			// Only values the builder itself emits (FieldLibrary.jsx): "all"
 			// or "specify". Anything else falls back to the safer default.
-			$sanitized['allowedFileTypes'] = in_array( $field['allowedFileTypes'], [ 'all', 'specify' ], true )
+			$sanitized['allowedFileTypes'] = in_array( $field['allowedFileTypes'], array( 'all', 'specify' ), true )
 				? $field['allowedFileTypes']
 				: 'specify';
 		}
@@ -601,14 +642,14 @@ class Form_Builder {
 	 * @return array Sanitized conditional logic.
 	 */
 	private function sanitize_conditional_logic( $logic ) {
-		$sanitized = [
+		$sanitized = array(
 			'enabled' => ! empty( $logic['enabled'] ),
 			'action'  => isset( $logic['action'] ) && 'hide' === $logic['action'] ? 'hide' : 'show',
 			'match'   => isset( $logic['match'] ) && 'any' === $logic['match'] ? 'any' : 'all',
-		];
+		);
 
-		$operators  = [ 'is', 'is_not', 'contains', 'greater_than', 'less_than' ];
-		$conditions = [];
+		$operators  = array( 'is', 'is_not', 'contains', 'greater_than', 'less_than' );
+		$conditions = array();
 
 		if ( isset( $logic['conditions'] ) && is_array( $logic['conditions'] ) ) {
 			foreach ( $logic['conditions'] as $condition ) {
@@ -622,11 +663,11 @@ class Form_Builder {
 					continue;
 				}
 
-				$conditions[] = [
+				$conditions[] = array(
 					'field'    => sanitize_text_field( $condition['field'] ),
 					'operator' => $operator,
 					'value'    => isset( $condition['value'] ) ? sanitize_text_field( $condition['value'] ) : '',
-				];
+				);
 			}
 		}
 
@@ -643,7 +684,7 @@ class Form_Builder {
 	 * @return array Sanitized settings data.
 	 */
 	private function sanitize_settings_data( $settings ) {
-		$sanitized = [];
+		$sanitized = array();
 
 		// Sanitize title (from React camelCase).
 		if ( isset( $settings['title'] ) ) {

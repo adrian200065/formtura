@@ -25,7 +25,7 @@ $form_id = isset( $form['id'] ) ? $form['id'] : 0;
 // Pass data to React app
 window.formturaBuilder = {
 	ajaxUrl: '<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>',
-	nonce: '<?php echo wp_create_nonce( 'formtura_admin' ); ?>',
+	nonce: '<?php echo esc_attr( wp_create_nonce( 'formtura_admin' ) ); ?>',
 	formId: '<?php echo esc_js( $form_id ); ?>',
 	editUrl: '<?php echo esc_url( admin_url( 'admin.php?page=formtura-builder' ) ); ?>',
 	formsUrl: '<?php echo esc_url( admin_url( 'admin.php?page=formtura' ) ); ?>',

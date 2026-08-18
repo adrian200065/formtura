@@ -36,7 +36,7 @@ class Entry_Export {
 	 *
 	 * @var string[]
 	 */
-	private static $meta_columns = [ 'id', 'created_at', 'is_read', 'ip_address', 'user_agent' ];
+	private static $meta_columns = array( 'id', 'created_at', 'is_read', 'ip_address', 'user_agent' );
 
 	/**
 	 * Entries source.
@@ -103,11 +103,11 @@ class Entry_Export {
 	 * @return array[] Entries.
 	 */
 	private function read_all( $form_id ) {
-		$all      = [];
+		$all      = array();
 		$after_id = null;
 
 		do {
-			$args = [ 'per_page' => self::BATCH_SIZE ];
+			$args = array( 'per_page' => self::BATCH_SIZE );
 
 			if ( null !== $after_id ) {
 				$args['after_id'] = $after_id;
@@ -123,7 +123,9 @@ class Entry_Export {
 				$all[]    = $entry;
 				$after_id = $entry['id'];
 			}
-		} while ( count( $batch ) === self::BATCH_SIZE );
+
+			$batch_count = count( $batch );
+		} while ( self::BATCH_SIZE === $batch_count );
 
 		return $all;
 	}
@@ -174,7 +176,7 @@ class Entry_Export {
 	 * @return string[] Ordered data keys.
 	 */
 	private function field_columns( array $entries, array $labels ) {
-		$seen = [];
+		$seen = array();
 
 		foreach ( $entries as $entry ) {
 			if ( ! isset( $entry['data'] ) || ! is_array( $entry['data'] ) ) {
@@ -186,7 +188,7 @@ class Entry_Export {
 			}
 		}
 
-		$columns = [];
+		$columns = array();
 
 		foreach ( array_keys( $labels ) as $key ) {
 			if ( isset( $seen[ $key ] ) ) {
@@ -221,13 +223,13 @@ class Entry_Export {
 	 * @return string[]
 	 */
 	private function header_row( array $columns, array $labels ) {
-		$row = [
+		$row = array(
 			__( 'Entry ID', 'formtura' ),
 			__( 'Submitted', 'formtura' ),
 			__( 'Status', 'formtura' ),
 			__( 'IP Address', 'formtura' ),
 			__( 'User Agent', 'formtura' ),
-		];
+		);
 
 		foreach ( $columns as $key ) {
 			$row[] = Entry_Values::label( $key, $labels );
@@ -235,7 +237,7 @@ class Entry_Export {
 
 		// Labels come from a form definition an author typed, so a heading is
 		// no more trustworthy than a cell.
-		return array_map( [ $this, 'neutralize' ], $row );
+		return array_map( array( $this, 'neutralize' ), $row );
 	}
 
 	/**
@@ -247,21 +249,21 @@ class Entry_Export {
 	 * @return string[]
 	 */
 	private function data_row( array $entry, array $columns ) {
-		$data = isset( $entry['data'] ) && is_array( $entry['data'] ) ? $entry['data'] : [];
+		$data = isset( $entry['data'] ) && is_array( $entry['data'] ) ? $entry['data'] : array();
 
-		$row = [
+		$row = array(
 			isset( $entry['id'] ) ? (string) $entry['id'] : '',
 			isset( $entry['created_at'] ) ? (string) $entry['created_at'] : '',
 			! empty( $entry['is_read'] ) ? __( 'Read', 'formtura' ) : __( 'Unread', 'formtura' ),
 			isset( $entry['ip_address'] ) ? (string) $entry['ip_address'] : '',
 			isset( $entry['user_agent'] ) ? (string) $entry['user_agent'] : '',
-		];
+		);
 
 		foreach ( $columns as $key ) {
 			$row[] = array_key_exists( $key, $data ) ? Entry_Values::text_for( $key, $data[ $key ] ) : '';
 		}
 
-		return array_map( [ $this, 'neutralize' ], $row );
+		return array_map( array( $this, 'neutralize' ), $row );
 	}
 
 	/**

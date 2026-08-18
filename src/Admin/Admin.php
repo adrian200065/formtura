@@ -37,13 +37,13 @@ class Admin {
 	 */
 	private function init_hooks() {
 		// Admin menu.
-		add_action( 'admin_menu', [ $this, 'register_menu' ] );
+		add_action( 'admin_menu', array( $this, 'register_menu' ) );
 
 		// Enqueue admin scripts and styles.
-		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 
 		// Admin notices.
-		add_action( 'admin_notices', [ $this, 'admin_notices' ] );
+		add_action( 'admin_notices', array( $this, 'admin_notices' ) );
 	}
 
 	/**
@@ -71,7 +71,7 @@ class Admin {
 			__( 'Formtura', 'formtura' ),
 			'manage_options',
 			'formtura',
-			[ $this, 'render_forms_page' ],
+			array( $this, 'render_forms_page' ),
 			'dashicons-feedback',
 			30
 		);
@@ -83,7 +83,7 @@ class Admin {
 			__( 'All Forms', 'formtura' ),
 			'manage_options',
 			'formtura',
-			[ $this, 'render_forms_page' ]
+			array( $this, 'render_forms_page' )
 		);
 
 		// Add New Form.
@@ -93,17 +93,17 @@ class Admin {
 			__( 'Add New', 'formtura' ),
 			'manage_options',
 			'formtura-new',
-			[ $this, 'render_new_form_page' ]
+			array( $this, 'render_new_form_page' )
 		);
 
 		// Form Builder (hidden from menu).
 		$builder_hook = add_submenu_page(
-			null, // Hidden from menu
+			null, // Hidden from menu.
 			__( 'Form Builder', 'formtura' ),
 			__( 'Form Builder', 'formtura' ),
 			'manage_options',
 			'formtura-builder',
-			[ $this, 'render_builder_page' ]
+			array( $this, 'render_builder_page' )
 		);
 
 		/*
@@ -112,7 +112,7 @@ class Admin {
 		 * PHP 8.1+ never receives null in strip_tags().
 		 */
 		if ( $builder_hook ) {
-			add_action( 'load-' . $builder_hook, [ $this, 'set_builder_page_title' ] );
+			add_action( 'load-' . $builder_hook, array( $this, 'set_builder_page_title' ) );
 		}
 
 		// Entries.
@@ -122,7 +122,7 @@ class Admin {
 			__( 'Entries', 'formtura' ),
 			'manage_options',
 			'formtura-entries',
-			[ $this, 'render_entries_page' ]
+			array( $this, 'render_entries_page' )
 		);
 
 		// Settings.
@@ -132,7 +132,7 @@ class Admin {
 			__( 'Settings', 'formtura' ),
 			'manage_options',
 			'formtura-settings',
-			[ $this, 'render_settings_page' ]
+			array( $this, 'render_settings_page' )
 		);
 
 		// SMTP.
@@ -142,7 +142,7 @@ class Admin {
 			__( 'SMTP', 'formtura' ),
 			'manage_options',
 			'formtura-smtp',
-			[ $this, 'render_smtp_page' ]
+			array( $this, 'render_smtp_page' )
 		);
 	}
 
@@ -154,7 +154,9 @@ class Admin {
 	public function set_builder_page_title() {
 		global $title;
 
-		$title = __( 'Form Builder', 'formtura' );
+		// Setting the admin-header $title global is the standard way to
+		// change the page title on a hidden (non-menu) admin screen.
+		$title = __( 'Form Builder', 'formtura' ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride
 	}
 
 	/**
@@ -173,7 +175,7 @@ class Admin {
 		wp_enqueue_style(
 			'formtura-admin',
 			FORMTURA_PLUGIN_URL . 'assets/css/admin.css',
-			[],
+			array(),
 			fta_asset_version( 'assets/css/admin.css' )
 		);
 
@@ -181,7 +183,7 @@ class Admin {
 		wp_enqueue_script(
 			'formtura-admin',
 			FORMTURA_PLUGIN_URL . 'assets/js/admin.js',
-			[ 'jquery' ],
+			array( 'jquery' ),
 			fta_asset_version( 'assets/js/admin.js' ),
 			true
 		);
@@ -190,16 +192,16 @@ class Admin {
 		wp_localize_script(
 			'formtura-admin',
 			'formturaAdmin',
-			[
+			array(
 				'ajaxUrl' => admin_url( 'admin-ajax.php' ),
 				'nonce'   => wp_create_nonce( 'formtura_admin' ),
-				'strings' => [
+				'strings' => array(
 					'confirmDelete' => __( 'Are you sure you want to delete this item?', 'formtura' ),
 					'saving'        => __( 'Saving...', 'formtura' ),
 					'saved'         => __( 'Saved!', 'formtura' ),
 					'error'         => __( 'An error occurred.', 'formtura' ),
-				],
-			]
+				),
+			)
 		);
 
 		// Enqueue the entries screen behaviour on the entries page.
@@ -207,7 +209,7 @@ class Admin {
 			wp_enqueue_script(
 				'formtura-entries',
 				FORMTURA_PLUGIN_URL . 'assets/js/entries.js',
-				[ 'jquery', 'formtura-admin' ],
+				array( 'jquery', 'formtura-admin' ),
 				fta_asset_version( 'assets/js/entries.js' ),
 				true
 			);
@@ -215,11 +217,11 @@ class Admin {
 			wp_localize_script(
 				'formtura-entries',
 				'formturaEntries',
-				[
+				array(
 					'ajaxUrl'    => admin_url( 'admin-ajax.php' ),
 					'nonce'      => wp_create_nonce( 'formtura_admin' ),
 					'entriesUrl' => admin_url( 'admin.php?page=formtura-entries' ),
-					'strings'    => [
+					'strings'    => array(
 						// Deleting an entry also removes its uploads and
 						// signatures from the private vault, so the warning
 						// says more than "are you sure".
@@ -233,24 +235,25 @@ class Admin {
 						'entryTitle'    => __( 'Entry #%s', 'formtura' ),
 						'close'         => __( 'Close', 'formtura' ),
 						'error'         => __( 'An error occurred. Please try again.', 'formtura' ),
-					],
-				]
+					),
+				)
 			);
 		}
 
 		// Enqueue builder assets on builder page.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only: only decides which admin assets to enqueue, no data is processed.
 		$is_builder_page = (
-			$hook === 'formtura_page_formtura-builder' ||
-			( isset( $_GET['page'] ) && $_GET['page'] === 'formtura-builder' ) ||
-			( isset( $_GET['action'] ) && $_GET['action'] === 'edit' )
+			'formtura_page_formtura-builder' === $hook ||
+			( isset( $_GET['page'] ) && 'formtura-builder' === $_GET['page'] ) ||
+			( isset( $_GET['action'] ) && 'edit' === $_GET['action'] )
 		);
 
 		if ( $is_builder_page ) {
-			// Enqueue React builder CSS
+			// Enqueue React builder CSS.
 			wp_enqueue_style(
 				'formtura-builder',
 				FORMTURA_PLUGIN_URL . 'assets/css/builder.css',
-				[],
+				array(),
 				fta_asset_version( 'assets/css/builder.css' )
 			);
 
@@ -260,7 +263,7 @@ class Admin {
 			wp_enqueue_script(
 				'formtura-builder',
 				FORMTURA_PLUGIN_URL . 'assets/js/builder.js',
-				[ 'wp-i18n' ],
+				array( 'wp-i18n' ),
 				fta_asset_version( 'assets/js/builder.js' ),
 				true
 			);
@@ -271,57 +274,57 @@ class Admin {
 			// the strings' English literals when none exists.
 			wp_set_script_translations( 'formtura-builder', FORMTURA_TEXTDOMAIN, FORMTURA_PLUGIN_DIR . 'languages' );
 
-			// Get all public post types for dynamic choices
-			$post_types = get_post_types( [ 'public' => true ], 'objects' );
-			$post_type_options = [];
+			// Get all public post types for dynamic choices.
+			$post_types        = get_post_types( array( 'public' => true ), 'objects' );
+			$post_type_options = array();
 			foreach ( $post_types as $post_type ) {
-				// Skip built-in types that are already listed
-				if ( in_array( $post_type->name, [ 'post', 'page', 'attachment' ], true ) ) {
+				// Skip built-in types that are already listed.
+				if ( in_array( $post_type->name, array( 'post', 'page', 'attachment' ), true ) ) {
 					continue;
 				}
-				$post_type_options[] = [
+				$post_type_options[] = array(
 					'value' => $post_type->name,
 					'label' => $post_type->labels->name,
-				];
+				);
 			}
 
-			// Get all public taxonomies for dynamic choices
-			$taxonomies = get_taxonomies( [ 'public' => true ], 'objects' );
-			$taxonomy_options = [];
+			// Get all public taxonomies for dynamic choices.
+			$taxonomies       = get_taxonomies( array( 'public' => true ), 'objects' );
+			$taxonomy_options = array();
 			foreach ( $taxonomies as $taxonomy ) {
-				// Skip built-in types that are already listed
-				if ( in_array( $taxonomy->name, [ 'category', 'post_tag' ], true ) ) {
+				// Skip built-in types that are already listed.
+				if ( in_array( $taxonomy->name, array( 'category', 'post_tag' ), true ) ) {
 					continue;
 				}
-				$taxonomy_options[] = [
+				$taxonomy_options[] = array(
 					'value' => $taxonomy->name,
 					'label' => $taxonomy->labels->name,
-				];
+				);
 			}
 
-			// Get all WordPress user roles for visibility settings
+			// Get all WordPress user roles for visibility settings.
 			global $wp_roles;
-			$user_roles = [];
+			$user_roles = array();
 			if ( ! empty( $wp_roles->roles ) ) {
 				foreach ( $wp_roles->roles as $role_key => $role_data ) {
-					$user_roles[] = [
+					$user_roles[] = array(
 						'value' => $role_key,
 						'label' => translate_user_role( $role_data['name'] ),
-					];
+					);
 				}
 			}
 
-			// Localize builder script with dynamic data
+			// Localize builder script with dynamic data.
 			wp_localize_script(
 				'formtura-builder',
 				'formturaBuilderData',
-				[
+				array(
 					'postTypes'  => $post_type_options,
 					'taxonomies' => $taxonomy_options,
 					'userRoles'  => $user_roles,
 					'ajaxUrl'    => admin_url( 'admin-ajax.php' ),
 					'nonce'      => wp_create_nonce( 'formtura_admin' ),
-				]
+				)
 			);
 		}
 	}
@@ -340,7 +343,7 @@ class Admin {
 					<?php
 					printf(
 						/* translators: %s: command to run */
-						__( 'Formtura requires Composer dependencies. Please run %s in the plugin directory.', 'formtura' ),
+						esc_html__( 'Formtura requires Composer dependencies. Please run %s in the plugin directory.', 'formtura' ),
 						'<code>composer install</code>'
 					);
 					?>
@@ -445,7 +448,7 @@ class Admin {
 	 */
 	public function render_builder_page() {
 		$form_id = isset( $_GET['form_id'] ) ? absint( $_GET['form_id'] ) : 0;
-		$form = null;
+		$form    = null;
 
 		if ( $form_id ) {
 			$form = fta_get_form( $form_id );

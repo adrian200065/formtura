@@ -36,11 +36,11 @@ class SMTP {
 	 */
 	private function init_hooks() {
 		// Configure PHPMailer if SMTP is enabled.
-		add_action( 'phpmailer_init', [ $this, 'configure_phpmailer' ] );
+		add_action( 'phpmailer_init', array( $this, 'configure_phpmailer' ) );
 
 		// AJAX handlers.
-		add_action( 'wp_ajax_fta_save_smtp_settings', [ $this, 'ajax_save_smtp_settings' ] );
-		add_action( 'wp_ajax_fta_send_test_email', [ $this, 'ajax_send_test_email' ] );
+		add_action( 'wp_ajax_fta_save_smtp_settings', array( $this, 'ajax_save_smtp_settings' ) );
+		add_action( 'wp_ajax_fta_send_test_email', array( $this, 'ajax_send_test_email' ) );
 	}
 
 	/**
@@ -87,7 +87,7 @@ class SMTP {
 
 		// Set from name and email.
 		$from_email = fta_get_smtp_setting( 'from_email', get_option( 'admin_email' ) );
-		$from_name = fta_get_smtp_setting( 'from_name', get_option( 'blogname' ) );
+		$from_name  = fta_get_smtp_setting( 'from_name', get_option( 'blogname' ) );
 
 		$phpmailer->setFrom( $from_email, $from_name );
 	}
@@ -100,11 +100,11 @@ class SMTP {
 	 */
 	private function configure_smtp( $phpmailer ) {
 		$phpmailer->isSMTP();
-		$phpmailer->Host = fta_get_smtp_setting( 'smtp_host', '' );
-		$phpmailer->Port = fta_get_smtp_setting( 'smtp_port', 587 );
-		$phpmailer->SMTPAuth = fta_get_smtp_setting( 'smtp_auth', true );
-		$phpmailer->Username = fta_get_smtp_setting( 'smtp_username', '' );
-		$phpmailer->Password = Secret_Crypto::decrypt( fta_get_smtp_setting( 'smtp_password', '' ) );
+		$phpmailer->Host       = fta_get_smtp_setting( 'smtp_host', '' );
+		$phpmailer->Port       = fta_get_smtp_setting( 'smtp_port', 587 );
+		$phpmailer->SMTPAuth   = fta_get_smtp_setting( 'smtp_auth', true );
+		$phpmailer->Username   = fta_get_smtp_setting( 'smtp_username', '' );
+		$phpmailer->Password   = Secret_Crypto::decrypt( fta_get_smtp_setting( 'smtp_password', '' ) );
 		$phpmailer->SMTPSecure = fta_get_smtp_setting( 'smtp_encryption', 'tls' );
 	}
 
@@ -116,11 +116,11 @@ class SMTP {
 	 */
 	private function configure_sendgrid( $phpmailer ) {
 		$phpmailer->isSMTP();
-		$phpmailer->Host = 'smtp.sendgrid.net';
-		$phpmailer->Port = 587;
-		$phpmailer->SMTPAuth = true;
-		$phpmailer->Username = 'apikey';
-		$phpmailer->Password = Secret_Crypto::decrypt( fta_get_smtp_setting( 'sendgrid_api_key', '' ) );
+		$phpmailer->Host       = 'smtp.sendgrid.net';
+		$phpmailer->Port       = 587;
+		$phpmailer->SMTPAuth   = true;
+		$phpmailer->Username   = 'apikey';
+		$phpmailer->Password   = Secret_Crypto::decrypt( fta_get_smtp_setting( 'sendgrid_api_key', '' ) );
 		$phpmailer->SMTPSecure = 'tls';
 	}
 
@@ -132,14 +132,14 @@ class SMTP {
 	 */
 	private function configure_mailgun( $phpmailer ) {
 		$region = fta_get_smtp_setting( 'mailgun_region', 'us' );
-		$host = $region === 'eu' ? 'smtp.eu.mailgun.org' : 'smtp.mailgun.org';
+		$host   = 'eu' === $region ? 'smtp.eu.mailgun.org' : 'smtp.mailgun.org';
 
 		$phpmailer->isSMTP();
-		$phpmailer->Host = $host;
-		$phpmailer->Port = 587;
-		$phpmailer->SMTPAuth = true;
-		$phpmailer->Username = fta_get_smtp_setting( 'mailgun_username', '' );
-		$phpmailer->Password = Secret_Crypto::decrypt( fta_get_smtp_setting( 'mailgun_password', '' ) );
+		$phpmailer->Host       = $host;
+		$phpmailer->Port       = 587;
+		$phpmailer->SMTPAuth   = true;
+		$phpmailer->Username   = fta_get_smtp_setting( 'mailgun_username', '' );
+		$phpmailer->Password   = Secret_Crypto::decrypt( fta_get_smtp_setting( 'mailgun_password', '' ) );
 		$phpmailer->SMTPSecure = 'tls';
 	}
 
@@ -151,14 +151,14 @@ class SMTP {
 	 */
 	private function configure_ses( $phpmailer ) {
 		$region = fta_get_smtp_setting( 'ses_region', 'us-east-1' );
-		$host = "email-smtp.{$region}.amazonaws.com";
+		$host   = "email-smtp.{$region}.amazonaws.com";
 
 		$phpmailer->isSMTP();
-		$phpmailer->Host = $host;
-		$phpmailer->Port = 587;
-		$phpmailer->SMTPAuth = true;
-		$phpmailer->Username = fta_get_smtp_setting( 'ses_access_key', '' );
-		$phpmailer->Password = Secret_Crypto::decrypt( fta_get_smtp_setting( 'ses_secret_key', '' ) );
+		$phpmailer->Host       = $host;
+		$phpmailer->Port       = 587;
+		$phpmailer->SMTPAuth   = true;
+		$phpmailer->Username   = fta_get_smtp_setting( 'ses_access_key', '' );
+		$phpmailer->Password   = Secret_Crypto::decrypt( fta_get_smtp_setting( 'ses_secret_key', '' ) );
 		$phpmailer->SMTPSecure = 'tls';
 	}
 
@@ -173,13 +173,16 @@ class SMTP {
 
 		// Check permissions.
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( [
-				'message' => __( 'You do not have permission to perform this action.', 'formtura' ),
-			] );
+			wp_send_json_error(
+				array(
+					'message' => __( 'You do not have permission to perform this action.', 'formtura' ),
+				)
+			);
 		}
 
 		// Get SMTP settings.
-		$smtp_settings = isset( $_POST['smtp_settings'] ) ? $_POST['smtp_settings'] : [];
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- every field is sanitized below in sanitize_smtp_settings().
+		$smtp_settings = isset( $_POST['smtp_settings'] ) ? wp_unslash( $_POST['smtp_settings'] ) : array();
 
 		// Sanitize settings.
 		$sanitized_settings = $this->sanitize_smtp_settings( $smtp_settings );
@@ -188,13 +191,17 @@ class SMTP {
 		$result = update_option( 'fta_smtp_settings', $sanitized_settings );
 
 		if ( $result ) {
-			wp_send_json_success( [
-				'message' => __( 'SMTP settings saved successfully.', 'formtura' ),
-			] );
+			wp_send_json_success(
+				array(
+					'message' => __( 'SMTP settings saved successfully.', 'formtura' ),
+				)
+			);
 		} else {
-			wp_send_json_error( [
-				'message' => __( 'Failed to save SMTP settings.', 'formtura' ),
-			] );
+			wp_send_json_error(
+				array(
+					'message' => __( 'Failed to save SMTP settings.', 'formtura' ),
+				)
+			);
 		}
 	}
 
@@ -209,17 +216,21 @@ class SMTP {
 
 		// Check permissions.
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( [
-				'message' => __( 'You do not have permission to perform this action.', 'formtura' ),
-			] );
+			wp_send_json_error(
+				array(
+					'message' => __( 'You do not have permission to perform this action.', 'formtura' ),
+				)
+			);
 		}
 
-		$email = isset( $_POST['email'] ) ? sanitize_email( $_POST['email'] ) : '';
+		$email = isset( $_POST['email'] ) ? sanitize_email( wp_unslash( $_POST['email'] ) ) : '';
 
 		if ( ! is_email( $email ) ) {
-			wp_send_json_error( [
-				'message' => __( 'Please enter a valid email address.', 'formtura' ),
-			] );
+			wp_send_json_error(
+				array(
+					'message' => __( 'Please enter a valid email address.', 'formtura' ),
+				)
+			);
 		}
 
 		// Send test email.
@@ -229,13 +240,17 @@ class SMTP {
 		$result = wp_mail( $email, $subject, $message );
 
 		if ( $result ) {
-			wp_send_json_success( [
-				'message' => __( 'Test email sent successfully! Please check your inbox.', 'formtura' ),
-			] );
+			wp_send_json_success(
+				array(
+					'message' => __( 'Test email sent successfully! Please check your inbox.', 'formtura' ),
+				)
+			);
 		} else {
-			wp_send_json_error( [
-				'message' => __( 'Failed to send test email. Please check your SMTP settings.', 'formtura' ),
-			] );
+			wp_send_json_error(
+				array(
+					'message' => __( 'Failed to send test email. Please check your SMTP settings.', 'formtura' ),
+				)
+			);
 		}
 	}
 
@@ -247,7 +262,7 @@ class SMTP {
 	 * @return array Sanitized settings.
 	 */
 	private function sanitize_smtp_settings( $settings ) {
-		$sanitized = [];
+		$sanitized = array();
 
 		// General settings.
 		if ( isset( $settings['enabled'] ) ) {
@@ -255,7 +270,7 @@ class SMTP {
 		}
 
 		if ( isset( $settings['mailer'] ) ) {
-			$sanitized['mailer'] = in_array( $settings['mailer'], [ 'smtp', 'sendgrid', 'mailgun', 'ses' ], true ) ? $settings['mailer'] : 'smtp';
+			$sanitized['mailer'] = in_array( $settings['mailer'], array( 'smtp', 'sendgrid', 'mailgun', 'ses' ), true ) ? $settings['mailer'] : 'smtp';
 		}
 
 		if ( isset( $settings['from_email'] ) ) {
@@ -288,7 +303,7 @@ class SMTP {
 		}
 
 		if ( isset( $settings['smtp_encryption'] ) ) {
-			$sanitized['smtp_encryption'] = in_array( $settings['smtp_encryption'], [ 'tls', 'ssl', 'none' ], true ) ? $settings['smtp_encryption'] : 'tls';
+			$sanitized['smtp_encryption'] = in_array( $settings['smtp_encryption'], array( 'tls', 'ssl', 'none' ), true ) ? $settings['smtp_encryption'] : 'tls';
 		}
 
 		// SendGrid settings.
@@ -306,7 +321,7 @@ class SMTP {
 		}
 
 		if ( isset( $settings['mailgun_region'] ) ) {
-			$sanitized['mailgun_region'] = in_array( $settings['mailgun_region'], [ 'us', 'eu' ], true ) ? $settings['mailgun_region'] : 'us';
+			$sanitized['mailgun_region'] = in_array( $settings['mailgun_region'], array( 'us', 'eu' ), true ) ? $settings['mailgun_region'] : 'us';
 		}
 
 		// SES settings.

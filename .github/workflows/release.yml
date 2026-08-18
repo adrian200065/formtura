@@ -124,6 +124,75 @@ jobs:
       - name: pnpm audit
         run: pnpm audit
 
+  # A real (disposable) WordPress instance per run - see scripts/e2e-env.sh
+  # for why: no Docker/wp-env dependency, and it never touches a real site.
+  # Runs once on a fixed PHP version rather than the full matrix; the E2E
+  # suite exercises plugin behavior end-to-end, not PHP-version compat.
+  e2e:
+    name: E2E tests
+    runs-on: ubuntu-latest
+    needs: test
+
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=10
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          tools: composer:v2, wp-cli
+          coverage: none
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - name: Install dependencies
+        run: |
+          composer install --no-interaction --prefer-dist
+          pnpm install --frozen-lockfile
+
+      - name: Build builder assets
+        run: pnpm run build
+
+      - name: Install Playwright's browser
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run E2E tests
+        env:
+          E2E_DB_HOST: 127.0.0.1
+          E2E_DB_USER: root
+          E2E_DB_PASS: root
+        run: bash scripts/e2e-run.sh
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          if-no-files-found: ignore
+
   # Runs on the plugin's declared minimum. Production dependencies install
   # cleanly there because composer.json requires no runtime packages, and
   # verify-release.sh runs `php -l` over every shipped file - so this job is

@@ -64,9 +64,9 @@ class Signature {
 	 * @return array|\WP_Error Map of field name => file records, or WP_Error.
 	 */
 	public function process_form_signatures( $form ) {
-		$results = [];
-		$errors  = [];
-		$decoded = [];
+		$results = array();
+		$errors  = array();
+		$decoded = array();
 
 		if ( empty( $form['fields'] ) || ! is_array( $form['fields'] ) ) {
 			return $results;
@@ -90,7 +90,8 @@ class Signature {
 			// (e.g. field_sig[]=x) is treated as no value rather than cast
 			// to string, which would emit an "Array to string conversion"
 			// warning and could corrupt the AJAX JSON response.
-			$raw   = isset( $_POST[ $field_name ] ) ? $_POST[ $field_name ] : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput, WordPress.Security.NonceVerification.Missing -- nonce already verified in Submission::ajax_submit_form() before process_form_signatures() (the only caller) runs.
+			$raw   = isset( $_POST[ $field_name ] ) ? $_POST[ $field_name ] : '';
 			$value = is_string( $raw ) ? wp_unslash( $raw ) : '';
 
 			if ( '' === $value ) {
@@ -138,7 +139,7 @@ class Signature {
 			// Uploads::get_email_attachments() filters on the literal
 			// 'file-upload' type, so signatures are not attached to
 			// notification emails today.
-			$results[ $field_name ] = [ $stored ];
+			$results[ $field_name ] = array( $stored );
 		}
 
 		if ( ! empty( $errors ) ) {

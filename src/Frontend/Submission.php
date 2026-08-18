@@ -48,14 +48,14 @@ class Submission {
 	 */
 	private function init_hooks() {
 		// AJAX handler for form submission.
-		add_action( 'wp_ajax_fta_submit_form', [ $this, 'ajax_submit_form' ] );
-		add_action( 'wp_ajax_nopriv_fta_submit_form', [ $this, 'ajax_submit_form' ] );
+		add_action( 'wp_ajax_fta_submit_form', array( $this, 'ajax_submit_form' ) );
+		add_action( 'wp_ajax_nopriv_fta_submit_form', array( $this, 'ajax_submit_form' ) );
 
 		// Coupon validation for display-side totals. The submission path
 		// re-validates independently; this endpoint only prevents the page
 		// from ever carrying the code list.
-		add_action( 'wp_ajax_fta_validate_coupon', [ $this, 'ajax_validate_coupon' ] );
-		add_action( 'wp_ajax_nopriv_fta_validate_coupon', [ $this, 'ajax_validate_coupon' ] );
+		add_action( 'wp_ajax_fta_validate_coupon', array( $this, 'ajax_validate_coupon' ) );
+		add_action( 'wp_ajax_nopriv_fta_validate_coupon', array( $this, 'ajax_validate_coupon' ) );
 	}
 
 	/**
@@ -71,45 +71,55 @@ class Submission {
 		$form_id = isset( $_POST['form_id'] ) ? absint( $_POST['form_id'] ) : 0;
 
 		if ( ! $form_id ) {
-			wp_send_json_error( [
-				'message' => __( 'Invalid form ID.', 'formtura' ),
-			] );
+			wp_send_json_error(
+				array(
+					'message' => __( 'Invalid form ID.', 'formtura' ),
+				)
+			);
 		}
 
 		// Get form.
 		$form = fta_get_form( $form_id );
 
 		if ( ! $form ) {
-			wp_send_json_error( [
-				'message' => __( 'Form not found.', 'formtura' ),
-			] );
+			wp_send_json_error(
+				array(
+					'message' => __( 'Form not found.', 'formtura' ),
+				)
+			);
 		}
 
 		// Check if form is active.
-		if ( isset( $form['status'] ) && $form['status'] !== 'active' ) {
-			wp_send_json_error( [
-				'message' => __( 'This form is currently inactive.', 'formtura' ),
-			] );
+		if ( isset( $form['status'] ) && 'active' !== $form['status'] ) {
+			wp_send_json_error(
+				array(
+					'message' => __( 'This form is currently inactive.', 'formtura' ),
+				)
+			);
 		}
 
 		// Validate reCAPTCHA if enabled.
 		$recaptcha_result = $this->validate_recaptcha();
 
 		if ( is_wp_error( $recaptcha_result ) ) {
-			wp_send_json_error( [
-				'message'   => $recaptcha_result->get_error_message(),
-				'recaptcha' => $recaptcha_result->get_error_code(),
-			] );
+			wp_send_json_error(
+				array(
+					'message'   => $recaptcha_result->get_error_message(),
+					'recaptcha' => $recaptcha_result->get_error_code(),
+				)
+			);
 		}
 
 		// Validate and sanitize form data.
 		$validation_result = $this->validate_submission( $form, $_POST );
 
 		if ( is_wp_error( $validation_result ) ) {
-			wp_send_json_error( [
-				'message' => $validation_result->get_error_message(),
-				'errors'  => $validation_result->get_error_data(),
-			] );
+			wp_send_json_error(
+				array(
+					'message' => $validation_result->get_error_message(),
+					'errors'  => $validation_result->get_error_data(),
+				)
+			);
 		}
 
 		// Payment forms carry an authoritative server-side computed order.
@@ -128,10 +138,12 @@ class Submission {
 			$payment = $payments->compute( $form, wp_unslash( $_POST ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 
 			if ( is_wp_error( $payment ) ) {
-				wp_send_json_error( [
-					'message' => $payment->get_error_message(),
-					'errors'  => $payment->get_error_data(),
-				] );
+				wp_send_json_error(
+					array(
+						'message' => $payment->get_error_message(),
+						'errors'  => $payment->get_error_data(),
+					)
+				);
 			}
 		}
 
@@ -140,10 +152,12 @@ class Submission {
 		$files = $this->process_files( $form );
 
 		if ( is_wp_error( $files ) ) {
-			wp_send_json_error( [
-				'message' => $files->get_error_message(),
-				'errors'  => $files->get_error_data(),
-			] );
+			wp_send_json_error(
+				array(
+					'message' => $files->get_error_message(),
+					'errors'  => $files->get_error_data(),
+				)
+			);
 		}
 
 		// Sanitize submission data.
@@ -164,13 +178,15 @@ class Submission {
 		}
 
 		// Save entry to database.
-		$entry_id = fta_create_entry( [
-			'form_id'    => $form_id,
-			'data'       => $entry_data,
-			'ip_address' => $this->get_user_ip(),
-			'user_agent' => $this->get_user_agent(),
-			'created_at' => current_time( 'mysql' ),
-		] );
+		$entry_id = fta_create_entry(
+			array(
+				'form_id'    => $form_id,
+				'data'       => $entry_data,
+				'ip_address' => $this->get_user_ip(),
+				'user_agent' => $this->get_user_agent(),
+				'created_at' => current_time( 'mysql' ),
+			)
+		);
 
 		if ( ! $entry_id ) {
 			// The files above are already on disk, and the entry that would
@@ -181,9 +197,11 @@ class Submission {
 			// in process_signatures() and for a rejected payment recompute.
 			( new Uploads( $this->storage ) )->cleanup( $files );
 
-			wp_send_json_error( [
-				'message' => __( 'Failed to save form submission. Please try again.', 'formtura' ),
-			] );
+			wp_send_json_error(
+				array(
+					'message' => __( 'Failed to save form submission. Please try again.', 'formtura' ),
+				)
+			);
 		}
 
 		// Send notifications.
@@ -200,11 +218,13 @@ class Submission {
 
 		$redirect_url = isset( $form['settings']['redirect_url'] ) ? $form['settings']['redirect_url'] : '';
 
-		wp_send_json_success( [
-			'message'      => $success_message,
-			'redirect_url' => $redirect_url,
-			'entry_id'     => $entry_id,
-		] );
+		wp_send_json_success(
+			array(
+				'message'      => $success_message,
+				'redirect_url' => $redirect_url,
+				'entry_id'     => $entry_id,
+			)
+		);
 	}
 
 	/**
@@ -225,9 +245,11 @@ class Submission {
 		// working code "is not valid" just because the window filled up on
 		// successes.
 		if ( $this->coupon_attempts_throttled() ) {
-			wp_send_json_error( [
-				'message' => __( 'This coupon code is not valid.', 'formtura' ),
-			] );
+			wp_send_json_error(
+				array(
+					'message' => __( 'This coupon code is not valid.', 'formtura' ),
+				)
+			);
 		}
 
 		$form_id  = isset( $_POST['form_id'] ) ? absint( $_POST['form_id'] ) : 0;
@@ -247,9 +269,11 @@ class Submission {
 
 		if ( ! $form || '' === $field_id || '' === $code ) {
 			$this->record_failed_coupon_attempt();
-			wp_send_json_error( [
-				'message' => __( 'This coupon code is not valid.', 'formtura' ),
-			] );
+			wp_send_json_error(
+				array(
+					'message' => __( 'This coupon code is not valid.', 'formtura' ),
+				)
+			);
 		}
 
 		$coupon = null;
@@ -263,9 +287,11 @@ class Submission {
 
 		if ( null === $coupon ) {
 			$this->record_failed_coupon_attempt();
-			wp_send_json_error( [
-				'message' => __( 'This coupon code is not valid.', 'formtura' ),
-			] );
+			wp_send_json_error(
+				array(
+					'message' => __( 'This coupon code is not valid.', 'formtura' ),
+				)
+			);
 		}
 
 		wp_send_json_success( $coupon );
@@ -382,7 +408,7 @@ class Submission {
 	 * @return true|\WP_Error True if valid, WP_Error if invalid.
 	 */
 	private function validate_submission( $form, $submission ) {
-		$errors = [];
+		$errors = array();
 
 		if ( ! isset( $form['fields'] ) || ! is_array( $form['fields'] ) ) {
 			return new \WP_Error( 'invalid_form', __( 'Invalid form configuration.', 'formtura' ) );
@@ -439,7 +465,7 @@ class Submission {
 			if ( isset( $field['validation'] ) && is_array( $field['validation'] ) ) {
 				$custom_validation = fta_validate_field( $field_value, $field['validation'] );
 
-				if ( $custom_validation !== true ) {
+				if ( true !== $custom_validation ) {
 					$errors[ $field_name ] = $custom_validation;
 				}
 			}
@@ -476,7 +502,7 @@ class Submission {
 			return true;
 		}
 
-		$conditions = isset( $logic['conditions'] ) && is_array( $logic['conditions'] ) ? $logic['conditions'] : [];
+		$conditions = isset( $logic['conditions'] ) && is_array( $logic['conditions'] ) ? $logic['conditions'] : array();
 		$match_any  = isset( $logic['match'] ) && 'any' === $logic['match'];
 
 		$conditions_met = $match_any ? false : true;
@@ -615,7 +641,7 @@ class Submission {
 			return true;
 		}
 
-		foreach ( [ 'line1', 'city', 'state', 'zip' ] as $part ) {
+		foreach ( array( 'line1', 'city', 'state', 'zip' ) as $part ) {
 			if ( ! isset( $value[ $part ] ) || '' === trim( (string) $value[ $part ] ) ) {
 				return new \WP_Error( 'incomplete_address', __( 'Please complete the address.', 'formtura' ) );
 			}
@@ -636,9 +662,14 @@ class Submission {
 	 */
 	private function is_empty_value( $value ) {
 		if ( is_array( $value ) ) {
-			return 0 === count( array_filter( $value, function( $item ) {
-				return ! $this->is_empty_value( $item );
-			} ) );
+			return 0 === count(
+				array_filter(
+					$value,
+					function ( $item ) {
+						return ! $this->is_empty_value( $item );
+					}
+				)
+			);
 		}
 
 		return '' === trim( (string) $value );
@@ -656,7 +687,7 @@ class Submission {
 
 		return in_array(
 			$type,
-			[
+			array(
 				'html',
 				'content',
 				'page-break',
@@ -671,7 +702,7 @@ class Submission {
 				// required check on every attempt, with the error attached to
 				// a field the visitor has no way to fill in.
 				'total',
-			],
+			),
 			true
 		);
 	}
@@ -685,7 +716,7 @@ class Submission {
 	 * @return array Sanitized data.
 	 */
 	private function sanitize_submission( $form, $submission ) {
-		$sanitized = [];
+		$sanitized = array();
 
 		if ( ! isset( $form['fields'] ) || ! is_array( $form['fields'] ) ) {
 			return $sanitized;
@@ -714,7 +745,7 @@ class Submission {
 			// visitor's response for that item.
 			$skip_type = isset( $field['type'] ) ? $field['type'] : '';
 
-			if ( Uploads::is_file_field( $field ) || in_array( $skip_type, [ 'signature', 'total', 'payment-single' ], true ) ) {
+			if ( Uploads::is_file_field( $field ) || in_array( $skip_type, array( 'signature', 'total', 'payment-single' ), true ) ) {
 				continue;
 			}
 
@@ -723,7 +754,7 @@ class Submission {
 
 			if ( is_array( $field_value ) ) {
 				$sanitized[ $field_name ] = array_map(
-					function( $item ) use ( $field_type ) {
+					function ( $item ) use ( $field_type ) {
 						return fta_sanitize_field( $item, $field_type );
 					},
 					$field_value
@@ -755,9 +786,11 @@ class Submission {
 			return true;
 		}
 
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- nonce already verified in ajax_submit_form() before this method runs.
 		$token = isset( $_POST['g-recaptcha-response'] )
 			? sanitize_text_field( wp_unslash( $_POST['g-recaptcha-response'] ) )
 			: '';
+		// phpcs:enable
 
 		if ( '' === $token ) {
 			return new \WP_Error(
@@ -769,14 +802,17 @@ class Submission {
 		}
 
 		// Verify with Google.
-		$response = wp_remote_post( 'https://www.google.com/recaptcha/api/siteverify', [
-			'timeout' => 15,
-			'body'    => [
-				'secret'   => $config['secret_key'],
-				'response' => $token,
-				'remoteip' => $this->get_user_ip(),
-			],
-		] );
+		$response = wp_remote_post(
+			'https://www.google.com/recaptcha/api/siteverify',
+			array(
+				'timeout' => 15,
+				'body'    => array(
+					'secret'   => $config['secret_key'],
+					'response' => $token,
+					'remoteip' => $this->get_user_ip(),
+				),
+			)
+		);
 
 		if ( is_wp_error( $response ) ) {
 			fta_log( 'reCAPTCHA verification request failed: ' . $response->get_error_message(), 'error' );
@@ -835,14 +871,14 @@ class Submission {
 		$ip = '';
 
 		if ( isset( $_SERVER['HTTP_CLIENT_IP'] ) ) {
-			$ip = $_SERVER['HTTP_CLIENT_IP'];
+			$ip = sanitize_text_field( wp_unslash( $_SERVER['HTTP_CLIENT_IP'] ) );
 		} elseif ( isset( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
-			$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+			$ip = sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_FORWARDED_FOR'] ) );
 		} elseif ( isset( $_SERVER['REMOTE_ADDR'] ) ) {
-			$ip = $_SERVER['REMOTE_ADDR'];
+			$ip = sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
 		}
 
-		return sanitize_text_field( $ip );
+		return $ip;
 	}
 
 	/**
@@ -852,6 +888,6 @@ class Submission {
 	 * @return string User agent.
 	 */
 	private function get_user_agent() {
-		return isset( $_SERVER['HTTP_USER_AGENT'] ) ? sanitize_text_field( $_SERVER['HTTP_USER_AGENT'] ) : '';
+		return isset( $_SERVER['HTTP_USER_AGENT'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) ) : '';
 	}
 }

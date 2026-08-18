@@ -31,7 +31,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class File_Download {
 
 	/**
-	 * admin-post.php action name.
+	 * Admin-post.php action name.
 	 */
 	const ACTION = 'fta_download_file';
 
@@ -67,7 +67,7 @@ class File_Download {
 	 * @return void
 	 */
 	public function register() {
-		add_action( 'admin_post_' . self::ACTION, [ $this, 'handle' ] );
+		add_action( 'admin_post_' . self::ACTION, array( $this, 'handle' ) );
 	}
 
 	/**
@@ -81,12 +81,12 @@ class File_Download {
 	 */
 	public static function url( $entry_id, $field, $index = 0 ) {
 		return add_query_arg(
-			[
+			array(
 				'action'   => self::ACTION,
 				'entry_id' => (int) $entry_id,
 				'field'    => $field,
 				'file'     => (int) $index,
-			],
+			),
 			admin_url( 'admin-post.php' )
 		);
 	}
@@ -212,7 +212,8 @@ class File_Download {
 		wp_die(
 			esc_html( $message ),
 			esc_html__( 'Formtura', 'formtura' ),
-			[ 'response' => $status ]
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $status is always a literal HTTP status int from a call site here (403/404), used by wp_die() to set the response header, never echoed as HTML.
+			array( 'response' => $status )
 		);
 	}
 

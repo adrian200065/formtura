@@ -72,14 +72,49 @@ class Uploads {
 	 *
 	 * @var string[]
 	 */
-	private static $blocked_extensions = [
-		'php', 'php3', 'php4', 'php5', 'php7', 'php8', 'phps', 'phtml', 'phar',
-		'cgi', 'pl', 'py', 'rb', 'sh', 'bash', 'zsh',
-		'jsp', 'jspx', 'asp', 'aspx', 'ashx', 'asmx',
-		'exe', 'com', 'bat', 'cmd', 'msi', 'scr', 'dll', 'so', 'jar',
-		'htaccess', 'htpasswd', 'ini', 'conf',
-		'html', 'htm', 'shtml', 'svg', 'svgz', 'xhtml',
-	];
+	private static $blocked_extensions = array(
+		'php',
+		'php3',
+		'php4',
+		'php5',
+		'php7',
+		'php8',
+		'phps',
+		'phtml',
+		'phar',
+		'cgi',
+		'pl',
+		'py',
+		'rb',
+		'sh',
+		'bash',
+		'zsh',
+		'jsp',
+		'jspx',
+		'asp',
+		'aspx',
+		'ashx',
+		'asmx',
+		'exe',
+		'com',
+		'bat',
+		'cmd',
+		'msi',
+		'scr',
+		'dll',
+		'so',
+		'jar',
+		'htaccess',
+		'htpasswd',
+		'ini',
+		'conf',
+		'html',
+		'htm',
+		'shtml',
+		'svg',
+		'svgz',
+		'xhtml',
+	);
 
 	/**
 	 * Whether a field's value arrives in $_FILES and is handled here.
@@ -91,7 +126,7 @@ class Uploads {
 	public static function is_file_field( $field ) {
 		$type = isset( $field['type'] ) ? $field['type'] : '';
 
-		return in_array( $type, [ 'file-upload', 'camera' ], true );
+		return in_array( $type, array( 'file-upload', 'camera' ), true );
 	}
 
 	/**
@@ -102,9 +137,9 @@ class Uploads {
 	 * @return array|\WP_Error Map of field name => file records, or WP_Error.
 	 */
 	public function process_form_uploads( $form ) {
-		$results  = [];
-		$errors   = [];
-		$orphaned = [];
+		$results  = array();
+		$errors   = array();
+		$orphaned = array();
 
 		if ( empty( $form['fields'] ) || ! is_array( $form['fields'] ) ) {
 			return $results;
@@ -140,7 +175,7 @@ class Uploads {
 				$files = array_slice( $files, 0, 1 );
 			}
 
-			$stored = [];
+			$stored = array();
 
 			foreach ( $files as $file ) {
 				$result = $this->handle_single_file( $file, $field );
@@ -195,31 +230,38 @@ class Uploads {
 	 * @return array[] List of individual file arrays.
 	 */
 	private function collect_field_files( $field_name ) {
+		// phpcs:disable WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- nonce already verified in Submission::ajax_submit_form() before process_form_uploads() (the only caller) runs; the file name is re-derived via wp_generate_password() and the original is passed through sanitize_file_name() in File_Storage::create_record() before being persisted.
 		if ( ! isset( $_FILES[ $field_name ] ) ) {
-			return [];
+			return array();
 		}
 
 		$entry = $_FILES[ $field_name ];
-		$files = [];
+		// phpcs:enable
+		$files = array();
 
 		if ( is_array( $entry['name'] ) ) {
 			foreach ( array_keys( $entry['name'] ) as $index ) {
-				$files[] = [
+				$files[] = array(
 					'name'     => $entry['name'][ $index ],
 					'type'     => $entry['type'][ $index ],
 					'tmp_name' => $entry['tmp_name'][ $index ],
 					'error'    => $entry['error'][ $index ],
 					'size'     => $entry['size'][ $index ],
-				];
+				);
 			}
 		} else {
 			$files[] = $entry;
 		}
 
 		// Drop empty file slots left by unused inputs.
-		return array_values( array_filter( $files, function( $file ) {
-			return UPLOAD_ERR_NO_FILE !== (int) $file['error'];
-		} ) );
+		return array_values(
+			array_filter(
+				$files,
+				function ( $file ) {
+					return UPLOAD_ERR_NO_FILE !== (int) $file['error'];
+				}
+			)
+		);
 	}
 
 	/**
@@ -395,17 +437,17 @@ class Uploads {
 		// Camera captures photos; the field's own type settings never widen
 		// that to arbitrary files.
 		if ( 'camera' === ( isset( $field['type'] ) ? $field['type'] : '' ) ) {
-			return [ 'jpg', 'jpeg', 'png', 'gif', 'webp' ];
+			return array( 'jpg', 'jpeg', 'png', 'gif', 'webp' );
 		}
 
 		$mode = isset( $field['allowedFileTypes'] ) ? $field['allowedFileTypes'] : 'specify';
 
 		if ( 'specify' !== $mode || empty( $field['specifiedTypes'] ) ) {
-			return [];
+			return array();
 		}
 
 		$extensions = array_map(
-			function( $type ) {
+			function ( $type ) {
 				return strtolower( ltrim( trim( $type ), '.' ) );
 			},
 			explode( ',', $field['specifiedTypes'] )
@@ -445,17 +487,20 @@ class Uploads {
 
 		// Filenames are randomised so stored files cannot be enumerated by
 		// guessing the visitor's original name.
-		$original  = $file['name'];
-		$extension = strtolower( pathinfo( $original, PATHINFO_EXTENSION ) );
+		$original     = $file['name'];
+		$extension    = strtolower( pathinfo( $original, PATHINFO_EXTENSION ) );
 		$file['name'] = wp_generate_password( 24, false, false ) . '.' . $extension;
 
-		$filter = [ $this, 'filter_upload_dir' ];
+		$filter = array( $this, 'filter_upload_dir' );
 		add_filter( 'upload_dir', $filter );
 
-		$moved = wp_handle_upload( $file, [
-			'test_form' => false,
-			'unique_filename_callback' => null,
-		] );
+		$moved = wp_handle_upload(
+			$file,
+			array(
+				'test_form'                => false,
+				'unique_filename_callback' => null,
+			)
+		);
 
 		remove_filter( 'upload_dir', $filter );
 
@@ -571,7 +616,7 @@ class Uploads {
 	 * @return string[] Absolute file paths.
 	 */
 	public static function get_email_attachments( $form, $entry_data, $storage = null ) {
-		$attachments = [];
+		$attachments = array();
 
 		if ( empty( $form['fields'] ) || ! is_array( $form['fields'] ) ) {
 			return $attachments;

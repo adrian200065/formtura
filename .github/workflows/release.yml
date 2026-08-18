@@ -157,10 +157,14 @@ jobs:
           tools: composer:v2, wp-cli
           coverage: none
 
+      # Playwright 1.62 requires Node 20+; the rest of the toolchain (Jest,
+      # ESLint, Vite, in the `test` job) only needs the project's declared
+      # >=18, so this bump is scoped to this job rather than raising it
+      # everywhere.
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
 
       - name: Set up pnpm
         uses: pnpm/action-setup@v4

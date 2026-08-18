@@ -25,6 +25,9 @@ module.exports = {
     '/vendor/',
     '/.worktrees/',
     '/dist/',
+    // Playwright specs, not Jest - they import @playwright/test's own
+    // test()/expect() and only run correctly under `playwright test`.
+    '/tests/e2e/',
   ],
   collectCoverageFrom: [
     'builder/**/*.{js,jsx}',

@@ -74,6 +74,9 @@ jobs:
       - name: Run PHPUnit
         run: vendor/bin/phpunit --do-not-cache-result
 
+      - name: Run PHPCS
+        run: vendor/bin/phpcs
+
       - name: Run Jest
         run: pnpm exec jest --runInBand
 

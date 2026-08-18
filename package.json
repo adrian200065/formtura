@@ -19,6 +19,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
+    "test:e2e": "bash scripts/e2e-run.sh",
     "release": "bash scripts/build-release.sh",
     "release:verify": "bash scripts/verify-release.sh"
   },
@@ -33,6 +34,7 @@
   "devDependencies": {
     "@babel/preset-env": "^7.29.7",
     "@babel/preset-react": "^7.29.7",
+    "@playwright/test": "^1.62.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^14.3.1",
     "@testing-library/user-event": "^14.6.4",

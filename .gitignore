@@ -33,6 +33,12 @@ coverage/
 # Environment
 .env
 .env.local
+.env.e2e
+
+# E2E
+/playwright-report
+/test-results
+/tests/e2e/.auth
 
 # PHPUnit
 .phpunit.result.cache

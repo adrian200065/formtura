@@ -31,6 +31,8 @@ class Forms_DB {
 	 * Constructor.
 	 *
 	 * @since 1.0.0
+	 * @param \Formtura\Frontend\File_Storage|null $storage Optional storage
+	 *        service, passed through to entry deletion.
 	 */
 	public function __construct( $storage = null ) {
 		global $wpdb;
@@ -57,6 +59,7 @@ class Forms_DB {
 		global $wpdb;
 
 		$form = $wpdb->get_row(
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is a fixed internal constant ($wpdb->prefix . 'fta_forms'), not user input.
 			$wpdb->prepare( "SELECT * FROM {$this->table_name} WHERE id = %d", $form_id ),
 			ARRAY_A
 		);
@@ -75,16 +78,16 @@ class Forms_DB {
 	 * @param array $args Query arguments.
 	 * @return array Array of forms.
 	 */
-	public function get_all( $args = [] ) {
+	public function get_all( $args = array() ) {
 		global $wpdb;
 
-		$defaults = [
-			'status'   => '',
-			'orderby'  => 'created_at',
-			'order'    => 'DESC',
-			'limit'    => 20,
-			'offset'   => 0,
-		];
+		$defaults = array(
+			'status'  => '',
+			'orderby' => 'created_at',
+			'order'   => 'DESC',
+			'limit'   => 20,
+			'offset'  => 0,
+		);
 
 		$args = wp_parse_args( $args, $defaults );
 
@@ -95,14 +98,15 @@ class Forms_DB {
 		}
 
 		$orderby = sanitize_sql_orderby( "{$args['orderby']} {$args['order']}" );
-		$limit = absint( $args['limit'] );
-		$offset = absint( $args['offset'] );
+		$limit   = absint( $args['limit'] );
+		$offset  = absint( $args['offset'] );
 
 		$query = "SELECT * FROM {$this->table_name} WHERE {$where} ORDER BY {$orderby} LIMIT {$limit} OFFSET {$offset}";
 
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $where is built from $wpdb->prepare() fragments above, $orderby is whitelisted via sanitize_sql_orderby(), $limit/$offset are absint()'d; nothing here is unprepared user input.
 		$forms = $wpdb->get_results( $query, ARRAY_A );
 
-		return array_map( [ $this, 'prepare_form' ], $forms );
+		return array_map( array( $this, 'prepare_form' ), $forms );
 	}
 
 	/**
@@ -115,17 +119,17 @@ class Forms_DB {
 	public function create( $data ) {
 		global $wpdb;
 
-		$defaults = [
+		$defaults = array(
 			'title'       => __( 'Untitled Form', 'formtura' ),
 			'description' => '',
-			'fields'      => [],
-			'settings'    => [],
+			'fields'      => array(),
+			'settings'    => array(),
 			'status'      => 'active',
-		];
+		);
 
 		$data = wp_parse_args( $data, $defaults );
 
-		$insert_data = [
+		$insert_data = array(
 			'title'       => $data['title'],
 			'description' => $data['description'],
 			'fields'      => wp_json_encode( $data['fields'] ),
@@ -133,7 +137,7 @@ class Forms_DB {
 			'status'      => $data['status'],
 			'created_at'  => current_time( 'mysql' ),
 			'updated_at'  => current_time( 'mysql' ),
-		];
+		);
 
 		$result = $wpdb->insert( $this->table_name, $insert_data );
 
@@ -155,7 +159,7 @@ class Forms_DB {
 	public function update( $form_id, $data ) {
 		global $wpdb;
 
-		$update_data = [];
+		$update_data = array();
 
 		if ( isset( $data['title'] ) ) {
 			$update_data['title'] = $data['title'];
@@ -182,10 +186,10 @@ class Forms_DB {
 		$result = $wpdb->update(
 			$this->table_name,
 			$update_data,
-			[ 'id' => $form_id ]
+			array( 'id' => $form_id )
 		);
 
-		return $result !== false;
+		return false !== $result;
 	}
 
 	/**
@@ -211,10 +215,10 @@ class Forms_DB {
 		// Delete form.
 		$result = $wpdb->delete(
 			$this->table_name,
-			[ 'id' => $form_id ]
+			array( 'id' => $form_id )
 		);
 
-		return $result !== false;
+		return false !== $result;
 	}
 
 	/**
@@ -233,6 +237,7 @@ class Forms_DB {
 			$where .= $wpdb->prepare( ' AND status = %s', $status );
 		}
 
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is a fixed internal constant; $where is built from $wpdb->prepare() fragments above.
 		return (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$this->table_name} WHERE {$where}" );
 	}
 
@@ -247,16 +252,16 @@ class Forms_DB {
 		// Decode JSON fields.
 		if ( isset( $form['fields'] ) && ! empty( $form['fields'] ) ) {
 			$decoded_fields = json_decode( $form['fields'], true );
-			$form['fields'] = is_array( $decoded_fields ) ? $decoded_fields : [];
+			$form['fields'] = is_array( $decoded_fields ) ? $decoded_fields : array();
 		} else {
-			$form['fields'] = [];
+			$form['fields'] = array();
 		}
 
 		if ( isset( $form['settings'] ) && ! empty( $form['settings'] ) ) {
 			$decoded_settings = json_decode( $form['settings'], true );
-			$form['settings'] = is_array( $decoded_settings ) ? $decoded_settings : [];
+			$form['settings'] = is_array( $decoded_settings ) ? $decoded_settings : array();
 		} else {
-			$form['settings'] = [];
+			$form['settings'] = array();
 		}
 
 		// Convert ID to integer.

@@ -51,7 +51,7 @@ class Entries_DB {
 	 */
 	public function __construct( $storage = null ) {
 		global $wpdb;
-		$this->table_name = $wpdb->prefix . 'fta_entries';
+		$this->table_name      = $wpdb->prefix . 'fta_entries';
 		$this->meta_table_name = $wpdb->prefix . 'fta_entry_meta';
 
 		$this->storage = $storage instanceof \Formtura\Frontend\File_Storage ? $storage : null;
@@ -82,6 +82,7 @@ class Entries_DB {
 		global $wpdb;
 
 		$entry = $wpdb->get_row(
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is a fixed internal constant ($wpdb->prefix . 'fta_entries'), not user input.
 			$wpdb->prepare( "SELECT * FROM {$this->table_name} WHERE id = %d", $entry_id ),
 			ARRAY_A
 		);
@@ -104,10 +105,10 @@ class Entries_DB {
 	 * @param array $args Query arguments.
 	 * @return array Array of entries.
 	 */
-	public function get_by_form( $form_id, $args = [] ) {
+	public function get_by_form( $form_id, $args = array() ) {
 		global $wpdb;
 
-		$defaults = [
+		$defaults = array(
 			'is_read'  => '',
 			'orderby'  => 'created_at',
 			'order'    => 'DESC',
@@ -115,9 +116,9 @@ class Entries_DB {
 			'offset'   => 0,
 			'page'     => 1,
 			'per_page' => 20,
-		];
+		);
 
-		$requested = is_array( $args ) ? $args : [];
+		$requested = is_array( $args ) ? $args : array();
 		$args      = wp_parse_args( $args, $defaults );
 
 		// Page size and offset come from page/per_page when the caller uses
@@ -140,7 +141,7 @@ class Entries_DB {
 
 		$where = $wpdb->prepare( 'form_id = %d', $form_id );
 
-		if ( $args['is_read'] !== '' ) {
+		if ( '' !== $args['is_read'] ) {
 			$where .= $wpdb->prepare( ' AND is_read = %d', (int) $args['is_read'] );
 		}
 
@@ -165,19 +166,21 @@ class Entries_DB {
 		// strictly after that id regardless of what was inserted elsewhere.
 		if ( isset( $requested['after_id'] ) ) {
 			$comparison = 'ASC' === strtoupper( (string) $args['order'] ) ? '>' : '<';
-			$where     .= $wpdb->prepare( " AND id {$comparison} %d", absint( $requested['after_id'] ) );
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $comparison is always literal '>' or '<' from the ternary above, never user input.
+			$where .= $wpdb->prepare( " AND id {$comparison} %d", absint( $requested['after_id'] ) );
 
 			$query = "SELECT * FROM {$this->table_name} WHERE {$where} ORDER BY {$orderby} LIMIT {$limit}";
 		} else {
 			$query = "SELECT * FROM {$this->table_name} WHERE {$where} ORDER BY {$orderby} LIMIT {$limit} OFFSET {$offset}";
 		}
 
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $where is built from $wpdb->prepare() fragments above, $orderby is whitelisted via sanitize_sql_orderby(), $limit/$offset are absint()'d; nothing here is unprepared user input.
 		$entries = $wpdb->get_results( $query, ARRAY_A );
 
 		// Get meta for each entry.
 		foreach ( $entries as &$entry ) {
 			$entry['data'] = $this->get_entry_meta( $entry['id'] );
-			$entry = $this->prepare_entry( $entry );
+			$entry         = $this->prepare_entry( $entry );
 		}
 
 		return $entries;
@@ -236,14 +239,14 @@ class Entries_DB {
 	public function create( $data ) {
 		global $wpdb;
 
-		$defaults = [
+		$defaults = array(
 			'form_id'    => 0,
 			'user_id'    => get_current_user_id(),
-			'data'       => [],
+			'data'       => array(),
 			'ip_address' => '',
 			'user_agent' => '',
 			'is_read'    => 0,
-		];
+		);
 
 		$data = wp_parse_args( $data, $defaults );
 
@@ -251,14 +254,14 @@ class Entries_DB {
 		$entry_data = $data['data'];
 		unset( $data['data'] );
 
-		$insert_data = [
+		$insert_data = array(
 			'form_id'    => $data['form_id'],
-			'user_id'    => $data['user_id'] ?: null,
+			'user_id'    => $data['user_id'] ? $data['user_id'] : null,
 			'ip_address' => $data['ip_address'],
 			'user_agent' => $data['user_agent'],
 			'is_read'    => $data['is_read'],
 			'created_at' => current_time( 'mysql' ),
-		];
+		);
 
 		$wpdb->query( 'START TRANSACTION' );
 
@@ -301,8 +304,8 @@ class Entries_DB {
 	private function discard_rows( $entry_id ) {
 		global $wpdb;
 
-		$wpdb->delete( $this->meta_table_name, [ 'entry_id' => $entry_id ] );
-		$wpdb->delete( $this->table_name, [ 'id' => $entry_id ] );
+		$wpdb->delete( $this->meta_table_name, array( 'entry_id' => $entry_id ) );
+		$wpdb->delete( $this->table_name, array( 'id' => $entry_id ) );
 	}
 
 	/**
@@ -320,7 +323,7 @@ class Entries_DB {
 	public function update( $entry_id, $data ) {
 		global $wpdb;
 
-		$update_data = [];
+		$update_data = array();
 
 		if ( isset( $data['is_read'] ) ) {
 			$update_data['is_read'] = (int) $data['is_read'];
@@ -341,7 +344,7 @@ class Entries_DB {
 			$result = $wpdb->update(
 				$this->table_name,
 				$update_data,
-				[ 'id' => $entry_id ]
+				array( 'id' => $entry_id )
 			);
 
 			if ( false === $result ) {
@@ -380,13 +383,13 @@ class Entries_DB {
 		// Delete entry meta.
 		$wpdb->delete(
 			$this->meta_table_name,
-			[ 'entry_id' => $entry_id ]
+			array( 'entry_id' => $entry_id )
 		);
 
 		// Delete entry.
 		$result = $wpdb->delete(
 			$this->table_name,
-			[ 'id' => $entry_id ]
+			array( 'id' => $entry_id )
 		);
 
 		if ( false === $result ) {
@@ -414,6 +417,7 @@ class Entries_DB {
 
 		// Get all entry IDs for this form.
 		$entry_ids = $wpdb->get_col(
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is a fixed internal constant, not user input.
 			$wpdb->prepare( "SELECT id FROM {$this->table_name} WHERE form_id = %d", $form_id )
 		);
 
@@ -422,7 +426,7 @@ class Entries_DB {
 		}
 
 		// Captured before the rows go, for the same reason as delete().
-		$captured = [];
+		$captured = array();
 
 		foreach ( $entry_ids as $entry_id ) {
 			$entry = $this->get( $entry_id );
@@ -435,13 +439,14 @@ class Entries_DB {
 		// Delete entry meta.
 		$placeholders = implode( ',', array_fill( 0, count( $entry_ids ), '%d' ) );
 		$wpdb->query(
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- meta table name is a fixed internal constant; $placeholders is a run of %d matching count( $entry_ids ), and $entry_ids is passed as a single array arg, which $wpdb->prepare() flattens (see wpdb::prepare()'s $passed_as_array handling).
 			$wpdb->prepare( "DELETE FROM {$this->meta_table_name} WHERE entry_id IN ({$placeholders})", $entry_ids )
 		);
 
 		// Delete entries.
 		$result = $wpdb->delete(
 			$this->table_name,
-			[ 'form_id' => $form_id ]
+			array( 'form_id' => $form_id )
 		);
 
 		if ( false === $result ) {
@@ -468,10 +473,11 @@ class Entries_DB {
 
 		$where = $wpdb->prepare( 'form_id = %d', $form_id );
 
-		if ( $is_read !== '' ) {
+		if ( '' !== $is_read ) {
 			$where .= $wpdb->prepare( ' AND is_read = %d', (int) $is_read );
 		}
 
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is a fixed internal constant; $where is built from $wpdb->prepare() fragments above.
 		return (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$this->table_name} WHERE {$where}" );
 	}
 
@@ -491,6 +497,7 @@ class Entries_DB {
 		return array_map(
 			'intval',
 			$wpdb->get_col(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is a fixed internal constant, not user input.
 				$wpdb->prepare( "SELECT id FROM {$this->table_name} WHERE user_id = %d", $user_id )
 			)
 		);
@@ -514,15 +521,19 @@ class Entries_DB {
 		global $wpdb;
 
 		if ( empty( $meta_keys ) ) {
-			return [];
+			return array();
 		}
 
 		$placeholders = implode( ',', array_fill( 0, count( $meta_keys ), '%s' ) );
 
-		$args = [ $form_id ];
-		$args = array_merge( $args, $meta_keys );
+		$args   = array( $form_id );
+		$args   = array_merge( $args, $meta_keys );
 		$args[] = $value;
 
+		// phpcs:disable WordPress.DB.PreparedSQL -- Table names are fixed internal constants. $placeholders is a run of
+		// %s matching count( $meta_keys ), and $args has exactly 1 + count( $meta_keys ) + 1 elements to match the
+		// %d + %s-run + %s in the query - the sniff can't verify counts through the spread operator or the
+		// interpolated placeholder run, but they line up, and $query below is this same prepared string.
 		$query = $wpdb->prepare(
 			"SELECT DISTINCT m.entry_id FROM {$this->meta_table_name} m
 			INNER JOIN {$this->table_name} e ON e.id = m.entry_id
@@ -531,6 +542,7 @@ class Entries_DB {
 		);
 
 		return array_map( 'intval', $wpdb->get_col( $query ) );
+		// phpcs:enable
 	}
 
 	/**
@@ -548,6 +560,7 @@ class Entries_DB {
 		return array_map(
 			'intval',
 			$wpdb->get_col(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is a fixed internal constant, not user input.
 				$wpdb->prepare( "SELECT id FROM {$this->table_name} WHERE created_at < %s", $cutoff )
 			)
 		);
@@ -564,11 +577,12 @@ class Entries_DB {
 		global $wpdb;
 
 		$meta = $wpdb->get_results(
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is a fixed internal constant, not user input.
 			$wpdb->prepare( "SELECT meta_key, meta_value FROM {$this->meta_table_name} WHERE entry_id = %d", $entry_id ),
 			ARRAY_A
 		);
 
-		$data = [];
+		$data = array();
 
 		foreach ( $meta as $row ) {
 			$data[ $row['meta_key'] ] = maybe_unserialize( $row['meta_value'] );
@@ -596,7 +610,7 @@ class Entries_DB {
 		// otherwise survive alongside the new ones.
 		$deleted = $wpdb->delete(
 			$this->meta_table_name,
-			[ 'entry_id' => $entry_id ]
+			array( 'entry_id' => $entry_id )
 		);
 
 		if ( false === $deleted ) {
@@ -607,11 +621,11 @@ class Entries_DB {
 		foreach ( $data as $key => $value ) {
 			$inserted = $wpdb->insert(
 				$this->meta_table_name,
-				[
+				array(
 					'entry_id'   => $entry_id,
 					'meta_key'   => $key,
 					'meta_value' => maybe_serialize( $value ),
-				]
+				)
 			);
 
 			if ( ! $inserted ) {

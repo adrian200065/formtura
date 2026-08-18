@@ -62,7 +62,7 @@ class Installer {
 
 		// Forms table.
 		$forms_table = $wpdb->prefix . 'fta_forms';
-		$forms_sql = "CREATE TABLE {$forms_table} (
+		$forms_sql   = "CREATE TABLE {$forms_table} (
 			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 			title varchar(255) NOT NULL,
 			description text,
@@ -78,7 +78,7 @@ class Installer {
 
 		// Entries table.
 		$entries_table = $wpdb->prefix . 'fta_entries';
-		$entries_sql = "CREATE TABLE {$entries_table} (
+		$entries_sql   = "CREATE TABLE {$entries_table} (
 			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 			form_id bigint(20) unsigned NOT NULL,
 			user_id bigint(20) unsigned DEFAULT NULL,
@@ -95,7 +95,7 @@ class Installer {
 
 		// Entry meta table.
 		$entry_meta_table = $wpdb->prefix . 'fta_entry_meta';
-		$entry_meta_sql = "CREATE TABLE {$entry_meta_table} (
+		$entry_meta_sql   = "CREATE TABLE {$entry_meta_table} (
 			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 			entry_id bigint(20) unsigned NOT NULL,
 			meta_key varchar(255) NOT NULL,
@@ -122,7 +122,7 @@ class Installer {
 	private static function set_default_options() {
 		// Set default settings if not already set.
 		if ( ! get_option( 'fta_settings' ) ) {
-			$default_settings = [
+			$default_settings = array(
 				'load_css'                  => true,
 				'load_js'                   => true,
 				'debug_mode'                => false,
@@ -132,25 +132,25 @@ class Installer {
 				'recaptcha_score_threshold' => 0.5,
 				'currency'                  => 'USD',
 				'delete_data_on_uninstall'  => false,
-			];
+			);
 
 			add_option( 'fta_settings', $default_settings );
 		}
 
 		// Set default SMTP settings if not already set.
 		if ( ! get_option( 'fta_smtp_settings' ) ) {
-			$default_smtp = [
-				'enabled'           => false,
-				'mailer'            => 'smtp',
-				'from_email'        => get_option( 'admin_email' ),
-				'from_name'         => get_option( 'blogname' ),
-				'smtp_host'         => '',
-				'smtp_port'         => 587,
-				'smtp_auth'         => true,
-				'smtp_username'     => '',
-				'smtp_password'     => '',
-				'smtp_encryption'   => 'tls',
-			];
+			$default_smtp = array(
+				'enabled'         => false,
+				'mailer'          => 'smtp',
+				'from_email'      => get_option( 'admin_email' ),
+				'from_name'       => get_option( 'blogname' ),
+				'smtp_host'       => '',
+				'smtp_port'       => 587,
+				'smtp_auth'       => true,
+				'smtp_username'   => '',
+				'smtp_password'   => '',
+				'smtp_encryption' => 'tls',
+			);
 
 			add_option( 'fta_smtp_settings', $default_smtp );
 		}
@@ -215,6 +215,9 @@ class Installer {
 	 * Run data migrations for the stored database version.
 	 *
 	 * @since 1.0.3
+	 * @param \Formtura\Frontend\File_Storage|null $storage Optional storage
+	 *        service. Injected by tests so migrations run against a
+	 *        temporary vault.
 	 */
 	private static function run_migrations( $storage = null ) {
 		$from    = get_option( 'fta_db_version', '0' );
@@ -296,10 +299,10 @@ class Installer {
 			return;
 		}
 
-		$done = get_option( 'fta_migrated_choice_types', [] );
+		$done = get_option( 'fta_migrated_choice_types', array() );
 
 		if ( ! is_array( $done ) ) {
-			$done = [];
+			$done = array();
 		}
 
 		foreach ( $forms as $form ) {
@@ -321,10 +324,10 @@ class Installer {
 				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
 				$wpdb->update(
 					$table,
-					[ 'fields' => wp_json_encode( $migrated ) ],
-					[ 'id' => $form_id ],
-					[ '%s' ],
-					[ '%d' ]
+					array( 'fields' => wp_json_encode( $migrated ) ),
+					array( 'id' => $form_id ),
+					array( '%s' ),
+					array( '%d' )
 				);
 
 				fta_log( sprintf( 'Migrated choice field types on form %d.', $form_id ) );
@@ -353,10 +356,10 @@ class Installer {
 	 * @return array Field definitions with updated types.
 	 */
 	public static function migrate_field_types( array $fields ) {
-		$map = [
+		$map = array(
 			'checkbox'   => 'radio',
 			'checkboxes' => 'checkbox',
-		];
+		);
 
 		foreach ( $fields as $index => $field ) {
 			if ( ! isset( $field['type'] ) || ! isset( $map[ $field['type'] ] ) ) {

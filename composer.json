@@ -29,8 +29,8 @@
         }
     },
     "scripts": {
-        "phpcs": "phpcs --standard=WordPress src/",
-        "phpcbf": "phpcbf --standard=WordPress src/",
+        "phpcs": "phpcs",
+        "phpcbf": "phpcbf",
         "test": "phpunit",
         "test:coverage": "phpunit --coverage-html coverage"
     }

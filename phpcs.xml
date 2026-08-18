@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<ruleset name="Formtura">
+	<description>Coding standard for the Formtura plugin.</description>
+
+	<file>src</file>
+
+	<arg name="extensions" value="php"/>
+	<arg value="sp"/>
+
+	<!-- Findings are reported, but only errors fail the build - matches the
+	     ESLint CI gate, which reports warnings without blocking on them. -->
+	<config name="ignore_warnings_on_exit" value="1"/>
+
+	<rule ref="WordPress"/>
+
+	<!-- WordPress-Core's file-naming convention (class-my-class.php,
+	     lowercase-hyphenated) assumes procedural, single-file-per-function
+	     plugins. This plugin autoloads via PSR-4 (see composer.json), which
+	     requires file names to match class names exactly - renaming the 30
+	     src/ files to satisfy this sniff would break autoloading. -->
+	<rule ref="WordPress">
+		<exclude name="WordPress.Files.FileName"/>
+	</rule>
+
+	<!-- SMTP.php configures PHPMailer through its actual public property
+	     names ($Host, $Port, $SMTPAuth, $Username, $Password, $SMTPSecure).
+	     Those are the library's real, required property names - renaming
+	     them to snake_case would stop PHPMailer from picking up the config. -->
+	<rule ref="WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase">
+		<exclude-pattern>src/Admin/SMTP\.php</exclude-pattern>
+	</rule>
+</ruleset>

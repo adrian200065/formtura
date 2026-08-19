@@ -1,3 +1,5 @@
+import { __, sprintf } from '../utils/i18n';
+
 const FieldPreview = ({ field }) => {
   const fieldId = `field-preview-${field.id}`;
   const descriptionId = field.description ? `${fieldId}-description` : null;
@@ -66,9 +68,9 @@ const FieldPreview = ({ field }) => {
           if (field.dynamicChoices === 'post_type') {
             // Get post types from WordPress localized data
             const builtInPostTypes = [
-              { value: 'post', label: 'Posts' },
-              { value: 'page', label: 'Pages' },
-              { value: 'attachment', label: 'Media' }
+              { value: 'post', label: __('Posts', 'formtura') },
+              { value: 'page', label: __('Pages', 'formtura') },
+              { value: 'attachment', label: __('Media', 'formtura') }
             ];
             const customPostTypes = window.formturaBuilderData?.postTypes || [];
             const allPostTypes = [...builtInPostTypes, ...customPostTypes];
@@ -80,9 +82,9 @@ const FieldPreview = ({ field }) => {
               if (selectedType) {
                 // Return placeholder items representing posts of that type
                 return [
-                  { value: '1', label: `${selectedType.label} Item 1` },
-                  { value: '2', label: `${selectedType.label} Item 2` },
-                  { value: '3', label: `${selectedType.label} Item 3` }
+                  { value: '1', label: sprintf(__('%s Item 1', 'formtura'), selectedType.label) },
+                  { value: '2', label: sprintf(__('%s Item 2', 'formtura'), selectedType.label) },
+                  { value: '3', label: sprintf(__('%s Item 3', 'formtura'), selectedType.label) }
                 ];
               }
             }
@@ -90,8 +92,8 @@ const FieldPreview = ({ field }) => {
           } else if (field.dynamicChoices === 'taxonomy') {
             // Get taxonomies from WordPress localized data
             const builtInTaxonomies = [
-              { value: 'category', label: 'Categories' },
-              { value: 'post_tag', label: 'Tags' }
+              { value: 'category', label: __('Categories', 'formtura') },
+              { value: 'post_tag', label: __('Tags', 'formtura') }
             ];
             const customTaxonomies = window.formturaBuilderData?.taxonomies || [];
             const allTaxonomies = [...builtInTaxonomies, ...customTaxonomies];
@@ -102,9 +104,9 @@ const FieldPreview = ({ field }) => {
               if (selectedTax) {
                 // Return placeholder items representing terms of that taxonomy
                 return [
-                  { value: '1', label: `${selectedTax.label} Term 1` },
-                  { value: '2', label: `${selectedTax.label} Term 2` },
-                  { value: '3', label: `${selectedTax.label} Term 3` }
+                  { value: '1', label: sprintf(__('%s Term 1', 'formtura'), selectedTax.label) },
+                  { value: '2', label: sprintf(__('%s Term 2', 'formtura'), selectedTax.label) },
+                  { value: '3', label: sprintf(__('%s Term 3', 'formtura'), selectedTax.label) }
                 ];
               }
             }
@@ -112,9 +114,9 @@ const FieldPreview = ({ field }) => {
           }
           // Default: use manual choices
           return field.choices || field.options || [
-            { value: '1', label: 'First Choice' },
-            { value: '2', label: 'Second Choice' },
-            { value: '3', label: 'Third Choice' }
+            { value: '1', label: __('First Choice', 'formtura') },
+            { value: '2', label: __('Second Choice', 'formtura') },
+            { value: '3', label: __('Third Choice', 'formtura') }
           ];
         };
 
@@ -152,7 +154,7 @@ const FieldPreview = ({ field }) => {
             aria-label={field.hideLabel ? field.label : undefined}
             aria-required={field.required}
           >
-            <option value="">{field.placeholder || 'Select an option'}</option>
+            <option value="">{field.placeholder || __('Select an option', 'formtura')}</option>
             {dropdownChoices.map((choice, index) => (
               <option key={index} value={choice.value || choice}>
                 {choice.label || choice}
@@ -167,9 +169,9 @@ const FieldPreview = ({ field }) => {
         const getRadioChoices = () => {
           if (field.dynamicChoices === 'post_type') {
             const builtInPostTypes = [
-              { value: 'post', label: 'Posts' },
-              { value: 'page', label: 'Pages' },
-              { value: 'attachment', label: 'Media' }
+              { value: 'post', label: __('Posts', 'formtura') },
+              { value: 'page', label: __('Pages', 'formtura') },
+              { value: 'attachment', label: __('Media', 'formtura') }
             ];
             const customPostTypes = window.formturaBuilderData?.postTypes || [];
             const allPostTypes = [...builtInPostTypes, ...customPostTypes];
@@ -178,17 +180,17 @@ const FieldPreview = ({ field }) => {
               const selectedType = allPostTypes.find(pt => pt.value === field.dynamicPostType);
               if (selectedType) {
                 return [
-                  { value: '1', label: `${selectedType.label} Item 1` },
-                  { value: '2', label: `${selectedType.label} Item 2` },
-                  { value: '3', label: `${selectedType.label} Item 3` }
+                  { value: '1', label: sprintf(__('%s Item 1', 'formtura'), selectedType.label) },
+                  { value: '2', label: sprintf(__('%s Item 2', 'formtura'), selectedType.label) },
+                  { value: '3', label: sprintf(__('%s Item 3', 'formtura'), selectedType.label) }
                 ];
               }
             }
             return allPostTypes;
           } else if (field.dynamicChoices === 'taxonomy') {
             const builtInTaxonomies = [
-              { value: 'category', label: 'Categories' },
-              { value: 'post_tag', label: 'Tags' }
+              { value: 'category', label: __('Categories', 'formtura') },
+              { value: 'post_tag', label: __('Tags', 'formtura') }
             ];
             const customTaxonomies = window.formturaBuilderData?.taxonomies || [];
             const allTaxonomies = [...builtInTaxonomies, ...customTaxonomies];
@@ -197,18 +199,18 @@ const FieldPreview = ({ field }) => {
               const selectedTax = allTaxonomies.find(tax => tax.value === field.dynamicTaxonomy);
               if (selectedTax) {
                 return [
-                  { value: '1', label: `${selectedTax.label} Term 1` },
-                  { value: '2', label: `${selectedTax.label} Term 2` },
-                  { value: '3', label: `${selectedTax.label} Term 3` }
+                  { value: '1', label: sprintf(__('%s Term 1', 'formtura'), selectedTax.label) },
+                  { value: '2', label: sprintf(__('%s Term 2', 'formtura'), selectedTax.label) },
+                  { value: '3', label: sprintf(__('%s Term 3', 'formtura'), selectedTax.label) }
                 ];
               }
             }
             return allTaxonomies;
           }
           return field.choices || field.options || [
-            { value: '1', label: 'First Choice' },
-            { value: '2', label: 'Second Choice' },
-            { value: '3', label: 'Third Choice' }
+            { value: '1', label: __('First Choice', 'formtura') },
+            { value: '2', label: __('Second Choice', 'formtura') },
+            { value: '3', label: __('Third Choice', 'formtura') }
           ];
         };
 
@@ -264,9 +266,9 @@ const FieldPreview = ({ field }) => {
         const getCheckboxChoices = () => {
           if (field.dynamicChoices === 'post_type') {
             const builtInPostTypes = [
-              { value: 'post', label: 'Posts' },
-              { value: 'page', label: 'Pages' },
-              { value: 'attachment', label: 'Media' }
+              { value: 'post', label: __('Posts', 'formtura') },
+              { value: 'page', label: __('Pages', 'formtura') },
+              { value: 'attachment', label: __('Media', 'formtura') }
             ];
             const customPostTypes = window.formturaBuilderData?.postTypes || [];
             const allPostTypes = [...builtInPostTypes, ...customPostTypes];
@@ -275,17 +277,17 @@ const FieldPreview = ({ field }) => {
               const selectedType = allPostTypes.find(pt => pt.value === field.dynamicPostType);
               if (selectedType) {
                 return [
-                  { value: '1', label: `${selectedType.label} Item 1` },
-                  { value: '2', label: `${selectedType.label} Item 2` },
-                  { value: '3', label: `${selectedType.label} Item 3` }
+                  { value: '1', label: sprintf(__('%s Item 1', 'formtura'), selectedType.label) },
+                  { value: '2', label: sprintf(__('%s Item 2', 'formtura'), selectedType.label) },
+                  { value: '3', label: sprintf(__('%s Item 3', 'formtura'), selectedType.label) }
                 ];
               }
             }
             return allPostTypes;
           } else if (field.dynamicChoices === 'taxonomy') {
             const builtInTaxonomies = [
-              { value: 'category', label: 'Categories' },
-              { value: 'post_tag', label: 'Tags' }
+              { value: 'category', label: __('Categories', 'formtura') },
+              { value: 'post_tag', label: __('Tags', 'formtura') }
             ];
             const customTaxonomies = window.formturaBuilderData?.taxonomies || [];
             const allTaxonomies = [...builtInTaxonomies, ...customTaxonomies];
@@ -294,18 +296,18 @@ const FieldPreview = ({ field }) => {
               const selectedTax = allTaxonomies.find(tax => tax.value === field.dynamicTaxonomy);
               if (selectedTax) {
                 return [
-                  { value: '1', label: `${selectedTax.label} Term 1` },
-                  { value: '2', label: `${selectedTax.label} Term 2` },
-                  { value: '3', label: `${selectedTax.label} Term 3` }
+                  { value: '1', label: sprintf(__('%s Term 1', 'formtura'), selectedTax.label) },
+                  { value: '2', label: sprintf(__('%s Term 2', 'formtura'), selectedTax.label) },
+                  { value: '3', label: sprintf(__('%s Term 3', 'formtura'), selectedTax.label) }
                 ];
               }
             }
             return allTaxonomies;
           }
           return field.choices || field.options || [
-            { value: '1', label: 'First Choice' },
-            { value: '2', label: 'Second Choice' },
-            { value: '3', label: 'Third Choice' }
+            { value: '1', label: __('First Choice', 'formtura') },
+            { value: '2', label: __('Second Choice', 'formtura') },
+            { value: '3', label: __('Third Choice', 'formtura') }
           ];
         };
 
@@ -352,31 +354,31 @@ const FieldPreview = ({ field }) => {
 
       case 'name': {
         const nameFormat = field.format || 'first-last';
-        const firstPlaceholder = field.firstNamePlaceholder || 'First Name';
-        const middlePlaceholder = field.middleNamePlaceholder || 'Middle Name';
-        const lastPlaceholder = field.lastNamePlaceholder || 'Last Name';
+        const firstPlaceholder = field.firstNamePlaceholder || __('First Name', 'formtura');
+        const middlePlaceholder = field.middleNamePlaceholder || __('Middle Name', 'formtura');
+        const lastPlaceholder = field.lastNamePlaceholder || __('Last Name', 'formtura');
         const firstDefault = field.firstNameDefault || '';
         const middleDefault = field.middleNameDefault || '';
         const lastDefault = field.lastNameDefault || '';
 
         if (nameFormat === 'simple') {
           return (
-            <input type="text" placeholder={field.placeholder || 'Name'} defaultValue={firstDefault} readOnly />
+            <input type="text" placeholder={field.placeholder || __('Name', 'formtura')} defaultValue={firstDefault} readOnly />
           );
         } else if (nameFormat === 'first-middle-last') {
           return (
             <div className="formtura-name-field-group">
               <div className="formtura-name-field-item">
                 <input type="text" placeholder={firstPlaceholder} defaultValue={firstDefault} readOnly />
-                {!field.hideSublabels && <span className="formtura-sublabel">First Name</span>}
+                {!field.hideSublabels && <span className="formtura-sublabel">{__('First Name', 'formtura')}</span>}
               </div>
               <div className="formtura-name-field-item">
                 <input type="text" placeholder={middlePlaceholder} defaultValue={middleDefault} readOnly />
-                {!field.hideSublabels && <span className="formtura-sublabel">Middle Name</span>}
+                {!field.hideSublabels && <span className="formtura-sublabel">{__('Middle Name', 'formtura')}</span>}
               </div>
               <div className="formtura-name-field-item">
                 <input type="text" placeholder={lastPlaceholder} defaultValue={lastDefault} readOnly />
-                {!field.hideSublabels && <span className="formtura-sublabel">Last Name</span>}
+                {!field.hideSublabels && <span className="formtura-sublabel">{__('Last Name', 'formtura')}</span>}
               </div>
             </div>
           );
@@ -386,11 +388,11 @@ const FieldPreview = ({ field }) => {
             <div className="formtura-name-field-group">
               <div className="formtura-name-field-item">
                 <input type="text" placeholder={firstPlaceholder} defaultValue={firstDefault} readOnly />
-                {!field.hideSublabels && <span className="formtura-sublabel">First Name</span>}
+                {!field.hideSublabels && <span className="formtura-sublabel">{__('First Name', 'formtura')}</span>}
               </div>
               <div className="formtura-name-field-item">
                 <input type="text" placeholder={lastPlaceholder} defaultValue={lastDefault} readOnly />
-                {!field.hideSublabels && <span className="formtura-sublabel">Last Name</span>}
+                {!field.hideSublabels && <span className="formtura-sublabel">{__('Last Name', 'formtura')}</span>}
               </div>
             </div>
           );
@@ -429,7 +431,7 @@ const FieldPreview = ({ field }) => {
         const minValue = field.minValue !== undefined ? field.minValue : 0;
         const maxValue = field.maxValue !== undefined ? field.maxValue : 10;
         const defaultValue = field.defaultValue !== undefined ? field.defaultValue : minValue;
-        const valueDisplay = field.valueDisplay || 'Selected Value: {value}';
+        const valueDisplay = field.valueDisplay || __('Selected Value: {value}', 'formtura');
         const displayText = valueDisplay.replace('{value}', defaultValue);
 
         return (
@@ -454,29 +456,29 @@ const FieldPreview = ({ field }) => {
             <table className="formtura-order-summary">
               <thead>
                 <tr>
-                  <th scope="col">Item</th>
-                  <th scope="col">Quantity</th>
-                  <th scope="col">Total</th>
+                  <th scope="col">{__('Item', 'formtura')}</th>
+                  <th scope="col">{__('Quantity', 'formtura')}</th>
+                  <th scope="col">{__('Total', 'formtura')}</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td>Example Product 1</td>
+                  <td>{sprintf(__('Example Product %d', 'formtura'), 1)}</td>
                   <td>3</td>
                   <td>$30.00</td>
                 </tr>
                 <tr>
-                  <td>Example Product 2</td>
+                  <td>{sprintf(__('Example Product %d', 'formtura'), 2)}</td>
                   <td>2</td>
                   <td>$20.00</td>
                 </tr>
                 <tr>
-                  <td>Example Product 3</td>
+                  <td>{sprintf(__('Example Product %d', 'formtura'), 3)}</td>
                   <td>1</td>
                   <td>$10.00</td>
                 </tr>
                 <tr className="formtura-order-summary-total">
-                  <th scope="row">Total</th>
+                  <th scope="row">{__('Total', 'formtura')}</th>
                   <td />
                   <td>$60.00</td>
                 </tr>
@@ -487,13 +489,13 @@ const FieldPreview = ({ field }) => {
         // Default total display (without summary)
         return (
           <div className="formtura-total-display">
-            <span>Total</span>
+            <span>{__('Total', 'formtura')}</span>
             <span>$0.00</span>
           </div>
         );
 
       case 'file-upload': {
-        const uploadText = field.uploadText || 'Drop a file here or click to upload';
+        const uploadText = field.uploadText || __('Drop a file here or click to upload', 'formtura');
         const maxFileSizeDisplay = field.maxFileSize || '516';
 
         return (
@@ -507,15 +509,15 @@ const FieldPreview = ({ field }) => {
                 </svg>
               </div>
               <div className="formtura-file-upload-text">{uploadText}</div>
-              <div className="formtura-file-upload-size">Maximum file size: {maxFileSizeDisplay}MB</div>
+              <div className="formtura-file-upload-size">{sprintf(__('Maximum file size: %sMB', 'formtura'), maxFileSizeDisplay)}</div>
             </div>
           </div>
         );
       }
 
       case 'repeater': {
-        const addLabel = field.addNewLabel || 'Add';
-        const removeLabel = field.removeLabel || 'Remove';
+        const addLabel = field.addNewLabel || __('Add', 'formtura');
+        const removeLabel = field.removeLabel || __('Remove', 'formtura');
 
         return (
           <div className="formtura-repeater-container">
@@ -536,7 +538,7 @@ const FieldPreview = ({ field }) => {
               </button>
             </div>
             <div className="formtura-repeater-dropzone">
-              <span className="formtura-repeater-dropzone-text">Add Fields Here</span>
+              <span className="formtura-repeater-dropzone-text">{__('Add Fields Here', 'formtura')}</span>
             </div>
           </div>
         );
@@ -571,15 +573,15 @@ const FieldPreview = ({ field }) => {
       case 'address':
         return (
           <div className="formtura-address-preview">
-            <input type="text" placeholder="Address Line 1" readOnly />
-            <input type="text" placeholder="Address Line 2" readOnly />
+            <input type="text" placeholder={__('Address Line 1', 'formtura')} readOnly />
+            <input type="text" placeholder={__('Address Line 2', 'formtura')} readOnly />
             <div className="formtura-address-preview-row">
-              <input type="text" placeholder="City" readOnly />
-              <input type="text" placeholder={field.scheme === 'international' ? 'State / Province / Region' : 'State'} readOnly />
+              <input type="text" placeholder={__('City', 'formtura')} readOnly />
+              <input type="text" placeholder={field.scheme === 'international' ? __('State / Province / Region', 'formtura') : __('State', 'formtura')} readOnly />
             </div>
             <div className="formtura-address-preview-row">
-              <input type="text" placeholder={field.scheme === 'international' ? 'Postal Code' : 'ZIP Code'} readOnly />
-              <input type="text" placeholder="Country" readOnly />
+              <input type="text" placeholder={field.scheme === 'international' ? __('Postal Code', 'formtura') : __('ZIP Code', 'formtura')} readOnly />
+              <input type="text" placeholder={__('Country', 'formtura')} readOnly />
             </div>
           </div>
         );
@@ -588,8 +590,8 @@ const FieldPreview = ({ field }) => {
         return (
           <div className="formtura-file-upload-preview">
             <div className="formtura-file-upload-dropzone">
-              <div className="formtura-file-upload-text">Take a photo or choose an image</div>
-              <div className="formtura-file-upload-size">Images only</div>
+              <div className="formtura-file-upload-text">{__('Take a photo or choose an image', 'formtura')}</div>
+              <div className="formtura-file-upload-size">{__('Images only', 'formtura')}</div>
             </div>
           </div>
         );
@@ -597,15 +599,15 @@ const FieldPreview = ({ field }) => {
       case 'signature':
         return (
           <div className="formtura-signature-preview">
-            <div className="formtura-signature-preview-canvas">✕ Sign here</div>
-            <button type="button" onClick={(e) => e.stopPropagation()}>Clear</button>
+            <div className="formtura-signature-preview-canvas">{__('✕ Sign here', 'formtura')}</div>
+            <button type="button" onClick={(e) => e.stopPropagation()}>{__('Clear', 'formtura')}</button>
           </div>
         );
 
       case 'payment-single':
         return (
           <div className="formtura-total-display">
-            <span>{field.label || 'Single Item'}</span>
+            <span>{field.label || __('Single Item', 'formtura')}</span>
             <span>${parseFloat(field.price || 0).toFixed(2)}</span>
           </div>
         );
@@ -641,8 +643,8 @@ const FieldPreview = ({ field }) => {
       case 'coupon':
         return (
           <div className="formtura-coupon-preview">
-            <input type="text" placeholder={field.placeholder || 'Coupon code'} readOnly />
-            <button type="button" onClick={(e) => e.stopPropagation()}>Apply</button>
+            <input type="text" placeholder={field.placeholder || __('Coupon code', 'formtura')} readOnly />
+            <button type="button" onClick={(e) => e.stopPropagation()}>{__('Apply', 'formtura')}</button>
           </div>
         );
 
@@ -660,7 +662,7 @@ const FieldPreview = ({ field }) => {
               dangerouslySetInnerHTML={{ __html: blockContent }}
             />
           )
-          : <p className="formtura-content-preview-empty">No content yet</p>;
+          : <p className="formtura-content-preview-empty">{__('No content yet', 'formtura')}</p>;
       }
 
       // The frontend renders the label as the section heading plus a rule
@@ -685,7 +687,7 @@ const FieldPreview = ({ field }) => {
       {!field.hideLabel && (
         <label id={fieldId} htmlFor={`${fieldId}-input`}>
           {field.label}
-          {field.required && <span className="formtura-required" aria-label="required"> *</span>}
+          {field.required && <span className="formtura-required" aria-label={__('required', 'formtura')}> *</span>}
         </label>
       )}
       <div className={getFieldSizeClass()} aria-describedby={descriptionId}>

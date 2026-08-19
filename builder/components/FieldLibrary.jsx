@@ -42,6 +42,7 @@ import {
 import React from 'react';
 import { createPortal } from 'react-dom';
 import InfoDialog from './InfoDialog';
+import { __, sprintf } from '../utils/i18n';
 
 // Tooltip Component
 const Tooltip = ({ text, children }) => {
@@ -134,7 +135,7 @@ const Tooltip = ({ text, children }) => {
         <button
           type="button"
           className="formtura-help-trigger"
-          aria-label="Help"
+          aria-label={__('Help', 'formtura')}
           aria-describedby={isVisible ? tooltipId : undefined}
         >
           <HelpCircle className="formtura-help-icon" aria-hidden="true" />
@@ -163,34 +164,34 @@ const Tooltip = ({ text, children }) => {
 
 // Smart Tags data
 const smartTagsData = [
-  { category: 'OTHER', tags: [
-    { label: 'Site Administrator Email', value: '{admin_email}' },
-    { label: 'Form ID', value: '{form_id}' },
-    { label: 'Form Name', value: '{form_name}' },
-    { label: 'Embedded Post/Page Title', value: '{page_title}' },
-    { label: 'Embedded Post/Page URL', value: '{page_url}' },
-    { label: 'Embedded Post/Page ID', value: '{page_id}' },
-    { label: 'Date', value: '{date}' },
-    { label: 'Query String Variable', value: '{query_var key=""}' },
-    { label: 'User IP Address', value: '{user_ip}' },
-    { label: 'User ID', value: '{user_id}' },
-    { label: 'User Display Name', value: '{user_display_name}' },
-    { label: 'User Full Name', value: '{user_full_name}' },
-    { label: 'User First Name', value: '{user_first_name}' },
-    { label: 'User Last Name', value: '{user_last_name}' },
-    { label: "Logged-in User's Email", value: '{user_email}' },
-    { label: 'User Meta', value: '{user_meta key=""}' },
-    { label: 'Author ID', value: '{author_id}' },
-    { label: 'Author Name', value: '{author_name}' },
-    { label: 'Author Email', value: '{author_email}' },
-    { label: 'Referrer URL', value: '{referrer_url}' },
-    { label: 'Login URL', value: '{login_url}' },
-    { label: 'Logout URL', value: '{logout_url}' },
-    { label: 'Register URL', value: '{register_url}' },
-    { label: 'Lost Password URL', value: '{lost_password_url}' },
-    { label: 'Unique Value', value: '{unique_value}' },
-    { label: 'Site Name', value: '{site_name}' },
-    { label: 'Order Summary', value: '{order_summary}' },
+  { category: __('OTHER', 'formtura'), tags: [
+    { label: __('Site Administrator Email', 'formtura'), value: '{admin_email}' },
+    { label: __('Form ID', 'formtura'), value: '{form_id}' },
+    { label: __('Form Name', 'formtura'), value: '{form_name}' },
+    { label: __('Embedded Post/Page Title', 'formtura'), value: '{page_title}' },
+    { label: __('Embedded Post/Page URL', 'formtura'), value: '{page_url}' },
+    { label: __('Embedded Post/Page ID', 'formtura'), value: '{page_id}' },
+    { label: __('Date', 'formtura'), value: '{date}' },
+    { label: __('Query String Variable', 'formtura'), value: '{query_var key=""}' },
+    { label: __('User IP Address', 'formtura'), value: '{user_ip}' },
+    { label: __('User ID', 'formtura'), value: '{user_id}' },
+    { label: __('User Display Name', 'formtura'), value: '{user_display_name}' },
+    { label: __('User Full Name', 'formtura'), value: '{user_full_name}' },
+    { label: __('User First Name', 'formtura'), value: '{user_first_name}' },
+    { label: __('User Last Name', 'formtura'), value: '{user_last_name}' },
+    { label: __("Logged-in User's Email", 'formtura'), value: '{user_email}' },
+    { label: __('User Meta', 'formtura'), value: '{user_meta key=""}' },
+    { label: __('Author ID', 'formtura'), value: '{author_id}' },
+    { label: __('Author Name', 'formtura'), value: '{author_name}' },
+    { label: __('Author Email', 'formtura'), value: '{author_email}' },
+    { label: __('Referrer URL', 'formtura'), value: '{referrer_url}' },
+    { label: __('Login URL', 'formtura'), value: '{login_url}' },
+    { label: __('Logout URL', 'formtura'), value: '{logout_url}' },
+    { label: __('Register URL', 'formtura'), value: '{register_url}' },
+    { label: __('Lost Password URL', 'formtura'), value: '{lost_password_url}' },
+    { label: __('Unique Value', 'formtura'), value: '{unique_value}' },
+    { label: __('Site Name', 'formtura'), value: '{site_name}' },
+    { label: __('Order Summary', 'formtura'), value: '{order_summary}' },
   ]},
 ];
 
@@ -231,12 +232,12 @@ const SmartTagsPopup = ({ isOpen, onClose, onSelect }) => {
       className="formtura-smart-tags-popup"
     >
       <div className="formtura-smart-tags-header">
-        <strong>Smart Tags</strong>
+        <strong>{__('Smart Tags', 'formtura')}</strong>
       </div>
       <div className="formtura-smart-tags-search">
         <input
           type="text"
-          placeholder="Search"
+          placeholder={__('Search', 'formtura')}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="formtura-smart-tags-search-input"
@@ -278,7 +279,7 @@ const SmartTagButton = ({ onSelect }) => {
         ref={buttonRef}
         type="button"
         className="formtura-smart-tag-btn"
-        title="Smart Tags"
+        title={__('Smart Tags', 'formtura')}
         onClick={() => setIsOpen(!isOpen)}
       >
         <Tag size={16} />
@@ -294,56 +295,56 @@ const SmartTagButton = ({ onSelect }) => {
 
 const fieldTypes = [
   {
-    category: 'Standard Fields',
+    category: __('Standard Fields', 'formtura'),
     fields: [
-      { type: 'text', label: 'Single Line Text', icon: Type },
-      { type: 'textarea', label: 'Paragraph Text', icon: MessageSquare },
-      { type: 'name', label: 'Name', icon: User },
-      { type: 'email', label: 'Email', icon: Mail },
-      { type: 'select', label: 'Dropdown', icon: ChevronDown },
-      { type: 'radio', label: 'Multiple Choice', icon: Circle },
-      { type: 'checkbox', label: 'Checkboxes', icon: CheckSquare },
-      { type: 'number', label: 'Numbers', icon: Hash },
-      { type: 'phone', label: 'Phone', icon: Phone },
-      { type: 'website', label: 'Website / URL', icon: Globe },
-      { type: 'html', label: 'HTML', icon: Code },
-      { type: 'hidden', label: 'Hidden Field', icon: Eye },
-      { type: 'captcha', label: 'CAPTCHA', icon: Lock },
+      { type: 'text', label: __('Single Line Text', 'formtura'), icon: Type },
+      { type: 'textarea', label: __('Paragraph Text', 'formtura'), icon: MessageSquare },
+      { type: 'name', label: __('Name', 'formtura'), icon: User },
+      { type: 'email', label: __('Email', 'formtura'), icon: Mail },
+      { type: 'select', label: __('Dropdown', 'formtura'), icon: ChevronDown },
+      { type: 'radio', label: __('Multiple Choice', 'formtura'), icon: Circle },
+      { type: 'checkbox', label: __('Checkboxes', 'formtura'), icon: CheckSquare },
+      { type: 'number', label: __('Numbers', 'formtura'), icon: Hash },
+      { type: 'phone', label: __('Phone', 'formtura'), icon: Phone },
+      { type: 'website', label: __('Website / URL', 'formtura'), icon: Globe },
+      { type: 'html', label: __('HTML', 'formtura'), icon: Code },
+      { type: 'hidden', label: __('Hidden Field', 'formtura'), icon: Eye },
+      { type: 'captcha', label: __('CAPTCHA', 'formtura'), icon: Lock },
     ],
   },
   {
-    category: 'Advanced Fields',
+    category: __('Advanced Fields', 'formtura'),
     fields: [
-      { type: 'address', label: 'Address', icon: MapPin },
-      { type: 'datetime', label: 'Date / Time', icon: Calendar },
-      { type: 'password', label: 'Password', icon: Lock },
-      { type: 'file-upload', label: 'File Upload', icon: Upload },
-      { type: 'camera', label: 'Camera', icon: Camera },
-      { type: 'layout', label: 'Layout', icon: Layout },
-      { type: 'repeater', label: 'Repeater', icon: Circle },
-      { type: 'page-break', label: 'Page Break', icon: Minus },
-      { type: 'section-divider', label: 'Section Divider', icon: Minus },
-      { type: 'rich-text', label: 'Rich Text', icon: FileText },
-      { type: 'content', label: 'Content', icon: FileText },
-      { type: 'entry-preview', label: 'Entry Preview', icon: Eye },
-      { type: 'signature', label: 'Signature', icon: PenTool },
-      { type: 'rating', label: 'Star Rating', icon: Star },
-      { type: 'number-slider', label: 'Slider', icon: TrendingUp },
+      { type: 'address', label: __('Address', 'formtura'), icon: MapPin },
+      { type: 'datetime', label: __('Date / Time', 'formtura'), icon: Calendar },
+      { type: 'password', label: __('Password', 'formtura'), icon: Lock },
+      { type: 'file-upload', label: __('File Upload', 'formtura'), icon: Upload },
+      { type: 'camera', label: __('Camera', 'formtura'), icon: Camera },
+      { type: 'layout', label: __('Layout', 'formtura'), icon: Layout },
+      { type: 'repeater', label: __('Repeater', 'formtura'), icon: Circle },
+      { type: 'page-break', label: __('Page Break', 'formtura'), icon: Minus },
+      { type: 'section-divider', label: __('Section Divider', 'formtura'), icon: Minus },
+      { type: 'rich-text', label: __('Rich Text', 'formtura'), icon: FileText },
+      { type: 'content', label: __('Content', 'formtura'), icon: FileText },
+      { type: 'entry-preview', label: __('Entry Preview', 'formtura'), icon: Eye },
+      { type: 'signature', label: __('Signature', 'formtura'), icon: PenTool },
+      { type: 'rating', label: __('Star Rating', 'formtura'), icon: Star },
+      { type: 'number-slider', label: __('Slider', 'formtura'), icon: TrendingUp },
     ],
   },
   {
-    category: 'Payment Fields',
+    category: __('Payment Fields', 'formtura'),
     fields: [
-      { type: 'payment-single', label: 'Single Item', icon: DollarSign },
-      { type: 'payment-checkbox', label: 'Checkbox Items', icon: CheckSquare },
-      { type: 'payment-multiple', label: 'Multiple Items', icon: ShoppingCart },
-      { type: 'payment-dropdown', label: 'Dropdown Items', icon: ChevronDown },
-      { type: 'paypal', label: 'PayPal Commerce', icon: CreditCard },
-      { type: 'stripe', label: 'Stripe Credit Card', icon: CreditCard },
-      { type: 'square', label: 'Square', icon: CreditCard },
-      { type: 'authorize-net', label: 'Authorize.Net', icon: CreditCard },
-      { type: 'coupon', label: 'Coupon', icon: DollarSign },
-      { type: 'total', label: 'Total', icon: DollarSign },
+      { type: 'payment-single', label: __('Single Item', 'formtura'), icon: DollarSign },
+      { type: 'payment-checkbox', label: __('Checkbox Items', 'formtura'), icon: CheckSquare },
+      { type: 'payment-multiple', label: __('Multiple Items', 'formtura'), icon: ShoppingCart },
+      { type: 'payment-dropdown', label: __('Dropdown Items', 'formtura'), icon: ChevronDown },
+      { type: 'paypal', label: __('PayPal Commerce', 'formtura'), icon: CreditCard },
+      { type: 'stripe', label: __('Stripe Credit Card', 'formtura'), icon: CreditCard },
+      { type: 'square', label: __('Square', 'formtura'), icon: CreditCard },
+      { type: 'authorize-net', label: __('Authorize.Net', 'formtura'), icon: CreditCard },
+      { type: 'coupon', label: __('Coupon', 'formtura'), icon: DollarSign },
+      { type: 'total', label: __('Total', 'formtura'), icon: DollarSign },
     ],
   },
 ];
@@ -363,20 +364,20 @@ const fieldTypes = [
  */
 const unavailableFieldTypes = {
   repeater: {
-    label: 'Repeater',
-    reason: 'A repeater needs to hold other fields, and the builder cannot place a field inside another field yet. Until it can, a repeater would have nothing to repeat.',
+    label: __('Repeater', 'formtura'),
+    reason: __('A repeater needs to hold other fields, and the builder cannot place a field inside another field yet. Until it can, a repeater would have nothing to repeat.', 'formtura'),
   },
   layout: {
-    label: 'Layout',
-    reason: 'Layout rows are part of the multi-page form subsystem, which Formtura does not have yet. To place fields side by side today, use the width classes under a field’s Advanced tab.',
+    label: __('Layout', 'formtura'),
+    reason: __('Layout rows are part of the multi-page form subsystem, which Formtura does not have yet. To place fields side by side today, use the width classes under a field’s Advanced tab.', 'formtura'),
   },
   'page-break': {
-    label: 'Page Break',
-    reason: 'A page break needs multi-page forms, which Formtura does not have yet. Every form is a single page for now, so there is nothing to break.',
+    label: __('Page Break', 'formtura'),
+    reason: __('A page break needs multi-page forms, which Formtura does not have yet. Every form is a single page for now, so there is nothing to break.', 'formtura'),
   },
   'entry-preview': {
-    label: 'Entry Preview',
-    reason: 'An entry preview shows a visitor their answers before submitting, which needs the multi-page form subsystem Formtura does not have yet.',
+    label: __('Entry Preview', 'formtura'),
+    reason: __('An entry preview shows a visitor their answers before submitting, which needs the multi-page form subsystem Formtura does not have yet.', 'formtura'),
   },
 };
 
@@ -393,7 +394,7 @@ const DraggableField = ({ type, label, icon: Icon, onAdd }) => {
       {...listeners}
       {...attributes}
       className={`formtura-field-item ${isDragging ? 'dragging' : ''}`}
-      aria-label={`Add ${label} field`}
+      aria-label={sprintf(__('Add %s field', 'formtura'), label)}
       onClick={() => onAdd(type)}
     >
       <span className="formtura-field-icon-wrap">
@@ -469,14 +470,14 @@ const FieldLibrary = ({
   return (
     <aside
       className={`formtura-sidebar ${isCollapsed ? 'collapsed' : ''}`}
-      aria-label="Builder component library"
+      aria-label={__('Builder component library', 'formtura')}
     >
       <button
         className="formtura-sidebar-collapse-btn"
         onClick={onToggleCollapse}
         type="button"
-        title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-        aria-label={isCollapsed ? 'Expand component library' : 'Collapse component library'}
+        title={isCollapsed ? __('Expand sidebar', 'formtura') : __('Collapse sidebar', 'formtura')}
+        aria-label={isCollapsed ? __('Expand component library', 'formtura') : __('Collapse component library', 'formtura')}
         aria-expanded={!isCollapsed}
       >
         {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
@@ -486,8 +487,8 @@ const FieldLibrary = ({
         <>
           <div className="formtura-sidebar-header">
             <div className="formtura-sidebar-heading">
-              <p className="formtura-sidebar-kicker">Build</p>
-              <h2>{activeTab === 'add' ? 'Component library' : 'Field settings'}</h2>
+              <p className="formtura-sidebar-kicker">{__('Build', 'formtura')}</p>
+              <h2>{activeTab === 'add' ? __('Component library', 'formtura') : __('Field settings', 'formtura')}</h2>
             </div>
             <div className="formtura-panel-toggle">
               <button
@@ -497,7 +498,7 @@ const FieldLibrary = ({
                 aria-pressed={activeTab === 'add'}
               >
                 <List size={16} />
-                Add Fields
+                {__('Add Fields', 'formtura')}
               </button>
               <button
                 className={`formtura-panel-toggle-btn ${activeTab === 'options' ? 'active' : ''}`}
@@ -507,7 +508,7 @@ const FieldLibrary = ({
                 aria-pressed={activeTab === 'options'}
               >
                 <Settings size={16} />
-                Field Options
+                {__('Field Options', 'formtura')}
               </button>
             </div>
           </div>
@@ -516,12 +517,12 @@ const FieldLibrary = ({
             <>
               <div className="formtura-sidebar-search">
                 <label className="formtura-sr-only" htmlFor="formtura-field-search">
-                  Search available fields
+                  {__('Search available fields', 'formtura')}
                 </label>
                 <input
                   id="formtura-field-search"
                   type="search"
-                  placeholder="Search fields..."
+                  placeholder={__('Search fields...', 'formtura')}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="formtura-search-input"
@@ -644,7 +645,7 @@ const FieldLibrary = ({
                 <div className="formtura-sidebar-content">
                   <div className="formtura-settings-empty">
                     <Settings size={48} />
-                    <p>Select a field to view options</p>
+                    <p>{__('Select a field to view options', 'formtura')}</p>
                   </div>
                 </div>
               ) : (
@@ -655,21 +656,21 @@ const FieldLibrary = ({
                       onClick={() => setOptionsTab('general')}
                       type="button"
                     >
-                      General
+                      {__('General', 'formtura')}
                     </button>
                     <button
                       className={`formtura-settings-tab ${optionsTab === 'advanced' ? 'active' : ''}`}
                       onClick={() => setOptionsTab('advanced')}
                       type="button"
                     >
-                      Advanced
+                      {__('Advanced', 'formtura')}
                     </button>
                     <button
                       className={`formtura-settings-tab ${optionsTab === 'smart-logic' ? 'active' : ''}`}
                       onClick={() => setOptionsTab('smart-logic')}
                       type="button"
                     >
-                      Smart Logic
+                      {__('Smart Logic', 'formtura')}
                     </button>
                   </div>
 
@@ -694,135 +695,135 @@ const FieldLibrary = ({
       {/* CAPTCHA Info Dialog */}
       <InfoDialog
         isOpen={showCaptchaDialog}
-        title="Heads up!"
+        title={__('Heads up!', 'formtura')}
         message={
           <>
-            Please complete the CAPTCHA setup in your{' '}
+            {__('Please complete the CAPTCHA setup in your', 'formtura')}{' '}
             <a
               href={`${window.formturaBuilder?.adminUrl || '/wp-admin/'}admin.php?page=formtura-settings&tab=captcha`}
             >
-              Formtura Settings
+              {__('Formtura Settings', 'formtura')}
             </a>
-            {' '}to enable CAPTCHA protection on your forms.
+            {' '}{__('to enable CAPTCHA protection on your forms.', 'formtura')}
           </>
         }
-        buttonText="OK"
+        buttonText={__('OK', 'formtura')}
         onClose={() => setShowCaptchaDialog(false)}
       />
 
       {/* Stripe Info Dialog */}
       <InfoDialog
         isOpen={showStripeDialog}
-        title="Heads up!"
+        title={__('Heads up!', 'formtura')}
         message={
           <>
             <p className="formtura-dialog-lead">
-              Stripe account connection is required when using the Stripe Credit Card field.
+              {__('Stripe account connection is required when using the Stripe Credit Card field.', 'formtura')}
             </p>
             <p>
-              To proceed, please go to{' '}
+              {__('To proceed, please go to', 'formtura')}{' '}
               <a
                 href={`${window.formturaBuilder?.adminUrl || '/wp-admin/'}admin.php?page=formtura-settings&tab=payments`}
               >
-                Formtura Settings » Payments » Stripe
+                {__('Formtura Settings » Payments » Stripe', 'formtura')}
               </a>
-              {' '}and press{' '}
-              <strong>Connect with Stripe</strong> button.
+              {' '}{__('and press', 'formtura')}{' '}
+              <strong>{__('Connect with Stripe', 'formtura')}</strong> {__('button.', 'formtura')}
             </p>
           </>
         }
-        buttonText="OK"
+        buttonText={__('OK', 'formtura')}
         onClose={() => setShowStripeDialog(false)}
       />
 
       {/* PayPal Info Dialog */}
       <InfoDialog
         isOpen={showPayPalDialog}
-        title="Heads up!"
+        title={__('Heads up!', 'formtura')}
         message={
           <>
             <p className="formtura-dialog-lead">
-              PayPal account connection is required when using the PayPal Commerce field.
+              {__('PayPal account connection is required when using the PayPal Commerce field.', 'formtura')}
             </p>
             <p>
-              To proceed, please go to{' '}
+              {__('To proceed, please go to', 'formtura')}{' '}
               <a
                 href={`${window.formturaBuilder?.adminUrl || '/wp-admin/'}admin.php?page=formtura-settings&tab=payments`}
               >
-                Formtura Settings » Payments » PayPal
+                {__('Formtura Settings » Payments » PayPal', 'formtura')}
               </a>
-              {' '}and press{' '}
-              <strong>Connect with PayPal</strong> button.
+              {' '}{__('and press', 'formtura')}{' '}
+              <strong>{__('Connect with PayPal', 'formtura')}</strong> {__('button.', 'formtura')}
             </p>
           </>
         }
-        buttonText="OK"
+        buttonText={__('OK', 'formtura')}
         onClose={() => setShowPayPalDialog(false)}
       />
 
       {/* Square Info Dialog */}
       <InfoDialog
         isOpen={showSquareDialog}
-        title="Heads up!"
+        title={__('Heads up!', 'formtura')}
         message={
           <>
             <p className="formtura-dialog-lead">
-              Square account connection is required when using the Square field.
+              {__('Square account connection is required when using the Square field.', 'formtura')}
             </p>
             <p>
-              To proceed, please go to{' '}
+              {__('To proceed, please go to', 'formtura')}{' '}
               <a
                 href={`${window.formturaBuilder?.adminUrl || '/wp-admin/'}admin.php?page=formtura-settings&tab=payments`}
               >
-                Formtura Settings » Payments » Square
+                {__('Formtura Settings » Payments » Square', 'formtura')}
               </a>
-              {' '}and press{' '}
-              <strong>Connect with Square</strong> button.
+              {' '}{__('and press', 'formtura')}{' '}
+              <strong>{__('Connect with Square', 'formtura')}</strong> {__('button.', 'formtura')}
             </p>
           </>
         }
-        buttonText="OK"
+        buttonText={__('OK', 'formtura')}
         onClose={() => setShowSquareDialog(false)}
       />
 
       {/* Authorize.Net Info Dialog */}
       <InfoDialog
         isOpen={showAuthorizeNetDialog}
-        title="Heads up!"
+        title={__('Heads up!', 'formtura')}
         message={
           <>
             <p className="formtura-dialog-lead">
-              Authorize.Net account connection is required when using the Authorize.Net field.
+              {__('Authorize.Net account connection is required when using the Authorize.Net field.', 'formtura')}
             </p>
             <p>
-              To proceed, please go to{' '}
+              {__('To proceed, please go to', 'formtura')}{' '}
               <a
                 href={`${window.formturaBuilder?.adminUrl || '/wp-admin/'}admin.php?page=formtura-settings&tab=payments`}
               >
-                Formtura Settings » Payments » Authorize.Net
+                {__('Formtura Settings » Payments » Authorize.Net', 'formtura')}
               </a>
-              {' '}and press{' '}
-              <strong>Connect with Authorize.Net</strong> button.
+              {' '}{__('and press', 'formtura')}{' '}
+              <strong>{__('Connect with Authorize.Net', 'formtura')}</strong> {__('button.', 'formtura')}
             </p>
           </>
         }
-        buttonText="OK"
+        buttonText={__('OK', 'formtura')}
         onClose={() => setShowAuthorizeNetDialog(false)}
       />
 
       {/* No-template Info Dialog (repeater, layout, page-break, entry-preview) */}
       <InfoDialog
         isOpen={null !== unavailableType}
-        title="Not available yet"
+        title={__('Not available yet', 'formtura')}
         message={
           <>
             <p className="formtura-dialog-lead">
-              The {unavailableFieldTypes[unavailableType]?.label} field is not available yet.
+              {sprintf(__('The %s field is not available yet.', 'formtura'), unavailableFieldTypes[unavailableType]?.label)}
             </p>
             <p>{unavailableFieldTypes[unavailableType]?.reason}</p>
           </>
         }
-        buttonText="OK"
+        buttonText={__('OK', 'formtura')}
         onClose={() => setUnavailableType(null)}
       />
     </aside>
@@ -873,7 +874,7 @@ const WysiwygEditor = ({ value, onChange }) => {
   };
 
   const handleLink = () => {
-    const url = prompt('Enter URL:', 'https://');
+    const url = prompt(__('Enter URL:', 'formtura'), 'https://');
     if (url) {
       execCommand('createLink', url);
     }
@@ -896,7 +897,7 @@ const WysiwygEditor = ({ value, onChange }) => {
         newText = `<em>${selectedText}</em>`;
         break;
       case 'link': {
-        const url = prompt('Enter URL:', 'https://');
+        const url = prompt(__('Enter URL:', 'formtura'), 'https://');
         if (!url) return;
         newText = `<a href="${url}">${selectedText || url}</a>`;
         break;
@@ -911,16 +912,16 @@ const WysiwygEditor = ({ value, onChange }) => {
         newText = `<ins>${selectedText}</ins>`;
         break;
       case 'img': {
-        const imgUrl = prompt('Enter image URL:', 'https://');
+        const imgUrl = prompt(__('Enter image URL:', 'formtura'), 'https://');
         if (!imgUrl) return;
         newText = `<img src="${imgUrl}" alt="${selectedText || ''}" />`;
         break;
       }
       case 'ul':
-        newText = `<ul>\n  <li>${selectedText || 'Item'}</li>\n</ul>`;
+        newText = `<ul>\n  <li>${selectedText || __('Item', 'formtura')}</li>\n</ul>`;
         break;
       case 'ol':
-        newText = `<ol>\n  <li>${selectedText || 'Item'}</li>\n</ol>`;
+        newText = `<ol>\n  <li>${selectedText || __('Item', 'formtura')}</li>\n</ol>`;
         break;
       case 'li':
         newText = `<li>${selectedText}</li>`;
@@ -948,47 +949,47 @@ const WysiwygEditor = ({ value, onChange }) => {
         <div className="formtura-wysiwyg-actions">
           {mode === 'code' ? (
             <>
-              <button type="button" onClick={() => insertTag('b')}>b</button>
-              <button type="button" onClick={() => insertTag('i')}>i</button>
-              <button type="button" onClick={() => insertTag('link')}>link</button>
-              <button type="button" onClick={() => insertTag('b-quote')}>b-quote</button>
-              <button type="button" onClick={() => insertTag('del')}>del</button>
-              <button type="button" onClick={() => insertTag('ins')}>ins</button>
-              <button type="button" onClick={() => insertTag('img')}>img</button>
-              <button type="button" onClick={() => insertTag('ul')}>ul</button>
-              <button type="button" onClick={() => insertTag('ol')}>ol</button>
-              <button type="button" onClick={() => insertTag('li')}>li</button>
-              <button type="button" onClick={() => insertTag('code')}>code</button>
-              <button type="button" onClick={() => insertTag('more')}>more</button>
+              <button type="button" onClick={() => insertTag('b')}>{__('b', 'formtura')}</button>
+              <button type="button" onClick={() => insertTag('i')}>{__('i', 'formtura')}</button>
+              <button type="button" onClick={() => insertTag('link')}>{__('link', 'formtura')}</button>
+              <button type="button" onClick={() => insertTag('b-quote')}>{__('b-quote', 'formtura')}</button>
+              <button type="button" onClick={() => insertTag('del')}>{__('del', 'formtura')}</button>
+              <button type="button" onClick={() => insertTag('ins')}>{__('ins', 'formtura')}</button>
+              <button type="button" onClick={() => insertTag('img')}>{__('img', 'formtura')}</button>
+              <button type="button" onClick={() => insertTag('ul')}>{__('ul', 'formtura')}</button>
+              <button type="button" onClick={() => insertTag('ol')}>{__('ol', 'formtura')}</button>
+              <button type="button" onClick={() => insertTag('li')}>{__('li', 'formtura')}</button>
+              <button type="button" onClick={() => insertTag('code')}>{__('code', 'formtura')}</button>
+              <button type="button" onClick={() => insertTag('more')}>{__('more', 'formtura')}</button>
             </>
           ) : (
             <>
-              <button type="button" onClick={() => execCommand('bold')} title="Bold">
+              <button type="button" onClick={() => execCommand('bold')} title={__('Bold', 'formtura')}>
                 <strong>B</strong>
               </button>
-              <button type="button" onClick={() => execCommand('italic')} title="Italic">
+              <button type="button" onClick={() => execCommand('italic')} title={__('Italic', 'formtura')}>
                 <em>I</em>
               </button>
-              <button type="button" onClick={handleLink} title="Insert Link">
-                link
+              <button type="button" onClick={handleLink} title={__('Insert Link', 'formtura')}>
+                {__('link', 'formtura')}
               </button>
-              <button type="button" onClick={() => execCommand('formatBlock', 'blockquote')} title="Blockquote">
-                b-quote
+              <button type="button" onClick={() => execCommand('formatBlock', 'blockquote')} title={__('Blockquote', 'formtura')}>
+                {__('b-quote', 'formtura')}
               </button>
-              <button type="button" onClick={() => execCommand('strikeThrough')} title="Strikethrough">
-                del
+              <button type="button" onClick={() => execCommand('strikeThrough')} title={__('Strikethrough', 'formtura')}>
+                {__('del', 'formtura')}
               </button>
-              <button type="button" onClick={() => execCommand('underline')} title="Underline">
-                ins
+              <button type="button" onClick={() => execCommand('underline')} title={__('Underline', 'formtura')}>
+                {__('ins', 'formtura')}
               </button>
-              <button type="button" onClick={() => execCommand('insertUnorderedList')} title="Bullet List">
-                ul
+              <button type="button" onClick={() => execCommand('insertUnorderedList')} title={__('Bullet List', 'formtura')}>
+                {__('ul', 'formtura')}
               </button>
-              <button type="button" onClick={() => execCommand('insertOrderedList')} title="Numbered List">
-                ol
+              <button type="button" onClick={() => execCommand('insertOrderedList')} title={__('Numbered List', 'formtura')}>
+                {__('ol', 'formtura')}
               </button>
-              <button type="button" onClick={() => execCommand('removeFormat')} title="Clear Formatting">
-                close tags
+              <button type="button" onClick={() => execCommand('removeFormat')} title={__('Clear Formatting', 'formtura')}>
+                {__('close tags', 'formtura')}
               </button>
             </>
           )}
@@ -1001,14 +1002,14 @@ const WysiwygEditor = ({ value, onChange }) => {
             onClick={() => setMode('visual')}
             className={mode === 'visual' ? 'active' : ''}
           >
-            Visual
+            {__('Visual', 'formtura')}
           </button>
           <button
             type="button"
             onClick={() => setMode('code')}
             className={mode === 'code' ? 'active' : ''}
           >
-            Code
+            {__('Code', 'formtura')}
           </button>
         </div>
       </div>
@@ -1029,7 +1030,7 @@ const WysiwygEditor = ({ value, onChange }) => {
           value={codeValue}
           onChange={handleCodeChange}
           className="formtura-code-editor"
-          placeholder="Enter HTML code here..."
+          placeholder={__('Enter HTML code here...', 'formtura')}
         />
       )}
     </div>
@@ -1049,16 +1050,16 @@ const GeneralTab = ({ field, onUpdate }) => {
   React.useEffect(() => {
     if ((field.type === 'select' || field.type === 'radio' || field.type === 'checkbox' || field.type === 'checkboxes') && !field.choices) {
       handleChange('choices', [
-        { label: 'First Choice', value: 'first-choice', isDefault: false },
-        { label: 'Second Choice', value: 'second-choice', isDefault: false },
-        { label: 'Third Choice', value: 'third-choice', isDefault: false }
+        { label: __('First Choice', 'formtura'), value: 'first-choice', isDefault: false },
+        { label: __('Second Choice', 'formtura'), value: 'second-choice', isDefault: false },
+        { label: __('Third Choice', 'formtura'), value: 'third-choice', isDefault: false }
       ]);
     }
     if (['payment-dropdown', 'payment-checkbox', 'payment-multiple'].includes(field.type) && !field.items) {
       handleChange('items', [
-        { label: 'First Item', value: 'first-item', price: '10.00', isDefault: false },
-        { label: 'Second Item', value: 'second-item', price: '25.00', isDefault: false },
-        { label: 'Third Item', value: 'third-item', price: '50.00', isDefault: false }
+        { label: __('First Item', 'formtura'), value: 'first-item', price: '10.00', isDefault: false },
+        { label: __('Second Item', 'formtura'), value: 'second-item', price: '25.00', isDefault: false },
+        { label: __('Third Item', 'formtura'), value: 'third-item', price: '50.00', isDefault: false }
       ]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1079,7 +1080,7 @@ const GeneralTab = ({ field, onUpdate }) => {
   const addChoice = () => {
     const newChoices = [...(field.choices || [])];
     newChoices.push({
-      label: `Choice ${newChoices.length + 1}`,
+      label: sprintf(__('Choice %d', 'formtura'), newChoices.length + 1),
       value: `choice-${newChoices.length + 1}`,
       isDefault: false
     });
@@ -1094,7 +1095,7 @@ const GeneralTab = ({ field, onUpdate }) => {
   const addItem = () => {
     const newItems = [...(field.items || [])];
     newItems.push({
-      label: `Item ${newItems.length + 1}`,
+      label: sprintf(__('Item %d', 'formtura'), newItems.length + 1),
       value: `item-${newItems.length + 1}`,
       price: '0.00',
       isDefault: false
@@ -1127,7 +1128,10 @@ const GeneralTab = ({ field, onUpdate }) => {
 
   const generateChoices = () => {
     // Simple example - generate some sample choices
-    const samples = ['Option A', 'Option B', 'Option C', 'Option D', 'Option E'];
+    const samples = [
+      __('Option A', 'formtura'), __('Option B', 'formtura'), __('Option C', 'formtura'),
+      __('Option D', 'formtura'), __('Option E', 'formtura'),
+    ];
     const newChoices = samples.map((label, index) => ({
       label,
       value: label.toLowerCase().replace(/\s+/g, '-'),
@@ -1144,20 +1148,20 @@ const GeneralTab = ({ field, onUpdate }) => {
         <>
           <div className="formtura-form-group">
             <label>
-              Choices <Tooltip text="Add dropdown options. Use the radio button to set a default selection." />
+              {__('Choices', 'formtura')} <Tooltip text={__('Add dropdown options. Use the radio button to set a default selection.', 'formtura')} />
               <button
                 type="button"
                 className="formtura-bulk-add-btn"
                 onClick={() => setShowBulkAdd(!showBulkAdd)}
               >
-                <Download size={12} /> Bulk Add
+                <Download size={12} /> {__('Bulk Add', 'formtura')}
               </button>
             </label>
 
             {showBulkAdd && (
               <div className="formtura-bulk-add-container">
                 <textarea
-                  placeholder="Paste your list here (one item per line)&#10;Example:&#10;Alabama&#10;Alaska&#10;Arizona"
+                  placeholder={__('Paste your list here (one item per line)&#10;Example:&#10;Alabama&#10;Alaska&#10;Arizona', 'formtura')}
                   value={bulkText}
                   onChange={(e) => setBulkText(e.target.value)}
                   rows={6}
@@ -1167,14 +1171,14 @@ const GeneralTab = ({ field, onUpdate }) => {
                   onClick={handleBulkAdd}
                   className="formtura-btn formtura-btn-primary"
                 >
-                  Add Choices
+                  {__('Add Choices', 'formtura')}
                 </button>
                 <button
                   type="button"
                   onClick={() => { setBulkText(''); setShowBulkAdd(false); }}
                   className="formtura-btn formtura-btn-secondary"
                 >
-                  Cancel
+                  {__('Cancel', 'formtura')}
                 </button>
               </div>
             )}
@@ -1199,14 +1203,14 @@ const GeneralTab = ({ field, onUpdate }) => {
                     type="text"
                     value={choice.label}
                     onChange={(e) => handleChoiceChange(index, 'label', e.target.value)}
-                    placeholder="Choice label"
+                    placeholder={__('Choice label', 'formtura')}
                     className="formtura-choice-input"
                   />
                   <button
                     type="button"
                     onClick={addChoice}
                     className="formtura-icon-btn formtura-btn-add"
-                    title="Add choice"
+                    title={__('Add choice', 'formtura')}
                   >
                     <Plus size={16} />
                   </button>
@@ -1214,7 +1218,7 @@ const GeneralTab = ({ field, onUpdate }) => {
                     type="button"
                     onClick={() => removeChoice(index)}
                     className="formtura-icon-btn formtura-btn-remove"
-                    title="Remove choice"
+                    title={__('Remove choice', 'formtura')}
                     disabled={field.choices.length <= 1}
                   >
                     <Minus size={16} />
@@ -1228,7 +1232,7 @@ const GeneralTab = ({ field, onUpdate }) => {
               onClick={generateChoices}
               className="formtura-btn formtura-btn-secondary formtura-generate-choices"
             >
-              <Wand2 size={14} /> Generate Choices
+              <Wand2 size={14} /> {__('Generate Choices', 'formtura')}
             </button>
           </div>
         </>
@@ -1241,20 +1245,20 @@ const GeneralTab = ({ field, onUpdate }) => {
         <>
           <div className="formtura-form-group">
             <label>
-              Choices <Tooltip text="Add options for users to select. Use the radio button to set a default selection." />
+              {__('Choices', 'formtura')} <Tooltip text={__('Add options for users to select. Use the radio button to set a default selection.', 'formtura')} />
               <button
                 type="button"
                 className="formtura-bulk-add-btn"
                 onClick={() => setShowBulkAdd(!showBulkAdd)}
               >
-                <Download size={12} /> Bulk Add
+                <Download size={12} /> {__('Bulk Add', 'formtura')}
               </button>
             </label>
 
             {showBulkAdd && (
               <div className="formtura-bulk-add-container">
                 <textarea
-                  placeholder="Paste your list here (one item per line)"
+                  placeholder={__('Paste your list here (one item per line)', 'formtura')}
                   value={bulkText}
                   onChange={(e) => setBulkText(e.target.value)}
                   rows={6}
@@ -1264,14 +1268,14 @@ const GeneralTab = ({ field, onUpdate }) => {
                   onClick={handleBulkAdd}
                   className="formtura-btn formtura-btn-primary"
                 >
-                  Add Choices
+                  {__('Add Choices', 'formtura')}
                 </button>
                 <button
                   type="button"
                   onClick={() => { setBulkText(''); setShowBulkAdd(false); }}
                   className="formtura-btn formtura-btn-secondary"
                 >
-                  Cancel
+                  {__('Cancel', 'formtura')}
                 </button>
               </div>
             )}
@@ -1296,14 +1300,14 @@ const GeneralTab = ({ field, onUpdate }) => {
                     type="text"
                     value={choice.label}
                     onChange={(e) => handleChoiceChange(index, 'label', e.target.value)}
-                    placeholder="Choice label"
+                    placeholder={__('Choice label', 'formtura')}
                     className="formtura-choice-input"
                   />
                   <button
                     type="button"
                     onClick={addChoice}
                     className="formtura-icon-btn formtura-btn-add"
-                    title="Add choice"
+                    title={__('Add choice', 'formtura')}
                   >
                     <Plus size={16} />
                   </button>
@@ -1311,7 +1315,7 @@ const GeneralTab = ({ field, onUpdate }) => {
                     type="button"
                     onClick={() => removeChoice(index)}
                     className="formtura-icon-btn formtura-btn-remove"
-                    title="Remove choice"
+                    title={__('Remove choice', 'formtura')}
                     disabled={field.choices.length <= 1}
                   >
                     <Minus size={16} />
@@ -1325,7 +1329,7 @@ const GeneralTab = ({ field, onUpdate }) => {
               onClick={generateChoices}
               className="formtura-btn formtura-btn-secondary formtura-generate-choices"
             >
-              <Wand2 size={14} /> Generate Choices
+              <Wand2 size={14} /> {__('Generate Choices', 'formtura')}
             </button>
           </div>
 
@@ -1340,7 +1344,7 @@ const GeneralTab = ({ field, onUpdate }) => {
                 <span className="formtura-toggle-slider"></span>
               </label>
               <span className="formtura-toggle-label">
-                Add Other Choice <Tooltip text="Allow users to enter a custom response if none of the provided options apply." />
+                {__('Add Other Choice', 'formtura')} <Tooltip text={__('Allow users to enter a custom response if none of the provided options apply.', 'formtura')} />
               </span>
             </div>
           </div>
@@ -1356,7 +1360,7 @@ const GeneralTab = ({ field, onUpdate }) => {
                 <span className="formtura-toggle-slider"></span>
               </label>
               <span className="formtura-toggle-label">
-                Use Image Choices <Tooltip text="Display images alongside or instead of text labels for each choice." />
+                {__('Use Image Choices', 'formtura')} <Tooltip text={__('Display images alongside or instead of text labels for each choice.', 'formtura')} />
               </span>
             </div>
           </div>
@@ -1372,7 +1376,7 @@ const GeneralTab = ({ field, onUpdate }) => {
                 <span className="formtura-toggle-slider"></span>
               </label>
               <span className="formtura-toggle-label">
-                Use Icon Choices <Tooltip text="Display icons alongside or instead of text labels for each choice." />
+                {__('Use Icon Choices', 'formtura')} <Tooltip text={__('Display icons alongside or instead of text labels for each choice.', 'formtura')} />
               </span>
             </div>
           </div>
@@ -1386,20 +1390,20 @@ const GeneralTab = ({ field, onUpdate }) => {
         <>
           <div className="formtura-form-group">
             <label>
-              Choices <Tooltip text="Add checkbox options. Users can select multiple options. Check boxes to set default selections." />
+              {__('Choices', 'formtura')} <Tooltip text={__('Add checkbox options. Users can select multiple options. Check boxes to set default selections.', 'formtura')} />
               <button
                 type="button"
                 className="formtura-bulk-add-btn"
                 onClick={() => setShowBulkAdd(!showBulkAdd)}
               >
-                <Download size={12} /> Bulk Add
+                <Download size={12} /> {__('Bulk Add', 'formtura')}
               </button>
             </label>
 
             {showBulkAdd && (
               <div className="formtura-bulk-add-container">
                 <textarea
-                  placeholder="Paste your list here (one item per line)"
+                  placeholder={__('Paste your list here (one item per line)', 'formtura')}
                   value={bulkText}
                   onChange={(e) => setBulkText(e.target.value)}
                   rows={6}
@@ -1409,14 +1413,14 @@ const GeneralTab = ({ field, onUpdate }) => {
                   onClick={handleBulkAdd}
                   className="formtura-btn formtura-btn-primary"
                 >
-                  Add Choices
+                  {__('Add Choices', 'formtura')}
                 </button>
                 <button
                   type="button"
                   onClick={() => { setBulkText(''); setShowBulkAdd(false); }}
                   className="formtura-btn formtura-btn-secondary"
                 >
-                  Cancel
+                  {__('Cancel', 'formtura')}
                 </button>
               </div>
             )}
@@ -1435,14 +1439,14 @@ const GeneralTab = ({ field, onUpdate }) => {
                     type="text"
                     value={choice.label}
                     onChange={(e) => handleChoiceChange(index, 'label', e.target.value)}
-                    placeholder="Choice label"
+                    placeholder={__('Choice label', 'formtura')}
                     className="formtura-choice-input"
                   />
                   <button
                     type="button"
                     onClick={addChoice}
                     className="formtura-icon-btn formtura-btn-add"
-                    title="Add choice"
+                    title={__('Add choice', 'formtura')}
                   >
                     <Plus size={16} />
                   </button>
@@ -1450,7 +1454,7 @@ const GeneralTab = ({ field, onUpdate }) => {
                     type="button"
                     onClick={() => removeChoice(index)}
                     className="formtura-icon-btn formtura-btn-remove"
-                    title="Remove choice"
+                    title={__('Remove choice', 'formtura')}
                     disabled={field.choices.length <= 1}
                   >
                     <Minus size={16} />
@@ -1464,7 +1468,7 @@ const GeneralTab = ({ field, onUpdate }) => {
               onClick={generateChoices}
               className="formtura-btn formtura-btn-secondary formtura-generate-choices"
             >
-              <Wand2 size={14} /> Generate Choices
+              <Wand2 size={14} /> {__('Generate Choices', 'formtura')}
             </button>
           </div>
         </>
@@ -1477,7 +1481,7 @@ const GeneralTab = ({ field, onUpdate }) => {
         <>
           <div className="formtura-form-group">
             <label>
-              Items <Tooltip text="Add payment items with prices. Use the radio button to set a default selection." />
+              {__('Items', 'formtura')} <Tooltip text={__('Add payment items with prices. Use the radio button to set a default selection.', 'formtura')} />
             </label>
 
             <div className="formtura-items-list">
@@ -1509,7 +1513,7 @@ const GeneralTab = ({ field, onUpdate }) => {
                     type="text"
                     value={item.label}
                     onChange={(e) => handleItemChange(index, 'label', e.target.value)}
-                    placeholder="Item name"
+                    placeholder={__('Item name', 'formtura')}
                     className="formtura-choice-input"
                   />
                   <input
@@ -1525,7 +1529,7 @@ const GeneralTab = ({ field, onUpdate }) => {
                     type="button"
                     onClick={addItem}
                     className="formtura-icon-btn formtura-btn-add"
-                    title="Add item"
+                    title={__('Add item', 'formtura')}
                   >
                     <Plus size={16} />
                   </button>
@@ -1533,7 +1537,7 @@ const GeneralTab = ({ field, onUpdate }) => {
                     type="button"
                     onClick={() => removeItem(index)}
                     className="formtura-icon-btn formtura-btn-remove"
-                    title="Remove item"
+                    title={__('Remove item', 'formtura')}
                     disabled={field.items.length <= 1}
                   >
                     <Minus size={16} />
@@ -1554,7 +1558,7 @@ const GeneralTab = ({ field, onUpdate }) => {
                 <span className="formtura-toggle-slider"></span>
               </label>
               <span className="formtura-toggle-label">
-                Show Price After Item Labels <Tooltip text="Display the price next to each item label in the dropdown." />
+                {__('Show Price After Item Labels', 'formtura')} <Tooltip text={__('Display the price next to each item label in the dropdown.', 'formtura')} />
               </span>
             </div>
           </div>
@@ -1570,7 +1574,7 @@ const GeneralTab = ({ field, onUpdate }) => {
                 <span className="formtura-toggle-slider"></span>
               </label>
               <span className="formtura-toggle-label">
-                Enable Quantity <Tooltip text="Allow users to specify the quantity of the selected item." />
+                {__('Enable Quantity', 'formtura')} <Tooltip text={__('Allow users to specify the quantity of the selected item.', 'formtura')} />
               </span>
             </div>
           </div>
@@ -1583,7 +1587,7 @@ const GeneralTab = ({ field, onUpdate }) => {
       return (
         <div className="formtura-form-group">
           <label htmlFor="field-price">
-            Item Price <Tooltip text="The amount this item adds to the order total." />
+            {__('Item Price', 'formtura')} <Tooltip text={__('The amount this item adds to the order total.', 'formtura')} />
           </label>
           <input
             id="field-price"
@@ -1606,14 +1610,14 @@ const GeneralTab = ({ field, onUpdate }) => {
       return (
         <div className="formtura-form-group">
           <label>
-            Coupon Codes <Tooltip text="Codes are validated on the server and are never shown to visitors." />
+            {__('Coupon Codes', 'formtura')} <Tooltip text={__('Codes are validated on the server and are never shown to visitors.', 'formtura')} />
           </label>
 
           {coupons.map((coupon, index) => (
             <div key={index} className="formtura-coupon-row">
               <input
                 type="text"
-                placeholder="CODE"
+                placeholder={__('CODE', 'formtura')}
                 value={coupon.code || ''}
                 onChange={(e) => {
                   const next = [...coupons];
@@ -1629,14 +1633,14 @@ const GeneralTab = ({ field, onUpdate }) => {
                   setCoupons(next);
                 }}
               >
-                <option value="fixed">Fixed amount</option>
-                <option value="percent">Percent</option>
+                <option value="fixed">{__('Fixed amount', 'formtura')}</option>
+                <option value="percent">{__('Percent', 'formtura')}</option>
               </select>
               <input
                 type="number"
                 min="0"
                 step="0.01"
-                placeholder="Value"
+                placeholder={__('Value', 'formtura')}
                 className="formtura-price-input"
                 value={coupon.value || ''}
                 onChange={(e) => {
@@ -1659,7 +1663,7 @@ const GeneralTab = ({ field, onUpdate }) => {
             className="formtura-btn formtura-btn-secondary"
             onClick={() => setCoupons([...coupons, { code: '', type: 'fixed', value: '' }])}
           >
-            Add Coupon
+            {__('Add Coupon', 'formtura')}
           </button>
         </div>
       );
@@ -1677,7 +1681,7 @@ const GeneralTab = ({ field, onUpdate }) => {
 
       <div className="formtura-form-group">
         <label htmlFor="field-label">
-          Label <Tooltip text="Enter text for the form field label. Labels are recommended but can be hidden in Advanced Settings." />
+          {__('Label', 'formtura')} <Tooltip text={__('Enter text for the form field label. Labels are recommended but can be hidden in Advanced Settings.', 'formtura')} />
         </label>
         <input
           id="field-label"
@@ -1692,7 +1696,7 @@ const GeneralTab = ({ field, onUpdate }) => {
         <div className="formtura-collapsible-section">
           <details open>
             <summary className="formtura-collapsible-header">
-              <span>File Upload Options</span>
+              <span>{__('File Upload Options', 'formtura')}</span>
               <ChevronDown size={16} className="formtura-collapsible-icon" />
             </summary>
             <div className="formtura-collapsible-content">
@@ -1700,9 +1704,9 @@ const GeneralTab = ({ field, onUpdate }) => {
               <div className="formtura-warning-notice">
                 <span className="formtura-warning-icon" aria-hidden="true">⚠</span>
                 <span>
-                  Uploads are public. File access can be updated in{' '}
-                  <a href="#">Form Permissions Settings</a>.{' '}
-                  <Tooltip text="Files uploaded with this field can be viewed by anyone with access to a link and could be indexed by search engines. If this is a concern, we recommend enabling file protection and turning off indexing." />
+                  {__('Uploads are public. File access can be updated in', 'formtura')}{' '}
+                  <a href="#">{__('Form Permissions Settings', 'formtura')}</a>.{' '}
+                  <Tooltip text={__('Files uploaded with this field can be viewed by anyone with access to a link and could be indexed by search engines. If this is a concern, we recommend enabling file protection and turning off indexing.', 'formtura')} />
                 </span>
               </div>
 
@@ -1717,7 +1721,7 @@ const GeneralTab = ({ field, onUpdate }) => {
                     />
                     <span className="formtura-toggle-slider"></span>
                   </label>
-                  <span className="formtura-toggle-label">Allow multiple files to be uploaded</span>
+                  <span className="formtura-toggle-label">{__('Allow multiple files to be uploaded', 'formtura')}</span>
                 </div>
               </div>
 
@@ -1731,7 +1735,7 @@ const GeneralTab = ({ field, onUpdate }) => {
                     />
                     <span className="formtura-toggle-slider"></span>
                   </label>
-                  <span className="formtura-toggle-label">Attach this file to the email notification</span>
+                  <span className="formtura-toggle-label">{__('Attach this file to the email notification', 'formtura')}</span>
                 </div>
               </div>
 
@@ -1745,7 +1749,7 @@ const GeneralTab = ({ field, onUpdate }) => {
                     />
                     <span className="formtura-toggle-slider"></span>
                   </label>
-                  <span className="formtura-toggle-label">Permanently delete old files when replaced or when the entry is deleted</span>
+                  <span className="formtura-toggle-label">{__('Permanently delete old files when replaced or when the entry is deleted', 'formtura')}</span>
                 </div>
               </div>
 
@@ -1760,15 +1764,15 @@ const GeneralTab = ({ field, onUpdate }) => {
                     <span className="formtura-toggle-slider"></span>
                   </label>
                   <span className="formtura-toggle-label">
-                    Automatically resize files before upload{' '}
-                    <Tooltip text="When a large image is uploaded, resize it before you save it to your site." />
+                    {__('Automatically resize files before upload', 'formtura')}{' '}
+                    <Tooltip text={__('When a large image is uploaded, resize it before you save it to your site.', 'formtura')} />
                   </span>
               </div>
               </div>
 
               {/* Allowed file types */}
               <div className="formtura-form-group">
-                <label>Allowed file types</label>
+                <label>{__('Allowed file types', 'formtura')}</label>
                 <div className="formtura-radio-inline-group">
                   <label className="formtura-radio-inline">
                     <input
@@ -1777,7 +1781,7 @@ const GeneralTab = ({ field, onUpdate }) => {
                       checked={field.allowedFileTypes === 'all'}
                       onChange={() => handleChange('allowedFileTypes', 'all')}
                     />
-                    <span>Allow all file types</span>
+                    <span>{__('Allow all file types', 'formtura')}</span>
                   </label>
                   <label className="formtura-radio-inline">
                     <input
@@ -1786,7 +1790,7 @@ const GeneralTab = ({ field, onUpdate }) => {
                       checked={field.allowedFileTypes === 'specify' || !field.allowedFileTypes}
                       onChange={() => handleChange('allowedFileTypes', 'specify')}
                     />
-                    <span>Specify allowed types</span>
+                    <span>{__('Specify allowed types', 'formtura')}</span>
                   </label>
                 </div>
                 {(field.allowedFileTypes === 'specify' || !field.allowedFileTypes) && (
@@ -1798,20 +1802,20 @@ const GeneralTab = ({ field, onUpdate }) => {
                     <option value="pdf">pdf</option>
                     <option value="doc, docx">doc, docx</option>
                     <option value="xls, xlsx">xls, xlsx</option>
-                    <option value="jpg, jpeg, jpe, png, gif, pdf">Images & PDF</option>
-                    <option value="jpg, jpeg, jpe, png, gif, pdf, doc, docx">Images, PDF & Documents</option>
+                    <option value="jpg, jpeg, jpe, png, gif, pdf">{__('Images & PDF', 'formtura')}</option>
+                    <option value="jpg, jpeg, jpe, png, gif, pdf, doc, docx">{__('Images, PDF & Documents', 'formtura')}</option>
                   </select>
                 )}
               </div>
 
               {/* File size limits */}
               <div className="formtura-form-group">
-                <label>File size limits</label>
+                <label>{__('File size limits', 'formtura')}</label>
                 <div className="formtura-grid-2">
                   <div>
                     <label className="formtura-subfield-label">
-                      Min file size (MB){' '}
-                      <Tooltip text="Set the minimum file size limit for each file uploaded." />
+                      {__('Min file size (MB)', 'formtura')}{' '}
+                      <Tooltip text={__('Set the minimum file size limit for each file uploaded.', 'formtura')} />
                     </label>
                     <input
                       type="number"
@@ -1824,8 +1828,8 @@ const GeneralTab = ({ field, onUpdate }) => {
                   </div>
                   <div>
                     <label className="formtura-subfield-label">
-                      Max file size (MB){' '}
-                      <Tooltip text="Set the file size limit for each file uploaded. Your server settings allow a maximum of 256 MB." />
+                      {__('Max file size (MB)', 'formtura')}{' '}
+                      <Tooltip text={__('Set the file size limit for each file uploaded. Your server settings allow a maximum of 256 MB.', 'formtura')} />
                     </label>
                     <input
                       type="number"
@@ -1841,11 +1845,11 @@ const GeneralTab = ({ field, onUpdate }) => {
 
               {/* Upload text */}
               <div className="formtura-form-group">
-                <label htmlFor="upload-text">Upload text</label>
+                <label htmlFor="upload-text">{__('Upload text', 'formtura')}</label>
                 <input
                   id="upload-text"
                   type="text"
-                  value={field.uploadText || 'Drop a file here or click to upload'}
+                  value={field.uploadText || __('Drop a file here or click to upload', 'formtura')}
                   onChange={(e) => handleChange('uploadText', e.target.value)}
                 />
               </div>
@@ -1853,13 +1857,13 @@ const GeneralTab = ({ field, onUpdate }) => {
               {/* Compact upload text */}
               <div className="formtura-form-group">
                 <label htmlFor="compact-upload-text">
-                  Compact upload text{' '}
-                  <Tooltip text="The label shown when the file upload field is compacted with fta_compact CSS layout class." />
+                  {__('Compact upload text', 'formtura')}{' '}
+                  <Tooltip text={__('The label shown when the file upload field is compacted with fta_compact CSS layout class.', 'formtura')} />
                 </label>
                 <input
                   id="compact-upload-text"
                   type="text"
-                  value={field.compactUploadText || 'Choose File'}
+                  value={field.compactUploadText || __('Choose File', 'formtura')}
                   onChange={(e) => handleChange('compactUploadText', e.target.value)}
                 />
               </div>
@@ -1872,7 +1876,7 @@ const GeneralTab = ({ field, onUpdate }) => {
       {field.type === 'rich-text' && (
         <div className="formtura-form-group">
           <label>
-            Content <Tooltip text="Enter rich text content that users can edit. Use the toolbar to format text, add links, and create lists." />
+            {__('Content', 'formtura')} <Tooltip text={__('Enter rich text content that users can edit. Use the toolbar to format text, add links, and create lists.', 'formtura')} />
           </label>
           <WysiwygEditor
             value={field.content || ''}
@@ -1885,16 +1889,16 @@ const GeneralTab = ({ field, onUpdate }) => {
       {field.type === 'name' && (
         <div className="formtura-form-group">
           <label htmlFor="field-format">
-            Format <Tooltip text="Choose how the name field should be displayed: as a single input or split into multiple parts." />
+            {__('Format', 'formtura')} <Tooltip text={__('Choose how the name field should be displayed: as a single input or split into multiple parts.', 'formtura')} />
           </label>
           <select
             id="field-format"
             value={field.format || 'first-last'}
             onChange={(e) => handleChange('format', e.target.value)}
           >
-            <option value="simple">Simple</option>
-            <option value="first-last">First + Last Names</option>
-            <option value="first-middle-last">First + Middle + Last Name</option>
+            <option value="simple">{__('Simple', 'formtura')}</option>
+            <option value="first-last">{__('First + Last Names', 'formtura')}</option>
+            <option value="first-middle-last">{__('First + Middle + Last Name', 'formtura')}</option>
           </select>
         </div>
       )}
@@ -1903,15 +1907,15 @@ const GeneralTab = ({ field, onUpdate }) => {
       {field.type === 'address' && (
         <div className="formtura-form-group">
           <label htmlFor="field-scheme">
-            Scheme <Tooltip text="US shows State and ZIP Code; International shows Province/Region and Postal Code." />
+            {__('Scheme', 'formtura')} <Tooltip text={__('US shows State and ZIP Code; International shows Province/Region and Postal Code.', 'formtura')} />
           </label>
           <select
             id="field-scheme"
             value={field.scheme || 'us'}
             onChange={(e) => handleChange('scheme', e.target.value)}
           >
-            <option value="us">United States</option>
-            <option value="international">International</option>
+            <option value="us">{__('United States', 'formtura')}</option>
+            <option value="international">{__('International', 'formtura')}</option>
           </select>
         </div>
       )}
@@ -1934,7 +1938,7 @@ const GeneralTab = ({ field, onUpdate }) => {
       {field.type === 'html' ? (
         <div className="formtura-form-group">
           <label>
-            Content <Tooltip text="Enter HTML content that will be displayed in the form. Use the toolbar to format text, add links, and create lists." />
+            {__('Content', 'formtura')} <Tooltip text={__('Enter HTML content that will be displayed in the form. Use the toolbar to format text, add links, and create lists.', 'formtura')} />
           </label>
           <WysiwygEditor
             value={field.content || field.description || ''}
@@ -1944,7 +1948,7 @@ const GeneralTab = ({ field, onUpdate }) => {
       ) : field.type === 'content' ? (
         <div className="formtura-form-group">
           <label htmlFor="field-content">
-            Content <Tooltip text="Enter the text or basic HTML this block displays on the form. It is not an input - visitors read it, they do not fill it in." />
+            {__('Content', 'formtura')} <Tooltip text={__('Enter the text or basic HTML this block displays on the form. It is not an input - visitors read it, they do not fill it in.', 'formtura')} />
           </label>
           <textarea
             id="field-content"
@@ -1956,7 +1960,7 @@ const GeneralTab = ({ field, onUpdate }) => {
       ) : field.type !== 'rich-text' && (
         <div className="formtura-form-group">
           <label htmlFor="field-description">
-            Description <Tooltip text="Enter text for the form field description." />
+            {__('Description', 'formtura')} <Tooltip text={__('Enter text for the form field description.', 'formtura')} />
           </label>
           <textarea
             id="field-description"
@@ -1972,7 +1976,7 @@ const GeneralTab = ({ field, onUpdate }) => {
         <div className="formtura-form-group formtura-grid-2">
           <div>
             <label htmlFor="field-size-richtext">
-              Field Size <Tooltip text="Set the width unit for the field." />
+              {__('Field Size', 'formtura')} <Tooltip text={__('Set the width unit for the field.', 'formtura')} />
             </label>
             <select
               id="field-size-richtext"
@@ -1987,7 +1991,7 @@ const GeneralTab = ({ field, onUpdate }) => {
           </div>
           <div>
             <label htmlFor="field-rows">
-              Rows <Tooltip text="Set the number of visible text rows for the editor." />
+              {__('Rows', 'formtura')} <Tooltip text={__('Set the number of visible text rows for the editor.', 'formtura')} />
             </label>
             <input
               id="field-rows"
@@ -2013,12 +2017,12 @@ const GeneralTab = ({ field, onUpdate }) => {
               <span className="formtura-toggle-slider"></span>
             </label>
             <span className="formtura-toggle-label">
-              Enable Summary <Tooltip text="Enable order summary for this field." />
+              {__('Enable Summary', 'formtura')} <Tooltip text={__('Enable order summary for this field.', 'formtura')} />
             </span>
           </div>
           {field.enableSummary && (
             <p className="formtura-info-message formtura-info-panel">
-              Example data is shown in the form editor. Actual products and totals will be displayed when you preview or embed your form.
+              {__('Example data is shown in the form editor. Actual products and totals will be displayed when you preview or embed your form.', 'formtura')}
             </p>
           )}
         </div>
@@ -2029,7 +2033,7 @@ const GeneralTab = ({ field, onUpdate }) => {
         <>
           <div className="formtura-form-group">
             <label>
-              Value Range <Tooltip text="Define the minimum and maximum values for the slider." />
+              {__('Value Range', 'formtura')} <Tooltip text={__('Define the minimum and maximum values for the slider.', 'formtura')} />
             </label>
             <div className="formtura-grid-2">
               <div>
@@ -2039,7 +2043,7 @@ const GeneralTab = ({ field, onUpdate }) => {
                   onChange={(e) => handleChange('minValue', parseInt(e.target.value) || 0)}
                   placeholder="0"
                 />
-                <span className="formtura-field-help">Minimum</span>
+                <span className="formtura-field-help">{__('Minimum', 'formtura')}</span>
               </div>
               <div>
                 <input
@@ -2048,14 +2052,14 @@ const GeneralTab = ({ field, onUpdate }) => {
                   onChange={(e) => handleChange('maxValue', parseInt(e.target.value) || 10)}
                   placeholder="10"
                 />
-                <span className="formtura-field-help">Maximum</span>
+                <span className="formtura-field-help">{__('Maximum', 'formtura')}</span>
               </div>
             </div>
           </div>
 
           <div className="formtura-form-group">
             <label htmlFor="field-default-value">
-              Default Value <Tooltip text="Enter a default value for this field." />
+              {__('Default Value', 'formtura')} <Tooltip text={__('Enter a default value for this field.', 'formtura')} />
             </label>
             <input
               id="field-default-value"
@@ -2068,7 +2072,7 @@ const GeneralTab = ({ field, onUpdate }) => {
 
           <div className="formtura-form-group">
             <label htmlFor="field-increment">
-              Increment <Tooltip text="Set the increment between selectable values on the slider." />
+              {__('Increment', 'formtura')} <Tooltip text={__('Set the increment between selectable values on the slider.', 'formtura')} />
             </label>
             <input
               id="field-increment"
@@ -2096,28 +2100,28 @@ const GeneralTab = ({ field, onUpdate }) => {
                 <span className="formtura-toggle-slider"></span>
               </label>
               <span className="formtura-toggle-label">
-                Collapsible <Tooltip text="Collapsible: This section will slide open and closed." />
+                {__('Collapsible', 'formtura')} <Tooltip text={__('Collapsible: This section will slide open and closed.', 'formtura')} />
               </span>
             </div>
           </div>
 
           <div className="formtura-form-group">
             <label htmlFor="field-repeat-layout">
-              Repeat Layout <Tooltip text="Choose how repeater rows are displayed." />
+              {__('Repeat Layout', 'formtura')} <Tooltip text={__('Choose how repeater rows are displayed.', 'formtura')} />
             </label>
             <select
               id="field-repeat-layout"
               value={field.repeatLayout || 'default'}
               onChange={(e) => handleChange('repeatLayout', e.target.value)}
             >
-              <option value="default">Default</option>
-              <option value="inline">Inline</option>
-              <option value="grid">Grid</option>
+              <option value="default">{__('Default', 'formtura')}</option>
+              <option value="inline">{__('Inline', 'formtura')}</option>
+              <option value="grid">{__('Grid', 'formtura')}</option>
             </select>
             <span className="formtura-field-help">
-              {field.repeatLayout === 'default' && 'No automatic formatting'}
-              {field.repeatLayout === 'inline' && 'Display each field and label in one row'}
-              {field.repeatLayout === 'grid' && 'Display labels as headings above rows of fields'}
+              {field.repeatLayout === 'default' && __('No automatic formatting', 'formtura')}
+              {field.repeatLayout === 'inline' && __('Display each field and label in one row', 'formtura')}
+              {field.repeatLayout === 'grid' && __('Display labels as headings above rows of fields', 'formtura')}
             </span>
           </div>
         </>
@@ -2142,7 +2146,7 @@ const GeneralTab = ({ field, onUpdate }) => {
               <span className="formtura-toggle-slider"></span>
             </label>
             <span className="formtura-toggle-label">
-              Required <Tooltip text="Check this option to mark the field as required. The form will not submit unless all required fields are completed." />
+              {__('Required', 'formtura')} <Tooltip text={__('Check this option to mark the field as required. The form will not submit unless all required fields are completed.', 'formtura')} />
             </span>
           </div>
         </div>
@@ -2161,7 +2165,7 @@ const GeneralTab = ({ field, onUpdate }) => {
               <span className="formtura-toggle-slider"></span>
             </label>
             <span className="formtura-toggle-label">
-              Unique <Tooltip text="Unique: Do not allow the same response multiple times. For example, if one user enters 'Joe', then no one else will be allowed to enter the same name." />
+              {__('Unique', 'formtura')} <Tooltip text={__('Unique: Do not allow the same response multiple times. For example, if one user enters \'Joe\', then no one else will be allowed to enter the same name.', 'formtura')} />
             </span>
           </div>
         </div>
@@ -2229,7 +2233,7 @@ const CSSLayoutClassesField = ({ field, onUpdate }) => {
   return (
     <div className="formtura-form-group formtura-css-layout-field" ref={containerRef}>
       <label htmlFor="field-css-classes">
-        CSS Layout Classes <Tooltip text="Add a class for the form field container. Use our predefined classes to align multiple fields in a single row." />
+        {__('CSS Layout Classes', 'formtura')} <Tooltip text={__('Add a class for the form field container. Use our predefined classes to align multiple fields in a single row.', 'formtura')} />
       </label>
       <div className="formtura-input-with-button">
         <input
@@ -2242,7 +2246,7 @@ const CSSLayoutClassesField = ({ field, onUpdate }) => {
           type="button"
           className="formtura-ellipsis-btn"
           onClick={() => setShowStyleClasses(!showStyleClasses)}
-          title="Show style classes"
+          title={__('Show style classes', 'formtura')}
         >
           <MoreHorizontal size={16} />
         </button>
@@ -2275,7 +2279,7 @@ const CSSLayoutClassesField = ({ field, onUpdate }) => {
           </div>
           <div className="formtura-style-classes-section">
             <div className="formtura-style-classes-header">
-              <span>Other Style Classes</span>
+              <span>{__('Other Style Classes', 'formtura')}</span>
               <ChevronDown size={14} />
             </div>
             <div className="formtura-style-classes-list">
@@ -2323,16 +2327,16 @@ const AdvancedTab = ({ field, onUpdate }) => {
 
         <div className="formtura-form-group">
           <label htmlFor="field-size">
-            Field Size <Tooltip text="Select the default size for the field." />
+            {__('Field Size', 'formtura')} <Tooltip text={__('Select the default size for the field.', 'formtura')} />
           </label>
           <select
             id="field-size"
             value={field.fieldSize || 'medium'}
             onChange={(e) => handleChange('fieldSize', e.target.value)}
           >
-            <option value="small">Small</option>
-            <option value="medium">Medium</option>
-            <option value="large">Large</option>
+            <option value="small">{__('Small', 'formtura')}</option>
+            <option value="medium">{__('Medium', 'formtura')}</option>
+            <option value="large">{__('Large', 'formtura')}</option>
           </select>
         </div>
 
@@ -2340,7 +2344,7 @@ const AdvancedTab = ({ field, onUpdate }) => {
         {showMultipleFields && (
           <div className="formtura-form-group">
             <label>
-              First Name <Tooltip text="Configure placeholder and default value for the first name input." />
+              {__('First Name', 'formtura')} <Tooltip text={__('Configure placeholder and default value for the first name input.', 'formtura')} />
             </label>
             <div className="formtura-name-field-row">
               <div className="formtura-name-field-col">
@@ -2350,7 +2354,7 @@ const AdvancedTab = ({ field, onUpdate }) => {
                   onChange={(e) => handleChange('firstNamePlaceholder', e.target.value)}
                   placeholder=""
                 />
-                <span className="formtura-field-help">Placeholder</span>
+                <span className="formtura-field-help">{__('Placeholder', 'formtura')}</span>
               </div>
               <div className="formtura-name-field-col">
                 <div className="formtura-input-with-inline-tag">
@@ -2362,7 +2366,7 @@ const AdvancedTab = ({ field, onUpdate }) => {
                   />
                   <SmartTagButton onSelect={(tag) => appendSmartTag('firstNameDefault', tag)} />
                 </div>
-                <span className="formtura-field-help">Default Value</span>
+                <span className="formtura-field-help">{__('Default Value', 'formtura')}</span>
               </div>
             </div>
           </div>
@@ -2372,7 +2376,7 @@ const AdvancedTab = ({ field, onUpdate }) => {
         {showMultipleFields && (
           <div className="formtura-form-group">
             <label>
-              Middle Name <Tooltip text="Configure placeholder and default value for the middle name input." />
+              {__('Middle Name', 'formtura')} <Tooltip text={__('Configure placeholder and default value for the middle name input.', 'formtura')} />
             </label>
             <div className="formtura-name-field-row">
               <div className="formtura-name-field-col">
@@ -2382,7 +2386,7 @@ const AdvancedTab = ({ field, onUpdate }) => {
                   onChange={(e) => handleChange('middleNamePlaceholder', e.target.value)}
                   placeholder=""
                 />
-                <span className="formtura-field-help">Placeholder</span>
+                <span className="formtura-field-help">{__('Placeholder', 'formtura')}</span>
               </div>
               <div className="formtura-name-field-col">
                 <div className="formtura-input-with-inline-tag">
@@ -2394,7 +2398,7 @@ const AdvancedTab = ({ field, onUpdate }) => {
                   />
                   <SmartTagButton onSelect={(tag) => appendSmartTag('middleNameDefault', tag)} />
                 </div>
-                <span className="formtura-field-help">Default Value</span>
+                <span className="formtura-field-help">{__('Default Value', 'formtura')}</span>
               </div>
             </div>
           </div>
@@ -2404,7 +2408,7 @@ const AdvancedTab = ({ field, onUpdate }) => {
         {showMultipleFields && (
           <div className="formtura-form-group">
             <label>
-              Last Name <Tooltip text="Configure placeholder and default value for the last name input." />
+              {__('Last Name', 'formtura')} <Tooltip text={__('Configure placeholder and default value for the last name input.', 'formtura')} />
             </label>
             <div className="formtura-name-field-row">
               <div className="formtura-name-field-col">
@@ -2414,7 +2418,7 @@ const AdvancedTab = ({ field, onUpdate }) => {
                   onChange={(e) => handleChange('lastNamePlaceholder', e.target.value)}
                   placeholder=""
                 />
-                <span className="formtura-field-help">Placeholder</span>
+                <span className="formtura-field-help">{__('Placeholder', 'formtura')}</span>
               </div>
               <div className="formtura-name-field-col">
                 <div className="formtura-input-with-inline-tag">
@@ -2426,7 +2430,7 @@ const AdvancedTab = ({ field, onUpdate }) => {
                   />
                   <SmartTagButton onSelect={(tag) => appendSmartTag('lastNameDefault', tag)} />
                 </div>
-                <span className="formtura-field-help">Default Value</span>
+                <span className="formtura-field-help">{__('Default Value', 'formtura')}</span>
               </div>
             </div>
           </div>
@@ -2445,7 +2449,7 @@ const AdvancedTab = ({ field, onUpdate }) => {
               <span className="formtura-toggle-slider"></span>
             </label>
             <span className="formtura-toggle-label">
-              Hide Label <Tooltip text="Check this option to hide the form field label." />
+              {__('Hide Label', 'formtura')} <Tooltip text={__('Check this option to hide the form field label.', 'formtura')} />
             </span>
           </div>
         </div>
@@ -2461,7 +2465,7 @@ const AdvancedTab = ({ field, onUpdate }) => {
               <span className="formtura-toggle-slider"></span>
             </label>
             <span className="formtura-toggle-label">
-              Hide Sublabels <Tooltip text="Check this option to hide sublabels under each name field input." />
+              {__('Hide Sublabels', 'formtura')} <Tooltip text={__('Check this option to hide sublabels under each name field input.', 'formtura')} />
             </span>
           </div>
         </div>
@@ -2477,7 +2481,7 @@ const AdvancedTab = ({ field, onUpdate }) => {
               <span className="formtura-toggle-slider"></span>
             </label>
             <span className="formtura-toggle-label">
-              Read-Only <Tooltip text="Check this option to display the field's value without allowing changes. The value will still be submitted." />
+              {__('Read-Only', 'formtura')} <Tooltip text={__('Check this option to display the field\'s value without allowing changes. The value will still be submitted.', 'formtura')} />
             </span>
           </div>
         </div>
@@ -2495,29 +2499,29 @@ const AdvancedTab = ({ field, onUpdate }) => {
 
         <div className="formtura-form-group">
           <label htmlFor="field-size">
-            Field Size <Tooltip text="Select the default size for the field." />
+            {__('Field Size', 'formtura')} <Tooltip text={__('Select the default size for the field.', 'formtura')} />
           </label>
           <select
             id="field-size"
             value={field.fieldSize || 'medium'}
             onChange={(e) => handleChange('fieldSize', e.target.value)}
           >
-            <option value="small">Small</option>
-            <option value="medium">Medium</option>
-            <option value="large">Large</option>
+            <option value="small">{__('Small', 'formtura')}</option>
+            <option value="medium">{__('Medium', 'formtura')}</option>
+            <option value="large">{__('Large', 'formtura')}</option>
           </select>
         </div>
 
         <div className="formtura-form-group">
           <label htmlFor="field-value-display">
-            Value Display <Tooltip text="Displays the currently selected value below the slider. Use {value} placeholder for the selected number." />
+            {__('Value Display', 'formtura')} <Tooltip text={__('Displays the currently selected value below the slider. Use {value} placeholder for the selected number.', 'formtura')} />
           </label>
           <input
             id="field-value-display"
             type="text"
-            value={field.valueDisplay || 'Selected Value: {value}'}
+            value={field.valueDisplay || __('Selected Value: {value}', 'formtura')}
             onChange={(e) => handleChange('valueDisplay', e.target.value)}
-            placeholder="Selected Value: {value}"
+            placeholder={__('Selected Value: {value}', 'formtura')}
           />
         </div>
 
@@ -2534,7 +2538,7 @@ const AdvancedTab = ({ field, onUpdate }) => {
               <span className="formtura-toggle-slider"></span>
             </label>
             <span className="formtura-toggle-label">
-              Hide Label <Tooltip text="Check this option to hide the form field label." />
+              {__('Hide Label', 'formtura')} <Tooltip text={__('Check this option to hide the form field label.', 'formtura')} />
             </span>
           </div>
         </div>
@@ -2550,7 +2554,7 @@ const AdvancedTab = ({ field, onUpdate }) => {
               <span className="formtura-toggle-slider"></span>
             </label>
             <span className="formtura-toggle-label">
-              Read-Only <Tooltip text="Check this option to display the field's value without allowing changes. The value will still be submitted." />
+              {__('Read-Only', 'formtura')} <Tooltip text={__('Check this option to display the field\'s value without allowing changes. The value will still be submitted.', 'formtura')} />
             </span>
           </div>
         </div>
@@ -2568,42 +2572,42 @@ const AdvancedTab = ({ field, onUpdate }) => {
 
         <div className="formtura-form-group">
           <label htmlFor="field-size">
-            Field Size <Tooltip text="Select the default size for the field." />
+            {__('Field Size', 'formtura')} <Tooltip text={__('Select the default size for the field.', 'formtura')} />
           </label>
           <select
             id="field-size"
             value={field.fieldSize || 'medium'}
             onChange={(e) => handleChange('fieldSize', e.target.value)}
           >
-            <option value="small">Small</option>
-            <option value="medium">Medium</option>
-            <option value="large">Large</option>
+            <option value="small">{__('Small', 'formtura')}</option>
+            <option value="medium">{__('Medium', 'formtura')}</option>
+            <option value="large">{__('Large', 'formtura')}</option>
           </select>
         </div>
 
         <div className="formtura-form-group formtura-grid-2">
           <div>
             <label htmlFor="field-add-label">
-              Add New Label <Tooltip text="Text for the add button." />
+              {__('Add New Label', 'formtura')} <Tooltip text={__('Text for the add button.', 'formtura')} />
             </label>
             <input
               id="field-add-label"
               type="text"
-              value={field.addNewLabel || 'Add'}
+              value={field.addNewLabel || __('Add', 'formtura')}
               onChange={(e) => handleChange('addNewLabel', e.target.value)}
-              placeholder="Add"
+              placeholder={__('Add', 'formtura')}
             />
           </div>
           <div>
             <label htmlFor="field-remove-label">
-              Remove Label <Tooltip text="Text for the remove button." />
+              {__('Remove Label', 'formtura')} <Tooltip text={__('Text for the remove button.', 'formtura')} />
             </label>
             <input
               id="field-remove-label"
               type="text"
-              value={field.removeLabel || 'Remove'}
+              value={field.removeLabel || __('Remove', 'formtura')}
               onChange={(e) => handleChange('removeLabel', e.target.value)}
-              placeholder="Remove"
+              placeholder={__('Remove', 'formtura')}
             />
           </div>
         </div>
@@ -2611,7 +2615,7 @@ const AdvancedTab = ({ field, onUpdate }) => {
         <div className="formtura-form-group formtura-grid-2">
           <div>
             <label htmlFor="field-min-rows">
-              Min Repeater Rows <Tooltip text="Minimum number of repeater rows." />
+              {__('Min Repeater Rows', 'formtura')} <Tooltip text={__('Minimum number of repeater rows.', 'formtura')} />
             </label>
             <input
               id="field-min-rows"
@@ -2624,7 +2628,7 @@ const AdvancedTab = ({ field, onUpdate }) => {
           </div>
           <div>
             <label htmlFor="field-max-rows">
-              Max Repeater Rows <Tooltip text="The maximum number of times the end user is allowed to duplicate this section of fields in one entry." />
+              {__('Max Repeater Rows', 'formtura')} <Tooltip text={__('The maximum number of times the end user is allowed to duplicate this section of fields in one entry.', 'formtura')} />
             </label>
             <input
               id="field-max-rows"
@@ -2650,7 +2654,7 @@ const AdvancedTab = ({ field, onUpdate }) => {
               <span className="formtura-toggle-slider"></span>
             </label>
             <span className="formtura-toggle-label">
-              Hide Label <Tooltip text="Check this option to hide the form field label." />
+              {__('Hide Label', 'formtura')} <Tooltip text={__('Check this option to hide the form field label.', 'formtura')} />
             </span>
           </div>
         </div>
@@ -2677,43 +2681,43 @@ const AdvancedTab = ({ field, onUpdate }) => {
               <span className="formtura-toggle-slider"></span>
             </label>
             <span className="formtura-toggle-label">
-              Multiple Options Selection <Tooltip text="Allow users to select multiple choices in this field." />
+              {__('Multiple Options Selection', 'formtura')} <Tooltip text={__('Allow users to select multiple choices in this field.', 'formtura')} />
             </span>
           </div>
         </div>
 
         <div className="formtura-form-group">
           <label htmlFor="field-style">
-            Style <Tooltip text="Select the visual style for the dropdown field." />
+            {__('Style', 'formtura')} <Tooltip text={__('Select the visual style for the dropdown field.', 'formtura')} />
           </label>
           <select
             id="field-style"
             value={field.style || 'classic'}
             onChange={(e) => handleChange('style', e.target.value)}
           >
-            <option value="classic">Classic</option>
-            <option value="modern">Modern</option>
+            <option value="classic">{__('Classic', 'formtura')}</option>
+            <option value="modern">{__('Modern', 'formtura')}</option>
           </select>
         </div>
 
         <div className="formtura-form-group">
           <label htmlFor="field-size">
-            Field Size <Tooltip text="Select the default size for the field." />
+            {__('Field Size', 'formtura')} <Tooltip text={__('Select the default size for the field.', 'formtura')} />
           </label>
           <select
             id="field-size"
             value={field.fieldSize || 'medium'}
             onChange={(e) => handleChange('fieldSize', e.target.value)}
           >
-            <option value="small">Small</option>
-            <option value="medium">Medium</option>
-            <option value="large">Large</option>
+            <option value="small">{__('Small', 'formtura')}</option>
+            <option value="medium">{__('Medium', 'formtura')}</option>
+            <option value="large">{__('Large', 'formtura')}</option>
           </select>
         </div>
 
         <div className="formtura-form-group">
           <label htmlFor="field-placeholder">
-            Placeholder Text <Tooltip text="Enter placeholder text that appears as the first option in the dropdown." />
+            {__('Placeholder Text', 'formtura')} <Tooltip text={__('Enter placeholder text that appears as the first option in the dropdown.', 'formtura')} />
           </label>
           <input
             id="field-placeholder"
@@ -2725,32 +2729,32 @@ const AdvancedTab = ({ field, onUpdate }) => {
 
         <div className="formtura-form-group">
           <label htmlFor="field-dynamic-choices">
-            Dynamic Choices <Tooltip text="Select auto-populate method to use." />
+            {__('Dynamic Choices', 'formtura')} <Tooltip text={__('Select auto-populate method to use.', 'formtura')} />
           </label>
           <select
             id="field-dynamic-choices"
             value={field.dynamicChoices || 'off'}
             onChange={(e) => handleChange('dynamicChoices', e.target.value)}
           >
-            <option value="off">Off</option>
-            <option value="post_type">Post Type</option>
-            <option value="taxonomy">Taxonomy</option>
+            <option value="off">{__('Off', 'formtura')}</option>
+            <option value="post_type">{__('Post Type', 'formtura')}</option>
+            <option value="taxonomy">{__('Taxonomy', 'formtura')}</option>
           </select>
         </div>
 
         {field.dynamicChoices === 'post_type' && (
           <div className="formtura-form-group">
             <label htmlFor="field-dynamic-post-type">
-              Dynamic Post Type Source <Tooltip text="Select Post Type to use for auto-populating the field choices." />
+              {__('Dynamic Post Type Source', 'formtura')} <Tooltip text={__('Select Post Type to use for auto-populating the field choices.', 'formtura')} />
             </label>
             <select
               id="field-dynamic-post-type"
               value={field.dynamicPostType || 'post'}
               onChange={(e) => handleChange('dynamicPostType', e.target.value)}
             >
-              <option value="post">Posts</option>
-              <option value="page">Pages</option>
-              <option value="attachment">Media</option>
+              <option value="post">{__('Posts', 'formtura')}</option>
+              <option value="page">{__('Pages', 'formtura')}</option>
+              <option value="attachment">{__('Media', 'formtura')}</option>
               {/* Custom post types loaded dynamically from WordPress */}
               {window.formturaBuilderData?.postTypes?.map(pt => (
                 <option key={pt.value} value={pt.value}>{pt.label}</option>
@@ -2762,15 +2766,15 @@ const AdvancedTab = ({ field, onUpdate }) => {
         {field.dynamicChoices === 'taxonomy' && (
           <div className="formtura-form-group">
             <label htmlFor="field-dynamic-taxonomy">
-              Dynamic Taxonomy Source <Tooltip text="Select Taxonomy to use for auto-populating the field choices." />
+              {__('Dynamic Taxonomy Source', 'formtura')} <Tooltip text={__('Select Taxonomy to use for auto-populating the field choices.', 'formtura')} />
             </label>
             <select
               id="field-dynamic-taxonomy"
               value={field.dynamicTaxonomy || 'category'}
               onChange={(e) => handleChange('dynamicTaxonomy', e.target.value)}
             >
-              <option value="category">Categories</option>
-              <option value="post_tag">Tags</option>
+              <option value="category">{__('Categories', 'formtura')}</option>
+              <option value="post_tag">{__('Tags', 'formtura')}</option>
               {/* Custom taxonomies loaded dynamically from WordPress */}
               {window.formturaBuilderData?.taxonomies?.map(tax => (
                 <option key={tax.value} value={tax.value}>{tax.label}</option>
@@ -2792,7 +2796,7 @@ const AdvancedTab = ({ field, onUpdate }) => {
               <span className="formtura-toggle-slider"></span>
             </label>
             <span className="formtura-toggle-label">
-              Hide Label <Tooltip text="Check this option to hide the form field label." />
+              {__('Hide Label', 'formtura')} <Tooltip text={__('Check this option to hide the form field label.', 'formtura')} />
             </span>
           </div>
         </div>
@@ -2808,7 +2812,7 @@ const AdvancedTab = ({ field, onUpdate }) => {
               <span className="formtura-toggle-slider"></span>
             </label>
             <span className="formtura-toggle-label">
-              Read-Only <Tooltip text="Check this option to display the field's value without allowing changes. The value will still be submitted." />
+              {__('Read-Only', 'formtura')} <Tooltip text={__('Check this option to display the field\'s value without allowing changes. The value will still be submitted.', 'formtura')} />
             </span>
           </div>
         </div>
@@ -2831,22 +2835,22 @@ const AdvancedTab = ({ field, onUpdate }) => {
 
         <div className="formtura-form-group">
           <label htmlFor="field-size">
-            Field Size <Tooltip text="Select the default size for the field." />
+            {__('Field Size', 'formtura')} <Tooltip text={__('Select the default size for the field.', 'formtura')} />
           </label>
           <select
             id="field-size"
             value={field.fieldSize || 'medium'}
             onChange={(e) => handleChange('fieldSize', e.target.value)}
           >
-            <option value="small">Small</option>
-            <option value="medium">Medium</option>
-            <option value="large">Large</option>
+            <option value="small">{__('Small', 'formtura')}</option>
+            <option value="medium">{__('Medium', 'formtura')}</option>
+            <option value="large">{__('Large', 'formtura')}</option>
           </select>
         </div>
 
         <div className="formtura-form-group">
           <label htmlFor="field-placeholder">
-            Placeholder Text <Tooltip text="Enter placeholder text that appears inside the input field before the user types." />
+            {__('Placeholder Text', 'formtura')} <Tooltip text={__('Enter placeholder text that appears inside the input field before the user types.', 'formtura')} />
           </label>
           <input
             id="field-placeholder"
@@ -2858,7 +2862,7 @@ const AdvancedTab = ({ field, onUpdate }) => {
 
         <div className="formtura-form-group">
           <label>
-            Range <Tooltip text="Define the minimum and the maximum values for the field." />
+            {__('Range', 'formtura')} <Tooltip text={__('Define the minimum and the maximum values for the field.', 'formtura')} />
           </label>
           <div className="formtura-range-row">
             <div className="formtura-range-col">
@@ -2868,7 +2872,7 @@ const AdvancedTab = ({ field, onUpdate }) => {
                 onChange={(e) => handleChange('minValue', e.target.value === '' ? undefined : parseFloat(e.target.value))}
                 placeholder=""
               />
-              <span className="formtura-field-help">Minimum</span>
+              <span className="formtura-field-help">{__('Minimum', 'formtura')}</span>
             </div>
             <div className="formtura-range-col">
               <input
@@ -2877,14 +2881,14 @@ const AdvancedTab = ({ field, onUpdate }) => {
                 onChange={(e) => handleChange('maxValue', e.target.value === '' ? undefined : parseFloat(e.target.value))}
                 placeholder=""
               />
-              <span className="formtura-field-help">Maximum</span>
+              <span className="formtura-field-help">{__('Maximum', 'formtura')}</span>
             </div>
           </div>
         </div>
 
         <div className="formtura-form-group">
           <label htmlFor="field-default-value">
-            Default Value <Tooltip text="Enter text for the default form field value." />
+            {__('Default Value', 'formtura')} <Tooltip text={__('Enter text for the default form field value.', 'formtura')} />
           </label>
           <div className="formtura-input-with-inline-tag">
             <input
@@ -2911,7 +2915,7 @@ const AdvancedTab = ({ field, onUpdate }) => {
               <span className="formtura-toggle-slider"></span>
             </label>
             <span className="formtura-toggle-label">
-              Hide Label <Tooltip text="Check this option to hide the form field label." />
+              {__('Hide Label', 'formtura')} <Tooltip text={__('Check this option to hide the form field label.', 'formtura')} />
             </span>
           </div>
         </div>
@@ -2927,7 +2931,7 @@ const AdvancedTab = ({ field, onUpdate }) => {
               <span className="formtura-toggle-slider"></span>
             </label>
             <span className="formtura-toggle-label">
-              Read-Only <Tooltip text="Check this option to display the field's value without allowing changes. The value will still be submitted." />
+              {__('Read-Only', 'formtura')} <Tooltip text={__('Check this option to display the field\'s value without allowing changes. The value will still be submitted.', 'formtura')} />
             </span>
           </div>
         </div>
@@ -2943,7 +2947,7 @@ const AdvancedTab = ({ field, onUpdate }) => {
               <span className="formtura-toggle-slider"></span>
             </label>
             <span className="formtura-toggle-label">
-              Enable Calculation <Tooltip text="Enable mathematical calculations using values from other form fields." />
+              {__('Enable Calculation', 'formtura')} <Tooltip text={__('Enable mathematical calculations using values from other form fields.', 'formtura')} />
             </span>
           </div>
         </div>
@@ -2951,7 +2955,7 @@ const AdvancedTab = ({ field, onUpdate }) => {
         {field.enableCalculation && (
           <div className="formtura-form-group">
             <label htmlFor="field-calculation-formula">
-              Calculation Formula <Tooltip text="Enter a mathematical formula using field IDs. Example: {field_1} + {field_2} * 2. Supported operators: +, -, *, /, (). Use {field_ID} to reference other number fields." />
+              {__('Calculation Formula', 'formtura')} <Tooltip text={__('Enter a mathematical formula using field IDs. Example: {field_1} + {field_2} * 2. Supported operators: +, -, *, /, (). Use {field_ID} to reference other number fields.', 'formtura')} />
             </label>
             <textarea
               id="field-calculation-formula"
@@ -2962,7 +2966,7 @@ const AdvancedTab = ({ field, onUpdate }) => {
               className="formtura-textarea"
             />
             <p className="formtura-field-description">
-              Use <code>{'{field_ID}'}</code> to reference other number fields. Supported operators: <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>()</code>
+              {__('Use', 'formtura')} <code>{'{field_ID}'}</code> {__('to reference other number fields. Supported operators:', 'formtura')} <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>()</code>
             </p>
           </div>
         )}
@@ -2989,55 +2993,55 @@ const AdvancedTab = ({ field, onUpdate }) => {
               <span className="formtura-toggle-slider"></span>
             </label>
             <span className="formtura-toggle-label">
-              Randomize Choices <Tooltip text="Check this option to randomize the order of the choices." />
+              {__('Randomize Choices', 'formtura')} <Tooltip text={__('Check this option to randomize the order of the choices.', 'formtura')} />
             </span>
           </div>
         </div>
 
         <div className="formtura-form-group">
           <label htmlFor="field-choice-layout">
-            Choice Layout <Tooltip text="Select the layout for displaying field choices." />
+            {__('Choice Layout', 'formtura')} <Tooltip text={__('Select the layout for displaying field choices.', 'formtura')} />
           </label>
           <select
             id="field-choice-layout"
             value={field.choiceLayout || 'one-column'}
             onChange={(e) => handleChange('choiceLayout', e.target.value)}
           >
-            <option value="one-column">One Column</option>
-            <option value="two-columns">Two Columns</option>
-            <option value="three-columns">Three Columns</option>
-            <option value="inline">Inline</option>
+            <option value="one-column">{__('One Column', 'formtura')}</option>
+            <option value="two-columns">{__('Two Columns', 'formtura')}</option>
+            <option value="three-columns">{__('Three Columns', 'formtura')}</option>
+            <option value="inline">{__('Inline', 'formtura')}</option>
           </select>
         </div>
 
         <div className="formtura-form-group">
           <label htmlFor="field-dynamic-choices">
-            Dynamic Choices <Tooltip text="Select auto-populate method to use." />
+            {__('Dynamic Choices', 'formtura')} <Tooltip text={__('Select auto-populate method to use.', 'formtura')} />
           </label>
           <select
             id="field-dynamic-choices"
             value={field.dynamicChoices || 'off'}
             onChange={(e) => handleChange('dynamicChoices', e.target.value)}
           >
-            <option value="off">Off</option>
-            <option value="post_type">Post Type</option>
-            <option value="taxonomy">Taxonomy</option>
+            <option value="off">{__('Off', 'formtura')}</option>
+            <option value="post_type">{__('Post Type', 'formtura')}</option>
+            <option value="taxonomy">{__('Taxonomy', 'formtura')}</option>
           </select>
         </div>
 
         {field.dynamicChoices === 'post_type' && (
           <div className="formtura-form-group">
             <label htmlFor="field-dynamic-post-type">
-              Dynamic Post Type Source <Tooltip text="Select Post Type to use for auto-populating the field choices." />
+              {__('Dynamic Post Type Source', 'formtura')} <Tooltip text={__('Select Post Type to use for auto-populating the field choices.', 'formtura')} />
             </label>
             <select
               id="field-dynamic-post-type"
               value={field.dynamicPostType || 'post'}
               onChange={(e) => handleChange('dynamicPostType', e.target.value)}
             >
-              <option value="post">Posts</option>
-              <option value="page">Pages</option>
-              <option value="attachment">Media</option>
+              <option value="post">{__('Posts', 'formtura')}</option>
+              <option value="page">{__('Pages', 'formtura')}</option>
+              <option value="attachment">{__('Media', 'formtura')}</option>
               {/* Custom post types loaded dynamically from WordPress */}
               {window.formturaBuilderData?.postTypes?.map(pt => (
                 <option key={pt.value} value={pt.value}>{pt.label}</option>
@@ -3049,15 +3053,15 @@ const AdvancedTab = ({ field, onUpdate }) => {
         {field.dynamicChoices === 'taxonomy' && (
           <div className="formtura-form-group">
             <label htmlFor="field-dynamic-taxonomy">
-              Dynamic Taxonomy Source <Tooltip text="Select Taxonomy to use for auto-populating the field choices." />
+              {__('Dynamic Taxonomy Source', 'formtura')} <Tooltip text={__('Select Taxonomy to use for auto-populating the field choices.', 'formtura')} />
             </label>
             <select
               id="field-dynamic-taxonomy"
               value={field.dynamicTaxonomy || 'category'}
               onChange={(e) => handleChange('dynamicTaxonomy', e.target.value)}
             >
-              <option value="category">Categories</option>
-              <option value="post_tag">Tags</option>
+              <option value="category">{__('Categories', 'formtura')}</option>
+              <option value="post_tag">{__('Tags', 'formtura')}</option>
               {/* Custom taxonomies loaded dynamically from WordPress */}
               {window.formturaBuilderData?.taxonomies?.map(tax => (
                 <option key={tax.value} value={tax.value}>{tax.label}</option>
@@ -3079,7 +3083,7 @@ const AdvancedTab = ({ field, onUpdate }) => {
               <span className="formtura-toggle-slider"></span>
             </label>
             <span className="formtura-toggle-label">
-              Hide Label <Tooltip text="Check this option to hide the form field label." />
+              {__('Hide Label', 'formtura')} <Tooltip text={__('Check this option to hide the form field label.', 'formtura')} />
             </span>
           </div>
         </div>
@@ -3095,7 +3099,7 @@ const AdvancedTab = ({ field, onUpdate }) => {
               <span className="formtura-toggle-slider"></span>
             </label>
             <span className="formtura-toggle-label">
-              Read-Only <Tooltip text="Check this option to display the field's value without allowing changes. The value will still be submitted." />
+              {__('Read-Only', 'formtura')} <Tooltip text={__('Check this option to display the field\'s value without allowing changes. The value will still be submitted.', 'formtura')} />
             </span>
           </div>
         </div>
@@ -3113,15 +3117,15 @@ const AdvancedTab = ({ field, onUpdate }) => {
 
         <div className="formtura-form-group">
           <label htmlFor="field-visibility">
-            Visibility <Tooltip text="Determines who can see this field. Select 'Everyone' for public visibility or choose specific user roles." />
+            {__('Visibility', 'formtura')} <Tooltip text={__('Determines who can see this field. Select \'Everyone\' for public visibility or choose specific user roles.', 'formtura')} />
           </label>
           <select
             id="field-visibility"
             value={field.visibility || 'everyone'}
             onChange={(e) => handleChange('visibility', e.target.value)}
           >
-            <option value="everyone">Everyone</option>
-            <option value="logged_in">Logged In Users</option>
+            <option value="everyone">{__('Everyone', 'formtura')}</option>
+            <option value="logged_in">{__('Logged In Users', 'formtura')}</option>
             {window.formturaBuilderData?.userRoles?.map(role => (
               <option key={role.value} value={role.value}>{role.label}</option>
             ))}
@@ -3141,7 +3145,7 @@ const AdvancedTab = ({ field, onUpdate }) => {
               <span className="formtura-toggle-slider"></span>
             </label>
             <span className="formtura-toggle-label">
-              Hide Label <Tooltip text="Check this option to hide the form field label." />
+              {__('Hide Label', 'formtura')} <Tooltip text={__('Check this option to hide the form field label.', 'formtura')} />
             </span>
           </div>
         </div>
@@ -3159,22 +3163,22 @@ const AdvancedTab = ({ field, onUpdate }) => {
 
         <div className="formtura-form-group">
           <label htmlFor="field-size">
-            Field Size <Tooltip text="Select the default size for the field." />
+            {__('Field Size', 'formtura')} <Tooltip text={__('Select the default size for the field.', 'formtura')} />
           </label>
           <select
             id="field-size"
             value={field.fieldSize || 'medium'}
             onChange={(e) => handleChange('fieldSize', e.target.value)}
           >
-            <option value="small">Small</option>
-            <option value="medium">Medium</option>
-            <option value="large">Large</option>
+            <option value="small">{__('Small', 'formtura')}</option>
+            <option value="medium">{__('Medium', 'formtura')}</option>
+            <option value="large">{__('Large', 'formtura')}</option>
           </select>
         </div>
 
         <div className="formtura-form-group">
           <label htmlFor="max-rating">
-            Maximum Rating <Tooltip text="Set the maximum number of stars that will be displayed in the rating field." />
+            {__('Maximum Rating', 'formtura')} <Tooltip text={__('Set the maximum number of stars that will be displayed in the rating field.', 'formtura')} />
           </label>
           <input
             id="max-rating"
@@ -3199,7 +3203,7 @@ const AdvancedTab = ({ field, onUpdate }) => {
               <span className="formtura-toggle-slider"></span>
             </label>
             <span className="formtura-toggle-label">
-              Hide Label <Tooltip text="Check this option to hide the form field label." />
+              {__('Hide Label', 'formtura')} <Tooltip text={__('Check this option to hide the form field label.', 'formtura')} />
             </span>
           </div>
         </div>
@@ -3217,22 +3221,22 @@ const AdvancedTab = ({ field, onUpdate }) => {
 
         <div className="formtura-form-group">
           <label htmlFor="field-size">
-            Field Size <Tooltip text="Select the default size for the field." />
+            {__('Field Size', 'formtura')} <Tooltip text={__('Select the default size for the field.', 'formtura')} />
           </label>
           <select
             id="field-size"
             value={field.fieldSize || 'medium'}
             onChange={(e) => handleChange('fieldSize', e.target.value)}
           >
-            <option value="small">Small</option>
-            <option value="medium">Medium</option>
-            <option value="large">Large</option>
+            <option value="small">{__('Small', 'formtura')}</option>
+            <option value="medium">{__('Medium', 'formtura')}</option>
+            <option value="large">{__('Large', 'formtura')}</option>
           </select>
         </div>
 
         <div className="formtura-form-group">
           <label>
-            Year Range <Tooltip text="Use four digit years or +/- years to make it dynamic. For example, use -5 for the start of the year and +5 for the end of the year." />
+            {__('Year Range', 'formtura')} <Tooltip text={__('Use four digit years or +/- years to make it dynamic. For example, use -5 for the start of the year and +5 for the end of the year.', 'formtura')} />
           </label>
           <div className="formtura-grid-2">
             <input
@@ -3265,7 +3269,7 @@ const AdvancedTab = ({ field, onUpdate }) => {
               <span className="formtura-toggle-slider"></span>
             </label>
             <span className="formtura-toggle-label">
-              Hide Label <Tooltip text="Check this option to hide the form field label." />
+              {__('Hide Label', 'formtura')} <Tooltip text={__('Check this option to hide the form field label.', 'formtura')} />
             </span>
           </div>
         </div>
@@ -3282,22 +3286,22 @@ const AdvancedTab = ({ field, onUpdate }) => {
 
       <div className="formtura-form-group">
         <label htmlFor="field-size">
-          Field Size <Tooltip text="Select the default size for the field." />
+          {__('Field Size', 'formtura')} <Tooltip text={__('Select the default size for the field.', 'formtura')} />
         </label>
         <select
           id="field-size"
           value={field.fieldSize || 'medium'}
           onChange={(e) => handleChange('fieldSize', e.target.value)}
         >
-          <option value="small">Small</option>
-          <option value="medium">Medium</option>
-          <option value="large">Large</option>
+          <option value="small">{__('Small', 'formtura')}</option>
+          <option value="medium">{__('Medium', 'formtura')}</option>
+          <option value="large">{__('Large', 'formtura')}</option>
         </select>
       </div>
 
       <div className="formtura-form-group">
         <label htmlFor="field-placeholder">
-          Placeholder Text <Tooltip text="Enter placeholder text that appears inside the input field before the user types." />
+          {__('Placeholder Text', 'formtura')} <Tooltip text={__('Enter placeholder text that appears inside the input field before the user types.', 'formtura')} />
         </label>
         <input
           id="field-placeholder"
@@ -3320,7 +3324,7 @@ const AdvancedTab = ({ field, onUpdate }) => {
             <span className="formtura-toggle-slider"></span>
           </label>
           <span className="formtura-toggle-label">
-            Hide Label <Tooltip text="Check this option to hide the form field label." />
+            {__('Hide Label', 'formtura')} <Tooltip text={__('Check this option to hide the form field label.', 'formtura')} />
           </span>
         </div>
       </div>
@@ -3343,7 +3347,7 @@ const AdvancedTab = ({ field, onUpdate }) => {
               <span className="formtura-toggle-slider"></span>
             </label>
             <span className="formtura-toggle-label">
-              Hide Sublabels <Tooltip text="Check this option to hide the sublabels under each address input." />
+              {__('Hide Sublabels', 'formtura')} <Tooltip text={__('Check this option to hide the sublabels under each address input.', 'formtura')} />
             </span>
           </div>
         </div>
@@ -3362,7 +3366,7 @@ const AdvancedTab = ({ field, onUpdate }) => {
               <span className="formtura-toggle-slider"></span>
             </label>
             <span className="formtura-toggle-label">
-              Read-Only <Tooltip text="Check this option to display the field's value without allowing changes. The value will still be submitted." />
+              {__('Read-Only', 'formtura')} <Tooltip text={__('Check this option to display the field\'s value without allowing changes. The value will still be submitted.', 'formtura')} />
             </span>
           </div>
         </div>
@@ -3381,7 +3385,7 @@ const AdvancedTab = ({ field, onUpdate }) => {
               <span className="formtura-toggle-slider"></span>
             </label>
             <span className="formtura-toggle-label">
-              Enable Address Autocomplete <Tooltip text="Enable Google Maps autocomplete for address fields to help users quickly enter their address." />
+              {__('Enable Address Autocomplete', 'formtura')} <Tooltip text={__('Enable Google Maps autocomplete for address fields to help users quickly enter their address.', 'formtura')} />
             </span>
           </div>
         </div>
@@ -3400,7 +3404,7 @@ const AdvancedTab = ({ field, onUpdate }) => {
               <span className="formtura-toggle-slider"></span>
             </label>
             <span className="formtura-toggle-label">
-              Enable Calculation <Tooltip text="Enable mathematical calculations using values from other form fields." />
+              {__('Enable Calculation', 'formtura')} <Tooltip text={__('Enable mathematical calculations using values from other form fields.', 'formtura')} />
             </span>
           </div>
         </div>
@@ -3409,7 +3413,7 @@ const AdvancedTab = ({ field, onUpdate }) => {
       {field.enableCalculation && field.type !== 'total' && (
         <div className="formtura-form-group">
           <label htmlFor="field-calculation-formula">
-            Calculation Formula <Tooltip text="Enter a mathematical formula using field IDs. Example: {field_1} + {field_2} * 2. Supported operators: +, -, *, /, (). Use {field_ID} to reference other number fields." />
+            {__('Calculation Formula', 'formtura')} <Tooltip text={__('Enter a mathematical formula using field IDs. Example: {field_1} + {field_2} * 2. Supported operators: +, -, *, /, (). Use {field_ID} to reference other number fields.', 'formtura')} />
           </label>
           <textarea
             id="field-calculation-formula"
@@ -3461,7 +3465,7 @@ const SmartLogicTab = ({ field, fields = [], onUpdate }) => {
 
       <div className="formtura-settings-group">
         <div className="formtura-settings-group-title">
-          <Zap size={16} /> Conditional Logic
+          <Zap size={16} /> {__('Conditional Logic', 'formtura')}
         </div>
 
         <div className="formtura-form-group">
@@ -3478,18 +3482,18 @@ const SmartLogicTab = ({ field, fields = [], onUpdate }) => {
               <span className="formtura-toggle-slider"></span>
             </label>
             <span className="formtura-toggle-label">
-              Enable Conditional Logic <Tooltip text="Show or hide this field based on the values entered in other form fields." />
+              {__('Enable Conditional Logic', 'formtura')} <Tooltip text={__('Show or hide this field based on the values entered in other form fields.', 'formtura')} />
             </span>
           </div>
           <p className="formtura-field-description">
-            Show or hide this field based on other field values
+            {__('Show or hide this field based on other field values', 'formtura')}
           </p>
         </div>
 
         {field.conditionalLogic?.enabled && (
           <div className="formtura-logic-rules">
             <div className="formtura-form-group">
-              <label>Show this field if:</label>
+              <label>{__('Show this field if:', 'formtura')}</label>
               <select
                 value={field.conditionalLogic?.action || 'show'}
                 onChange={(e) => handleChange('conditionalLogic', {
@@ -3497,13 +3501,13 @@ const SmartLogicTab = ({ field, fields = [], onUpdate }) => {
                   action: e.target.value
                 })}
               >
-                <option value="show">Show</option>
-                <option value="hide">Hide</option>
+                <option value="show">{__('Show', 'formtura')}</option>
+                <option value="hide">{__('Hide', 'formtura')}</option>
               </select>
             </div>
 
             <div className="formtura-form-group">
-              <label>When the following match:</label>
+              <label>{__('When the following match:', 'formtura')}</label>
               <select
                 value={field.conditionalLogic?.match || 'all'}
                 onChange={(e) => handleChange('conditionalLogic', {
@@ -3511,49 +3515,49 @@ const SmartLogicTab = ({ field, fields = [], onUpdate }) => {
                   match: e.target.value
                 })}
               >
-                <option value="all">All conditions</option>
-                <option value="any">Any condition</option>
+                <option value="all">{__('All conditions', 'formtura')}</option>
+                <option value="any">{__('Any condition', 'formtura')}</option>
               </select>
             </div>
 
             {conditions.map((condition, index) => (
               <div className="formtura-logic-condition" key={index}>
                 <select
-                  aria-label="Condition field"
+                  aria-label={__('Condition field', 'formtura')}
                   value={condition.field}
                   onChange={(e) => updateCondition(index, 'field', e.target.value)}
                 >
-                  <option value="">Select a field...</option>
+                  <option value="">{__('Select a field...', 'formtura')}</option>
                   {otherFields.map((f) => (
                     <option key={f.id} value={f.id}>{f.label || f.id}</option>
                   ))}
                 </select>
 
                 <select
-                  aria-label="Condition operator"
+                  aria-label={__('Condition operator', 'formtura')}
                   value={condition.operator}
                   onChange={(e) => updateCondition(index, 'operator', e.target.value)}
                 >
-                  <option value="is">is</option>
-                  <option value="is_not">is not</option>
-                  <option value="contains">contains</option>
-                  <option value="greater_than">greater than</option>
-                  <option value="less_than">less than</option>
+                  <option value="is">{__('is', 'formtura')}</option>
+                  <option value="is_not">{__('is not', 'formtura')}</option>
+                  <option value="contains">{__('contains', 'formtura')}</option>
+                  <option value="greater_than">{__('greater than', 'formtura')}</option>
+                  <option value="less_than">{__('less than', 'formtura')}</option>
                 </select>
 
                 <input
                   type="text"
                   className="formtura-choice-input"
-                  aria-label="Condition value"
+                  aria-label={__('Condition value', 'formtura')}
                   value={condition.value}
                   onChange={(e) => updateCondition(index, 'value', e.target.value)}
-                  placeholder="Value"
+                  placeholder={__('Value', 'formtura')}
                 />
 
                 <button
                   type="button"
                   className="formtura-btn-icon"
-                  aria-label="Remove condition"
+                  aria-label={__('Remove condition', 'formtura')}
                   onClick={() => removeCondition(index)}
                 >
                   &times;
@@ -3562,7 +3566,7 @@ const SmartLogicTab = ({ field, fields = [], onUpdate }) => {
             ))}
 
             <button className="formtura-btn" type="button" onClick={addCondition}>
-              + Add Condition
+              + {__('Add Condition', 'formtura')}
             </button>
           </div>
         )}
@@ -3570,7 +3574,7 @@ const SmartLogicTab = ({ field, fields = [], onUpdate }) => {
 
       <div className="formtura-settings-group">
         <div className="formtura-settings-group-title">
-          <Zap size={16} /> Field Behavior
+          <Zap size={16} /> {__('Field Behavior', 'formtura')}
         </div>
 
         <div className="formtura-form-group">
@@ -3584,11 +3588,11 @@ const SmartLogicTab = ({ field, fields = [], onUpdate }) => {
               <span className="formtura-toggle-slider"></span>
             </label>
             <span className="formtura-toggle-label">
-              Dynamic Default Value <Tooltip text="Automatically populate this field with a value from another field when the form loads." />
+              {__('Dynamic Default Value', 'formtura')} <Tooltip text={__('Automatically populate this field with a value from another field when the form loads.', 'formtura')} />
             </span>
           </div>
           <p className="formtura-field-description">
-            Auto-populate this field based on another field&apos;s value
+            {__('Auto-populate this field based on another field\'s value', 'formtura')}
           </p>
         </div>
 
@@ -3603,18 +3607,18 @@ const SmartLogicTab = ({ field, fields = [], onUpdate }) => {
               <span className="formtura-toggle-slider"></span>
             </label>
             <span className="formtura-toggle-label">
-              Enable/Disable Based on Logic <Tooltip text="Enable or disable this field based on conditions set from other form field values." />
+              {__('Enable/Disable Based on Logic', 'formtura')} <Tooltip text={__('Enable or disable this field based on conditions set from other form field values.', 'formtura')} />
             </span>
           </div>
           <p className="formtura-field-description">
-            Make field interactive or read-only based on conditions
+            {__('Make field interactive or read-only based on conditions', 'formtura')}
           </p>
         </div>
       </div>
 
       <div className="formtura-settings-group">
         <div className="formtura-settings-group-title">
-          <Zap size={16} /> Validation Rules
+          <Zap size={16} /> {__('Validation Rules', 'formtura')}
         </div>
 
         <div className="formtura-form-group">
@@ -3628,17 +3632,17 @@ const SmartLogicTab = ({ field, fields = [], onUpdate }) => {
               <span className="formtura-toggle-slider"></span>
             </label>
             <span className="formtura-toggle-label">
-              Custom Validation Rules <Tooltip text="Apply custom validation logic that checks this field's value against conditions from other fields." />
+              {__('Custom Validation Rules', 'formtura')} <Tooltip text={__('Apply custom validation logic that checks this field\'s value against conditions from other fields.', 'formtura')} />
             </span>
           </div>
           <p className="formtura-field-description">
-            Apply dynamic validation based on other field values
+            {__('Apply dynamic validation based on other field values', 'formtura')}
           </p>
         </div>
 
         {field.customValidation && (
           <div className="formtura-form-group">
-            <label htmlFor="validation-rule">Validation Expression</label>
+            <label htmlFor="validation-rule">{__('Validation Expression', 'formtura')}</label>
             <textarea
               id="validation-rule"
               value={field.validationRule || ''}
@@ -3652,7 +3656,7 @@ const SmartLogicTab = ({ field, fields = [], onUpdate }) => {
 
       <div className="formtura-settings-group">
         <div className="formtura-settings-group-title">
-          <Zap size={16} /> Page Navigation
+          <Zap size={16} /> {__('Page Navigation', 'formtura')}
         </div>
 
         <div className="formtura-form-group">
@@ -3666,26 +3670,26 @@ const SmartLogicTab = ({ field, fields = [], onUpdate }) => {
               <span className="formtura-toggle-slider"></span>
             </label>
             <span className="formtura-toggle-label">
-              Branching/Skip Logic <Tooltip text="Redirect users to different form pages based on their answer to this field." />
+              {__('Branching/Skip Logic', 'formtura')} <Tooltip text={__('Redirect users to different form pages based on their answer to this field.', 'formtura')} />
             </span>
           </div>
           <p className="formtura-field-description">
-            Redirect users to different pages based on their answer
+            {__('Redirect users to different pages based on their answer', 'formtura')}
           </p>
         </div>
 
         {field.branchingLogic && (
           <div className="formtura-form-group">
-            <label htmlFor="branch-target">Go to Page</label>
+            <label htmlFor="branch-target">{__('Go to Page', 'formtura')}</label>
             <select
               id="branch-target"
               value={field.branchTarget || ''}
               onChange={(e) => handleChange('branchTarget', e.target.value)}
             >
-              <option value="">Select page...</option>
-              <option value="page-2">Page 2</option>
-              <option value="page-3">Page 3</option>
-              <option value="submit">Submit Form</option>
+              <option value="">{__('Select page...', 'formtura')}</option>
+              <option value="page-2">{__('Page 2', 'formtura')}</option>
+              <option value="page-3">{__('Page 3', 'formtura')}</option>
+              <option value="submit">{__('Submit Form', 'formtura')}</option>
             </select>
           </div>
         )}

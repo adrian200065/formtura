@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { CheckCircle, XCircle, AlertCircle, X } from 'lucide-react';
+import { __ } from '../utils/i18n';
 
 /**
  * Toast notification component
@@ -43,7 +44,7 @@ const Toast = () => {
     <div
       className="formtura-toast-container"
       role="region"
-      aria-label="Notifications"
+      aria-label={__('Notifications', 'formtura')}
       aria-live="polite"
     >
       {toasts.map((toast) => (
@@ -93,7 +94,7 @@ const ToastItem = ({ toast, onClose }) => {
       <button
         className="formtura-toast-close"
         onClick={onClose}
-        aria-label="Close notification"
+        aria-label={__('Close notification', 'formtura')}
         type="button"
       >
         <X size={16} aria-hidden="true" />

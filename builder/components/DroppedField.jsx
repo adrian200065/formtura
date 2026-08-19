@@ -5,6 +5,7 @@ import { useState } from 'react';
 import ConfirmDialog from './ConfirmDialog';
 import FieldPreview from './FieldPreview';
 import Button from './ui/Button';
+import { __, sprintf } from '../utils/i18n';
 
 const DroppedField = ({ field, isSelected, onSelect, onDelete, onDuplicate }) => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -54,7 +55,11 @@ const DroppedField = ({ field, isSelected, onSelect, onDelete, onDuplicate }) =>
         onClick={onSelect}
         onKeyDown={handleKeyDown}
         tabIndex={0}
-        aria-label={`${field.label || 'Untitled field'}, ${isSelected ? 'selected' : 'select to edit'}`}
+        aria-label={sprintf(
+          __('%1$s, %2$s', 'formtura'),
+          field.label || __('Untitled field', 'formtura'),
+          isSelected ? __('selected', 'formtura') : __('select to edit', 'formtura')
+        )}
         aria-current={isSelected ? 'true' : undefined}
       >
         <div className="formtura-field-header">
@@ -62,7 +67,7 @@ const DroppedField = ({ field, isSelected, onSelect, onDelete, onDuplicate }) =>
             <button
               className="formtura-drag-handle"
               type="button"
-              aria-label={`Reorder ${field.label || 'field'}`}
+              aria-label={sprintf(__('Reorder %s', 'formtura'), field.label || __('field', 'formtura'))}
               {...attributes}
               {...listeners}
             >
@@ -81,7 +86,7 @@ const DroppedField = ({ field, isSelected, onSelect, onDelete, onDuplicate }) =>
                 onDuplicate();
               }}
             >
-              Duplicate field
+              {__('Duplicate field', 'formtura')}
             </Button>
             <Button
               className="formtura-field-action-btn formtura-field-delete-btn"
@@ -90,7 +95,7 @@ const DroppedField = ({ field, isSelected, onSelect, onDelete, onDuplicate }) =>
               iconOnly
               onClick={handleDeleteClick}
             >
-              Delete field
+              {__('Delete field', 'formtura')}
             </Button>
           </div>
         </div>
@@ -100,10 +105,10 @@ const DroppedField = ({ field, isSelected, onSelect, onDelete, onDuplicate }) =>
 
       <ConfirmDialog
         isOpen={showDeleteConfirm}
-        title="Delete field?"
-        message="Are you sure you want to delete this field?"
-        confirmText="OK"
-        cancelText="Cancel"
+        title={__('Delete field?', 'formtura')}
+        message={__('Are you sure you want to delete this field?', 'formtura')}
+        confirmText={__('OK', 'formtura')}
+        cancelText={__('Cancel', 'formtura')}
         onConfirm={handleConfirmDelete}
         onCancel={handleCancelDelete}
         type="danger"

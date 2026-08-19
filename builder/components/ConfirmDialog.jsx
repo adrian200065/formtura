@@ -1,5 +1,6 @@
 import { AlertCircle } from 'lucide-react';
 import { useEffect, useRef } from 'react';
+import { __ } from '../utils/i18n';
 
 /**
  * ConfirmDialog - A custom confirmation popup component
@@ -15,10 +16,10 @@ import { useEffect, useRef } from 'react';
  */
 const ConfirmDialog = ({
   isOpen,
-  title = 'Confirm',
-  message = 'Are you sure?',
-  confirmText = 'OK',
-  cancelText = 'Cancel',
+  title = __('Confirm', 'formtura'),
+  message = __('Are you sure?', 'formtura'),
+  confirmText = __('OK', 'formtura'),
+  cancelText = __('Cancel', 'formtura'),
   onConfirm,
   onCancel,
   type = 'danger'

@@ -1,5 +1,6 @@
 import { AlertCircle } from 'lucide-react';
 import { useEffect, useRef } from 'react';
+import { __ } from '../utils/i18n';
 
 /**
  * InfoDialog - A simple informational popup with a single button
@@ -12,9 +13,9 @@ import { useEffect, useRef } from 'react';
  */
 const InfoDialog = ({
   isOpen,
-  title = 'Heads up!',
+  title = __('Heads up!', 'formtura'),
   message = '',
-  buttonText = 'OK',
+  buttonText = __('OK', 'formtura'),
   onClose,
 }) => {
   const dialogRef = useRef(null);

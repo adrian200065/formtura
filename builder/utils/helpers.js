@@ -6,6 +6,20 @@ export const generateFieldId = () => {
 };
 
 /**
+ * Normalizes the builder root's `data-form-id` attribute to a form ID
+ * string, or null when there isn't one yet. form-builder.php always renders
+ * a numeric value there, using "0" as its "no form yet" sentinel (see
+ * Admin::render_builder_page()) - but "0" is a non-empty string, so reading
+ * it as `dataset.formId || null` treated a brand new form as if it already
+ * had id "0". Call this at the point dataset.formId is read (see main.jsx)
+ * rather than downstream, so every consumer just sees a real id or null.
+ */
+export const normalizeFormId = (rawFormId) => {
+  const id = Number(rawFormId);
+  return id > 0 ? String(rawFormId) : null;
+};
+
+/**
  * Validate field data
  */
 export const validateField = (field) => {

@@ -1,4 +1,4 @@
-import { generateFieldId, validateField, exportFormData, importFormData } from '../helpers';
+import { generateFieldId, validateField, exportFormData, importFormData, normalizeFormId } from '../helpers';
 
 describe('helpers utility functions', () => {
   describe('generateFieldId', () => {
@@ -108,6 +108,31 @@ describe('helpers utility functions', () => {
 
       expect(result).toContain('\n');
       expect(result).toContain('  ');
+    });
+  });
+
+  describe('normalizeFormId', () => {
+    // form-builder.php always renders a numeric data-form-id, using "0" as
+    // its "no form yet" sentinel (Admin::render_builder_page() defaults
+    // $form_id to 0). "0" is a non-empty string though, so code that read
+    // dataset.formId straight and did `formId || null` treated a brand new
+    // form as if it already had id "0" - see FormBuilder's handleSaveForm(),
+    // which then never redirected after creating a form, and kept posting
+    // form_id=0 on every subsequent save, creating a new form each time.
+    it('treats "0" the same as an absent value', () => {
+      expect(normalizeFormId('0')).toBeNull();
+    });
+
+    it('treats an empty string as absent', () => {
+      expect(normalizeFormId('')).toBeNull();
+    });
+
+    it('treats undefined as absent', () => {
+      expect(normalizeFormId(undefined)).toBeNull();
+    });
+
+    it('keeps a real numeric form id as a string', () => {
+      expect(normalizeFormId('42')).toBe('42');
     });
   });
 

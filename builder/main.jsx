@@ -4,6 +4,7 @@ import FormBuilder from './components/FormBuilder';
 import Toast from './components/Toast';
 import LiveRegion from './components/LiveRegion';
 import { log, handleError, LogLevel } from './utils/errorHandler';
+import { normalizeFormId } from './utils/helpers';
 import './styles/builder.css';
 import './styles/toast.css';
 import './styles/accessibility.css';
@@ -19,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       log('Creating React root', LogLevel.DEBUG);
       const root = createRoot(container);
-      const formId = container.dataset.formId || null;
+      const formId = normalizeFormId(container.dataset.formId);
 
       log('Rendering FormBuilder', LogLevel.DEBUG, { formId });
       root.render(

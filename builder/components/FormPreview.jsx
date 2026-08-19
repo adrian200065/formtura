@@ -1,5 +1,6 @@
 import { X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { __, sprintf } from '../utils/i18n';
 
 // DateTimePicker Component
 const DateTimePicker = ({ field, fieldSizeClass }) => {
@@ -9,7 +10,11 @@ const DateTimePicker = ({ field, fieldSizeClass }) => {
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const containerRef = useRef(null);
 
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const months = [
+    __('Jan', 'formtura'), __('Feb', 'formtura'), __('Mar', 'formtura'), __('Apr', 'formtura'),
+    __('May', 'formtura'), __('Jun', 'formtura'), __('Jul', 'formtura'), __('Aug', 'formtura'),
+    __('Sep', 'formtura'), __('Oct', 'formtura'), __('Nov', 'formtura'), __('Dec', 'formtura'),
+  ];
 
   // Calculate year range from field settings
   const currentYearNum = new Date().getFullYear();
@@ -148,7 +153,7 @@ const DateTimePicker = ({ field, fieldSizeClass }) => {
             <button type="button" className="formtura-calendar-nav" onClick={nextMonth}>&gt;</button>
           </div>
           <div className="formtura-calendar-weekdays">
-            <span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span><span>Su</span>
+            <span>{__('Mo', 'formtura')}</span><span>{__('Tu', 'formtura')}</span><span>{__('We', 'formtura')}</span><span>{__('Th', 'formtura')}</span><span>{__('Fr', 'formtura')}</span><span>{__('Sa', 'formtura')}</span><span>{__('Su', 'formtura')}</span>
           </div>
           <div className="formtura-calendar-days">
             {renderCalendarDays()}
@@ -180,7 +185,7 @@ const StarRatingPreview = ({ field }) => {
             onFocus={() => setHoverRating(starValue)}
             onBlur={() => setHoverRating(0)}
             onClick={() => setSelectedRating(starValue)}
-            aria-label={`Rate ${starValue} out of ${maxStars}`}
+            aria-label={sprintf(__('Rate %1$d out of %2$d', 'formtura'), starValue, maxStars)}
             aria-pressed={selectedRating === starValue}
           >
             ★
@@ -194,8 +199,8 @@ const StarRatingPreview = ({ field }) => {
 // Interactive Repeater Component
 const RepeaterPreview = ({ field }) => {
   const [rows, setRows] = useState([{ id: 1 }]);
-  const addLabel = field.addNewLabel || 'Add';
-  const removeLabel = field.removeLabel || 'Remove';
+  const addLabel = field.addNewLabel || __('Add', 'formtura');
+  const removeLabel = field.removeLabel || __('Remove', 'formtura');
 
   const addRow = () => {
     setRows([...rows, { id: Date.now() }]);
@@ -212,7 +217,7 @@ const RepeaterPreview = ({ field }) => {
       {rows.map((row, index) => (
         <div key={row.id} className="formtura-repeater-row">
           <div className="formtura-repeater-row-content">
-            <span className="formtura-repeater-row-placeholder">Repeater row {index + 1}</span>
+            <span className="formtura-repeater-row-placeholder">{sprintf(__('Repeater row %d', 'formtura'), index + 1)}</span>
           </div>
           <button
             type="button"
@@ -320,9 +325,9 @@ const FormPreview = ({ fields, formSettings, onClose }) => {
             if (field.dynamicChoices === 'post_type' || field.dynamicChoices === 'taxonomy') {
               // For preview, show placeholder dynamic choices
               return [
-                { value: '1', label: 'Dynamic Choice 1' },
-                { value: '2', label: 'Dynamic Choice 2' },
-                { value: '3', label: 'Dynamic Choice 3' }
+                { value: '1', label: sprintf(__('Dynamic Choice %d', 'formtura'), 1) },
+                { value: '2', label: sprintf(__('Dynamic Choice %d', 'formtura'), 2) },
+                { value: '3', label: sprintf(__('Dynamic Choice %d', 'formtura'), 3) }
               ];
             }
             return field.choices || field.options || [];
@@ -350,7 +355,7 @@ const FormPreview = ({ fields, formSettings, onClose }) => {
 
           return (
             <select required={field.required} className={fieldSizeClass}>
-              <option value="">{field.placeholder || 'Select an option'}</option>
+              <option value="">{field.placeholder || __('Select an option', 'formtura')}</option>
               {selectChoices.map((choice, index) => (
                 <option key={index} value={choice.value || choice}>
                   {choice.label || choice}
@@ -380,9 +385,9 @@ const FormPreview = ({ fields, formSettings, onClose }) => {
           const getRadioChoices = () => {
             if (field.dynamicChoices === 'post_type' || field.dynamicChoices === 'taxonomy') {
               return [
-                { value: '1', label: 'Dynamic Choice 1' },
-                { value: '2', label: 'Dynamic Choice 2' },
-                { value: '3', label: 'Dynamic Choice 3' }
+                { value: '1', label: sprintf(__('Dynamic Choice %d', 'formtura'), 1) },
+                { value: '2', label: sprintf(__('Dynamic Choice %d', 'formtura'), 2) },
+                { value: '3', label: sprintf(__('Dynamic Choice %d', 'formtura'), 3) }
               ];
             }
             return field.choices || field.options || [];
@@ -437,9 +442,9 @@ const FormPreview = ({ fields, formSettings, onClose }) => {
           const getCheckboxesChoices = () => {
             if (field.dynamicChoices === 'post_type' || field.dynamicChoices === 'taxonomy') {
               return [
-                { value: '1', label: 'Dynamic Choice 1' },
-                { value: '2', label: 'Dynamic Choice 2' },
-                { value: '3', label: 'Dynamic Choice 3' }
+                { value: '1', label: sprintf(__('Dynamic Choice %d', 'formtura'), 1) },
+                { value: '2', label: sprintf(__('Dynamic Choice %d', 'formtura'), 2) },
+                { value: '3', label: sprintf(__('Dynamic Choice %d', 'formtura'), 3) }
               ];
             }
             return field.choices || field.options || [];
@@ -470,9 +475,9 @@ const FormPreview = ({ fields, formSettings, onClose }) => {
 
         case 'name': {
           const nameFormat = field.format || 'first-last';
-          const firstPlaceholder = field.firstNamePlaceholder || 'First Name';
-          const middlePlaceholder = field.middleNamePlaceholder || 'Middle Name';
-          const lastPlaceholder = field.lastNamePlaceholder || 'Last Name';
+          const firstPlaceholder = field.firstNamePlaceholder || __('First Name', 'formtura');
+          const middlePlaceholder = field.middleNamePlaceholder || __('Middle Name', 'formtura');
+          const lastPlaceholder = field.lastNamePlaceholder || __('Last Name', 'formtura');
           const firstDefault = field.firstNameDefault || '';
           const middleDefault = field.middleNameDefault || '';
           const lastDefault = field.lastNameDefault || '';
@@ -481,7 +486,7 @@ const FormPreview = ({ fields, formSettings, onClose }) => {
             return (
               <input
                 type="text"
-                placeholder={field.placeholder || 'Name'}
+                placeholder={field.placeholder || __('Name', 'formtura')}
                 defaultValue={firstDefault}
                 className={fieldSizeClass}
               />
@@ -491,15 +496,15 @@ const FormPreview = ({ fields, formSettings, onClose }) => {
               <div className="formtura-preview-name-group formtura-preview-name-group-3">
                 <div className="formtura-preview-name-item">
                   <input type="text" placeholder={firstPlaceholder} defaultValue={firstDefault} className="formtura-preview-name-input" />
-                  {!field.hideSublabels && <span className="formtura-preview-sublabel">First Name</span>}
+                  {!field.hideSublabels && <span className="formtura-preview-sublabel">{__('First Name', 'formtura')}</span>}
                 </div>
                 <div className="formtura-preview-name-item">
                   <input type="text" placeholder={middlePlaceholder} defaultValue={middleDefault} className="formtura-preview-name-input" />
-                  {!field.hideSublabels && <span className="formtura-preview-sublabel">Middle Name</span>}
+                  {!field.hideSublabels && <span className="formtura-preview-sublabel">{__('Middle Name', 'formtura')}</span>}
                 </div>
                 <div className="formtura-preview-name-item">
                   <input type="text" placeholder={lastPlaceholder} defaultValue={lastDefault} className="formtura-preview-name-input" />
-                  {!field.hideSublabels && <span className="formtura-preview-sublabel">Last Name</span>}
+                  {!field.hideSublabels && <span className="formtura-preview-sublabel">{__('Last Name', 'formtura')}</span>}
                 </div>
               </div>
             );
@@ -509,11 +514,11 @@ const FormPreview = ({ fields, formSettings, onClose }) => {
               <div className="formtura-preview-name-group">
                 <div className="formtura-preview-name-item">
                   <input type="text" placeholder={firstPlaceholder} defaultValue={firstDefault} className="formtura-preview-name-input" />
-                  {!field.hideSublabels && <span className="formtura-preview-sublabel">First Name</span>}
+                  {!field.hideSublabels && <span className="formtura-preview-sublabel">{__('First Name', 'formtura')}</span>}
                 </div>
                 <div className="formtura-preview-name-item">
                   <input type="text" placeholder={lastPlaceholder} defaultValue={lastDefault} className="formtura-preview-name-input" />
-                  {!field.hideSublabels && <span className="formtura-preview-sublabel">Last Name</span>}
+                  {!field.hideSublabels && <span className="formtura-preview-sublabel">{__('Last Name', 'formtura')}</span>}
                 </div>
               </div>
             );
@@ -546,7 +551,7 @@ const FormPreview = ({ fields, formSettings, onClose }) => {
           const minValue = field.minValue !== undefined ? field.minValue : 0;
           const maxValue = field.maxValue !== undefined ? field.maxValue : 10;
           const defaultValue = field.defaultValue !== undefined ? field.defaultValue : minValue;
-          const valueDisplay = field.valueDisplay || 'Selected Value: {value}';
+          const valueDisplay = field.valueDisplay || __('Selected Value: {value}', 'formtura');
           const displayText = valueDisplay.replace('{value}', defaultValue);
 
           return (
@@ -585,7 +590,7 @@ const FormPreview = ({ fields, formSettings, onClose }) => {
           );
 
         case 'file-upload': {
-          const previewUploadText = field.uploadText || 'Drop a file here or click to upload';
+          const previewUploadText = field.uploadText || __('Drop a file here or click to upload', 'formtura');
           const previewMaxFileSize = field.maxFileSize || '516';
 
           return (
@@ -599,7 +604,7 @@ const FormPreview = ({ fields, formSettings, onClose }) => {
                   </svg>
                 </div>
                 <div className="formtura-file-upload-text">{previewUploadText}</div>
-                <div className="formtura-file-upload-size">Maximum file size: {previewMaxFileSize}MB</div>
+                <div className="formtura-file-upload-size">{sprintf(__('Maximum file size: %sMB', 'formtura'), previewMaxFileSize)}</div>
               </div>
             </div>
           );
@@ -724,13 +729,13 @@ const FormPreview = ({ fields, formSettings, onClose }) => {
         aria-labelledby="formtura-preview-title"
       >
         <div className="formtura-preview-header">
-          <h2 id="formtura-preview-title">Form preview</h2>
+          <h2 id="formtura-preview-title">{__('Form preview', 'formtura')}</h2>
           <button
             ref={closeButtonRef}
             type="button"
             className="formtura-preview-close"
             onClick={onClose}
-            aria-label="Close preview"
+            aria-label={__('Close preview', 'formtura')}
           >
             <X size={20} />
           </button>
@@ -747,7 +752,7 @@ const FormPreview = ({ fields, formSettings, onClose }) => {
 
             <div className="formtura-preview-fields">
               {fields.length === 0 ? (
-                <p className="formtura-preview-empty">No fields added yet. Add fields to see the preview.</p>
+                <p className="formtura-preview-empty">{__('No fields added yet. Add fields to see the preview.', 'formtura')}</p>
               ) : (
                 renderRows()
               )}
@@ -755,7 +760,7 @@ const FormPreview = ({ fields, formSettings, onClose }) => {
 
             {fields.length > 0 && (
               <button type="submit" className="formtura-preview-submit">
-                {formSettings.submitButtonText || 'Submit'}
+                {formSettings.submitButtonText || __('Submit', 'formtura')}
               </button>
             )}
           </form>

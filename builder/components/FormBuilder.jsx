@@ -11,6 +11,7 @@ import FormPreview from './FormPreview';
 import FormSettingsDialog from './FormSettingsDialog';
 import { announce } from './LiveRegion';
 import Button from './ui/Button';
+import { __, sprintf } from '../utils/i18n';
 
 const FormBuilder = ({ formId }) => {
   const [fields, setFields] = useState([]);
@@ -60,12 +61,12 @@ const FormBuilder = ({ formId }) => {
         }));
       } else {
         handleError('Failed to load form data', {
-          userMessage: 'Could not load form. Please try again.',
+          userMessage: __('Could not load form. Please try again.', 'formtura'),
         });
       }
     } catch (error) {
       handleError(error, {
-        userMessage: 'Failed to load form. Please refresh the page.',
+        userMessage: __('Failed to load form. Please refresh the page.', 'formtura'),
       });
     }
   };
@@ -130,7 +131,7 @@ const FormBuilder = ({ formId }) => {
     const newField = createField(fieldType);
     setFields((currentFields) => [...currentFields, newField]);
     setSelectedField(newField.id);
-    announce(`${newField.label} added`);
+    announce(sprintf(__('%s added', 'formtura'), newField.label));
   };
 
   const handleFieldDelete = (fieldId) => {
@@ -139,7 +140,7 @@ const FormBuilder = ({ formId }) => {
     if (selectedField === fieldId) {
       setSelectedField(null);
     }
-    announce(`Field "${field?.label || 'Untitled'}" deleted`);
+    announce(sprintf(__('Field "%s" deleted', 'formtura'), field?.label || __('Untitled', 'formtura')));
   };
 
   const handleFieldDuplicate = (fieldId) => {
@@ -154,7 +155,7 @@ const FormBuilder = ({ formId }) => {
       const newFields = [...fields];
       newFields.splice(index + 1, 0, newField);
       setFields(newFields);
-      announce(`Field "${fieldToDuplicate.label}" duplicated`);
+      announce(sprintf(__('Field "%s" duplicated', 'formtura'), fieldToDuplicate.label));
     }
   };
 
@@ -182,7 +183,7 @@ const FormBuilder = ({ formId }) => {
       const data = await response.json();
 
       if (data.success) {
-        handleSuccess('Form saved successfully!');
+        handleSuccess(__('Form saved successfully!', 'formtura'));
 
         // If this was a new form (no formId), redirect to edit page with the new ID
         if (!formId && data.data?.form_id) {
@@ -191,12 +192,15 @@ const FormBuilder = ({ formId }) => {
         }
       } else {
         handleError(data.data?.message || 'Unknown error', {
-          userMessage: `Error saving form: ${data.data?.message || 'Please try again'}`,
+          userMessage: sprintf(
+            __('Error saving form: %s', 'formtura'),
+            data.data?.message || __('Please try again', 'formtura')
+          ),
         });
       }
     } catch (error) {
       handleError(error, {
-        userMessage: 'Error saving form. Please try again.',
+        userMessage: __('Error saving form. Please try again.', 'formtura'),
       });
     } finally {
       setIsSaving(false);
@@ -212,26 +216,26 @@ const FormBuilder = ({ formId }) => {
     >
       <div className={`formtura-builder ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
         <a className="formtura-skip-link" href="#formtura-builder-canvas">
-          Skip to form canvas
+          {__('Skip to form canvas', 'formtura')}
         </a>
         <header className="formtura-canvas-header">
           <div className="formtura-builder-heading">
             <a
               className="formtura-back-link"
               href={window.formturaBuilder?.formsUrl}
-              aria-label="Back to all forms"
+              aria-label={__('Back to all forms', 'formtura')}
             >
               <ArrowLeft aria-hidden="true" />
             </a>
             <div>
-              <p className="formtura-builder-eyebrow">Formtura workspace</p>
+              <p className="formtura-builder-eyebrow">{__('Formtura workspace', 'formtura')}</p>
               <h1 className="formtura-canvas-title">
-                {formSettings.title || 'Untitled form'}
+                {formSettings.title || __('Untitled form', 'formtura')}
               </h1>
             </div>
             <span className="formtura-save-status">
               <span aria-hidden="true" className="formtura-save-status-dot" />
-              Editing
+              {__('Editing', 'formtura')}
             </span>
           </div>
           <div className="formtura-canvas-actions">
@@ -240,22 +244,22 @@ const FormBuilder = ({ formId }) => {
               icon={Settings}
               onClick={() => setShowSettings(true)}
             >
-              Form settings
+              {__('Form settings', 'formtura')}
             </Button>
             <Button
               variant="ghost"
               icon={Eye}
               onClick={() => setShowPreview(true)}
             >
-              Preview
+              {__('Preview', 'formtura')}
             </Button>
             <Button
               variant="secondary"
               icon={Code2}
               disabled
-              title="Embed options are not available yet"
+              title={__('Embed options are not available yet', 'formtura')}
             >
-              Embed
+              {__('Embed', 'formtura')}
             </Button>
             <Button
               variant="primary"
@@ -264,7 +268,7 @@ const FormBuilder = ({ formId }) => {
               disabled={isSaving}
               aria-busy={isSaving}
             >
-              {isSaving ? 'Saving…' : 'Save form'}
+              {isSaving ? __('Saving…', 'formtura') : __('Save form', 'formtura')}
             </Button>
           </div>
         </header>

@@ -154,4 +154,28 @@ class SMTPTest extends TestCase {
 
 		$this->assertSame( 'new-pass', Secret_Crypto::decrypt( $this->storedSettings()['smtp_password'] ) );
 	}
+
+	/**
+	 * Browsers omit an unchecked checkbox from the request entirely, so a
+	 * sanitizer that only writes 'smtp_auth' when the key isset() can never
+	 * turn it back off - it just silently keeps whatever was last saved, and
+	 * configure_smtp()'s own default is `true`.
+	 */
+	public function test_unchecking_smtp_auth_overrides_a_stored_true() {
+		$GLOBALS['fta_test_options']['fta_smtp_settings'] = [ 'smtp_auth' => true ];
+
+		$_POST['smtp_settings'] = [];
+
+		$this->callSave();
+
+		$this->assertFalse( $this->storedSettings()['smtp_auth'] );
+	}
+
+	public function test_checking_smtp_auth_is_saved_as_true() {
+		$_POST['smtp_settings'] = [ 'smtp_auth' => '1' ];
+
+		$this->callSave();
+
+		$this->assertTrue( $this->storedSettings()['smtp_auth'] );
+	}
 }

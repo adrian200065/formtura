@@ -290,9 +290,11 @@ class SMTP {
 			$sanitized['smtp_port'] = absint( $settings['smtp_port'] );
 		}
 
-		if ( isset( $settings['smtp_auth'] ) ) {
-			$sanitized['smtp_auth'] = (bool) $settings['smtp_auth'];
-		}
+		// Assigned unconditionally: an unchecked checkbox is absent from the
+		// request, so a guarded assignment would leave a previously saved
+		// `true` in place and make disabling SMTP auth impossible (see
+		// configure_smtp()'s own `true` default).
+		$sanitized['smtp_auth'] = ! empty( $settings['smtp_auth'] );
 
 		if ( isset( $settings['smtp_username'] ) ) {
 			$sanitized['smtp_username'] = sanitize_text_field( $settings['smtp_username'] );

@@ -2,11 +2,12 @@
 #
 # Build a deterministic, installable Formtura release ZIP.
 #
-# The build runs in an isolated temporary workspace copied from the working
-# tree, with .git, node_modules, vendor and dist excluded. That isolation is
-# the point: dependencies and assets are produced from committed manifests, so
-# the artifact never inherits stale or hand-modified files that happen to be
-# sitting in a developer's checkout.
+# The build runs in an isolated temporary workspace populated from `git
+# archive HEAD` - committed content only. That isolation is the point:
+# dependencies and assets are produced from committed manifests, so the
+# artifact never inherits untracked, ignored, or hand-modified files that
+# happen to be sitting in a developer's checkout (stray credentials, .env
+# files, editor/agent tooling state).
 #
 # Usage: scripts/build-release.sh [output-directory]   (default: ./dist)
 
@@ -18,7 +19,7 @@ output_dir="${1:-$repo_root/dist}"
 log() { printf '==> %s\n' "$1"; }
 fail() { printf 'ERROR: %s\n' "$1" >&2; exit 1; }
 
-for cmd in composer pnpm rsync zip unzip php; do
+for cmd in composer pnpm rsync zip unzip php git tar; do
 	command -v "$cmd" >/dev/null 2>&1 || fail "required command not found: $cmd"
 done
 
@@ -46,14 +47,12 @@ package_dir="$package_root/formtura"
 
 mkdir -p "$build_src" "$package_dir"
 
-log "Copying working tree into isolated workspace"
-rsync -a \
-	--exclude '.git/' \
-	--exclude 'node_modules/' \
-	--exclude 'vendor/' \
-	--exclude 'dist/' \
-	--exclude '.worktrees/' \
-	"$repo_root/" "$build_src/"
+log "Copying tracked files into isolated workspace"
+# Only content committed at HEAD enters the build. This is what keeps
+# untracked working-tree files - credentials, .env files, agent/editor
+# tooling state, build scratch - out of the release ZIP, regardless of
+# whether .distignore has been taught about a given name.
+git -C "$repo_root" archive HEAD | tar -x -C "$build_src"
 
 log "Installing production Composer dependencies"
 (

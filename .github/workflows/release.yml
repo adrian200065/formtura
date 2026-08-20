@@ -197,6 +197,27 @@ jobs:
           path: playwright-report/
           if-no-files-found: ignore
 
+  # Fast, dependency-free proof that the packaging pipeline cannot ship
+  # untracked or dev-only content (credentials, .env files, editor/agent
+  # tooling state), regardless of what .distignore currently lists. Does not
+  # need `needs: test` - it stubs runtime assets rather than building them.
+  artifact-contents:
+    name: Release artifact contents
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+
+      - name: Run release artifact content test
+        run: bash scripts/test-release-artifact.sh
+
   # Runs on the plugin's declared minimum. Production dependencies install
   # cleanly there because composer.json requires no runtime packages, and
   # verify-release.sh runs `php -l` over every shipped file - so this job is

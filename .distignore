@@ -24,6 +24,8 @@
 /.vscode/
 /.idea/
 /.worktrees/
+/.eslintrc.json
+*.code-workspace
 
 # Build sources and toolchain
 /builder/
@@ -42,6 +44,7 @@
 /tests/
 /jest.config.js
 /jest.setup.js
+/playwright.config.js
 /phpunit.xml
 /phpunit.xml.dist
 /.phpunit.result.cache
@@ -60,8 +63,7 @@
 /dist/
 
 # Environment and local noise
-/.env
-/.env.local
+/.env*
 /*.log
 /.DS_Store
 /Thumbs.db

@@ -61,6 +61,8 @@ forbidden=(
 	formtura/package.json
 	formtura/vite.config.js
 	formtura/phpunit.xml
+	formtura/.eslintrc.json
+	formtura/playwright.config.js
 )
 
 failures=0
@@ -88,6 +90,25 @@ if [ -f "$builder_js" ]; then
 		failures=$((failures + 1))
 	fi
 fi
+
+# Dotfiles and dot-directories are never runtime content for this plugin -
+# they're where env files, credentials, and editor/agent tooling state live
+# (.env*, .git, .github, .claude, .vscode, ...). This is a backstop, not the
+# primary defense: it catches anything a .distignore pattern doesn't yet
+# name, rather than requiring every possible leak to be enumerated by hand.
+# .gitkeep is the sole standard exception (an empty-directory placeholder).
+while IFS= read -r -d '' bad_path; do
+	echo "FAIL: forbidden dotfile/dev-config present: ${bad_path#"$extract_dir/"}" >&2
+	failures=$((failures + 1))
+done < <(find "$extract_dir/formtura" -mindepth 1 \( -name '.*' -a ! -name '.gitkeep' \) -print0)
+
+# Editor workspace files (e.g. VS Code's *.code-workspace) can be tracked
+# anywhere in the tree, not just the root, so .distignore's named patterns
+# get the same generic backstop.
+while IFS= read -r -d '' bad_path; do
+	echo "FAIL: forbidden editor workspace file present: ${bad_path#"$extract_dir/"}" >&2
+	failures=$((failures + 1))
+done < <(find "$extract_dir/formtura" -name '*.code-workspace' -print0)
 
 # Composer dev dependencies must not have been installed into the package.
 if [ -d "$extract_dir/formtura/vendor/phpunit" ]; then

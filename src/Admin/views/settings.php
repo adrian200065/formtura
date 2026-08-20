@@ -71,13 +71,25 @@ if ( ! defined( 'ABSPATH' ) ) {
 							<label for="fta-recaptcha-secret-key"><?php esc_html_e( 'reCAPTCHA Secret Key', 'formtura' ); ?></label>
 						</th>
 						<td>
+							<?php
+							// Never re-render the saved secret - it is stored encrypted and
+							// the form always resubmits this field blank unless the
+							// administrator is actively changing it. See
+							// Settings::encrypted_secret().
+							?>
 							<input type="password"
 								id="fta-recaptcha-secret-key"
 								name="settings[recaptcha_secret_key]"
-								value="<?php echo esc_attr( isset( $settings['recaptcha_secret_key'] ) ? $settings['recaptcha_secret_key'] : '' ); ?>"
-								class="regular-text">
+								value=""
+								class="regular-text"
+								autocomplete="new-password"
+								placeholder="<?php echo ! empty( $settings['recaptcha_secret_key'] ) ? esc_attr__( 'Leave blank to keep the saved secret key', 'formtura' ) : ''; ?>">
 							<p class="description">
-								<?php esc_html_e( 'Your matching secret key. reCAPTCHA is only applied to forms once both keys are saved.', 'formtura' ); ?>
+								<?php if ( ! empty( $settings['recaptcha_secret_key'] ) ) : ?>
+									<?php esc_html_e( 'A secret key is already saved, encrypted. Enter a new one to replace it.', 'formtura' ); ?>
+								<?php else : ?>
+									<?php esc_html_e( 'Your matching secret key. reCAPTCHA is only applied to forms once both keys are saved.', 'formtura' ); ?>
+								<?php endif; ?>
 							</p>
 						</td>
 					</tr>

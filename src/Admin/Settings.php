@@ -131,7 +131,7 @@ class Settings {
 		}
 
 		if ( isset( $settings['recaptcha_secret_key'] ) ) {
-			$sanitized['recaptcha_secret_key'] = sanitize_text_field( $settings['recaptcha_secret_key'] );
+			$sanitized['recaptcha_secret_key'] = $this->encrypted_secret( $settings['recaptcha_secret_key'], 'recaptcha_secret_key' );
 		}
 
 		if ( isset( $settings['recaptcha_version'] ) ) {
@@ -163,7 +163,42 @@ class Settings {
 		// `true` in place and make opting back out impossible.
 		$sanitized['delete_data_on_uninstall'] = ! empty( $settings['delete_data_on_uninstall'] );
 
+		// Same reasoning as delete_data_on_uninstall above.
+		$sanitized['disable_default_css'] = ! empty( $settings['disable_default_css'] );
+
+		if ( isset( $settings['from_email'] ) ) {
+			$sanitized['from_email'] = sanitize_email( $settings['from_email'] );
+		}
+
+		if ( isset( $settings['from_name'] ) ) {
+			$sanitized['from_name'] = sanitize_text_field( $settings['from_name'] );
+		}
+
 		return $sanitized;
+	}
+
+	/**
+	 * Encrypt a submitted secret for storage, or keep the one already saved.
+	 *
+	 * The settings screen never re-renders a saved secret's real value (see
+	 * the reCAPTCHA secret field in settings.php), so the form always
+	 * resubmits it blank unless the administrator is actively changing it.
+	 * Encrypting an empty submission would overwrite - and lose - a working
+	 * credential every time any other field on the form is saved.
+	 *
+	 * @since 1.0.7
+	 * @param mixed  $submitted Raw submitted value.
+	 * @param string $key       Setting key, used to look up the current value.
+	 * @return string
+	 */
+	private function encrypted_secret( $submitted, $key ) {
+		$submitted = (string) $submitted;
+
+		if ( '' === $submitted ) {
+			return fta_get_setting( $key, '' );
+		}
+
+		return Secret_Crypto::encrypt( $submitted );
 	}
 
 	/**

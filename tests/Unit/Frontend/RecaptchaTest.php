@@ -11,6 +11,7 @@
 
 namespace Formtura\Tests\Unit\Frontend;
 
+use Formtura\Admin\Secret_Crypto;
 use Formtura\Frontend\Submission;
 use Formtura\Tests\TestCase;
 
@@ -102,6 +103,20 @@ class RecaptchaTest extends TestCase {
 		$this->assertSame( 'site', $config['site_key'] );
 		$this->assertSame( 'secret', $config['secret_key'] );
 		$this->assertSame( 'v2', $config['version'] );
+	}
+
+	/**
+	 * The secret key is stored encrypted at rest (see GeneralSettingsSanitizeTest);
+	 * the config helper is the one place it gets decrypted back to a usable
+	 * value for the siteverify request.
+	 */
+	public function test_config_decrypts_a_secret_key_stored_at_rest() {
+		$this->settings( [
+			'recaptcha_site_key'   => 'site',
+			'recaptcha_secret_key' => Secret_Crypto::encrypt( 'secret' ),
+		] );
+
+		$this->assertSame( 'secret', fta_get_recaptcha_config()['secret_key'] );
 	}
 
 	public function test_config_falls_back_to_v2_for_an_unknown_version() {

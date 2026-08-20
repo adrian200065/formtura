@@ -206,7 +206,7 @@ function fta_get_smtp_setting( $key = '', $default = null ) {
  */
 function fta_get_recaptcha_config() {
 	$site_key   = trim( (string) fta_get_setting( 'recaptcha_site_key', '' ) );
-	$secret_key = trim( (string) fta_get_setting( 'recaptcha_secret_key', '' ) );
+	$secret_key = trim( (string) \Formtura\Admin\Secret_Crypto::decrypt( fta_get_setting( 'recaptcha_secret_key', '' ) ) );
 	$version    = 'v3' === fta_get_setting( 'recaptcha_version', 'v2' ) ? 'v3' : 'v2';
 
 	$threshold = fta_get_setting( 'recaptcha_score_threshold', 0.5 );

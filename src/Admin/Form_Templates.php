@@ -69,16 +69,19 @@ class Form_Templates {
 				'icon'        => 'mail',
 				'fields'      => array(
 					array(
+						'id'       => 'field_contact_name',
 						'type'     => 'name',
 						'label'    => __( 'Name', 'formtura' ),
 						'required' => true,
 					),
 					array(
+						'id'       => 'field_contact_email',
 						'type'     => 'email',
 						'label'    => __( 'Email', 'formtura' ),
 						'required' => true,
 					),
 					array(
+						'id'          => 'field_contact_message',
 						'type'        => 'textarea',
 						'label'       => __( 'Message', 'formtura' ),
 						'required'    => true,
@@ -92,21 +95,25 @@ class Form_Templates {
 				'icon'        => 'dollar-sign',
 				'fields'      => array(
 					array(
+						'id'       => 'field_quote_name',
 						'type'     => 'name',
 						'label'    => __( 'Name', 'formtura' ),
 						'required' => true,
 					),
 					array(
+						'id'       => 'field_quote_email',
 						'type'     => 'email',
 						'label'    => __( 'Email', 'formtura' ),
 						'required' => true,
 					),
 					array(
+						'id'       => 'field_quote_company',
 						'type'     => 'text',
 						'label'    => __( 'Company', 'formtura' ),
 						'required' => false,
 					),
 					array(
+						'id'       => 'field_quote_service',
 						'type'     => 'select',
 						'label'    => __( 'Service Interested In', 'formtura' ),
 						'required' => true,
@@ -119,6 +126,7 @@ class Form_Templates {
 						),
 					),
 					array(
+						'id'          => 'field_quote_details',
 						'type'        => 'textarea',
 						'label'       => __( 'Project Details', 'formtura' ),
 						'required'    => true,
@@ -132,6 +140,7 @@ class Form_Templates {
 				'icon'        => 'message-square',
 				'fields'      => array(
 					array(
+						'id'       => 'field_feedback_satisfaction',
 						'type'     => 'radio',
 						'label'    => __( 'How satisfied are you with our service?', 'formtura' ),
 						'required' => true,
@@ -144,6 +153,7 @@ class Form_Templates {
 						),
 					),
 					array(
+						'id'       => 'field_feedback_recommend',
 						'type'     => 'radio',
 						'label'    => __( 'Would you recommend us to others?', 'formtura' ),
 						'required' => true,
@@ -156,6 +166,7 @@ class Form_Templates {
 						),
 					),
 					array(
+						'id'          => 'field_feedback_comments',
 						'type'        => 'textarea',
 						'label'       => __( 'Additional Comments', 'formtura' ),
 						'required'    => false,
@@ -169,27 +180,32 @@ class Form_Templates {
 				'icon'        => 'calendar',
 				'fields'      => array(
 					array(
+						'id'       => 'field_registration_name',
 						'type'     => 'name',
 						'label'    => __( 'Full Name', 'formtura' ),
 						'required' => true,
 					),
 					array(
+						'id'       => 'field_registration_email',
 						'type'     => 'email',
 						'label'    => __( 'Email Address', 'formtura' ),
 						'required' => true,
 					),
 					array(
+						'id'       => 'field_registration_phone',
 						'type'     => 'text',
 						'label'    => __( 'Phone Number', 'formtura' ),
 						'required' => false,
 					),
 					array(
+						'id'       => 'field_registration_attendees',
 						'type'     => 'select',
 						'label'    => __( 'Number of Attendees', 'formtura' ),
 						'required' => true,
 						'options'  => array( '1', '2', '3', '4', '5+' ),
 					),
 					array(
+						'id'          => 'field_registration_requirements',
 						'type'        => 'textarea',
 						'label'       => __( 'Special Requirements', 'formtura' ),
 						'required'    => false,
@@ -203,21 +219,25 @@ class Form_Templates {
 				'icon'        => 'briefcase',
 				'fields'      => array(
 					array(
+						'id'       => 'field_job_name',
 						'type'     => 'name',
 						'label'    => __( 'Full Name', 'formtura' ),
 						'required' => true,
 					),
 					array(
+						'id'       => 'field_job_email',
 						'type'     => 'email',
 						'label'    => __( 'Email Address', 'formtura' ),
 						'required' => true,
 					),
 					array(
+						'id'       => 'field_job_phone',
 						'type'     => 'text',
 						'label'    => __( 'Phone Number', 'formtura' ),
 						'required' => true,
 					),
 					array(
+						'id'       => 'field_job_position',
 						'type'     => 'select',
 						'label'    => __( 'Position Applying For', 'formtura' ),
 						'required' => true,
@@ -230,6 +250,7 @@ class Form_Templates {
 						),
 					),
 					array(
+						'id'          => 'field_job_cover_letter',
 						'type'        => 'textarea',
 						'label'       => __( 'Cover Letter', 'formtura' ),
 						'required'    => false,

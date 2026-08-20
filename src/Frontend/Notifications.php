@@ -74,14 +74,17 @@ class Notifications {
 	 * @param int   $entry_id Entry ID, needed to build file download links.
 	 */
 	private function send_notification( $notification, $form, $entry_data, $entry_id = 0 ) {
-		// Parse recipient email(s).
-		$to = $this->parse_smart_tags( $notification['to'], $entry_data, $entry_id );
+		// Parse recipient email(s). Smart tags can resolve to a
+		// visitor-submitted field value, so the result is stripped of CR/LF
+		// before use - otherwise a submission could inject an arbitrary extra
+		// header (a second Bcc:, a Subject: override) into the outgoing mail.
+		$to = $this->strip_header_injection( $this->parse_smart_tags( $notification['to'], $entry_data, $entry_id ) );
 		$to = array_map( 'trim', explode( ',', $to ) );
 
 		// Parse subject.
-		$subject = $this->parse_smart_tags( $notification['subject'], $entry_data, $entry_id );
+		$subject = $this->strip_header_injection( $this->parse_smart_tags( $notification['subject'], $entry_data, $entry_id ) );
 
-		// Parse message.
+		// Parse message. Not header-bound, so newlines are left intact.
 		$message = $this->parse_smart_tags( $notification['message'], $entry_data, $entry_id );
 
 		// Set headers.
@@ -89,13 +92,13 @@ class Notifications {
 
 		// Add reply-to if specified.
 		if ( ! empty( $notification['reply_to'] ) ) {
-			$reply_to  = $this->parse_smart_tags( $notification['reply_to'], $entry_data, $entry_id );
+			$reply_to  = $this->strip_header_injection( $this->parse_smart_tags( $notification['reply_to'], $entry_data, $entry_id ) );
 			$headers[] = 'Reply-To: ' . $reply_to;
 		}
 
 		// Add CC if specified.
 		if ( ! empty( $notification['cc'] ) ) {
-			$cc        = $this->parse_smart_tags( $notification['cc'], $entry_data, $entry_id );
+			$cc        = $this->strip_header_injection( $this->parse_smart_tags( $notification['cc'], $entry_data, $entry_id ) );
 			$cc_emails = array_map( 'trim', explode( ',', $cc ) );
 			foreach ( $cc_emails as $cc_email ) {
 				$headers[] = 'Cc: ' . $cc_email;
@@ -104,7 +107,7 @@ class Notifications {
 
 		// Add BCC if specified.
 		if ( ! empty( $notification['bcc'] ) ) {
-			$bcc        = $this->parse_smart_tags( $notification['bcc'], $entry_data, $entry_id );
+			$bcc        = $this->strip_header_injection( $this->parse_smart_tags( $notification['bcc'], $entry_data, $entry_id ) );
 			$bcc_emails = array_map( 'trim', explode( ',', $bcc ) );
 			foreach ( $bcc_emails as $bcc_email ) {
 				$headers[] = 'Bcc: ' . $bcc_email;
@@ -133,6 +136,17 @@ class Notifications {
 		}
 
 		do_action( 'fta_after_notification_sent', $sent, $notification, $form, $entry_data );
+	}
+
+	/**
+	 * Strip CR/LF from a value bound for a raw email header.
+	 *
+	 * @since 1.0.6
+	 * @param string $value Header value, already smart-tag-resolved.
+	 * @return string Value with carriage returns and line feeds removed.
+	 */
+	private function strip_header_injection( $value ) {
+		return str_replace( array( "\r", "\n" ), '', (string) $value );
 	}
 
 	/**
@@ -242,7 +256,7 @@ class Notifications {
 	 * @since 1.0.0
 	 * @return array Default notification settings.
 	 */
-	public function get_default_notification() {
+	public static function get_default_notification() {
 		return array(
 			'enabled'  => true,
 			'to'       => '{admin_email}',

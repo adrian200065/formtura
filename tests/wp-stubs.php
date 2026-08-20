@@ -323,6 +323,12 @@ if ( ! function_exists( 'apply_filters' ) ) {
 	}
 }
 
+if ( ! function_exists( 'do_action' ) ) {
+	function do_action( $hook, ...$args ) {
+		// No listeners in tests; the real dispatcher has no state worth stubbing.
+	}
+}
+
 if ( ! function_exists( 'current_time' ) ) {
 	function current_time( $type, $gmt = 0 ) {
 		$offset = isset( $GLOBALS['fta_test_gmt_offset'] ) ? (int) $GLOBALS['fta_test_gmt_offset'] : 0;
@@ -497,7 +503,33 @@ if ( ! function_exists( 'wp_upload_dir' ) ) {
 
 if ( ! function_exists( 'get_bloginfo' ) ) {
 	function get_bloginfo( $show = '', $filter = 'raw' ) {
-		return 'Test Site';
+		return 'charset' === $show ? 'UTF-8' : 'Test Site';
+	}
+}
+
+if ( ! function_exists( 'bloginfo' ) ) {
+	function bloginfo( $show = '' ) {
+		echo esc_html( get_bloginfo( $show ) ); // phpcs:ignore
+	}
+}
+
+if ( ! function_exists( 'language_attributes' ) ) {
+	function language_attributes( $doctype = 'html' ) {
+		echo 'lang="en-US"'; // phpcs:ignore
+	}
+}
+
+if ( ! function_exists( 'home_url' ) ) {
+	function home_url( $path = '', $scheme = null ) {
+		return 'https://example.com' . $path;
+	}
+}
+
+if ( ! function_exists( 'wpautop' ) ) {
+	function wpautop( $text ) {
+		$text = trim( (string) $text );
+
+		return '' === $text ? '' : '<p>' . str_replace( "\n", '<br>', $text ) . '</p>';
 	}
 }
 

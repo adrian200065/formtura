@@ -81,25 +81,26 @@ mkdir -p "$leaky_src"
 git -C "$repo_root" archive HEAD | tar -x -C "$leaky_src"
 stub_runtime_assets "$leaky_src"
 
-# Exactly what leaked in the reported incident, plus a stand-in for a
-# credential file: neither name appears anywhere in .distignore, so only
+# A stand-in for a credential file (.npmrc holds registry auth tokens in
+# real projects) plus a synthetic name .distignore can never coincidentally
+# grow a pattern for. Neither should appear in .distignore, so only
 # verify-release.sh's generic dotfile/dev-config backstop can catch them.
-printf 'DB_PASSWORD=super-secret\n' >"$leaky_src/.env.e2e"
 printf '//registry.npmjs.org/:_authToken=leaked-token\n' >"$leaky_src/.npmrc"
+printf 'leaked\n' >"$leaky_src/.formtura-test-leak-marker"
 
 leaky_pkg_root="$work/leaky-package"
 leaky_pkg="$leaky_pkg_root/formtura"
 mkdir -p "$leaky_pkg"
 rsync -a --exclude-from="$leaky_src/.distignore" "$leaky_src/" "$leaky_pkg/"
 
-[ -e "$leaky_pkg/.env.e2e" ] || fail "test setup error: .distignore already excludes .env.e2e, this case no longer isolates the backstop"
 [ -e "$leaky_pkg/.npmrc" ] || fail "test setup error: .distignore already excludes .npmrc, this case no longer isolates the backstop"
+[ -e "$leaky_pkg/.formtura-test-leak-marker" ] || fail "test setup error: .distignore already excludes the synthetic marker file, this case no longer isolates the backstop"
 
 leaky_zip="$work/formtura-leaky.zip"
 (cd "$leaky_pkg_root" && zip -qr "$leaky_zip" formtura)
 
 if "$repo_root/scripts/verify-release.sh" "$leaky_zip" >/dev/null 2>&1; then
-	fail "verify-release.sh accepted a package containing .env.e2e and .npmrc - the dotfile backstop is not working"
+	fail "verify-release.sh accepted a package containing .npmrc and a stray dotfile - the dotfile backstop is not working"
 fi
 
 log "OK: release packaging keeps untracked and dev-only content out"

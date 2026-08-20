@@ -71,11 +71,17 @@ class Settings {
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- every field is sanitized below in sanitize_settings().
 		$settings = isset( $_POST['settings'] ) ? wp_unslash( $_POST['settings'] ) : array();
 
-		// Sanitize settings.
-		$sanitized_settings = $this->sanitize_settings( $settings );
+		// Sanitize settings, then merge onto the existing option rather than
+		// replacing it outright - this form only has controls for a subset
+		// of fta_settings, and a full replace would silently drop every key
+		// it doesn't submit (currency, asset loading, debug, license, etc.).
+		$existing           = fta_get_setting();
+		$sanitized_settings = array_merge( $existing, $this->sanitize_settings( $settings ) );
 
-		// Save settings.
-		$result = update_option( 'fta_settings', $sanitized_settings );
+		// update_option() returns false both on failure and when the new
+		// value is identical to the old one - only skip the write (and still
+		// report success) in the latter case.
+		$result = $sanitized_settings === $existing ? true : update_option( 'fta_settings', $sanitized_settings );
 
 		if ( $result ) {
 			wp_send_json_success(

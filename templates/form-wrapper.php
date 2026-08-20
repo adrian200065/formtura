@@ -43,6 +43,26 @@ $recaptcha = fta_get_recaptcha_config();
 			</div><!-- /.fta-form-header -->
 		<?php endif; ?>
 
+		<?php
+		// Honeypot: invisible to a real visitor and never submitted with a
+		// value except by something filling in every input it finds (see
+		// Submission::honeypot_tripped()). Hidden with an inline style, not
+		// the plugin's stylesheet, so it stays hidden even when "Disable
+		// Default CSS" is on. tabindex="-1" and aria-hidden keep it out of
+		// keyboard and screen-reader navigation for anyone who does reach it.
+		?>
+		<div style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;" aria-hidden="true">
+			<label for="fta-hp-<?php echo esc_attr( $form_id ); ?>">
+				<?php esc_html_e( 'Leave this field blank', 'formtura' ); ?>
+			</label>
+			<input type="text"
+				id="fta-hp-<?php echo esc_attr( $form_id ); ?>"
+				name="<?php echo esc_attr( \Formtura\Frontend\Submission::HONEYPOT_FIELD ); ?>"
+				value=""
+				tabindex="-1"
+				autocomplete="off">
+		</div>
+
 		<div class="fta-form-body">
 			<?php
 			if ( ! empty( $form_fields ) ) {

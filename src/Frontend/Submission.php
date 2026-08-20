@@ -21,6 +21,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Submission {
 
 	/**
+	 * POST key of the honeypot field templates/form-wrapper.php renders,
+	 * hidden from real visitors and never posted with a value except by
+	 * something filling in every input it finds. A real field's submitted
+	 * name is always field_<id> (see fta_get_field_name()), so this constant
+	 * cannot collide with a form's own data.
+	 *
+	 * @var string
+	 */
+	const HONEYPOT_FIELD = 'fta_hp';
+
+	/**
 	 * Private storage service shared by the file-producing steps.
 	 *
 	 * @var File_Storage
@@ -78,6 +89,23 @@ class Submission {
 			);
 		}
 
+		// Per-IP submission throttle, checked before any form lookup or
+		// validation work so a flood costs this endpoint as little as
+		// possible. reCAPTCHA is the primary defence when configured, but
+		// this applies regardless - including when reCAPTCHA is disabled,
+		// the case it does nothing for.
+		if ( $this->submission_rate_limited() ) {
+			fta_log( sprintf( 'Submission rate limit exceeded for IP %s (form %d).', $this->get_user_ip(), $form_id ), 'warning' );
+
+			wp_send_json_error(
+				array(
+					'message' => __( 'You are submitting too quickly. Please wait a moment and try again.', 'formtura' ),
+				)
+			);
+		}
+
+		$this->record_submission_attempt();
+
 		// Get form.
 		$form = fta_get_form( $form_id );
 
@@ -96,6 +124,17 @@ class Submission {
 					'message' => __( 'This form is currently inactive.', 'formtura' ),
 				)
 			);
+		}
+
+		// Honeypot: a hidden field no real visitor can see or fill in (see
+		// templates/form-wrapper.php). A non-empty value means something
+		// filled in every input it found, not a person - reported as an
+		// ordinary success, with no entry, file, or notification produced,
+		// so the sender has no signal that it was caught.
+		if ( $this->honeypot_tripped() ) {
+			fta_log( sprintf( 'Honeypot triggered for IP %s (form %d).', $this->get_user_ip(), $form_id ), 'warning' );
+
+			wp_send_json_success( $this->build_success_response( $form, null ) );
 		}
 
 		// Validate reCAPTCHA if enabled.
@@ -207,8 +246,25 @@ class Submission {
 		// Send notifications.
 		do_action( 'fta_after_form_submission', $entry_id, $form, $entry_data );
 
-		// Get success message and redirect URL. The builder stores this
-		// under the camelCase key it posts (see
+		wp_send_json_success( $this->build_success_response( $form, $entry_id ) );
+	}
+
+	/**
+	 * Build the JSON payload sent back for a successful submission.
+	 *
+	 * Shared with the honeypot path in ajax_submit_form(), which reports a
+	 * real submission's success shape - message and redirect included - with
+	 * $entry_id null, so a caught sender sees nothing distinguishing it from
+	 * a genuine one.
+	 *
+	 * @since 1.0.9
+	 * @param array    $form     Form data.
+	 * @param int|null $entry_id Created entry id, or null when no entry was
+	 *                           created.
+	 * @return array
+	 */
+	private function build_success_response( $form, $entry_id ) {
+		// The builder stores this under the camelCase key it posts (see
 		// Form_Builder::sanitize_settings_data()); snake_case here never
 		// matched a saved setting, so a custom message silently fell back to
 		// the default below on every submission.
@@ -218,12 +274,10 @@ class Submission {
 
 		$redirect_url = isset( $form['settings']['redirect_url'] ) ? $form['settings']['redirect_url'] : '';
 
-		wp_send_json_success(
-			array(
-				'message'      => $success_message,
-				'redirect_url' => $redirect_url,
-				'entry_id'     => $entry_id,
-			)
+		return array(
+			'message'      => $success_message,
+			'redirect_url' => $redirect_url,
+			'entry_id'     => $entry_id,
 		);
 	}
 
@@ -337,19 +391,82 @@ class Submission {
 	/**
 	 * Transient key for this request's coupon-attempt budget.
 	 *
-	 * Keyed on get_user_ip(), which - like the rest of this plugin - prefers
-	 * client-supplied headers (HTTP_CLIENT_IP, HTTP_X_FORWARDED_FOR) over
-	 * REMOTE_ADDR. Those headers are attacker-controlled: a request that
-	 * rotates them gets a fresh budget each time, so this throttle raises
-	 * the cost of a casual sweep but is not a hard guarantee against a
-	 * determined one. The real backstop remains PaymentTotals re-validating
-	 * independently on submission.
+	 * Keyed on get_user_ip(), which only reflects a client-supplied
+	 * X-Forwarded-For value when the request arrives from an administrator-
+	 * configured trusted proxy (see Settings' `trusted_proxies`) - otherwise
+	 * it is the raw connecting address, which a client cannot spoof. A
+	 * request from behind an untrusted or unconfigured proxy is keyed on
+	 * that proxy's own address instead, so this throttle's precision is only
+	 * as good as that configuration.
 	 *
 	 * @since 1.0.4
 	 * @return string
 	 */
 	private function coupon_throttle_key() {
 		return 'fta_coupon_attempts_' . md5( $this->get_user_ip() );
+	}
+
+	/**
+	 * Whether this IP is currently over the submission budget.
+	 *
+	 * Unlike the coupon throttle above, every attempt counts here - not just
+	 * failures - because a submission is expensive regardless of whether it
+	 * ultimately validates: it can write a database row, move an uploaded
+	 * file to disk, and send an email. A limit of 0 disables the throttle
+	 * entirely (see Settings::get_defaults()).
+	 *
+	 * @since 1.0.9
+	 * @return bool True when this IP is over the limit.
+	 */
+	private function submission_rate_limited() {
+		$limit = (int) fta_get_setting( 'submission_rate_limit', 10 );
+
+		if ( $limit <= 0 ) {
+			return false;
+		}
+
+		return (int) get_transient( $this->submission_throttle_key() ) >= $limit;
+	}
+
+	/**
+	 * Record one submission attempt against this IP's budget.
+	 *
+	 * Called once per request that reaches this point, regardless of how the
+	 * submission is ultimately handled (honeypot, validation failure, or a
+	 * real entry) - see the note on submission_rate_limited().
+	 *
+	 * @since 1.0.9
+	 */
+	private function record_submission_attempt() {
+		$key   = $this->submission_throttle_key();
+		$count = (int) get_transient( $key );
+
+		// 10 minutes. Not MINUTE_IN_SECONDS - a spelled-out literal so the
+		// window is legible without chasing a WordPress core constant.
+		set_transient( $key, $count + 1, 10 * 60 );
+	}
+
+	/**
+	 * Transient key for this request's submission budget.
+	 *
+	 * @since 1.0.9
+	 * @return string
+	 */
+	private function submission_throttle_key() {
+		return 'fta_submission_attempts_' . md5( $this->get_user_ip() );
+	}
+
+	/**
+	 * Whether the hidden honeypot field was filled in.
+	 *
+	 * @since 1.0.9
+	 * @return bool
+	 */
+	private function honeypot_tripped() {
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- nonce already verified in ajax_submit_form() before this method runs.
+		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- no sanitizer applies; only presence/emptiness of the raw value is checked, and it is never stored or displayed.
+		return isset( $_POST[ self::HONEYPOT_FIELD ] ) && '' !== trim( (string) wp_unslash( $_POST[ self::HONEYPOT_FIELD ] ) );
+		// phpcs:enable
 	}
 
 	/**
@@ -862,23 +979,97 @@ class Submission {
 	}
 
 	/**
-	 * Get user IP address.
+	 * Get the request's IP address.
+	 *
+	 * REMOTE_ADDR - the actual TCP peer - is always what's returned, unless
+	 * that peer is an administrator-configured trusted proxy (Settings'
+	 * `trusted_proxies`), in which case the leftmost address in
+	 * X-Forwarded-For is used instead. Both HTTP_CLIENT_IP and an untrusted
+	 * X-Forwarded-For are attacker-controlled - a request can set either to
+	 * anything - so honoring them unconditionally let a client defeat
+	 * anything keyed on this value (the submission and coupon throttles,
+	 * abuse log entries) just by rotating the header per request.
 	 *
 	 * @since 1.0.0
 	 * @return string User IP address.
 	 */
 	private function get_user_ip() {
-		$ip = '';
+		$remote_addr = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
 
-		if ( isset( $_SERVER['HTTP_CLIENT_IP'] ) ) {
-			$ip = sanitize_text_field( wp_unslash( $_SERVER['HTTP_CLIENT_IP'] ) );
-		} elseif ( isset( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
-			$ip = sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_FORWARDED_FOR'] ) );
-		} elseif ( isset( $_SERVER['REMOTE_ADDR'] ) ) {
-			$ip = sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
+		if ( '' === $remote_addr || ! isset( $_SERVER['HTTP_X_FORWARDED_FOR'] ) || ! $this->ip_is_trusted_proxy( $remote_addr ) ) {
+			return $remote_addr;
 		}
 
-		return $ip;
+		$forwarded_for = sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_FORWARDED_FOR'] ) );
+		$client_ip     = trim( explode( ',', $forwarded_for )[0] );
+
+		return filter_var( $client_ip, FILTER_VALIDATE_IP ) ? $client_ip : $remote_addr;
+	}
+
+	/**
+	 * Whether an address is one of the administrator-configured trusted
+	 * proxies (see Settings::sanitize_trusted_proxies()).
+	 *
+	 * @since 1.0.9
+	 * @param string $ip Address to check (the request's REMOTE_ADDR).
+	 * @return bool
+	 */
+	private function ip_is_trusted_proxy( $ip ) {
+		$trusted = (string) fta_get_setting( 'trusted_proxies', '' );
+
+		if ( '' === trim( $trusted ) ) {
+			return false;
+		}
+
+		foreach ( preg_split( '/[\r\n]+/', $trusted ) as $entry ) {
+			$entry = trim( $entry );
+
+			if ( '' !== $entry && $this->ip_in_range( $ip, $entry ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Whether an address falls within a single trusted-proxy entry - either
+	 * an exact address or a CIDR range.
+	 *
+	 * @since 1.0.9
+	 * @param string $ip    Address to test.
+	 * @param string $range A trusted_proxies entry: an IP or "ip/prefix".
+	 * @return bool
+	 */
+	private function ip_in_range( $ip, $range ) {
+		if ( false === strpos( $range, '/' ) ) {
+			return $ip === $range;
+		}
+
+		list( $subnet, $prefix ) = explode( '/', $range, 2 );
+
+		$ip_bin     = @inet_pton( $ip ); // phpcs:ignore WordPress.PHP.NoSilencedErrors -- inet_pton() warns on malformed input; failure is handled below via its false return.
+		$subnet_bin = @inet_pton( $subnet ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+
+		if ( false === $ip_bin || false === $subnet_bin || strlen( $ip_bin ) !== strlen( $subnet_bin ) ) {
+			return false;
+		}
+
+		$bits           = max( 0, min( strlen( $ip_bin ) * 8, (int) $prefix ) );
+		$bytes          = intdiv( $bits, 8 );
+		$remainder_bits = $bits % 8;
+
+		if ( $bytes > 0 && substr( $ip_bin, 0, $bytes ) !== substr( $subnet_bin, 0, $bytes ) ) {
+			return false;
+		}
+
+		if ( 0 === $remainder_bits ) {
+			return true;
+		}
+
+		$mask = ~( 0xFF >> $remainder_bits ) & 0xFF;
+
+		return ( ord( $ip_bin[ $bytes ] ) & $mask ) === ( ord( $subnet_bin[ $bytes ] ) & $mask );
 	}
 
 	/**

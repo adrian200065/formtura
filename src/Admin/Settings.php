@@ -174,7 +174,49 @@ class Settings {
 			$sanitized['from_name'] = sanitize_text_field( $settings['from_name'] );
 		}
 
+		// Anti-abuse settings.
+		if ( isset( $settings['submission_rate_limit'] ) ) {
+			$sanitized['submission_rate_limit'] = max( 0, (int) $settings['submission_rate_limit'] );
+		}
+
+		if ( isset( $settings['trusted_proxies'] ) ) {
+			$sanitized['trusted_proxies'] = $this->sanitize_trusted_proxies( $settings['trusted_proxies'] );
+		}
+
 		return $sanitized;
+	}
+
+	/**
+	 * Sanitize the trusted-proxy list.
+	 *
+	 * One IP or CIDR per line, invalid entries dropped rather than stored -
+	 * Submission::get_user_ip() trusts every line here to decide whether
+	 * X-Forwarded-For is honored at all, so a malformed entry must not
+	 * silently become "trust everything."
+	 *
+	 * @since 1.0.9
+	 * @param string $raw Raw textarea input.
+	 * @return string Newline-separated list of valid entries.
+	 */
+	private function sanitize_trusted_proxies( $raw ) {
+		$lines = preg_split( '/[\r\n]+/', (string) $raw );
+		$valid = array();
+
+		foreach ( $lines as $line ) {
+			$line = trim( $line );
+
+			if ( '' === $line ) {
+				continue;
+			}
+
+			$address = explode( '/', $line, 2 )[0];
+
+			if ( filter_var( $address, FILTER_VALIDATE_IP ) ) {
+				$valid[] = $line;
+			}
+		}
+
+		return implode( "\n", $valid );
 	}
 
 	/**
@@ -220,6 +262,8 @@ class Settings {
 			'currency'                  => 'USD',
 			'entry_retention_days'      => 0,
 			'delete_data_on_uninstall'  => false,
+			'submission_rate_limit'     => 10,
+			'trusted_proxies'           => '',
 		);
 	}
 }

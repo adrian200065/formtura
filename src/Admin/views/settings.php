@@ -201,6 +201,42 @@ if ( ! defined( 'ABSPATH' ) ) {
 							</p>
 						</td>
 					</tr>
+
+					<tr>
+						<th scope="row">
+							<label for="fta-submission-rate-limit"><?php esc_html_e( 'Submission Rate Limit', 'formtura' ); ?></label>
+						</th>
+						<td>
+							<input type="number"
+								id="fta-submission-rate-limit"
+								name="settings[submission_rate_limit]"
+								value="<?php echo esc_attr( isset( $settings['submission_rate_limit'] ) ? $settings['submission_rate_limit'] : 10 ); ?>"
+								step="1"
+								min="0"
+								class="small-text">
+							<?php esc_html_e( 'submissions per IP every 10 minutes', 'formtura' ); ?>
+							<p class="description">
+								<?php esc_html_e( 'Submissions beyond this limit from the same IP address are rejected. Set to 0 to disable rate limiting.', 'formtura' ); ?>
+							</p>
+						</td>
+					</tr>
+
+					<tr>
+						<th scope="row">
+							<label for="fta-trusted-proxies"><?php esc_html_e( 'Trusted Proxies', 'formtura' ); ?></label>
+						</th>
+						<td>
+							<textarea
+								id="fta-trusted-proxies"
+								name="settings[trusted_proxies]"
+								rows="4"
+								class="large-text code"
+								placeholder="203.0.113.0/24&#10;198.51.100.7"><?php echo esc_textarea( isset( $settings['trusted_proxies'] ) ? $settings['trusted_proxies'] : '' ); ?></textarea>
+							<p class="description">
+								<?php esc_html_e( 'One IP address or CIDR range per line. Only requests arriving from these addresses have their X-Forwarded-For header trusted for rate limiting and abuse logging. Leave blank if this site is not behind a reverse proxy or CDN.', 'formtura' ); ?>
+							</p>
+						</td>
+					</tr>
 				</tbody>
 			</table>
 

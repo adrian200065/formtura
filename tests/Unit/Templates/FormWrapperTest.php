@@ -135,4 +135,44 @@ class FormWrapperTest extends TestCase {
 
 		$this->assertStringContainsString( 'Submit', $button );
 	}
+
+	/**
+	 * The honeypot field (see Submission::honeypot_tripped()) has to post
+	 * under the exact key the server checks, or the whole mechanism does
+	 * nothing.
+	 */
+	public function test_the_honeypot_field_posts_the_key_the_server_reads() {
+		$html = $this->render();
+
+		$this->assertStringContainsString(
+			'name="' . \Formtura\Frontend\Submission::HONEYPOT_FIELD . '"',
+			$html
+		);
+	}
+
+	/**
+	 * Inside the form, or it would never be submitted alongside real fields.
+	 */
+	public function test_the_honeypot_field_is_inside_the_form() {
+		$html = $this->render();
+
+		$this->assertMatchesRegularExpression(
+			'/<form[^>]*>.*name="' . preg_quote( \Formtura\Frontend\Submission::HONEYPOT_FIELD, '/' ) . '".*<\/form>/s',
+			$html
+		);
+	}
+
+	/**
+	 * Hidden with an inline style rather than the plugin's own CSS class, so
+	 * it stays hidden even when "Disable Default CSS" turns that stylesheet
+	 * off - a visible honeypot would trap real visitors, not bots.
+	 */
+	public function test_the_honeypot_field_is_hidden_inline_not_via_a_stylesheet_class() {
+		$html   = $this->render();
+		$offset = strpos( $html, '<div style=' );
+		$field  = substr( $html, $offset, strpos( $html, '</div>', $offset ) - $offset );
+
+		$this->assertStringContainsString( 'position:absolute', $field );
+		$this->assertStringContainsString( \Formtura\Frontend\Submission::HONEYPOT_FIELD, $field );
+	}
 }

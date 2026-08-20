@@ -36,6 +36,9 @@
 			
 			// Toggle visibility
 			$(document).on('change', '.fta-toggle-visibility', this.toggleVisibility);
+
+			// Delete a form from the forms list
+			$(document).on('click', '.fta-delete-form', this.deleteForm);
 		},
 
 		/**
@@ -146,6 +149,55 @@
 				},
 				complete() {
 					$button.prop('disabled', false).text('Save Settings');
+				}
+			});
+		},
+
+		/**
+		 * Delete a form, and its entries and uploaded files with it.
+		 */
+		deleteForm(e) {
+			e.preventDefault();
+
+			const $button = $(this);
+			const formId = String($button.data('form-id'));
+
+			if (!window.confirm(formturaAdmin.strings.confirmDeleteForm)) {
+				return;
+			}
+
+			$button.prop('disabled', true);
+
+			$.ajax({
+				url: formturaAdmin.ajaxUrl,
+				type: 'POST',
+				data: {
+					action: 'fta_delete_form',
+					nonce: formturaAdmin.nonce,
+					form_id: formId
+				},
+				success(response) {
+					if (!response.success) {
+						FormturaAdmin.showNotice(
+							(response.data && response.data.message) || formturaAdmin.strings.error,
+							'error'
+						);
+
+						return;
+					}
+
+					$button.closest('.fta-form-row').remove();
+
+					FormturaAdmin.showNotice(
+						(response.data && response.data.message) || formturaAdmin.strings.formDeleted,
+						'success'
+					);
+				},
+				error() {
+					FormturaAdmin.showNotice(formturaAdmin.strings.error, 'error');
+				},
+				complete() {
+					$button.prop('disabled', false);
 				}
 			});
 		},

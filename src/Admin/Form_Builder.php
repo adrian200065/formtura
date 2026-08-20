@@ -39,6 +39,7 @@ class Form_Builder {
 		add_action( 'wp_ajax_fta_save_form', array( $this, 'ajax_save_form' ) );
 		add_action( 'wp_ajax_fta_get_form', array( $this, 'ajax_get_form' ) );
 		add_action( 'wp_ajax_fta_duplicate_form', array( $this, 'ajax_duplicate_form' ) );
+		add_action( 'wp_ajax_fta_delete_form', array( $this, 'ajax_delete_form' ) );
 	}
 
 	/**
@@ -256,6 +257,53 @@ class Form_Builder {
 			wp_send_json_error(
 				array(
 					'message' => __( 'Failed to duplicate form.', 'formtura' ),
+				)
+			);
+		}
+	}
+
+	/**
+	 * AJAX handler to delete a form.
+	 *
+	 * @since 1.0.6
+	 */
+	public function ajax_delete_form() {
+		// Verify nonce.
+		check_ajax_referer( 'formtura_admin', 'nonce' );
+
+		// Check permissions.
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error(
+				array(
+					'message' => __( 'You do not have permission to perform this action.', 'formtura' ),
+				)
+			);
+		}
+
+		$form_id = isset( $_POST['form_id'] ) ? absint( $_POST['form_id'] ) : 0;
+
+		if ( ! $form_id ) {
+			wp_send_json_error(
+				array(
+					'message' => __( 'Invalid form ID.', 'formtura' ),
+				)
+			);
+		}
+
+		// fta_delete_form() also removes every entry for this form and every
+		// file those entries reference (see FormFileCleanupTest); it aborts
+		// and reports failure without deleting the form row if that cleanup
+		// fails partway through.
+		if ( fta_delete_form( $form_id ) ) {
+			wp_send_json_success(
+				array(
+					'message' => __( 'Form deleted successfully.', 'formtura' ),
+				)
+			);
+		} else {
+			wp_send_json_error(
+				array(
+					'message' => __( 'Failed to delete form.', 'formtura' ),
 				)
 			);
 		}

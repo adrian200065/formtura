@@ -196,10 +196,15 @@ class Admin {
 				'ajaxUrl' => admin_url( 'admin-ajax.php' ),
 				'nonce'   => wp_create_nonce( 'formtura_admin' ),
 				'strings' => array(
-					'confirmDelete' => __( 'Are you sure you want to delete this item?', 'formtura' ),
-					'saving'        => __( 'Saving...', 'formtura' ),
-					'saved'         => __( 'Saved!', 'formtura' ),
-					'error'         => __( 'An error occurred.', 'formtura' ),
+					'confirmDelete'     => __( 'Are you sure you want to delete this item?', 'formtura' ),
+					// Deleting a form also deletes every one of its entries and
+					// their uploaded files (see fta_delete_form()), so the
+					// warning says more than "are you sure".
+					'confirmDeleteForm' => __( 'Delete this form? All of its entries and uploaded files are deleted with it and cannot be recovered.', 'formtura' ),
+					'formDeleted'       => __( 'Form deleted.', 'formtura' ),
+					'saving'            => __( 'Saving...', 'formtura' ),
+					'saved'             => __( 'Saved!', 'formtura' ),
+					'error'             => __( 'An error occurred.', 'formtura' ),
 				),
 			)
 		);

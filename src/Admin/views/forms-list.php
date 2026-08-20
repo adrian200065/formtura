@@ -53,7 +53,7 @@ $forms = fta_get_forms();
 				</thead>
 				<tbody>
 					<?php foreach ( $forms as $form ) : ?>
-						<tr>
+						<tr class="fta-form-row" data-form-id="<?php echo esc_attr( $form['id'] ); ?>">
 							<td class="fta-table-primary">
 								<strong>
 									<a href="<?php echo esc_url( admin_url( 'admin.php?page=formtura-builder&form_id=' . $form['id'] ) ); ?>">

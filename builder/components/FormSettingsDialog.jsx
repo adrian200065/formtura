@@ -81,6 +81,15 @@ const FormSettingsDialog = ({ isOpen, formSettings = {}, onSave, onClose }) => {
 
   const update = (key, value) => setDraft((current) => ({ ...current, [key]: value }));
 
+  const notification = draft.notifications?.[0] || {};
+
+  const updateNotification = (key, value) => {
+    setDraft((current) => ({
+      ...current,
+      notifications: [{ ...(current.notifications?.[0] || {}), [key]: value }],
+    }));
+  };
+
   const handleSave = () => {
     onSave(draft);
     onClose();
@@ -144,6 +153,92 @@ const FormSettingsDialog = ({ isOpen, formSettings = {}, onSave, onClose }) => {
               placeholder={__('Thank you for your submission!', 'formtura')}
             />
           </div>
+
+          <h4 className="formtura-settings-section-title">{__('Email Notification', 'formtura')}</h4>
+
+          <div className="formtura-form-group">
+            <div className="formtura-toggle-group">
+              <label className="formtura-toggle">
+                <input
+                  id="formtura-settings-notify-enabled"
+                  type="checkbox"
+                  checked={notification.enabled || false}
+                  onChange={(e) => updateNotification('enabled', e.target.checked)}
+                />
+                <span className="formtura-toggle-slider"></span>
+              </label>
+              <label className="formtura-toggle-label" htmlFor="formtura-settings-notify-enabled">
+                {__('Send Email Notification', 'formtura')}
+              </label>
+            </div>
+          </div>
+
+          {notification.enabled && (
+            <>
+              <div className="formtura-form-group">
+                <label htmlFor="formtura-settings-notify-to">{__('Send To', 'formtura')}</label>
+                <input
+                  id="formtura-settings-notify-to"
+                  type="text"
+                  value={notification.to || ''}
+                  onChange={(e) => updateNotification('to', e.target.value)}
+                  placeholder="{admin_email}"
+                />
+              </div>
+
+              <div className="formtura-form-group">
+                <label htmlFor="formtura-settings-notify-subject">{__('Subject', 'formtura')}</label>
+                <input
+                  id="formtura-settings-notify-subject"
+                  type="text"
+                  value={notification.subject || ''}
+                  onChange={(e) => updateNotification('subject', e.target.value)}
+                  placeholder={__('New Form Submission from {site_name}', 'formtura')}
+                />
+              </div>
+
+              <div className="formtura-form-group">
+                <label htmlFor="formtura-settings-notify-message">{__('Message', 'formtura')}</label>
+                <textarea
+                  id="formtura-settings-notify-message"
+                  value={notification.message || ''}
+                  onChange={(e) => updateNotification('message', e.target.value)}
+                  rows={4}
+                  placeholder={__('You have received a new form submission.', 'formtura')}
+                />
+              </div>
+
+              <div className="formtura-form-group">
+                <label htmlFor="formtura-settings-notify-reply-to">{__('Reply-To', 'formtura')}</label>
+                <input
+                  id="formtura-settings-notify-reply-to"
+                  type="text"
+                  value={notification.reply_to || ''}
+                  onChange={(e) => updateNotification('reply_to', e.target.value)}
+                />
+              </div>
+
+              <div className="formtura-form-group">
+                <label htmlFor="formtura-settings-notify-cc">{__('CC', 'formtura')}</label>
+                <input
+                  id="formtura-settings-notify-cc"
+                  type="text"
+                  value={notification.cc || ''}
+                  onChange={(e) => updateNotification('cc', e.target.value)}
+                />
+              </div>
+
+              <div className="formtura-form-group">
+                <label htmlFor="formtura-settings-notify-bcc">{__('BCC', 'formtura')}</label>
+                <input
+                  id="formtura-settings-notify-bcc"
+                  type="text"
+                  value={notification.bcc || ''}
+                  onChange={(e) => updateNotification('bcc', e.target.value)}
+                />
+              </div>
+            </>
+          )}
         </div>
 
         <div className="formtura-confirm-actions">

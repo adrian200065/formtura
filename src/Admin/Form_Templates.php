@@ -10,6 +10,8 @@
 
 namespace Formtura\Admin;
 
+use Formtura\Frontend\Notifications;
+
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -303,11 +305,18 @@ class Form_Templates {
 
 		$template = $templates[ $template_id ];
 
-		// Create form from template.
+		// Create form from template. New forms start with one enabled
+		// notification to the site admin, matching the builder's own
+		// blank-form default (see FormBuilder.jsx) - otherwise a form made
+		// from a template silently sent no email until someone opened Form
+		// Settings and configured a notification by hand.
 		$form_data = array(
-			'title'  => $template['title'],
-			'fields' => $template['fields'],
-			'status' => 'active',
+			'title'    => $template['title'],
+			'fields'   => $template['fields'],
+			'status'   => 'active',
+			'settings' => array(
+				'notifications' => array( Notifications::get_default_notification() ),
+			),
 		);
 
 		$form_id = fta_create_form( $form_data );

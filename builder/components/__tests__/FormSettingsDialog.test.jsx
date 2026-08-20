@@ -92,3 +92,93 @@ describe('FormSettingsDialog', () => {
     expect(screen.getByLabelText(/submit button text/i)).toHaveValue('');
   });
 });
+
+/**
+ * The backend has always fully supported notifications (recipient, subject,
+ * message, reply-to, cc, bcc, smart tags) - see Notifications.php - but
+ * nothing in the builder could ever create or edit one. No form sent email
+ * unless someone hand-wrote the settings JSON.
+ */
+describe('FormSettingsDialog notifications', () => {
+  const settingsWithNotification = {
+    title: 'Contact Us',
+    notifications: [
+      {
+        enabled: true,
+        to: 'owner@example.test',
+        subject: 'New submission',
+        message: 'You got mail.',
+        reply_to: 'reply@example.test',
+        cc: 'cc@example.test',
+        bcc: 'bcc@example.test',
+      },
+    ],
+  };
+
+  const defaultProps = {
+    isOpen: true,
+    onSave: jest.fn(),
+    onClose: jest.fn(),
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('shows the notification as enabled and prefills every field', () => {
+    render(<FormSettingsDialog {...defaultProps} formSettings={settingsWithNotification} />);
+
+    expect(screen.getByLabelText(/send email notification/i)).toBeChecked();
+    expect(screen.getByLabelText(/^send to$/i)).toHaveValue('owner@example.test');
+    expect(screen.getByLabelText(/^subject$/i)).toHaveValue('New submission');
+    expect(screen.getByLabelText(/^message$/i)).toHaveValue('You got mail.');
+    expect(screen.getByLabelText(/reply-to/i)).toHaveValue('reply@example.test');
+    expect(screen.getByLabelText(/^cc$/i)).toHaveValue('cc@example.test');
+    expect(screen.getByLabelText(/^bcc$/i)).toHaveValue('bcc@example.test');
+  });
+
+  it('hides the detail fields when no notification is configured', () => {
+    render(<FormSettingsDialog {...defaultProps} formSettings={{ title: 'Contact' }} />);
+
+    expect(screen.getByLabelText(/send email notification/i)).not.toBeChecked();
+    expect(screen.queryByLabelText(/^send to$/i)).not.toBeInTheDocument();
+  });
+
+  it('reveals the detail fields when the toggle is checked', async () => {
+    const user = userEvent.setup();
+    render(<FormSettingsDialog {...defaultProps} formSettings={{ title: 'Contact' }} />);
+
+    await user.click(screen.getByLabelText(/send email notification/i));
+
+    expect(screen.getByLabelText(/^send to$/i)).toBeInTheDocument();
+  });
+
+  it('saves the edited notification, keyed as a one-element array', async () => {
+    const user = userEvent.setup();
+    render(<FormSettingsDialog {...defaultProps} formSettings={settingsWithNotification} />);
+
+    await user.clear(screen.getByLabelText(/^subject$/i));
+    await user.type(screen.getByLabelText(/^subject$/i), 'Updated subject');
+    await user.click(screen.getByRole('button', { name: /save/i }));
+
+    expect(defaultProps.onSave).toHaveBeenCalledWith(
+      expect.objectContaining({
+        notifications: [expect.objectContaining({ enabled: true, subject: 'Updated subject' })],
+      })
+    );
+  });
+
+  it('unchecking the toggle saves it disabled rather than deleting the notification', async () => {
+    const user = userEvent.setup();
+    render(<FormSettingsDialog {...defaultProps} formSettings={settingsWithNotification} />);
+
+    await user.click(screen.getByLabelText(/send email notification/i));
+    await user.click(screen.getByRole('button', { name: /save/i }));
+
+    expect(defaultProps.onSave).toHaveBeenCalledWith(
+      expect.objectContaining({
+        notifications: [expect.objectContaining({ enabled: false, to: 'owner@example.test' })],
+      })
+    );
+  });
+});

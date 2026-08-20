@@ -765,9 +765,38 @@ class Form_Builder {
 
 		// Sanitize notification settings.
 		if ( isset( $settings['notifications'] ) && is_array( $settings['notifications'] ) ) {
-			$sanitized['notifications'] = $settings['notifications'];
+			$sanitized['notifications'] = array_values(
+				array_map(
+					array( $this, 'sanitize_notification_data' ),
+					array_filter( $settings['notifications'], 'is_array' )
+				)
+			);
 		}
 
 		return $sanitized;
+	}
+
+	/**
+	 * Sanitize a single notification's settings.
+	 *
+	 * Every field here can carry smart tags ({admin_email}, {field_x}, ...),
+	 * so email-format validation would reject legitimate values - these are
+	 * resolved and stripped of header-breaking characters at send time
+	 * instead (see Notifications::send_notification()).
+	 *
+	 * @since 1.0.6
+	 * @param array $notification Raw notification data.
+	 * @return array Sanitized notification data.
+	 */
+	private function sanitize_notification_data( $notification ) {
+		return array(
+			'enabled'  => ! empty( $notification['enabled'] ),
+			'to'       => isset( $notification['to'] ) ? sanitize_text_field( $notification['to'] ) : '',
+			'subject'  => isset( $notification['subject'] ) ? sanitize_text_field( $notification['subject'] ) : '',
+			'message'  => isset( $notification['message'] ) ? (string) $notification['message'] : '',
+			'reply_to' => isset( $notification['reply_to'] ) ? sanitize_text_field( $notification['reply_to'] ) : '',
+			'cc'       => isset( $notification['cc'] ) ? sanitize_text_field( $notification['cc'] ) : '',
+			'bcc'      => isset( $notification['bcc'] ) ? sanitize_text_field( $notification['bcc'] ) : '',
+		);
 	}
 }

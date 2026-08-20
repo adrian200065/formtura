@@ -22,6 +22,21 @@ const FormBuilder = ({ formId }) => {
     description: '',
     submitButtonText: 'Submit',
     successMessage: 'Thank you for your submission!',
+    // A brand new form notifies its owner by default, like most form
+    // builders - editable or removable in Form Settings. loadForm() below
+    // must not let this leak into a form loaded from the server that has
+    // no notification of its own.
+    notifications: [
+      {
+        enabled: true,
+        to: '{admin_email}',
+        subject: __('New Form Submission from {site_name}', 'formtura'),
+        message: __('You have received a new form submission.', 'formtura'),
+        reply_to: '',
+        cc: '',
+        bcc: '',
+      },
+    ],
   });
   const [isSaving, setIsSaving] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -58,6 +73,10 @@ const FormBuilder = ({ formId }) => {
           ...currentSettings,
           ...(formData.settings || {}),
           title: formData.settings?.title || data.data.title || '',
+          // A form loaded from the server carries its own truth on this -
+          // even "no notification saved" - so the new-form default above
+          // must never survive the merge for an existing form.
+          notifications: formData.settings?.notifications || [],
         }));
       } else {
         handleError('Failed to load form data', {

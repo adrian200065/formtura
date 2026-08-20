@@ -50,3 +50,72 @@ describe('FormBuilder form settings', () => {
     });
   });
 });
+
+/**
+ * Notifications.php has always fully supported an admin notification, but
+ * nothing created one for a form until the builder itself started
+ * defaulting one in. That default must apply only to genuinely new forms -
+ * not bleed into an existing form loaded from the server that has its own
+ * (possibly absent) notification settings.
+ */
+describe('FormBuilder notification defaults', () => {
+  afterEach(() => {
+    delete global.fetch;
+  });
+
+  it('a brand new form defaults to one enabled admin notification', async () => {
+    const user = userEvent.setup();
+    render(<FormBuilder />);
+
+    await user.click(screen.getByRole('button', { name: /form settings/i }));
+
+    expect(screen.getByLabelText(/send email notification/i)).toBeChecked();
+    expect(screen.getByLabelText(/^send to$/i)).toHaveValue('{admin_email}');
+  });
+
+  it('loading an existing form with no saved notification does not inherit the new-form default', async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      json: () => Promise.resolve({
+        success: true,
+        data: {
+          title: 'Existing Form',
+          form_data: JSON.stringify({ fields: [], settings: { title: 'Existing Form' } }),
+        },
+      }),
+    });
+
+    const user = userEvent.setup();
+    render(<FormBuilder formId={5} />);
+
+    await waitFor(() => expect(global.fetch).toHaveBeenCalled());
+    await user.click(screen.getByRole('button', { name: /form settings/i }));
+
+    expect(screen.getByLabelText(/send email notification/i)).not.toBeChecked();
+  });
+
+  it('loading an existing form applies its own saved notification, not the new-form default', async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      json: () => Promise.resolve({
+        success: true,
+        data: {
+          title: 'Existing Form',
+          form_data: JSON.stringify({
+            fields: [],
+            settings: {
+              title: 'Existing Form',
+              notifications: [{ enabled: true, to: 'owner@example.test' }],
+            },
+          }),
+        },
+      }),
+    });
+
+    const user = userEvent.setup();
+    render(<FormBuilder formId={5} />);
+
+    await waitFor(() => expect(global.fetch).toHaveBeenCalled());
+    await user.click(screen.getByRole('button', { name: /form settings/i }));
+
+    expect(screen.getByLabelText(/^send to$/i)).toHaveValue('owner@example.test');
+  });
+});

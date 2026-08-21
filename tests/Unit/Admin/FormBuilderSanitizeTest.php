@@ -419,6 +419,112 @@ class FormBuilderSanitizeTest extends TestCase {
 	}
 
 	/**
+	 * Boolean toggles that sanitize_field_data() silently dropped entirely
+	 * (no isset() branch at all) prior to the follow-up audit - confirmed
+	 * dead in AUDIT_FINDINGS.md #1: builder writes them, sanitizer drops
+	 * them, so they vanish on every save/reopen cycle.
+	 */
+	public function test_previously_dropped_boolean_toggles_round_trip() {
+		$result = $this->sanitize( [
+			'enableDisable'    => true,
+			'branchingLogic'   => true,
+			'autoResize'       => true,
+			'collapsible'      => true,
+			'deleteOnReplace'  => true,
+			'dynamicDefault'   => true,
+			'enableQuantity'   => true,
+			'unique'           => true,
+			'useIconChoices'   => true,
+			'useImageChoices'  => true,
+			'addOtherChoice'   => true,
+		] );
+
+		$this->assertTrue( $result['enableDisable'] );
+		$this->assertTrue( $result['branchingLogic'] );
+		$this->assertTrue( $result['autoResize'] );
+		$this->assertTrue( $result['collapsible'] );
+		$this->assertTrue( $result['deleteOnReplace'] );
+		$this->assertTrue( $result['dynamicDefault'] );
+		$this->assertTrue( $result['enableQuantity'] );
+		$this->assertTrue( $result['unique'] );
+		$this->assertTrue( $result['useIconChoices'] );
+		$this->assertTrue( $result['useImageChoices'] );
+		$this->assertTrue( $result['addOtherChoice'] );
+	}
+
+	/**
+	 * branchTarget (page-navigation/skip-logic target) is free text tied to
+	 * a hardcoded builder <select> ('', 'page-2', 'page-3', 'submit') - not
+	 * a security boundary since it's only ever read back into that same
+	 * select, so it gets the same sanitize_text_field() treatment as every
+	 * other free-text setting rather than a brittle enum.
+	 */
+	public function test_branch_target_round_trips_as_sanitized_text() {
+		$this->assertSame( 'page-2', $this->sanitize( [ 'branchTarget' => 'page-2' ] )['branchTarget'] );
+		$this->assertSame(
+			'alert(1)',
+			$this->sanitize( [ 'branchTarget' => '<script>alert(1)</script>' ] )['branchTarget']
+		);
+	}
+
+	/**
+	 * addNewLabel / removeLabel (repeater button text) are free text.
+	 */
+	public function test_repeater_button_labels_round_trip_as_sanitized_text() {
+		$result = $this->sanitize( [
+			'addNewLabel' => 'Add Another',
+			'removeLabel' => 'Remove This',
+		] );
+
+		$this->assertSame( 'Add Another', $result['addNewLabel'] );
+		$this->assertSame( 'Remove This', $result['removeLabel'] );
+	}
+
+	/**
+	 * repeatLayout is restricted to the three values the builder's own
+	 * <select> can emit ('default', 'inline', 'grid'); anything else (a
+	 * crafted request) falls back to 'default'.
+	 */
+	public function test_repeat_layout_round_trips_and_rejects_unexpected_values() {
+		$this->assertSame( 'inline', $this->sanitize( [ 'repeatLayout' => 'inline' ] )['repeatLayout'] );
+		$this->assertSame( 'grid', $this->sanitize( [ 'repeatLayout' => 'grid' ] )['repeatLayout'] );
+		$this->assertSame( 'default', $this->sanitize( [ 'repeatLayout' => 'chaos' ] )['repeatLayout'] );
+	}
+
+	/**
+	 * minRows / maxRows (repeater row limits) are non-negative integers
+	 * posted from a number input that allows an empty value (no limit) -
+	 * same is_numeric() guard as minFileSize/maxFileSize so an empty or
+	 * non-numeric value survives as '' rather than a bogus 0.
+	 */
+	public function test_repeater_row_limits_round_trip_as_ints_or_empty_string() {
+		$result = $this->sanitize( [ 'minRows' => '2', 'maxRows' => '5' ] );
+		$this->assertSame( 2, $result['minRows'] );
+		$this->assertSame( 5, $result['maxRows'] );
+
+		$result = $this->sanitize( [ 'minRows' => '', 'maxRows' => '' ] );
+		$this->assertSame( '', $result['minRows'] );
+		$this->assertSame( '', $result['maxRows'] );
+	}
+
+	/**
+	 * visibility (field-level "who can see this field" role gate) is a
+	 * WordPress role slug, or the two builder-defined values 'everyone' /
+	 * 'logged_in' - the role list is populated dynamically from
+	 * window.formturaBuilderData.userRoles (Admin.php), so it can't be a
+	 * fixed enum here; sanitize_key() is the correct treatment for any
+	 * WP role slug.
+	 */
+	public function test_visibility_round_trips_as_a_sanitized_key() {
+		$this->assertSame( 'logged_in', $this->sanitize( [ 'visibility' => 'logged_in' ] )['visibility'] );
+		$this->assertSame( 'editor', $this->sanitize( [ 'visibility' => 'editor' ] )['visibility'] );
+		$this->assertSame(
+			'scriptalert1script',
+			$this->sanitize( [ 'visibility' => '<script>alert(1)</script>' ] )['visibility']
+		);
+	}
+
+	/**
 	 * Coverage guard for the builder save path (Task 12).
 	 *
 	 * This cycle's actual defect was never a wrong value - it was a setting

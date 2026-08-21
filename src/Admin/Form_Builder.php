@@ -419,6 +419,29 @@ class Form_Builder {
 			$sanitized['enableAutocomplete'] = (bool) $field['enableAutocomplete'];
 		}
 
+		// Sanitize enable/disable field toggle.
+		if ( isset( $field['enableDisable'] ) ) {
+			$sanitized['enableDisable'] = (bool) $field['enableDisable'];
+		}
+
+		// Sanitize dynamic default value toggle.
+		if ( isset( $field['dynamicDefault'] ) ) {
+			$sanitized['dynamicDefault'] = (bool) $field['dynamicDefault'];
+		}
+
+		// Sanitize field visibility (WP role slug, or 'everyone'/'logged_in').
+		if ( isset( $field['visibility'] ) ) {
+			$sanitized['visibility'] = sanitize_key( $field['visibility'] );
+		}
+
+		// Sanitize branching/skip logic (page navigation).
+		if ( isset( $field['branchingLogic'] ) ) {
+			$sanitized['branchingLogic'] = (bool) $field['branchingLogic'];
+		}
+		if ( isset( $field['branchTarget'] ) ) {
+			$sanitized['branchTarget'] = sanitize_text_field( $field['branchTarget'] );
+		}
+
 		// Sanitize rows (for textarea).
 		if ( isset( $field['rows'] ) ) {
 			$sanitized['rows'] = absint( $field['rows'] );
@@ -454,6 +477,19 @@ class Form_Builder {
 		// Sanitize randomize choices.
 		if ( isset( $field['randomizeChoices'] ) ) {
 			$sanitized['randomizeChoices'] = (bool) $field['randomizeChoices'];
+		}
+
+		// Sanitize "add other choice" toggle.
+		if ( isset( $field['addOtherChoice'] ) ) {
+			$sanitized['addOtherChoice'] = (bool) $field['addOtherChoice'];
+		}
+
+		// Sanitize use image/icon choices toggles.
+		if ( isset( $field['useImageChoices'] ) ) {
+			$sanitized['useImageChoices'] = (bool) $field['useImageChoices'];
+		}
+		if ( isset( $field['useIconChoices'] ) ) {
+			$sanitized['useIconChoices'] = (bool) $field['useIconChoices'];
 		}
 
 		// Sanitize dynamic choices.
@@ -555,6 +591,40 @@ class Form_Builder {
 			$sanitized['maxRating'] = max( 1, absint( $field['maxRating'] ) );
 		}
 
+		// Sanitize unique response toggle (Rating field).
+		if ( isset( $field['unique'] ) ) {
+			$sanitized['unique'] = (bool) $field['unique'];
+		}
+
+		// Sanitize enable quantity toggle (payment fields).
+		if ( isset( $field['enableQuantity'] ) ) {
+			$sanitized['enableQuantity'] = (bool) $field['enableQuantity'];
+		}
+
+		// Sanitize repeater field options.
+		if ( isset( $field['collapsible'] ) ) {
+			$sanitized['collapsible'] = (bool) $field['collapsible'];
+		}
+		if ( isset( $field['repeatLayout'] ) ) {
+			// Only values the builder itself emits (FieldLibrary.jsx): "default",
+			// "inline", or "grid". Anything else falls back to the default.
+			$sanitized['repeatLayout'] = in_array( $field['repeatLayout'], array( 'default', 'inline', 'grid' ), true )
+				? $field['repeatLayout']
+				: 'default';
+		}
+		if ( isset( $field['addNewLabel'] ) ) {
+			$sanitized['addNewLabel'] = sanitize_text_field( $field['addNewLabel'] );
+		}
+		if ( isset( $field['removeLabel'] ) ) {
+			$sanitized['removeLabel'] = sanitize_text_field( $field['removeLabel'] );
+		}
+		if ( isset( $field['minRows'] ) ) {
+			$sanitized['minRows'] = is_numeric( $field['minRows'] ) ? absint( $field['minRows'] ) : '';
+		}
+		if ( isset( $field['maxRows'] ) ) {
+			$sanitized['maxRows'] = is_numeric( $field['maxRows'] ) ? absint( $field['maxRows'] ) : '';
+		}
+
 		// Sanitize date/time field options.
 		if ( isset( $field['dateTimeFormat'] ) ) {
 			$sanitized['dateTimeFormat'] = sanitize_text_field( $field['dateTimeFormat'] );
@@ -650,6 +720,12 @@ class Form_Builder {
 		}
 		if ( isset( $field['attachToEmail'] ) ) {
 			$sanitized['attachToEmail'] = (bool) $field['attachToEmail'];
+		}
+		if ( isset( $field['deleteOnReplace'] ) ) {
+			$sanitized['deleteOnReplace'] = (bool) $field['deleteOnReplace'];
+		}
+		if ( isset( $field['autoResize'] ) ) {
+			$sanitized['autoResize'] = (bool) $field['autoResize'];
 		}
 		if ( isset( $field['allowedFileTypes'] ) ) {
 			// Only values the builder itself emits (FieldLibrary.jsx): "all"

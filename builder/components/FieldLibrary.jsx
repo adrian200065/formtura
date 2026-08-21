@@ -3618,44 +3618,6 @@ const SmartLogicTab = ({ field, fields = [], onUpdate }) => {
 
       <div className="formtura-settings-group">
         <div className="formtura-settings-group-title">
-          <Zap size={16} /> {__('Validation Rules', 'formtura')}
-        </div>
-
-        <div className="formtura-form-group">
-          <div className="formtura-toggle-group">
-            <label className="formtura-toggle">
-              <input
-                type="checkbox"
-                checked={field.customValidation || false}
-                onChange={(e) => handleChange('customValidation', e.target.checked)}
-              />
-              <span className="formtura-toggle-slider"></span>
-            </label>
-            <span className="formtura-toggle-label">
-              {__('Custom Validation Rules', 'formtura')} <Tooltip text={__('Apply custom validation logic that checks this field\'s value against conditions from other fields.', 'formtura')} />
-            </span>
-          </div>
-          <p className="formtura-field-description">
-            {__('Apply dynamic validation based on other field values', 'formtura')}
-          </p>
-        </div>
-
-        {field.customValidation && (
-          <div className="formtura-form-group">
-            <label htmlFor="validation-rule">{__('Validation Expression', 'formtura')}</label>
-            <textarea
-              id="validation-rule"
-              value={field.validationRule || ''}
-              onChange={(e) => handleChange('validationRule', e.target.value)}
-              rows={3}
-              placeholder="e.g., age >= 18"
-            />
-          </div>
-        )}
-      </div>
-
-      <div className="formtura-settings-group">
-        <div className="formtura-settings-group-title">
           <Zap size={16} /> {__('Page Navigation', 'formtura')}
         </div>
 

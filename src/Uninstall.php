@@ -41,6 +41,7 @@ class Uninstall {
 		'fta_keep_data_on_uninstall',
 		'fta_private_migration_failed',
 		'fta_db_version',
+		'fta_migrated_choice_types',
 	);
 
 	/**

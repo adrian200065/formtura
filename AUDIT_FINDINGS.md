@@ -58,10 +58,11 @@ Nothing in `src/Admin`, `src/Database`, or the submission/upload/payment pipelin
 
 ## Low priority — cleanup / product-completeness, not urgent
 
-### [ ] 6. `fta_migrated_choice_types` option orphaned on uninstall
+### [x] 6. `fta_migrated_choice_types` option orphaned on uninstall — FIXED 2026-08-21
 
 - **Files:** `src/Database/Installer.php` (creates the option via `update_option()`), `src/Uninstall.php` (`$options` cleanup list doesn't include it).
 - **Impact:** A destructive "Delete Data on Uninstall" run leaves this one row behind. One-line fix — add the key to `Uninstall::$options`.
+- **Fix applied:** Added `'fta_migrated_choice_types'` to `Uninstall::$options`. TDD: added a failing test to `UninstallTest.php` first, watched it fail, then added the one-line fix. Full suite (553 tests) green after.
 
 ### [ ] 7. `license_key` is dead schema — needs a decision, not urgent
 

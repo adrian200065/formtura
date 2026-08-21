@@ -120,6 +120,20 @@ class UninstallTest extends TestCase {
 	}
 
 	/**
+	 * Installer::run_choice_types_migration() creates fta_migrated_choice_types
+	 * via update_option() (src/Database/Installer.php), but it was missing from
+	 * Uninstall::$options - a destructive run left this one row behind.
+	 * AUDIT_FINDINGS.md #6.
+	 */
+	public function test_true_setting_removes_migrated_choice_types_option() {
+		$GLOBALS['fta_test_options']['fta_settings'] = [ 'delete_data_on_uninstall' => true ];
+
+		Uninstall::run();
+
+		$this->assertContains( 'fta_migrated_choice_types', $GLOBALS['fta_test_deleted_options'] );
+	}
+
+	/**
 	 * Build an isolated vault holding one file, plus a sibling directory that
 	 * uninstall must never touch.
 	 *

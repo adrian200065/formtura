@@ -47,11 +47,12 @@ Nothing in `src/Admin`, `src/Database`, or the submission/upload/payment pipelin
 - **Fix shape:** Either build the admin settings UI + per-form fields and fix the two bugs above as part of that work, or remove the `readme.txt` claim and consider whether to keep the dead provider class at all. Needs a decision on which, same as item 2.
 - **Decision (via AskUserQuestion):** remove the claim, don't build the UI. Dropped the Mailchimp clause from `readme.txt`'s Privacy section. Left `Integrations.php`'s registration and `Providers/Mailchimp.php` in place rather than deleting them — the `mailchimp` entry is registered through the public `fta_integrations` filter (`Integrations::register_integrations()`), so unlike the dead builder UI in #2, this is a genuine (if currently unused) extension point a site owner could enable via a filter, not pure dead code. The two related bugs in `Mailchimp.php` are left as documented above ("live only once this is wired up") since nothing wires it up.
 
-### [ ] 5. `redirect_url` is fully wired server-side but has no admin UI to set it
+### [x] 5. `redirect_url` is fully wired server-side but has no admin UI to set it — FIXED 2026-08-21
 
 - **Files:** `src/Admin/Form_Builder.php` (sanitizes `redirect_url`), `src/Frontend/Submission.php` (`build_success_response()` returns it), `assets/js/frontend.js` (already redirects on it if present) — but no field in `builder/components/FormSettingsDialog.jsx` (the only form-settings UI) ever writes it.
 - **What's wrong:** Inverse of the other findings here — a working feature nobody can reach, not data loss.
 - **Fix shape:** Add a "Redirect URL" field to `FormSettingsDialog.jsx` that writes the `redirect_url` key. Low risk, no design decision needed.
+- **Fix applied:** Added a "Redirect URL" input to `FormSettingsDialog.jsx`, saved under the snake_case `redirect_url` key — unlike `submitButtonText`/`successMessage`, `Form_Builder.php::sanitize_settings_data()` has no camelCase alias for this one, so the key had to match exactly. TDD: added failing tests to `FormSettingsDialog.test.jsx` first (prefill + save-under-correct-key), watched them fail on the missing field, then implemented. Full Jest (208 tests) and PHPUnit (552 tests) suites green after.
 
 ---
 

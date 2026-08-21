@@ -14,6 +14,7 @@ describe('FormSettingsDialog', () => {
     description: 'Reach out any time.',
     submitButtonText: 'Send',
     successMessage: 'Thanks!',
+    redirect_url: 'https://example.test/thanks',
   };
 
   const defaultProps = {
@@ -39,6 +40,7 @@ describe('FormSettingsDialog', () => {
     expect(screen.getByLabelText(/description/i)).toHaveValue('Reach out any time.');
     expect(screen.getByLabelText(/submit button text/i)).toHaveValue('Send');
     expect(screen.getByLabelText(/success message/i)).toHaveValue('Thanks!');
+    expect(screen.getByLabelText(/redirect url/i)).toHaveValue('https://example.test/thanks');
   });
 
   it('saves the edited values, not the originals', async () => {
@@ -52,6 +54,28 @@ describe('FormSettingsDialog', () => {
 
     expect(defaultProps.onSave).toHaveBeenCalledWith(
       expect.objectContaining({ title: 'Support Request', submitButtonText: 'Send' })
+    );
+  });
+
+  /**
+   * redirect_url is fully wired server-side (Form_Builder::sanitize_settings_data(),
+   * Submission::build_success_response(), assets/js/frontend.js already redirects
+   * on it if present) but had no admin UI to set it - AUDIT_FINDINGS.md #5.
+   * Saved under the snake_case `redirect_url` key, matching the only key
+   * Form_Builder.php recognises (unlike submitButtonText/successMessage, there
+   * is no camelCase alias for this one).
+   */
+  it('saves the redirect URL under the snake_case key the backend expects', async () => {
+    const user = userEvent.setup();
+    render(<FormSettingsDialog {...defaultProps} />);
+
+    await user.clear(screen.getByLabelText(/redirect url/i));
+    await user.type(screen.getByLabelText(/redirect url/i), 'https://example.test/updated');
+
+    await user.click(screen.getByRole('button', { name: /save/i }));
+
+    expect(defaultProps.onSave).toHaveBeenCalledWith(
+      expect.objectContaining({ redirect_url: 'https://example.test/updated' })
     );
   });
 

@@ -154,6 +154,17 @@ const FormSettingsDialog = ({ isOpen, formSettings = {}, onSave, onClose }) => {
             />
           </div>
 
+          <div className="formtura-form-group">
+            <label htmlFor="formtura-settings-redirect-url">{__('Redirect URL', 'formtura')}</label>
+            <input
+              id="formtura-settings-redirect-url"
+              type="url"
+              value={draft.redirect_url || ''}
+              onChange={(e) => update('redirect_url', e.target.value)}
+              placeholder={__('https://example.com/thank-you', 'formtura')}
+            />
+          </div>
+
           <h4 className="formtura-settings-section-title">{__('Email Notification', 'formtura')}</h4>
 
           <div className="formtura-form-group">

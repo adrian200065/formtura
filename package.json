@@ -1,6 +1,6 @@
 {
   "name": "formtura",
-  "version": "1.0.6",
+  "version": "1.0.9",
   "description": "A modern, intuitive, and powerful form builder for WordPress",
   "main": "assets/js/builder.js",
   "packageManager": "pnpm@10.29.3",

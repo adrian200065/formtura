@@ -4,7 +4,7 @@ Tags: form, form builder, contact form, drag and drop, forms
 Requires at least: 5.8
 Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 1.0.6
+Stable tag: 1.0.9
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -117,6 +117,27 @@ If you enable reCAPTCHA (Formtura > Settings), submitting a protected form sends
 
 == Changelog ==
 
+= 1.0.9 =
+* Fixed SMTP settings being unsaveable: the enable checkbox posted under a different key than the code that read it, so SMTP could never actually be turned on. Every provider password and API key was also stored and displayed back in plaintext - both are now encrypted at rest and only decrypted when sending mail
+* Fixed unchecking "Use SMTP authentication" never taking effect once it had been turned on
+* Fixed the reCAPTCHA secret key being stored and displayed in plaintext; it is now encrypted at rest, the same way the SMTP password is
+* Fixed a header-injection vulnerability where a visitor-submitted field value, used as a smart tag in a notification's To, Subject, Reply-To, Cc, or Bcc, could inject extra email headers into the outgoing message
+* Added baseline abuse protection for form submissions: a configurable per-IP rate limit (10 submissions per 10 minutes by default, adjustable or disabled under Formtura > Settings), a honeypot field invisible to real visitors, and IP resolution that no longer trusts client-supplied headers unless the request comes from a reverse proxy or CDN you explicitly list as trusted
+* Fixed the Settings screen silently discarding your currency, asset-loading, debug, and license settings every time it was saved, because saving replaced the entire settings record instead of updating only what the screen has controls for
+* Fixed the "Disable Default CSS", "From Email Address", and "From Name" settings doing nothing when saved
+* Fixed a custom success message or submit button label set in the form builder never actually appearing on the live form
+* Added an Email Notification section to the form builder's Form Settings, so a form's notification recipient, subject, message, reply-to, cc and bcc can be configured directly in the builder instead of requiring hand-edited data. New forms, and forms created from a template, now default to notifying the site's admin email address
+* Added a Form Settings dialog for editing a form's title, description, submit button text, and success message
+* Fixed conditional logic, which was broken at every layer: creating a condition in the builder had no effect, the frontend only ever evaluated visibility once on page load instead of live, "match any" conditions were not evaluated at all, and a field hidden by conditional logic could still block submission on the server. All of this now works correctly end to end
+* Fixed every field in the built-in Contact, Quote, Feedback, Registration, and Job Application templates being silently optional with its submitted answer unrecoverable, due to a missing field identifier
+* Fixed the forms list's Delete button doing nothing when clicked
+* Fixed saving a brand-new form for the first time silently creating a duplicate on every subsequent save
+* Fixed CSV exports skipping entries that were submitted while a multi-page export was still in progress
+* Fixed the entries table squeezing every column to equal width regardless of how much content it actually held
+* Fixed screen reader announcements that were supposed to interrupt immediately (for example, an error) being queued as low-priority instead
+* The plugin's translatable strings are now actually extractable by WordPress's translation tooling (350 strings, up from 14), and the form builder's interface can be translated as well
+* Release packages now include only files committed to the repository, never local or untracked files that happened to exist on the machine building the release
+
 = 1.0.6 =
 * Fixed a submission being reported as successful when only part of it saved. The entry was created, its answers were written without checking whether the writes succeeded, and the visitor was thanked either way - so a failed write sent notifications and kept the uploaded files for an entry whose answers were gone. Entries are now written in a single transaction that either saves completely or not at all
 * Fixed the entries screen showing an empty preview for every submission. It read the answers from a key the database layer has never produced, so no submitted value was ever displayed
@@ -176,6 +197,9 @@ If you enable reCAPTCHA (Formtura > Settings), submitting a protected form sends
 * CAPTCHA support
 
 == Upgrade Notice ==
+
+= 1.0.9 =
+SMTP passwords and the reCAPTCHA secret key are now encrypted at rest; existing plaintext values keep working and are re-encrypted the next time they're saved. Form submissions are now rate-limited per IP by default (10 per 10 minutes) - if your forms see high legitimate submission volume from a single address (e.g. a kiosk or shared office IP), raise or disable the limit under Formtura > Settings before updating on a busy site.
 
 = 1.0.6 =
 Entry management is repaired in this release. If you have been exporting

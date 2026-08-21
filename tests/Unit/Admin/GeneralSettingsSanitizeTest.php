@@ -109,4 +109,21 @@ class GeneralSettingsSanitizeTest extends TestCase {
 
 		$this->assertSame( $existing, $result['recaptcha_secret_key'] );
 	}
+
+	/**
+	 * license_key is dead schema - sanitize_settings()/get_defaults() both
+	 * handled it, but no UI field exists anywhere in the plugin and no
+	 * license-validation/activation code exists in src/ at all. Removed per
+	 * AUDIT_FINDINGS.md #7 rather than finished, since there is nothing to
+	 * finish it against.
+	 */
+	public function test_license_key_is_not_sanitized_or_stored() {
+		$result = $this->sanitize( [ 'license_key' => 'ABC-123' ] );
+
+		$this->assertArrayNotHasKey( 'license_key', $result );
+	}
+
+	public function test_license_key_is_not_in_the_defaults() {
+		$this->assertArrayNotHasKey( 'license_key', $this->settings->get_defaults() );
+	}
 }

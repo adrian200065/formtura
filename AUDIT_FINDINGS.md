@@ -64,15 +64,17 @@ Nothing in `src/Admin`, `src/Database`, or the submission/upload/payment pipelin
 - **Impact:** A destructive "Delete Data on Uninstall" run leaves this one row behind. One-line fix — add the key to `Uninstall::$options`.
 - **Fix applied:** Added `'fta_migrated_choice_types'` to `Uninstall::$options`. TDD: added a failing test to `UninstallTest.php` first, watched it fail, then added the one-line fix. Full suite (553 tests) green after.
 
-### [ ] 7. `license_key` is dead schema — needs a decision, not urgent
+### [x] 7. `license_key` is dead schema — FIXED 2026-08-21
 
 - **Files:** `src/Admin/Settings.php` (`get_defaults()` / `sanitize_settings()` both handle it), `src/Admin/views/settings.php` (no field for it at all), and no license-validation/activation code exists anywhere in `src/`.
 - **Fix shape:** Either finish it (add a UI field + real activation/validation flow) or remove the dead key from the schema. Harmless as shipped.
+- **Decision (via AskUserQuestion):** remove the dead key. Deleted `license_key` from both `Settings::get_defaults()` and `Settings::sanitize_settings()`. Updated `SettingsSaveTest.php`'s merge-preserves-keys-it-has-no-control-for test to stop asserting on it (it was only ever used there as one example key alongside `currency`/`load_css`/`load_js`/`debug_mode`, which — unlike `license_key` — are all genuinely read via `fta_get_setting()` elsewhere in `src/`, just not on this settings screen). TDD: added failing tests to `GeneralSettingsSanitizeTest.php` first (asserting the key is absent from both methods), watched them fail against the un-reverted code, then applied the deletion. Full suite (555 tests) green after.
 
-### [ ] 8. "Rich Text" field's WYSIWYG toolbar is misleading
+### [x] 8. "Rich Text" field's WYSIWYG toolbar is misleading — FIXED 2026-08-21
 
 - **Files:** `builder/components/FieldLibrary.jsx` (full bold/links/lists toolbar for the `rich-text` field type), `templates/fields/rich-text.php` (renders the saved `content` through `wp_strip_all_tags()` into a plain `<textarea>` default value on the frontend).
 - **Impact:** Not a security issue — the server-side stripping is the *correct* choice for a plain-text-rendered field — but the editor UI promises formatting the field type can never deliver. Either simplify the builder's toolbar to match what actually survives to the frontend, or make the frontend template honor safe formatting (would need its own `wp_kses_post()`-style review).
+- **Decision (via AskUserQuestion):** simplify the toolbar. Replaced the `<WysiwygEditor>` (the same bold/italic/link/list-capable component the `html` field correctly uses) with a plain `<textarea>` for `rich-text`'s content editor, matching the `content` field's own editor and what `templates/fields/rich-text.php` actually renders. TDD: added a failing test to `builderFieldSettings.test.jsx` first (asserting no "Bold" toolbar button and a real `<textarea>`), watched it fail against the WYSIWYG editor, then implemented. Also updated a stale comment in that test file describing `rich-text`'s content as coming from a non-sweepable contentEditable div, which stopped being true. Full Jest (209 tests) and PHPUnit (555 tests) suites green after.
 
 ---
 
@@ -96,3 +98,5 @@ Documented so these aren't re-investigated from scratch in a future pass:
 ## When picking this back up
 
 Suggested order: #3 (cheap, should happen regardless of what else is picked) → #1 (biggest data-loss surface, no design decision needed) → #2 and #4 (each needs a scoping conversation before implementation — use AskUserQuestion) → #5 → #6 → #7/#8 (product decisions, not urgent).
+
+**Status as of 2026-08-21: all 8 items closed.** Nothing outstanding from this audit.

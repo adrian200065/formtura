@@ -6,7 +6,7 @@
  * the current submission, but the handler used to hand that partial array
  * straight to update_option(), replacing the whole `fta_settings` option and
  * silently dropping every key the settings screen has no control for
- * (currency, load_css, load_js, debug_mode, license_key). And update_option()
+ * (currency, load_css, load_js, debug_mode). And update_option()
  * returns false both on failure and when the new value is identical to the
  * old one, which the handler used to treat as an error.
  *
@@ -68,7 +68,6 @@ class SettingsSaveTest extends TestCase {
 
 	public function test_saving_from_the_settings_screen_preserves_keys_it_has_no_control_for() {
 		$GLOBALS['fta_test_options']['fta_settings'] = [
-			'license_key' => 'ABC-123',
 			'currency'    => 'EUR',
 			'load_css'    => false,
 			'load_js'     => false,
@@ -81,7 +80,6 @@ class SettingsSaveTest extends TestCase {
 
 		$stored = $this->storedSettings();
 
-		$this->assertSame( 'ABC-123', $stored['license_key'] );
 		$this->assertSame( 'EUR', $stored['currency'] );
 		$this->assertFalse( $stored['load_css'] );
 		$this->assertFalse( $stored['load_js'] );

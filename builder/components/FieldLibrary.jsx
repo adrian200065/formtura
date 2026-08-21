@@ -1872,15 +1872,21 @@ const GeneralTab = ({ field, onUpdate }) => {
         </div>
       )}
 
-      {/* Rich Text Editor - After Label for rich-text field type */}
+      {/* Rich Text Editor - After Label for rich-text field type.
+          Plain textarea, not WysiwygEditor: templates/fields/rich-text.php
+          renders this content through wp_strip_all_tags() into a plain
+          <textarea> on the frontend, so a formatting toolbar here would
+          promise markup the field can never actually deliver. */}
       {field.type === 'rich-text' && (
         <div className="formtura-form-group">
-          <label>
-            {__('Content', 'formtura')} <Tooltip text={__('Enter rich text content that users can edit. Use the toolbar to format text, add links, and create lists.', 'formtura')} />
+          <label htmlFor="field-content">
+            {__('Content', 'formtura')} <Tooltip text={__('Enter the text this field shows by default. It renders as plain text on the frontend, so formatting here will not be preserved.', 'formtura')} />
           </label>
-          <WysiwygEditor
+          <textarea
+            id="field-content"
             value={field.content || ''}
-            onChange={(html) => handleChange('content', html)}
+            onChange={(e) => handleChange('content', e.target.value)}
+            rows={6}
           />
         </div>
       )}

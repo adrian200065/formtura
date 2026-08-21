@@ -109,10 +109,6 @@ class Settings {
 		$sanitized = array();
 
 		// General settings.
-		if ( isset( $settings['license_key'] ) ) {
-			$sanitized['license_key'] = sanitize_text_field( $settings['license_key'] );
-		}
-
 		if ( isset( $settings['load_css'] ) ) {
 			$sanitized['load_css'] = (bool) $settings['load_css'];
 		}
@@ -251,7 +247,6 @@ class Settings {
 	 */
 	public function get_defaults() {
 		return array(
-			'license_key'               => '',
 			'load_css'                  => true,
 			'load_js'                   => true,
 			'debug_mode'                => false,

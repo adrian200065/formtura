@@ -26,10 +26,10 @@ import fixture from '../../../tests/fixtures/builder-field-settings.json';
  */
 
 // Keys written by controls this sweep cannot drive, so they can only be
-// credited to createField()'s defaults:
-// - rich-text's `content` comes from WysiwygEditor, a contentEditable div
-//   rather than a form control. The content field's editor is a plain
-//   textarea and IS swept, which is the case that regressed.
+// credited to createField()'s defaults: none currently. rich-text's
+// `content` used to come from WysiwygEditor, a contentEditable div rather
+// than a form control - it is now a plain textarea (AUDIT_FINDINGS.md #8)
+// and IS swept, same as the content field's editor.
 
 /**
  * Fire a plausible change at every form control in the container and return
@@ -172,6 +172,44 @@ describe('builder settings the save path is guarded against', () => {
 
     expect(onFieldUpdate).toHaveBeenCalledWith(field.id, {
       content: 'Read me before submitting.',
+    });
+  });
+
+  /**
+   * AUDIT_FINDINGS.md #8: the rich-text field's editor offered a full
+   * bold/link/list WYSIWYG toolbar, but templates/fields/rich-text.php
+   * renders the saved content through wp_strip_all_tags() into a plain
+   * <textarea> - none of that formatting ever survives to the frontend.
+   * The editor must match what the field can actually deliver: plain text,
+   * like the content field's editor.
+   */
+  it('rich-text uses a plain textarea, not a formatting toolbar', () => {
+    const field = createField('rich-text');
+    const onFieldUpdate = jest.fn();
+
+    const { container } = render(
+      <DndContext>
+        <FieldLibrary
+          selectedField={field.id}
+          fields={[field]}
+          onFieldUpdate={onFieldUpdate}
+          isCollapsed={false}
+          onToggleCollapse={() => {}}
+          onFieldAdd={() => {}}
+        />
+      </DndContext>
+    );
+
+    expect(screen.queryByTitle('Bold')).not.toBeInTheDocument();
+    expect(container.querySelector('.formtura-wysiwyg-editor')).not.toBeInTheDocument();
+
+    const contentField = container.querySelector('#field-content');
+    expect(contentField.tagName).toBe('TEXTAREA');
+
+    fireEvent.change(contentField, { target: { value: 'Plain draft copy.' } });
+
+    expect(onFieldUpdate).toHaveBeenCalledWith(field.id, {
+      content: 'Plain draft copy.',
     });
   });
 });

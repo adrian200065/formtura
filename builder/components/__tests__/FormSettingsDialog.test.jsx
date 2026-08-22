@@ -69,8 +69,15 @@ describe('FormSettingsDialog', () => {
     const user = userEvent.setup();
     render(<FormSettingsDialog {...defaultProps} />);
 
-    await user.clear(screen.getByLabelText(/redirect url/i));
-    await user.type(screen.getByLabelText(/redirect url/i), 'https://example.test/updated');
+    // fireEvent.change, not user.type: type="url" runs the input through the
+    // browser's URL value-sanitization algorithm on every keystroke, and
+    // typing it one character at a time is flaky under jsdom (drops the
+    // final character intermittently in CI, though never locally) - setting
+    // the full value in one shot sidesteps that per-keystroke sanitization
+    // entirely.
+    fireEvent.change(screen.getByLabelText(/redirect url/i), {
+      target: { value: 'https://example.test/updated' },
+    });
 
     await user.click(screen.getByRole('button', { name: /save/i }));
 

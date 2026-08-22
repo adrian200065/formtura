@@ -1,5 +1,5 @@
 === Formtura ===
-Contributors: formturateam
+Contributors: adrian200065
 Tags: form, form builder, contact form, drag and drop, forms
 Requires at least: 5.8
 Tested up to: 7.1

@@ -1,11 +1,11 @@
 <?php
 /**
  * Plugin Name: Formtura
- * Plugin URI: https://formtura.com
+ * Plugin URI: https://github.com/adrian200065/formtura
  * Description: A modern, intuitive, and powerful form builder for WordPress with a beautiful drag-and-drop interface.
  * Version: 1.0.9
  * Author: Formtura Team
- * Author URI: https://formtura.com
+ * Author URI: https://github.com/adrian200065/formtura
  * Text Domain: formtura
  * Domain Path: /languages
  * Requires at least: 5.8
